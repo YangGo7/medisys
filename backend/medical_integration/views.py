@@ -6,7 +6,7 @@ from rest_framework import status
 import logging
 from datetime import datetime
 from .openmrs_api import OpenMRSAPI
-from .db_utils import DatabaseManager
+#from .db_utils import DatabaseManager
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 

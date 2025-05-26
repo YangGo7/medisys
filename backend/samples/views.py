@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Sample, LOINCCode, AliasMapping
+from orders.models import TestOrder
 from .serializers import SampleSerializer
 from django.core.exceptions import ValidationError
 import traceback
@@ -26,6 +27,22 @@ def alias_mapping_list(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
+def get_test_types_by_alias(request):
+    sample_type = request.GET.get('sample_type')
+    alias_name = request.GET.get('alias_name')
+
+    if not sample_type or not alias_name:
+        return Response({'error': 'sample_type과 alias_name 모두 필요합니다.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    test_types = LOINCCode.objects.filter(
+        sample_type=sample_type,
+        name__icontains=alias_name  # 또는 다른 로직으로도 OK
+    ).values_list('test_type', flat=True).distinct()
+
+    return Response(list(test_types))
+
+@api_view(['GET'])
 def get_loinc_by_sample_type(request):
     sample_type = request.GET.get('sample_type')
     test_type = request.GET.get('test_type')
@@ -46,10 +63,17 @@ def get_loinc_by_sample_type(request):
     
 @api_view(['POST']) 
 def create_sample(request): # 샘플 등록 
-    loinc_code = request.data.get('loinc_code') # LOINC코드 매핑 
+    loinc_code = request.data.get('loinc_code') # LOINC코드 매핑
+    order_id = request.data.get('order')  
     if not LOINCCode.objects.filter(code=loinc_code).exists():
         return Response(
             {"error": f"LOINC 코드 '{loinc_code}'는 유효하지 않습니다."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+    if not TestOrder.objects.filter(id=order_id).exists():
+        return Response(
+            {"error": f"주문 ID '{order_id}'는 존재하지 않습니다."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -57,10 +81,17 @@ def create_sample(request): # 샘플 등록
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    print("🔥 serializer errors:", serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
  
 @api_view(['GET']) # 샘플 리스트 불러오기 
 def list_samples_by_order(request, order_id):
     samples = Sample.objects.filter(order_id=order_id)
+    serializer = SampleSerializer(samples, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def list_all_samples(request):  # 전체 샘플 조회
+    samples = Sample.objects.all()
     serializer = SampleSerializer(samples, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)

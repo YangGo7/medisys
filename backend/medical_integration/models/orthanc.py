@@ -1,15 +1,27 @@
 from django.db import models
 
 class Resources(models.Model):
-    """Orthanc Resources 모델"""
+    """Orthanc 리소스 모델"""
     internalId = models.AutoField(primary_key=True)
-    resourceType = models.IntegerField()
+    resourceType = models.IntegerField()  # 0: Patient, 1: Study, 2: Series, 3: Instance
     publicId = models.CharField(max_length=255)
-    parentId = models.IntegerField(null=True, blank=True)
+    parentId = models.IntegerField(null=True)
 
     class Meta:
         db_table = 'Resources'
-        managed = False  # Orthanc 데이터베이스의 기존 테이블 사용
+        managed = False  # Orthanc가 관리하는 테이블이므로 Django에서는 관리하지 않음
+
+    def __str__(self):
+        return f"{self.get_resource_type_display()} - {self.publicId}"
+
+    def get_resource_type_display(self):
+        resource_types = {
+            0: 'Patient',
+            1: 'Study',
+            2: 'Series',
+            3: 'Instance'
+        }
+        return resource_types.get(self.resourceType, 'Unknown')
 
     @classmethod
     def get_patient_resources(cls):

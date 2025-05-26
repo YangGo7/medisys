@@ -13,10 +13,12 @@ def list_orders(request):
 
 @api_view(['POST']) # 요청 받아오기 
 def create_order(request):
+    print("POST된 데이터:", request.data)
     serializer = TestOrderSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET']) # 요청 확인하기 

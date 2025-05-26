@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.utils import timezone
-from medical_integration.tests.test_models import TestPerson, TestPersonName, TestPatient, TestResources
-from medical_integration.models import PatientMapping
+from medical_integration.models.patient import Person, PersonName, Patient
+from medical_integration.models.orthanc import Resources
+from medical_integration.models.mapping import PatientMapping
 from django.db import connections
 import logging
 import uuid
@@ -90,12 +91,27 @@ class IntegrationTest(TestCase):
                 )
             """)
 
+        # PatientMapping 테이블 생성
+        with connections['default'].cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS patient_mapping (
+                    mapping_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    orthanc_patient_id INTEGER NOT NULL,
+                    openmrs_patient_id INTEGER NOT NULL,
+                    created_date DATETIME NOT NULL,
+                    last_sync DATETIME,
+                    is_active BOOLEAN NOT NULL,
+                    sync_status VARCHAR(20) NOT NULL,
+                    error_message TEXT
+                )
+            """)
+
     def setUp(self):
         """테스트 데이터 설정"""
         # OpenMRS 테스트 데이터 생성
         try:
             # Person 생성
-            self.person = TestPerson.objects.using('openmrs').create(
+            self.person = Person.objects.using('openmrs').create(
                 gender='M',
                 birthdate='1990-01-01',
                 creator=1,
@@ -105,7 +121,7 @@ class IntegrationTest(TestCase):
             logger.info(f"OpenMRS Person 생성됨: {self.person.person_id}")
 
             # PersonName 생성
-            self.person_name = TestPersonName.objects.using('openmrs').create(
+            self.person_name = PersonName.objects.using('openmrs').create(
                 person=self.person,
                 preferred=True,
                 given_name='John',
@@ -117,7 +133,7 @@ class IntegrationTest(TestCase):
             logger.info(f"OpenMRS PersonName 생성됨: {self.person_name.given_name} {self.person_name.family_name}")
 
             # Patient 생성
-            self.openmrs_patient = TestPatient.objects.using('openmrs').create(
+            self.openmrs_patient = Patient.objects.using('openmrs').create(
                 person=self.person,
                 creator=1,
                 date_created=timezone.now()
@@ -130,7 +146,7 @@ class IntegrationTest(TestCase):
 
         # Orthanc 테스트 데이터 생성
         try:
-            self.orthanc_patient = TestResources.objects.using('orthanc').create(
+            self.orthanc_patient = Resources.objects.using('orthanc').create(
                 resourceType=0,  # Patient type
                 publicId=str(uuid.uuid4()),
                 parentId=None
@@ -145,17 +161,17 @@ class IntegrationTest(TestCase):
         """환자 데이터 접근 테스트"""
         try:
             # OpenMRS 환자 데이터 조회
-            patient = TestPatient.objects.using('openmrs').select_related('person').get(
+            patient = Patient.objects.using('openmrs').select_related('person').get(
                 patient_id=self.openmrs_patient.patient_id
             )
-            person_name = TestPersonName.objects.using('openmrs').get(
+            person_name = PersonName.objects.using('openmrs').get(
                 person=patient.person,
                 voided=False
             )
             logger.info(f"환자 정보 조회: {person_name.given_name} {person_name.family_name}")
 
             # Orthanc 환자 리소스 조회
-            resource = TestResources.objects.using('orthanc').get(
+            resource = Resources.objects.using('orthanc').get(
                 internalId=self.orthanc_patient.internalId
             )
             logger.info(f"Orthanc 환자 ID 조회: {resource.publicId}")
@@ -171,14 +187,14 @@ class IntegrationTest(TestCase):
         """매핑 생성 테스트"""
         try:
             # 매핑 생성
-            mapping = PatientMapping.objects.create(
+            mapping = PatientMapping.objects.using('default').create(
                 orthanc_patient=self.orthanc_patient,
                 openmrs_patient=self.openmrs_patient
             )
             logger.info(f"매핑 생성 성공: {mapping}")
 
             # 매핑 조회 테스트
-            retrieved_mapping = PatientMapping.objects.get(mapping_id=mapping.mapping_id)
+            retrieved_mapping = PatientMapping.objects.using('default').get(mapping_id=mapping.mapping_id)
             logger.info(f"매핑 조회 성공: {retrieved_mapping}")
 
             self.assertEqual(retrieved_mapping.orthanc_patient.publicId, self.orthanc_patient.publicId)
@@ -192,7 +208,7 @@ class IntegrationTest(TestCase):
         """동기화 상태 업데이트 테스트"""
         try:
             # 매핑 생성
-            mapping = PatientMapping.objects.create(
+            mapping = PatientMapping.objects.using('default').create(
                 orthanc_patient=self.orthanc_patient,
                 openmrs_patient=self.openmrs_patient
             )
@@ -202,7 +218,7 @@ class IntegrationTest(TestCase):
             logger.info("동기화 상태 업데이트 성공")
 
             # 상태 확인
-            updated_mapping = PatientMapping.objects.get(mapping_id=mapping.mapping_id)
+            updated_mapping = PatientMapping.objects.using('default').get(mapping_id=mapping.mapping_id)
             self.assertEqual(updated_mapping.sync_status, 'SYNCED')
 
             # 에러 상태 테스트
@@ -213,7 +229,7 @@ class IntegrationTest(TestCase):
             logger.info("에러 상태 업데이트 성공")
 
             # 에러 상태 확인
-            error_mapping = PatientMapping.objects.get(mapping_id=mapping.mapping_id)
+            error_mapping = PatientMapping.objects.using('default').get(mapping_id=mapping.mapping_id)
             self.assertEqual(error_mapping.sync_status, 'ERROR')
             self.assertEqual(error_mapping.error_message, '테스트 에러 메시지')
 

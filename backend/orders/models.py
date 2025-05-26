@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class TestOrder(models.Model):
     patient_id = models.IntegerField()

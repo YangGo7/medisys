@@ -10,15 +10,17 @@ class PatientMapping(models.Model):
         Resources,
         on_delete=models.PROTECT,
         limit_choices_to={'resourceType': 0},  # Patient type only
-        related_name='patient_mappings'
+        related_name='patient_mappings',
+        db_constraint=False  # 다른 데이터베이스의 테이블이므로 제약 조건 비활성화
     )
     openmrs_patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
-        related_name='orthanc_mappings'
+        related_name='orthanc_mappings',
+        db_constraint=False  # 다른 데이터베이스의 테이블이므로 제약 조건 비활성화
     )
     created_date = models.DateTimeField(auto_now_add=True)
-    last_sync = models.DateTimeField(null=True, blank=True)
+    last_sync = models.DateTimeField(null=True)
     is_active = models.BooleanField(default=True)
     sync_status = models.CharField(
         max_length=20,
@@ -29,11 +31,11 @@ class PatientMapping(models.Model):
         ],
         default='PENDING'
     )
-    error_message = models.TextField(null=True, blank=True)
+    error_message = models.TextField(null=True)
 
     class Meta:
         db_table = 'patient_mapping'
-        managed = True  # Django가 테이블을 관리하도록 설정
+        managed = True  # Django가 테이블을 관리
         unique_together = [
             ('orthanc_patient', 'openmrs_patient'),
         ]
@@ -45,6 +47,24 @@ class PatientMapping(models.Model):
 
     def __str__(self):
         return f"매핑: Orthanc {self.orthanc_patient.publicId} -> OpenMRS {self.openmrs_patient.patient_id}"
+
+    def save(self, *args, **kwargs):
+        """저장 시 각 관련 모델의 데이터베이스에서 객체 존재 여부 확인"""
+        # Orthanc 환자 확인
+        if not Resources.objects.using('orthanc').filter(
+            internalId=self.orthanc_patient.internalId,
+            resourceType=0  # Patient type
+        ).exists():
+            raise Resources.DoesNotExist("Orthanc 환자를 찾을 수 없습니다.")
+
+        # OpenMRS 환자 확인
+        if not Patient.objects.using('openmrs').filter(
+            patient_id=self.openmrs_patient.patient_id,
+            voided=False
+        ).exists():
+            raise Patient.DoesNotExist("OpenMRS 환자를 찾을 수 없습니다.")
+
+        super().save(*args, **kwargs)
 
     def update_sync_time(self, status='SYNCED', error_message=None):
         """동기화 상태 및 시간 업데이트"""

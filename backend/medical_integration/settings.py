@@ -1,12 +1,10 @@
-# backend/medical_integration/tests/test_settings.py
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-test-key-not-for-production'
+SECRET_KEY = 'django-insecure-your-secret-key-here'  # 실제 운영 환경에서는 환경 변수로 관리해야 함
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,7 +33,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'medical_integration.tests.test_urls'
+ROOT_URLCONF = 'medical_integration.urls'
 
 TEMPLATES = [
     {
@@ -59,18 +57,19 @@ WSGI_APPLICATION = 'medical_integration.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'file:memorydb_default?mode=memory&cache=shared',
+        'NAME': BASE_DIR / 'db' / 'default.sqlite3',
     },
     'openmrs': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'file:memorydb_openmrs?mode=memory&cache=shared',
+        'NAME': BASE_DIR / 'db' / 'openmrs.sqlite3',
     },
     'orthanc': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'file:memorydb_orthanc?mode=memory&cache=shared',
+        'NAME': BASE_DIR / 'db' / 'orthanc.sqlite3',
     }
 }
 
+# 데이터베이스 라우터 설정
 DATABASE_ROUTERS = ['medical_integration.db_router.DatabaseRouter']
 
 # Password validation
@@ -97,6 +96,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -109,24 +109,20 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'medical_integration.log',
+        },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'INFO',
     },
     'loggers': {
         'medical_integration': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
     },
-}
-
-# 기타 필수 설정
-USE_TZ = True
-TIME_ZONE = 'UTC'
-STATIC_URL = '/static/'
-
-# 데이터베이스 라우터 설정
-DATABASE_ROUTERS = ['db_router.DatabaseRouter'] 
+} 
