@@ -1,8 +1,7 @@
-from django.utils import timezone
+import requests
+from requests.auth import HTTPBasicAuth
+from django.conf import settings
 import logging
-from .models import PatientMapping
-from .orthanc_api import OrthancAPI
-
 
 logger = logging.getLogger('medical_integration')
 
@@ -24,12 +23,16 @@ class OrthancAPI:
                 
             response = requests.get(
                 f"{self.base_url}/{endpoint}",
-                auth=self.auth
+                auth=self.auth,
+                timeout=30
             )
             response.raise_for_status()
             return response.json()
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"Orthanc GET 요청 실패 (endpoint: {endpoint}): {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Orthanc GET 요청 처리 중 오류 (endpoint: {endpoint}): {e}")
             return None
     
     def post(self, endpoint, data=None, files=None):
@@ -43,18 +46,23 @@ class OrthancAPI:
                 f"{self.base_url}/{endpoint}",
                 json=data,
                 files=files,
-                auth=self.auth
+                auth=self.auth,
+                timeout=30
             )
             response.raise_for_status()
             
             # 응답이 JSON인 경우만 파싱
-            if response.headers.get('Content-Type', '').startswith('application/json'):
+            content_type = response.headers.get('Content-Type', '')
+            if 'application/json' in content_type:
                 return response.json()
             else:
                 return response.content
                 
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"Orthanc POST 요청 실패 (endpoint: {endpoint}): {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Orthanc POST 요청 처리 중 오류 (endpoint: {endpoint}): {e}")
             return None
     
     def get_patients(self):
@@ -77,6 +85,14 @@ class OrthancAPI:
         """Study ID로 모든 Series 조회"""
         return self.get(f"studies/{study_id}/series")
     
+    def get_series(self, series_id):
+        """Series ID로 Series 정보 조회"""
+        return self.get(f"series/{series_id}")
+    
+    def get_series_instances(self, series_id):
+        """Series ID로 모든 Instance 조회"""
+        return self.get(f"series/{series_id}/instances")
+    
     def get_instance(self, instance_id):
         """Instance ID로 Instance 정보 조회"""
         return self.get(f"instances/{instance_id}")
@@ -90,10 +106,56 @@ class OrthancAPI:
         try:
             response = requests.get(
                 f"{self.base_url}/instances/{instance_id}/preview",
-                auth=self.auth
+                auth=self.auth,
+                timeout=30
             )
             response.raise_for_status()
             return response.content  # 이미지 바이너리 반환
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"인스턴스 미리보기 가져오기 실패 (instance_id: {instance_id}): {e}")
             return None
+        except Exception as e:
+            logger.error(f"인스턴스 미리보기 처리 중 오류 (instance_id: {instance_id}): {e}")
+            return None
+    
+    def search_patients_by_name(self, patient_name):
+        """환자 이름으로 검색"""
+        try:
+            # Orthanc의 경우 직접 검색 API가 제한적이므로 
+            # 모든 환자를 가져와서 필터링
+            all_patients = self.get_patients()
+            if not all_patients:
+                return []
+            
+            matching_patients = []
+            for patient_id in all_patients:
+                patient_info = self.get_patient(patient_id)
+                if patient_info and 'MainDicomTags' in patient_info:
+                    patient_name_in_dicom = patient_info['MainDicomTags'].get('PatientName', '')
+                    if patient_name.lower() in patient_name_in_dicom.lower():
+                        matching_patients.append({
+                            'patient_id': patient_id,
+                            'patient_info': patient_info
+                        })
+            
+            return matching_patients
+        except Exception as e:
+            logger.error(f"환자 이름 검색 실패 (name: {patient_name}): {e}")
+            return []
+    
+    def test_connection(self):
+        """Orthanc 서버 연결 테스트"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/system",
+                auth=self.auth,
+                timeout=10
+            )
+            response.raise_for_status()
+            system_info = response.json()
+            logger.info(f"Orthanc 연결 성공: {system_info.get('Name', 'Unknown')} "
+                       f"버전 {system_info.get('Version', 'Unknown')}")
+            return True
+        except Exception as e:
+            logger.error(f"Orthanc 연결 실패: {e}")
+            return False

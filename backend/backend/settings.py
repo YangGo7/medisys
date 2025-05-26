@@ -1,13 +1,22 @@
 import os
 from pathlib import Path
-from decouple import config
+from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# .env 파일 로드
+load_dotenv()
 
-SECRET_KEY = 'django-insecure-your-secret-key-here'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -18,15 +27,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'medical_integration',
-    'worklist',             
-    'airesults',
-    'orders',
-    'samples',
-    'tests',
     'openmrs_models',
     'orthanc_models',
 ]
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -39,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -57,125 +60,168 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
-# 다중 데이터베이스 설정
+# Database Configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('MARIADB_DATABASE', default='medical_system'),
-        'USER': config('MARIADB_USER', default='root'),
-        'PASSWORD': config('MARIADB_PASSWORD', default='password'),
-        'HOST': config('MARIADB_HOST', default='localhost'),
-        'PORT': config('MARIADB_PORT', default='3306'),
+        'NAME': os.getenv('MARIADB_DATABASE', 'medical_platform'),
+        'USER': os.getenv('MARIADB_USER', 'root'),
+        'PASSWORD': os.getenv('MARIADB_PASSWORD', 'rootpassword'),
+        'HOST': os.getenv('MARIADB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('MARIADB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     },
     'openmrs': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('OPENMRS_DATABASE', default='openmrs'),
-        'USER': config('OPENMRS_USER', default='openmrs'),
-        'PASSWORD': config('OPENMRS_PASSWORD', default='Admin123'),
-        'HOST': config('OPENMRS_HOST', default='localhost'),
-        'PORT': config('OPENMRS_PORT', default='3307'),
+        'NAME': os.getenv('OPENMRS_DATABASE', 'openmrs'),
+        'USER': os.getenv('OPENMRS_USER', 'openmrs'),
+        'PASSWORD': os.getenv('OPENMRS_PASSWORD', 'Admin123'),
+        'HOST': os.getenv('OPENMRS_HOST', '127.0.0.1'),
+        'PORT': os.getenv('OPENMRS_PORT', '3307'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         },
     },
     'orthanc': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('ORTHANC_DATABASE', default='orthanc'),
-        'USER': config('ORTHANC_USER', default='orthanc'),
-        'PASSWORD': config('ORTHANC_PASSWORD', default='orthanc'),
-        'HOST': config('ORTHANC_HOST', default='localhost'),
-        'PORT': config('ORTHANC_PORT', default='5432'),
-    }
+        'NAME': os.getenv('ORTHANC_DATABASE', 'orthanc'),
+        'USER': os.getenv('ORTHANC_USER', 'orthanc'),
+        'PASSWORD': os.getenv('ORTHANC_PASSWORD', 'orthanc'),
+        'HOST': os.getenv('ORTHANC_HOST', '127.0.0.1'),
+        'PORT': os.getenv('ORTHANC_PORT', '5432'),
+    },
 }
 
-# ⭐ 데이터베이스 라우터 설정
+# 데이터베이스 라우터 설정
 DATABASE_ROUTERS = ['db_router.DatabaseRouter']
 
-# MongoDB 설정 (Django ORM 외부)
-MONGODB_SETTINGS = {
-    'host': config('MONGODB_HOST', default='localhost'),
-    'port': int(config('MONGODB_PORT', default='27017')),
-    'db': config('MONGODB_DATABASE', default='medical_system'),
-    'username': config('MONGODB_USER', default=''),
-    'password': config('MONGODB_PASSWORD', default=''),
-}
-
-# 외부 서비스 설정
+# 외부 서비스 API 설정
 EXTERNAL_SERVICES = {
-    'orthanc': {
-        'host': config('ORTHANC_API_HOST', default='localhost'),
-        'port': config('ORTHANC_API_PORT', default='8042'),
-        'username': config('ORTHANC_API_USER', default='orthanc'),
-        'password': config('ORTHANC_API_PASSWORD', default='orthanc'),
-    },
     'openmrs': {
-        'host': config('OPENMRS_API_HOST', default='localhost'),
-        'port': config('OPENMRS_API_PORT', default='8082'),
-        'username': config('OPENMRS_API_USER', default='admin'),
-        'password': config('OPENMRS_API_PASSWORD', default='Admin123'),
+        'host': os.getenv('OPENMRS_API_HOST', '127.0.0.1'),
+        'port': os.getenv('OPENMRS_API_PORT', '8082'),
+        'username': os.getenv('OPENMRS_API_USER', 'admin'),
+        'password': os.getenv('OPENMRS_API_PASSWORD', 'Admin123'),
+    },
+    'orthanc': {
+        'host': os.getenv('ORTHANC_API_HOST', '127.0.0.1'),
+        'port': os.getenv('ORTHANC_API_PORT', '8042'),
+        'username': os.getenv('ORTHANC_API_USER', 'orthanc'),
+        'password': os.getenv('ORTHANC_API_PASSWORD', 'orthanc'),
     }
 }
 
+# MongoDB 설정 (필요한 경우)
+MONGODB_SETTINGS = {
+    'host': os.getenv('MONGODB_HOST', '127.0.0.1'),
+    'port': int(os.getenv('MONGODB_PORT', '27017')),
+    'database': os.getenv('MONGODB_DATABASE', 'medical_system'),
+    'username': os.getenv('MONGODB_USER', ''),
+    'password': os.getenv('MONGODB_PASSWORD', ''),
+}
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Internationalization
+LANGUAGE_CODE = 'ko-kr'
+TIME_ZONE = 'Asia/Seoul'
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REST Framework 설정
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 # 로깅 설정
-os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
             'style': '{',
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
         'console': {
-            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'medical_integration.log',
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
             'formatter': 'verbose',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'medical_integration': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
 
-# REST Framework 설정
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-}
-
-# CORS 설정
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-
-LANGUAGE_CODE = 'ko-kr'
-TIME_ZONE = 'Asia/Seoul'
-USE_I18N = True
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# 로그 디렉토리 생성
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)

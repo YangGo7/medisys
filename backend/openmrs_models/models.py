@@ -1,15 +1,16 @@
-# backend/openmrs_models/models.py
+# # backend/openmrs_models/models.py
 
 from django.db import models
 
 class Person(models.Model):
+    """OpenMRS Person 모델"""
     person_id = models.AutoField(primary_key=True)
     gender = models.CharField(max_length=50)
     birthdate = models.DateField(null=True, blank=True)
     birthdate_estimated = models.BooleanField(default=False)
     dead = models.BooleanField(default=False)
     death_date = models.DateField(null=True, blank=True)
-    cause_of_death = models.IntegerField(null=True, blank=True)
+    cause_of_death = models.IntegerField(null=True)
     creator = models.IntegerField()
     date_created = models.DateTimeField()
     changed_by = models.IntegerField(null=True, blank=True)
@@ -21,28 +22,24 @@ class Person(models.Model):
     uuid = models.CharField(max_length=38, unique=True)
 
     class Meta:
-        managed = False  # 기존 테이블 사용
         db_table = 'person'
+        managed = False
         app_label = 'openmrs_models'
 
-    @property
-    def active_name(self):
-        """활성화된 선호 이름 반환"""
-        return self.personname_set.filter(
-            voided=False,
-            preferred=True
-        ).first()
+    def __str__(self):
+        return f"Person {self.person_id} ({self.uuid})"
 
 class PersonName(models.Model):
+    """OpenMRS PersonName 모델"""
     person_name_id = models.AutoField(primary_key=True)
     preferred = models.BooleanField(default=False)
-    person = models.ForeignKey(Person, on_delete=models.DO_NOTHING)
-    prefix = models.CharField(max_length=50, null=True, blank=True)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    prefix = models.CharField(max_length=50, null=True)
     given_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     family_name = models.CharField(max_length=50)
-    family_name2 = models.CharField(max_length=50, null=True, blank=True)
-    family_name_suffix = models.CharField(max_length=50, null=True, blank=True)
+    family_name2 = models.CharField(max_length=50, null=True)
+    family_name_suffix = models.CharField(max_length=50, null=True)
     creator = models.IntegerField()
     date_created = models.DateTimeField()
     voided = models.BooleanField(default=False)
@@ -54,30 +51,31 @@ class PersonName(models.Model):
     uuid = models.CharField(max_length=38, unique=True)
 
     class Meta:
-        managed = False
         db_table = 'person_name'
+        managed = False
         app_label = 'openmrs_models'
 
+    def __str__(self):
+        return f"{self.given_name} {self.family_name}"
+
     def get_full_name(self):
-        """전체 이름 반환"""
+        """전체 이름을 반환"""
         name_parts = []
         if self.prefix:
             name_parts.append(self.prefix)
-        if self.given_name:
-            name_parts.append(self.given_name)
+        name_parts.append(self.given_name)
         if self.middle_name:
             name_parts.append(self.middle_name)
-        if self.family_name:
-            name_parts.append(self.family_name)
+        name_parts.append(self.family_name)
         if self.family_name2:
             name_parts.append(self.family_name2)
         if self.family_name_suffix:
             name_parts.append(self.family_name_suffix)
-        return ' '.join(name_parts).strip()
+        return ' '.join(name_parts)
 
 class Patient(models.Model):
-    patient_id = models.AutoField(primary_key=True)
-    person = models.OneToOneField(Person, on_delete=models.DO_NOTHING)
+    """OpenMRS Patient 모델"""
+    patient_id = models.OneToOneField(Person, on_delete=models.CASCADE, primary_key=True, db_column='patient_id')
     creator = models.IntegerField()
     date_created = models.DateTimeField()
     changed_by = models.IntegerField(null=True, blank=True)
@@ -88,24 +86,22 @@ class Patient(models.Model):
     void_reason = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        managed = False
         db_table = 'patient'
+        managed = False
         app_label = 'openmrs_models'
 
-    @property
-    def full_name(self):
-        """환자의 전체 이름 반환"""
-        active_name = self.person.active_name
-        if active_name:
-            return active_name.get_full_name()
-        return "Unknown"
+    def __str__(self):
+        return f"Patient {self.patient_id}"
 
-    @property
-    def primary_identifier(self):
-        """환자의 기본 식별자 반환"""
-        return self.patientidentifier_set.filter(
+    def get_active_name(self):
+        """환자의 활성화된 이름을 반환"""
+        return PersonName.objects.filter(
+            person=self.patient_id,
             voided=False,
             preferred=True
+        ).first() or PersonName.objects.filter(
+            person=self.patient_id,
+            voided=False
         ).first()
 
 class PatientIdentifier(models.Model):
