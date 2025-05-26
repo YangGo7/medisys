@@ -18,7 +18,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'medical_integration',
+    'worklist',             
+    'airesults',
+    'orders',
+    'samples',
+    'tests',
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

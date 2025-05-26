@@ -16,8 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from rest_framework.routers import DefaultRouter
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('medical_integration.urls')),
+    path('api/', include('worklist.urls')),
+    path('api/ai/', include('airesults.urls')),
+        path('api/orders/', include('orders.urls')),
+    path('api/samples/', include('samples.urls')),
+    path('api/tests/', include('tests.urls')),
+    
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,678 @@
+2025-05-25 07:51:18,410 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:51:18,411 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 07:51:18,411 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T07:51:18.411309
+2025-05-25 07:51:18,411 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:51:18,412 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 07:51:18,424 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 07:51:18,424 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 07:51:18,425 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 07:51:18,426 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 07:51:18,462 - medical_integration_test - ERROR - ❌ OpenMRS MySQL 연결 실패: 1146 (42S02): Table 'openmrs.patient_data' doesn't exist
+2025-05-25 07:51:18,462 - medical_integration_test - ERROR - OpenMRS 설정을 확인하세요: {'host': '127.0.0.1', 'port': 3307, 'user': 'openmrs', 'password': 'Admin123', 'database': 'openmrs'}
+2025-05-25 07:51:18,466 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 07:51:18,485 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 07:51:18,498 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 07:51:18,499 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 07:51:18,512 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 07:51:18,513 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 07:51:18,528 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 07:51:18,534 - medical_integration_test - ERROR - ❌ MongoDB 연결 실패: Command listDatabases requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listDatabases requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 07:51:18,535 - medical_integration_test - ERROR - MongoDB 설정을 확인하세요: {'host': '127.0.0.1', 'port': 27017, 'database': 'medical_system'}
+2025-05-25 07:51:18,536 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 07:51:18,545 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 07:51:18,545 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 07:51:18,546 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 07:51:18,554 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 07:51:18,556 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 07:51:18,771 - medical_integration_test - ERROR - ❌ OpenMRS API 연결 실패: Expecting value: line 1 column 1 (char 0)
+2025-05-25 07:51:18,771 - medical_integration_test - ERROR - OpenMRS API 설정을 확인하세요: {'url': 'http://127.0.0.1:8082/openmrs/ws/rest/v1', 'user': 'admin', 'password': 'Admin123'}
+2025-05-25 07:51:18,771 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 07:51:18,772 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 07:51:18,820 - medical_integration_test - ERROR - ❌ OpenMRS MySQL 연결 실패: 1146 (42S02): Table 'openmrs.patient_data' doesn't exist
+2025-05-25 07:51:18,821 - medical_integration_test - ERROR - OpenMRS 설정을 확인하세요: {'host': '127.0.0.1', 'port': 3307, 'user': 'openmrs', 'password': 'Admin123', 'database': 'openmrs'}
+2025-05-25 07:51:18,836 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 07:51:18,848 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 07:51:18,848 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 07:51:18,848 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 07:51:18,856 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 07:51:18,856 - medical_integration_test - ERROR - ❌ 데이터 통합 테스트 실패: OpenMRS 또는 Orthanc 연결 문제
+2025-05-25 07:51:18,857 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:51:18,857 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 07:51:18,857 - medical_integration_test - INFO - 성공한 테스트: 3/7 (42.86%)
+2025-05-25 07:51:18,857 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 07:51:18,857 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:51:18,859 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_075118.json에 저장되었습니다.
+2025-05-25 07:51:18,861 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_075118.json
+2025-05-25 07:56:06,869 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:56:06,869 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 07:56:06,870 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T07:56:06.870079
+2025-05-25 07:56:06,870 - medical_integration_test - INFO - ==================================================
+2025-05-25 07:56:06,870 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 07:56:06,877 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 07:56:06,878 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 07:56:06,879 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 07:56:06,879 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 07:56:06,908 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 07:56:06,911 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 07:56:06,912 - medical_integration_test - ERROR - ❌ OpenMRS MySQL 연결 실패: 1054 (42S22): Unknown column 'identifier' in 'field list'
+2025-05-25 07:56:06,913 - medical_integration_test - ERROR - OpenMRS 설정을 확인하세요: {'host': '127.0.0.1', 'port': 3307, 'user': 'openmrs', 'password': 'Admin123', 'database': 'openmrs'}
+2025-05-25 07:56:06,915 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 07:56:06,932 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 07:56:06,934 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 07:56:06,935 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 07:56:06,939 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 07:56:06,941 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 07:56:06,941 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 07:56:06,957 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 07:56:06,958 - medical_integration_test - WARNING - ⚠️ 컬렉션 목록 조회 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 07:56:06,959 - medical_integration_test - INFO - MongoDB 인증이 필요할 수 있습니다. 데이터베이스 직접 접근
+2025-05-25 07:56:06,959 - medical_integration_test - INFO - analysis_results 컬렉션이 없습니다. 샘플 데이터를 생성합니다.
+2025-05-25 07:56:06,960 - medical_integration_test - WARNING - ⚠️ 샘플 데이터 생성 실패: Command insert requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command insert requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 07:56:06,961 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 07:56:06,968 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 07:56:06,968 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 07:56:06,968 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 07:56:06,973 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 07:56:06,974 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 08:01:02,959 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:01:02,959 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 08:01:02,959 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T08:01:02.959764
+2025-05-25 08:01:02,960 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:02:13,952 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:02:13,952 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 08:02:13,952 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T08:02:13.952940
+2025-05-25 08:02:13,953 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:02:13,953 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 08:02:13,962 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 08:02:13,963 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 08:02:13,964 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 08:02:13,964 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:02:13,990 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:02:13,992 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:02:13,995 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:02:13,996 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:02:13,999 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 08:02:14,015 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 08:02:14,016 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 08:02:14,017 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:02:14,020 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 08:02:14,021 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 08:02:14,021 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 08:02:14,033 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 08:02:14,034 - medical_integration_test - ERROR - ❌ MongoDB 컬렉션 접근 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 08:02:14,036 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:02:14,041 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:02:14,042 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:02:14,043 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:02:14,049 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:02:14,049 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 08:02:14,050 - medical_integration_test - INFO - OpenMRS 기본 URL: http://127.0.0.1:8082/openmrs
+2025-05-25 08:02:14,050 - medical_integration_test - INFO - OpenMRS API URL: http://127.0.0.1:8082/openmrs/ws/rest/v1
+2025-05-25 08:02:14,272 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-25 08:02:14,272 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://127.0.0.1:8082/openmrs/ws/rest/v1/session
+2025-05-25 08:02:14,322 - medical_integration_test - ERROR - ❌ OpenMRS API 응답 코드: 404
+2025-05-25 08:02:14,323 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 08:02:14,323 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:02:14,361 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:02:14,362 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:02:14,364 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:02:14,365 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:02:14,368 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:02:14,372 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:02:14,372 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:02:14,372 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:02:14,376 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:02:14,377 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-25 08:02:14,377 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:02:14,377 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-25 08:02:14,382 - medical_integration_test - INFO - PatientMapping 테이블이 없습니다. 생성합니다...
+2025-05-25 08:02:14,398 - medical_integration_test - INFO - ✅ PatientMapping 테이블 생성 완료
+2025-05-25 08:02:14,398 - medical_integration_test - WARNING - ⚠️ 샘플 환자 데이터가 없어 매핑을 생성할 수 없습니다.
+2025-05-25 08:02:14,399 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:02:14,399 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 08:02:14,399 - medical_integration_test - INFO - 성공한 테스트: 4/7 (57.14%)
+2025-05-25 08:02:14,399 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 08:02:14,400 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:02:14,400 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_080214.json에 저장되었습니다.
+2025-05-25 08:02:14,400 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_080214.json
+2025-05-25 08:24:10,582 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:24:10,582 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 08:24:10,583 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T08:24:10.583185
+2025-05-25 08:24:10,583 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:24:10,583 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 08:24:10,592 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 08:24:10,592 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 08:24:10,593 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 08:24:10,594 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:24:10,628 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:24:10,630 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:24:10,632 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:24:10,634 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:24:10,636 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 08:24:10,652 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 08:24:10,655 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 08:24:10,656 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:24:10,663 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 08:24:10,664 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 08:24:10,664 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 08:24:10,679 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 08:24:10,681 - medical_integration_test - ERROR - ❌ MongoDB 컬렉션 접근 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 08:24:10,683 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:24:10,691 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:24:10,692 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:24:10,692 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:24:10,698 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:24:10,699 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 08:24:10,699 - medical_integration_test - INFO - OpenMRS 기본 URL: http://127.0.0.1:8082/openmrs
+2025-05-25 08:24:10,700 - medical_integration_test - INFO - OpenMRS API URL: http://127.0.0.1:8082/openmrs/ws/rest/v1
+2025-05-25 08:24:10,718 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-25 08:24:10,718 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://127.0.0.1:8082/openmrs/ws/rest/v1/session
+2025-05-25 08:24:10,729 - medical_integration_test - ERROR - ❌ OpenMRS API 응답 코드: 404
+2025-05-25 08:24:10,729 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 08:24:10,730 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:24:10,763 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:24:10,765 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:24:10,767 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:24:10,769 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:24:10,772 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:24:10,777 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:24:10,778 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:24:10,778 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:24:10,782 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:24:10,783 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-25 08:24:10,784 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:24:10,784 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-25 08:24:10,790 - medical_integration_test - INFO - ✅ PatientMapping 테이블 존재, 매핑 수: 0
+2025-05-25 08:24:10,791 - medical_integration_test - INFO - 매핑 샘플: []
+2025-05-25 08:24:10,792 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:24:10,792 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 08:24:10,792 - medical_integration_test - INFO - 성공한 테스트: 5/7 (71.43%)
+2025-05-25 08:24:10,792 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 08:24:10,792 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:24:10,793 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_082410.json에 저장되었습니다.
+2025-05-25 08:24:10,793 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_082410.json
+2025-05-25 08:41:27,612 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:41:27,612 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 08:41:27,612 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T08:41:27.612772
+2025-05-25 08:41:27,613 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:41:27,613 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 08:41:27,625 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 08:41:27,626 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 08:41:27,627 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 08:41:27,627 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:43:40,293 - medical_integration_test - ERROR - ❌ OpenMRS MySQL 연결 실패: 2003 (HY000): Can't connect to MySQL server on '35.225.63.41:3307' (110)
+2025-05-25 08:43:40,293 - medical_integration_test - ERROR - OpenMRS 설정을 확인하세요: {'host': '35.225.63.41', 'port': 3307, 'user': 'openmrs', 'password': 'Admin123', 'database': 'openmrs'}
+2025-05-25 08:43:40,294 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 08:43:40,313 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 08:43:40,315 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 08:43:40,317 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:43:40,321 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 08:43:40,321 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 08:43:40,322 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 08:43:45,331 - medical_integration_test - ERROR - ❌ MongoDB 연결 실패: No servers found yet, Timeout: 5.0s, Topology Description: <TopologyDescription id: 6832d83c0f6deb9c22b19789, topology_type: Unknown, servers: [<ServerDescription ('35.225.63.41', 27017) server_type: Unknown, rtt: None>]>
+2025-05-25 08:43:45,331 - medical_integration_test - ERROR - MongoDB 설정을 확인하세요: {'host': '35.225.63.41', 'port': 27017, 'database': 'medical_system'}
+2025-05-25 08:43:45,332 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:43:45,341 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:43:45,341 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:43:45,341 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:43:45,351 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:43:45,352 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 08:43:45,352 - medical_integration_test - INFO - OpenMRS 기본 URL: http://35.225.63.41:8082/openmrs
+2025-05-25 08:43:45,353 - medical_integration_test - INFO - OpenMRS API URL: http://35.225.63.41:8082/openmrs/ws/rest/v1
+2025-05-25 08:43:45,370 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-25 08:43:45,371 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://35.225.63.41:8082/openmrs/ws/rest/v1/session
+2025-05-25 08:43:45,382 - medical_integration_test - ERROR - ❌ OpenMRS API 응답 코드: 404
+2025-05-25 08:43:45,383 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 08:43:45,383 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:44:53,540 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:44:53,542 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:44:53,543 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:44:53,545 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:44:53,547 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:44:53,558 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:44:53,559 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:44:53,559 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:44:53,567 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:44:53,567 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-25 08:44:53,568 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:44:53,568 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-25 08:44:53,577 - medical_integration_test - INFO - ✅ PatientMapping 테이블 존재, 매핑 수: 0
+2025-05-25 08:44:53,578 - medical_integration_test - INFO - 매핑 샘플: []
+2025-05-25 08:44:53,579 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:44:53,579 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 08:44:53,579 - medical_integration_test - INFO - 성공한 테스트: 4/7 (57.14%)
+2025-05-25 08:44:53,579 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 08:44:53,579 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:44:53,580 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_084453.json에 저장되었습니다.
+2025-05-25 08:44:53,580 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_084453.json
+2025-05-25 08:49:16,551 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:49:16,551 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 08:49:16,551 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T08:49:16.551947
+2025-05-25 08:49:16,552 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:49:16,552 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 08:49:16,565 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 08:49:16,566 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 08:49:16,567 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 08:49:16,567 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:49:16,603 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:49:16,606 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:49:16,608 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:49:16,612 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:49:16,616 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 08:49:16,638 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 08:49:16,641 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 08:49:16,642 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:49:16,647 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 08:49:16,648 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 08:49:16,648 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 08:49:16,666 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 08:49:16,667 - medical_integration_test - ERROR - ❌ MongoDB 컬렉션 접근 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 08:49:16,669 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:49:16,677 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:49:16,678 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:49:16,678 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:49:16,686 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:49:16,687 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 08:49:16,687 - medical_integration_test - INFO - OpenMRS 기본 URL: http://35.225.63.41:8082/openmrs
+2025-05-25 08:49:16,687 - medical_integration_test - INFO - OpenMRS API URL: http://35.225.63.41:8082/openmrs/ws/rest/v1
+2025-05-25 08:49:16,703 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-25 08:49:16,704 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://35.225.63.41:8082/openmrs/ws/rest/v1/session
+2025-05-25 08:49:16,715 - medical_integration_test - ERROR - ❌ OpenMRS API 응답 코드: 404
+2025-05-25 08:49:16,715 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 08:49:16,716 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 08:49:16,750 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['allergy', 'allergy_reaction', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 08:49:16,752 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 08:49:16,754 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 08:49:16,756 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  }
+]
+2025-05-25 08:49:16,759 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 08:49:16,767 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 08:49:16,768 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 08:49:16,768 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 08:49:16,775 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 08:49:16,776 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-25 08:49:16,776 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 08:49:16,777 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-25 08:49:16,786 - medical_integration_test - INFO - ✅ PatientMapping 테이블 존재, 매핑 수: 0
+2025-05-25 08:49:16,788 - medical_integration_test - INFO - 매핑 샘플: []
+2025-05-25 08:49:16,788 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:49:16,789 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 08:49:16,789 - medical_integration_test - INFO - 성공한 테스트: 5/7 (71.43%)
+2025-05-25 08:49:16,789 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 08:49:16,790 - medical_integration_test - INFO - ==================================================
+2025-05-25 08:49:16,791 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_084916.json에 저장되었습니다.
+2025-05-25 08:49:16,792 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_084916.json
+2025-05-25 09:18:49,172 - medical_integration_test - INFO - ==================================================
+2025-05-25 09:18:49,175 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-25 09:18:49,175 - medical_integration_test - INFO - 테스트 시간: 2025-05-25T09:18:49.175395
+2025-05-25 09:18:49,176 - medical_integration_test - INFO - ==================================================
+2025-05-25 09:18:49,176 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-25 09:18:49,190 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-25 09:18:49,190 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-25 09:18:49,191 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-25 09:18:49,192 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 09:18:49,226 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['address_hierarchy_address_to_entry_map', 'address_hierarchy_entry', 'address_hierarchy_level', 'allergy', 'allergy_reaction', 'appframework_component_state', 'appframework_user_app', 'appointmentscheduling_appointment', 'appointmentscheduling_appointment_block', 'appointmentscheduling_appointment_request', 'appointmentscheduling_appointment_status_history', 'appointmentscheduling_appointment_type', 'appointmentscheduling_block_type_map', 'appointmentscheduling_provider_schedule', 'appointmentscheduling_provider_type_map', 'appointmentscheduling_time_slot', 'calculation_registration', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'fhir_concept_source', 'fhir_diagnostic_report', 'fhir_diagnostic_report_performers', 'fhir_diagnostic_report_results', 'fhir_duration_unit_map', 'fhir_encounter_class_map', 'fhir_observation_category_map', 'fhir_patient_identifier_system', 'fhir_reference', 'fhir_task', 'fhir_task_based_on_reference', 'fhir_task_input', 'fhir_task_output', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'htmlformentry_html_form', 'idgen_auto_generation_option', 'idgen_id_pool', 'idgen_identifier_source', 'idgen_log_entry', 'idgen_pooled_identifier', 'idgen_remote_source', 'idgen_reserved_identifier', 'idgen_seq_id_gen', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'metadatamapping_metadata_set', 'metadatamapping_metadata_set_member', 'metadatamapping_metadata_source', 'metadatamapping_metadata_term_mapping', 'metadatasharing_exported_package', 'metadatasharing_imported_item', 'metadatasharing_imported_package', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'openconceptlab_import', 'openconceptlab_item', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'providermanagement_provider_role', 'providermanagement_provider_role_provider_attribute_type', 'providermanagement_provider_role_relationship_type', 'providermanagement_provider_role_supervisee_provider_role', 'providermanagement_provider_suggestion', 'providermanagement_supervision_suggestion', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'reporting_report_design', 'reporting_report_design_resource', 'reporting_report_processor', 'reporting_report_request', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'uiframework_user_defined_page_view', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 09:18:49,227 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 09:18:49,229 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 09:18:49,230 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 1,
+    "given_name": "super",
+    "family_name": "user",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 2,
+    "given_name": "Unknown",
+    "family_name": "Provider",
+    "gender": "F",
+    "birthdate": null
+  },
+  {
+    "person_id": 3,
+    "given_name": "John",
+    "family_name": "Smith",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 4,
+    "given_name": "Jane",
+    "family_name": "Smith",
+    "gender": "F",
+    "birthdate": null
+  }
+]
+2025-05-25 09:18:49,233 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-25 09:18:49,256 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-25 09:18:49,259 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-25 09:18:49,260 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 09:18:49,267 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-25 09:18:49,268 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-25 09:18:49,268 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-25 09:18:49,288 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-25 09:18:49,291 - medical_integration_test - ERROR - ❌ MongoDB 컬렉션 접근 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-25 09:18:49,295 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 09:18:49,308 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 09:18:49,309 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 09:18:49,309 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 09:18:49,316 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 09:18:49,318 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-25 09:18:49,319 - medical_integration_test - INFO - OpenMRS 기본 URL: http://127.0.0.1:8082/openmrs
+2025-05-25 09:18:49,320 - medical_integration_test - INFO - OpenMRS API URL: http://127.0.0.1:8082/openmrs/ws/rest/v1
+2025-05-25 09:18:49,499 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-25 09:18:49,499 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://127.0.0.1:8082/openmrs/ws/rest/v1/session
+2025-05-25 09:18:49,658 - medical_integration_test - INFO - ✅ OpenMRS API 연결 성공!
+2025-05-25 09:18:49,659 - medical_integration_test - INFO - OpenMRS 인증 상태: False
+2025-05-25 09:18:49,661 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-25 09:18:49,663 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-25 09:18:49,715 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['address_hierarchy_address_to_entry_map', 'address_hierarchy_entry', 'address_hierarchy_level', 'allergy', 'allergy_reaction', 'appframework_component_state', 'appframework_user_app', 'appointmentscheduling_appointment', 'appointmentscheduling_appointment_block', 'appointmentscheduling_appointment_request', 'appointmentscheduling_appointment_status_history', 'appointmentscheduling_appointment_type', 'appointmentscheduling_block_type_map', 'appointmentscheduling_provider_schedule', 'appointmentscheduling_provider_type_map', 'appointmentscheduling_time_slot', 'calculation_registration', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'fhir_concept_source', 'fhir_diagnostic_report', 'fhir_diagnostic_report_performers', 'fhir_diagnostic_report_results', 'fhir_duration_unit_map', 'fhir_encounter_class_map', 'fhir_observation_category_map', 'fhir_patient_identifier_system', 'fhir_reference', 'fhir_task', 'fhir_task_based_on_reference', 'fhir_task_input', 'fhir_task_output', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'htmlformentry_html_form', 'idgen_auto_generation_option', 'idgen_id_pool', 'idgen_identifier_source', 'idgen_log_entry', 'idgen_pooled_identifier', 'idgen_remote_source', 'idgen_reserved_identifier', 'idgen_seq_id_gen', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'metadatamapping_metadata_set', 'metadatamapping_metadata_set_member', 'metadatamapping_metadata_source', 'metadatamapping_metadata_term_mapping', 'metadatasharing_exported_package', 'metadatasharing_imported_item', 'metadatasharing_imported_package', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'openconceptlab_import', 'openconceptlab_item', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'providermanagement_provider_role', 'providermanagement_provider_role_provider_attribute_type', 'providermanagement_provider_role_relationship_type', 'providermanagement_provider_role_supervisee_provider_role', 'providermanagement_provider_suggestion', 'providermanagement_supervision_suggestion', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'reporting_report_design', 'reporting_report_design_resource', 'reporting_report_processor', 'reporting_report_request', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'uiframework_user_defined_page_view', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-25 09:18:49,717 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-25 09:18:49,719 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-25 09:18:49,721 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 1,
+    "given_name": "super",
+    "family_name": "user",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 2,
+    "given_name": "Unknown",
+    "family_name": "Provider",
+    "gender": "F",
+    "birthdate": null
+  },
+  {
+    "person_id": 3,
+    "given_name": "John",
+    "family_name": "Smith",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 4,
+    "given_name": "Jane",
+    "family_name": "Smith",
+    "gender": "F",
+    "birthdate": null
+  }
+]
+2025-05-25 09:18:49,726 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-25 09:18:49,731 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-25 09:18:49,732 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-25 09:18:49,732 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-25 09:18:49,740 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-25 09:18:49,742 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-25 09:18:49,742 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-25 09:18:49,743 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-25 09:18:49,753 - medical_integration_test - INFO - ✅ PatientMapping 테이블 존재, 매핑 수: 0
+2025-05-25 09:18:49,755 - medical_integration_test - INFO - 매핑 샘플: []
+2025-05-25 09:18:49,756 - medical_integration_test - INFO - ==================================================
+2025-05-25 09:18:49,756 - medical_integration_test - INFO - 테스트 완료
+2025-05-25 09:18:49,757 - medical_integration_test - INFO - 성공한 테스트: 6/7 (85.71%)
+2025-05-25 09:18:49,757 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-25 09:18:49,758 - medical_integration_test - INFO - ==================================================
+2025-05-25 09:18:49,761 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250525_091849.json에 저장되었습니다.
+2025-05-25 09:18:49,762 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250525_091849.json
+2025-05-26 00:28:34,587 - medical_integration_test - INFO - ==================================================
+2025-05-26 00:28:34,588 - medical_integration_test - INFO - 의료 통합 시스템 연결 테스트 시작
+2025-05-26 00:28:34,589 - medical_integration_test - INFO - 테스트 시간: 2025-05-26T00:28:34.588822
+2025-05-26 00:28:34,589 - medical_integration_test - INFO - ==================================================
+2025-05-26 00:28:34,589 - medical_integration_test - INFO - === MariaDB 연결 테스트 (포트 3306) ===
+2025-05-26 00:28:34,621 - medical_integration_test - INFO - ✅ MariaDB 연결 성공! 데이터베이스 목록: ['information_schema', 'medical_platform', 'mysql', 'performance_schema', 'sys']
+2025-05-26 00:28:34,622 - medical_integration_test - INFO - medical_platform 데이터베이스가 이미 존재합니다.
+2025-05-26 00:28:34,624 - medical_integration_test - INFO - MariaDB 버전: 10.11.13-MariaDB-ubu2204
+2025-05-26 00:28:34,625 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-26 00:28:34,676 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['address_hierarchy_address_to_entry_map', 'address_hierarchy_entry', 'address_hierarchy_level', 'allergy', 'allergy_reaction', 'appframework_component_state', 'appframework_user_app', 'appointmentscheduling_appointment', 'appointmentscheduling_appointment_block', 'appointmentscheduling_appointment_request', 'appointmentscheduling_appointment_status_history', 'appointmentscheduling_appointment_type', 'appointmentscheduling_block_type_map', 'appointmentscheduling_provider_schedule', 'appointmentscheduling_provider_type_map', 'appointmentscheduling_time_slot', 'calculation_registration', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'fhir_concept_source', 'fhir_diagnostic_report', 'fhir_diagnostic_report_performers', 'fhir_diagnostic_report_results', 'fhir_duration_unit_map', 'fhir_encounter_class_map', 'fhir_observation_category_map', 'fhir_patient_identifier_system', 'fhir_reference', 'fhir_task', 'fhir_task_based_on_reference', 'fhir_task_input', 'fhir_task_output', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'htmlformentry_html_form', 'idgen_auto_generation_option', 'idgen_id_pool', 'idgen_identifier_source', 'idgen_log_entry', 'idgen_pooled_identifier', 'idgen_remote_source', 'idgen_reserved_identifier', 'idgen_seq_id_gen', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'metadatamapping_metadata_set', 'metadatamapping_metadata_set_member', 'metadatamapping_metadata_source', 'metadatamapping_metadata_term_mapping', 'metadatasharing_exported_package', 'metadatasharing_imported_item', 'metadatasharing_imported_package', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'openconceptlab_import', 'openconceptlab_item', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'providermanagement_provider_role', 'providermanagement_provider_role_provider_attribute_type', 'providermanagement_provider_role_relationship_type', 'providermanagement_provider_role_supervisee_provider_role', 'providermanagement_provider_suggestion', 'providermanagement_supervision_suggestion', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'reporting_report_design', 'reporting_report_design_resource', 'reporting_report_processor', 'reporting_report_request', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'uiframework_user_defined_page_view', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-26 00:28:34,679 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-26 00:28:34,682 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-26 00:28:34,687 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 1,
+    "given_name": "super",
+    "family_name": "user",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 2,
+    "given_name": "Unknown",
+    "family_name": "Provider",
+    "gender": "F",
+    "birthdate": null
+  },
+  {
+    "person_id": 3,
+    "given_name": "John",
+    "family_name": "Smith",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 4,
+    "given_name": "Jane",
+    "family_name": "Smith",
+    "gender": "F",
+    "birthdate": null
+  }
+]
+2025-05-26 00:28:34,691 - medical_integration_test - INFO - 
+=== Orthanc PostgreSQL 연결 테스트 (포트 5432) ===
+2025-05-26 00:28:34,714 - medical_integration_test - INFO - PostgreSQL 버전: PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-05-26 00:28:34,718 - medical_integration_test - INFO - ✅ Orthanc PostgreSQL 연결 성공! 리소스 수: 0
+2025-05-26 00:28:34,720 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-26 00:28:34,728 - medical_integration_test - INFO - 테이블 목록: ['globalproperties', 'resources', 'metadata', 'maindicomtags', 'attachedfiles', 'dicomidentifiers', 'changes', 'exportedresources', 'patientrecyclingorder', 'deletedfiles', 'remainingancestor', 'deletedresources', 'globalintegers', 'serverproperties', 'labels']
+2025-05-26 00:28:34,729 - medical_integration_test - INFO - 
+=== MongoDB 연결 테스트 (포트 27017) ===
+2025-05-26 00:28:34,729 - medical_integration_test - INFO - MongoDB 인증 정보 없음 - 직접 데이터베이스 접근
+2025-05-26 00:28:34,752 - medical_integration_test - INFO - MongoDB 버전: 7.0.20
+2025-05-26 00:28:34,755 - medical_integration_test - ERROR - ❌ MongoDB 컬렉션 접근 실패: Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}
+2025-05-26 00:28:34,757 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-26 00:28:34,770 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-26 00:28:34,770 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-26 00:28:34,770 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-26 00:28:34,777 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-26 00:28:34,778 - medical_integration_test - INFO - 
+=== OpenMRS API 연결 테스트 ===
+2025-05-26 00:28:34,779 - medical_integration_test - INFO - OpenMRS 기본 URL: http://127.0.0.1:8082/openmrs
+2025-05-26 00:28:34,779 - medical_integration_test - INFO - OpenMRS API URL: http://127.0.0.1:8082/openmrs/ws/rest/v1
+2025-05-26 00:28:34,926 - medical_integration_test - INFO - ✅ OpenMRS 웹 서버 접속 성공!
+2025-05-26 00:28:34,927 - medical_integration_test - INFO - OpenMRS 세션 API 접속 시도: http://127.0.0.1:8082/openmrs/ws/rest/v1/session
+2025-05-26 00:28:34,969 - medical_integration_test - INFO - ✅ OpenMRS API 연결 성공!
+2025-05-26 00:28:34,970 - medical_integration_test - INFO - OpenMRS 인증 상태: False
+2025-05-26 00:28:34,971 - medical_integration_test - INFO - 
+=== 데이터 통합 테스트 ===
+2025-05-26 00:28:34,971 - medical_integration_test - INFO - 
+=== OpenMRS MySQL 연결 테스트 (포트 3307) ===
+2025-05-26 00:28:35,012 - medical_integration_test - INFO - OpenMRS 테이블 목록: ['address_hierarchy_address_to_entry_map', 'address_hierarchy_entry', 'address_hierarchy_level', 'allergy', 'allergy_reaction', 'appframework_component_state', 'appframework_user_app', 'appointmentscheduling_appointment', 'appointmentscheduling_appointment_block', 'appointmentscheduling_appointment_request', 'appointmentscheduling_appointment_status_history', 'appointmentscheduling_appointment_type', 'appointmentscheduling_block_type_map', 'appointmentscheduling_provider_schedule', 'appointmentscheduling_provider_type_map', 'appointmentscheduling_time_slot', 'calculation_registration', 'care_setting', 'clob_datatype_storage', 'cohort', 'cohort_member', 'concept', 'concept_answer', 'concept_attribute', 'concept_attribute_type', 'concept_class', 'concept_complex', 'concept_datatype', 'concept_description', 'concept_map_type', 'concept_name', 'concept_name_tag', 'concept_name_tag_map', 'concept_numeric', 'concept_proposal', 'concept_proposal_tag_map', 'concept_reference_map', 'concept_reference_source', 'concept_reference_term', 'concept_reference_term_map', 'concept_set', 'concept_state_conversion', 'concept_stop_word', 'conditions', 'drug', 'drug_ingredient', 'drug_order', 'drug_reference_map', 'encounter', 'encounter_diagnosis', 'encounter_provider', 'encounter_role', 'encounter_type', 'fhir_concept_source', 'fhir_diagnostic_report', 'fhir_diagnostic_report_performers', 'fhir_diagnostic_report_results', 'fhir_duration_unit_map', 'fhir_encounter_class_map', 'fhir_observation_category_map', 'fhir_patient_identifier_system', 'fhir_reference', 'fhir_task', 'fhir_task_based_on_reference', 'fhir_task_input', 'fhir_task_output', 'field', 'field_answer', 'field_type', 'form', 'form_field', 'form_resource', 'global_property', 'hl7_in_archive', 'hl7_in_error', 'hl7_in_queue', 'hl7_source', 'htmlformentry_html_form', 'idgen_auto_generation_option', 'idgen_id_pool', 'idgen_identifier_source', 'idgen_log_entry', 'idgen_pooled_identifier', 'idgen_remote_source', 'idgen_reserved_identifier', 'idgen_seq_id_gen', 'liquibasechangelog', 'liquibasechangeloglock', 'location', 'location_attribute', 'location_attribute_type', 'location_tag', 'location_tag_map', 'metadatamapping_metadata_set', 'metadatamapping_metadata_set_member', 'metadatamapping_metadata_source', 'metadatamapping_metadata_term_mapping', 'metadatasharing_exported_package', 'metadatasharing_imported_item', 'metadatasharing_imported_package', 'note', 'notification_alert', 'notification_alert_recipient', 'notification_template', 'obs', 'openconceptlab_import', 'openconceptlab_item', 'order_frequency', 'order_group', 'order_group_attribute', 'order_group_attribute_type', 'order_set', 'order_set_attribute', 'order_set_attribute_type', 'order_set_member', 'order_type', 'order_type_class_map', 'orders', 'patient', 'patient_identifier', 'patient_identifier_type', 'patient_program', 'patient_program_attribute', 'patient_state', 'person', 'person_address', 'person_attribute', 'person_attribute_type', 'person_merge_log', 'person_name', 'privilege', 'program', 'program_attribute_type', 'program_workflow', 'program_workflow_state', 'provider', 'provider_attribute', 'provider_attribute_type', 'providermanagement_provider_role', 'providermanagement_provider_role_provider_attribute_type', 'providermanagement_provider_role_relationship_type', 'providermanagement_provider_role_supervisee_provider_role', 'providermanagement_provider_suggestion', 'providermanagement_supervision_suggestion', 'relationship', 'relationship_type', 'report_object', 'report_schema_xml', 'reporting_report_design', 'reporting_report_design_resource', 'reporting_report_processor', 'reporting_report_request', 'role', 'role_privilege', 'role_role', 'scheduler_task_config', 'scheduler_task_config_property', 'serialized_object', 'test_order', 'uiframework_user_defined_page_view', 'user_property', 'user_role', 'users', 'visit', 'visit_attribute', 'visit_attribute_type', 'visit_type']
+2025-05-26 00:28:35,014 - medical_integration_test - INFO - ✅ OpenMRS MySQL 연결 성공! 환자 수: 0
+2025-05-26 00:28:35,017 - medical_integration_test - INFO - 환자 식별자 샘플 데이터: []
+2025-05-26 00:28:35,021 - medical_integration_test - INFO - 사람 정보 샘플 데이터: [
+  {
+    "person_id": 1,
+    "given_name": "Super",
+    "family_name": "User",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 1,
+    "given_name": "super",
+    "family_name": "user",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 2,
+    "given_name": "Unknown",
+    "family_name": "Provider",
+    "gender": "F",
+    "birthdate": null
+  },
+  {
+    "person_id": 3,
+    "given_name": "John",
+    "family_name": "Smith",
+    "gender": "M",
+    "birthdate": null
+  },
+  {
+    "person_id": 4,
+    "given_name": "Jane",
+    "family_name": "Smith",
+    "gender": "F",
+    "birthdate": null
+  }
+]
+2025-05-26 00:28:35,024 - medical_integration_test - INFO - 
+=== Orthanc API 연결 테스트 ===
+2025-05-26 00:28:35,029 - medical_integration_test - INFO - ✅ Orthanc API 연결 성공!
+2025-05-26 00:28:35,029 - medical_integration_test - INFO - Orthanc 버전: 1.12.0
+2025-05-26 00:28:35,029 - medical_integration_test - INFO - AET: ORTHANC
+2025-05-26 00:28:35,033 - medical_integration_test - INFO - 환자 ID 수: 0
+2025-05-26 00:28:35,034 - medical_integration_test - INFO - OpenMRS 환자 수: 0
+2025-05-26 00:28:35,034 - medical_integration_test - INFO - Orthanc 환자 수: 0
+2025-05-26 00:28:35,034 - medical_integration_test - INFO - PatientMapping 테이블 확인 중...
+2025-05-26 00:28:35,046 - medical_integration_test - INFO - ✅ PatientMapping 테이블 존재, 매핑 수: 0
+2025-05-26 00:28:35,048 - medical_integration_test - INFO - 매핑 샘플: []
+2025-05-26 00:28:35,048 - medical_integration_test - INFO - ==================================================
+2025-05-26 00:28:35,048 - medical_integration_test - INFO - 테스트 완료
+2025-05-26 00:28:35,048 - medical_integration_test - INFO - 성공한 테스트: 6/7 (85.71%)
+2025-05-26 00:28:35,048 - medical_integration_test - INFO - 상태: Partial Success
+2025-05-26 00:28:35,049 - medical_integration_test - INFO - ==================================================
+2025-05-26 00:28:35,049 - medical_integration_test - INFO - ✅ 테스트 결과가 logs/connection_test_results_20250526_002835.json에 저장되었습니다.
+2025-05-26 00:28:35,049 - medical_integration_test - INFO - 결과 파일: logs/connection_test_results_20250526_002835.json
