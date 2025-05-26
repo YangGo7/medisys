@@ -9,4 +9,8 @@ class MedicalIntegrationTestRunner(DiscoverRunner):
 
     def teardown_databases(self, old_config, **kwargs):
         """테스트 데이터베이스 정리"""
-        super().teardown_databases(old_config, **kwargs) 
+        super().teardown_databases(old_config, **kwargs)
+
+"""
+테스트 앱 초기화
+""" 

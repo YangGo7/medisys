@@ -12,9 +12,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'medical_integration.apps.MedicalIntegrationConfig',
-    'openmrs_models.apps.OpenMRSModelsConfig',
-    'orthanc_models.apps.OrthancModelsConfig',
+    'medical_integration',
+    'medical_integration.tests',
 ]
 
 MIDDLEWARE = [
@@ -94,4 +93,7 @@ LOGGING = {
 # 기타 필수 설정
 USE_TZ = True
 TIME_ZONE = 'UTC'
-STATIC_URL = '/static/' 
+STATIC_URL = '/static/'
+
+# 데이터베이스 라우터 설정
+DATABASE_ROUTERS = ['medical_integration.db_router.DatabaseRouter'] 

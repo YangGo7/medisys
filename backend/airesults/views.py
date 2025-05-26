@@ -301,7 +301,7 @@ class YOLOModelAPIView(APIView):
         
         
 # OpenMRS 설정 및 UUID
-OPENMRS_API_BASE = "http://localhost:8081/openmrs/ws/rest/v1"
+OPENMRS_API_BASE = "http://localhost:8082/openmrs/ws/rest/v1"
 OPENMRS_AUTH = ("admin", "Admin123")
 
 TEMP_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"

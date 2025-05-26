@@ -2,6 +2,8 @@ from django.db import models
 
 class TestPerson(models.Model):
     """테스트용 Person 모델"""
+    _DATABASE = 'openmrs'
+    
     person_id = models.AutoField(primary_key=True)
     gender = models.CharField(max_length=50)
     birthdate = models.DateField(null=True, blank=True)
@@ -20,11 +22,13 @@ class TestPerson(models.Model):
     uuid = models.CharField(max_length=38, unique=True)
 
     class Meta:
-        app_label = 'medical_integration'
         managed = True
+        db_table = 'person'
 
 class TestPersonName(models.Model):
     """테스트용 PersonName 모델"""
+    _DATABASE = 'openmrs'
+    
     person_name_id = models.AutoField(primary_key=True)
     preferred = models.BooleanField(default=False)
     person = models.ForeignKey(TestPerson, on_delete=models.CASCADE)
@@ -45,11 +49,13 @@ class TestPersonName(models.Model):
     uuid = models.CharField(max_length=38, unique=True)
 
     class Meta:
-        app_label = 'medical_integration'
         managed = True
+        db_table = 'person_name'
 
 class TestPatient(models.Model):
     """테스트용 Patient 모델"""
+    _DATABASE = 'openmrs'
+    
     patient_id = models.AutoField(primary_key=True)
     person = models.OneToOneField(TestPerson, on_delete=models.CASCADE)
     creator = models.IntegerField()
@@ -62,16 +68,18 @@ class TestPatient(models.Model):
     void_reason = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        app_label = 'medical_integration'
         managed = True
+        db_table = 'patient'
 
 class TestResources(models.Model):
     """테스트용 Orthanc Resources 모델"""
+    _DATABASE = 'orthanc'
+    
     internalId = models.AutoField(primary_key=True)
     resourceType = models.IntegerField()
     publicId = models.CharField(max_length=255)
     parentId = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        app_label = 'medical_integration'
-        managed = True 
+        managed = True
+        db_table = 'Resources' 
