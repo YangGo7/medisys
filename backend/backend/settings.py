@@ -3,7 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # .env 파일 로드
-load_dotenv()
+load_dotenv(dotenv_path='.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
@@ -29,6 +29,12 @@ INSTALLED_APPS = [
     'medical_integration',
     'openmrs_models',
     'orthanc_models',
+    'worklist',
+    'airesults',
+    'orders',
+    'samples',
+    'tests',
+    
 ]
 
 MIDDLEWARE = [
@@ -42,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -60,7 +66,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database Configuration
 DATABASES = {
@@ -172,6 +178,7 @@ REST_FRAMEWORK = {
 
 # CORS 설정
 CORS_ALLOWED_ORIGINS = [
+    "http://35.225.63.41:3000",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]

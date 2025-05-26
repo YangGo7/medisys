@@ -16,7 +16,7 @@ import sys
 
 # YOLO 서비스 import
 sys.path.append(os.path.join(settings.BASE_DIR, 'models'))
-from yolo_inference import get_yolo_service
+from models.yolo_inference import get_yolo_service
 
 from .models import AIResult, AIAnalysisSummary
 from .serializers import AIResultSerializer

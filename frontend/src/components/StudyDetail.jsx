@@ -1,4 +1,4 @@
-import VitalAlertBanner from './VitalAlertBanner';
+import VitalAlertBanner from './VitalAlert';
 import React, { useState, useEffect } from 'react';
 
 const StudyDetail = ({ studyId, onBack }) => {

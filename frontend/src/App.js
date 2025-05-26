@@ -11,6 +11,7 @@ import OrderListPage from './components/OrderListPage';
 import SampleListPage from './components/SampleListPage';
 
 import './App.css';
+import OpenMRSPatientList from './components/tests';
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState('request');
@@ -93,6 +94,7 @@ function App() {
         <Route path="/orders" element={<OrderListPage />} />
         <Route path="/sample/new" element={<SampleForm />} />
         <Route path="/samples" element={<SampleListPage />} />
+        <Route path="/tests" element={<OpenMRSPatientList />} />
         <Route path="*" element={<MainApp />} />
       </Routes>
     </Router>
