@@ -4,7 +4,12 @@ import Navigation from './components/Navigation';
 import StudyRequestForm from './components/StudyRequestForm';
 import WorkList from './components/WorkList';
 import StudyDetail from './components/StudyDetail';
-import SampleForm from './pages/SampleForm';
+import SampleForm from './components/SampleForm';
+import LisHome from './components/LisHome';
+import OrderForm from './components/OrderForm';
+import OrderListPage from './components/OrderListPage';
+import SampleListPage from './components/SampleListPage';
+
 import './App.css';
 
 function MainApp() {
@@ -83,7 +88,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/sample" element={<SampleForm />} />
+        <Route path="/lis" element={<LisHome />} />
+        <Route path="/order/new" element={<OrderForm />} />
+        <Route path="/orders" element={<OrderListPage />} />
+        <Route path="/sample/new" element={<SampleForm />} />
+        <Route path="/samples" element={<SampleListPage />} />
         <Route path="*" element={<MainApp />} />
       </Routes>
     </Router>

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SampleForm = () => {
+  const navigate = useNavigate();
   const [aliasMappings, setAliasMappings] = useState({});
   const [selectedAlias, setSelectedAlias] = useState('');
   const [selectedTestType, setSelectedTestType] = useState('');  
   const [sampleType, setSampleType] = useState('');
+  const [testTypeOptions, setTestTypeOptions] = useState([]);
   const [collectionDate, setCollectionDate] = useState('');
   const [orderId, setOrderId] = useState('');
   const [loincCode, setLoincCode] = useState('');
@@ -21,6 +24,24 @@ const SampleForm = () => {
       .catch(err => console.error('❌ aliasMappings 불러오기 실패:', err));
   }, []);
 
+  useEffect(() => {
+    if (selectedAlias && sampleType) {
+      axios.get(`${process.env.REACT_APP_API_URL}/api/samples/test-types-by-alias/`, {
+        params: {
+          sample_type: sampleType,
+          alias_name: selectedAlias
+        }
+      })
+      .then(res => {
+        console.log('🧪 test_type 목록:', res.data);
+        setTestTypeOptions(res.data); // test_type 목록
+      })
+      .catch(err => {
+        console.error('❌ test_type 목록 불러오기 실패:', err);
+      });
+    }
+  }, [selectedAlias, sampleType]);
+
   // alias 선택 시 loinc-code 자동 매핑
   useEffect(() => {
     if (selectedTestType && sampleType) {
@@ -32,6 +53,7 @@ const SampleForm = () => {
           console.log('✅ LOINC 매핑 응답:', res.data);
           const loinc = res.data.find(item => item.test_type === selectedTestType);
           setLoincCode(loinc?.loinc_code || '');
+          setSelectedTestType(loinc?.test_type || selectedTestType);
         })
         .catch(err => {
           console.error('❌ LOINC 코드 매핑 실패:', err);
@@ -44,7 +66,7 @@ const SampleForm = () => {
     e.preventDefault();
 
     const payload = {
-      order_id: orderId,
+      order: parseInt(orderId),
       sample_type: sampleType,
       test_type: selectedAlias,
       collection_date: collectionDate,
@@ -62,6 +84,8 @@ const SampleForm = () => {
       );
       alert('✅ 샘플 등록 성공!');
       console.log('🎉 등록된 샘플:', res.data);
+
+      navigate('/');
     } catch (error) {
       console.error('❌ 샘플 등록 실패:', error);
       alert('샘플 등록 중 오류가 발생했습니다.');
@@ -102,6 +126,14 @@ const SampleForm = () => {
             <option key={alias} value={alias}>{alias}</option>
           ))}
       </select>
+
+      <select value={selectedTestType} onChange={e => setSelectedTestType(e.target.value)} required>
+        <option value="">Test Type 선택</option>
+        {testTypeOptions.map((tt, idx) => (
+          <option key={idx} value={tt}>{tt}</option>
+        ))}
+      </select>
+
 
       <p>🔎 자동 매핑된 LOINC 코드: <strong>{loincCode || '없음'}</strong></p>
 

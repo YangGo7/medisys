@@ -1,4 +1,4 @@
-
+import VitalAlertBanner from './VitalAlertBanner';
 import React, { useState, useEffect } from 'react';
 
 const StudyDetail = ({ studyId, onBack }) => {
@@ -186,6 +186,7 @@ const StudyDetail = ({ studyId, onBack }) => {
 
   return (
     <div style={{ width: '100%', padding: '10px' }}>
+      {studyData && <VitalAlertBanner patientUuid={studyData.patient_id} />}
       {/* 헤더 - 두 번째 코드 스타일로 변경 */}
       <div style={{
         display: 'flex',
