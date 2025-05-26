@@ -25,6 +25,14 @@ class Person(models.Model):
         db_table = 'person'
         app_label = 'openmrs_models'
 
+    @property
+    def active_name(self):
+        """활성화된 선호 이름 반환"""
+        return self.personname_set.filter(
+            voided=False,
+            preferred=True
+        ).first()
+
 class PersonName(models.Model):
     person_name_id = models.AutoField(primary_key=True)
     preferred = models.BooleanField(default=False)
@@ -50,6 +58,23 @@ class PersonName(models.Model):
         db_table = 'person_name'
         app_label = 'openmrs_models'
 
+    def get_full_name(self):
+        """전체 이름 반환"""
+        name_parts = []
+        if self.prefix:
+            name_parts.append(self.prefix)
+        if self.given_name:
+            name_parts.append(self.given_name)
+        if self.middle_name:
+            name_parts.append(self.middle_name)
+        if self.family_name:
+            name_parts.append(self.family_name)
+        if self.family_name2:
+            name_parts.append(self.family_name2)
+        if self.family_name_suffix:
+            name_parts.append(self.family_name_suffix)
+        return ' '.join(name_parts).strip()
+
 class Patient(models.Model):
     patient_id = models.AutoField(primary_key=True)
     person = models.OneToOneField(Person, on_delete=models.DO_NOTHING)
@@ -66,6 +91,22 @@ class Patient(models.Model):
         managed = False
         db_table = 'patient'
         app_label = 'openmrs_models'
+
+    @property
+    def full_name(self):
+        """환자의 전체 이름 반환"""
+        active_name = self.person.active_name
+        if active_name:
+            return active_name.get_full_name()
+        return "Unknown"
+
+    @property
+    def primary_identifier(self):
+        """환자의 기본 식별자 반환"""
+        return self.patientidentifier_set.filter(
+            voided=False,
+            preferred=True
+        ).first()
 
 class PatientIdentifier(models.Model):
     patient_identifier_id = models.AutoField(primary_key=True)

@@ -7,6 +7,8 @@ import logging
 from datetime import datetime
 from .openmrs_api import OpenMRSAPI
 from .db_utils import DatabaseManager
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger('medical_integration')
 
@@ -243,3 +245,46 @@ def create_patient_mapping(request):
     except Exception as e:
         logger.error(f"환자 매핑 생성 실패: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@require_http_methods(["GET"])
+def test_all_connections(request):
+    """모든 데이터베이스 연결 테스트"""
+    results = {
+        'openmrs': False,
+        'orthanc': False,
+        'mongodb': False
+    }
+    
+    try:
+        # OpenMRS 연결 테스트
+        openmrs_conn = DatabaseManager.get_openmrs_connection()
+        with openmrs_conn.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            results['openmrs'] = True
+            logger.info("OpenMRS 연결 성공")
+    except Exception as e:
+        logger.error(f"OpenMRS 연결 실패: {e}")
+
+    try:
+        # Orthanc 연결 테스트
+        orthanc_conn = DatabaseManager.get_orthanc_connection()
+        with orthanc_conn.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            results['orthanc'] = True
+            logger.info("Orthanc 연결 성공")
+    except Exception as e:
+        logger.error(f"Orthanc 연결 실패: {e}")
+
+    try:
+        # MongoDB 연결 테스트
+        with DatabaseManager.get_mongodb_connection() as (client, db):
+            db.command('ping')
+            results['mongodb'] = True
+            logger.info("MongoDB 연결 성공")
+    except Exception as e:
+        logger.error(f"MongoDB 연결 실패: {e}")
+
+    return JsonResponse({
+        'status': 'success' if all(results.values()) else 'partial' if any(results.values()) else 'failure',
+        'connections': results
+    })

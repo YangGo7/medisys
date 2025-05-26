@@ -94,7 +94,7 @@ DATABASES = {
 }
 
 # ⭐ 데이터베이스 라우터 설정
-DATABASE_ROUTERS = ['backend.db_router.DatabaseRouter']
+DATABASE_ROUTERS = ['db_router.DatabaseRouter']
 
 # MongoDB 설정 (Django ORM 외부)
 MONGODB_SETTINGS = {

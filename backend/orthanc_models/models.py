@@ -7,10 +7,41 @@ class Resources(models.Model):
     resourceType = models.IntegerField()  # 0: Patient, 1: Study, 2: Series, 3: Instance
     publicId = models.CharField(max_length=255)
     parentId = models.IntegerField(null=True, blank=True)
+    
+    dicom_tags = models.ManyToManyField(
+        'MainDicomTags',
+        through='ResourceTags',
+        related_name='resources'
+    )
+    metadata = models.ManyToManyField(
+        'Metadata',
+        through='ResourceMetadata',
+        related_name='resources'
+    )
 
     class Meta:
         managed = False
         db_table = 'Resources'
+        app_label = 'orthanc_models'
+
+class ResourceTags(models.Model):
+    """Resources와 MainDicomTags 간의 관계 테이블"""
+    resource = models.ForeignKey(Resources, on_delete=models.CASCADE)
+    tag = models.ForeignKey('MainDicomTags', on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'ResourceTags'
+        app_label = 'orthanc_models'
+
+class ResourceMetadata(models.Model):
+    """Resources와 Metadata 간의 관계 테이블"""
+    resource = models.ForeignKey(Resources, on_delete=models.CASCADE)
+    metadata = models.ForeignKey('Metadata', on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'ResourceMetadata'
         app_label = 'orthanc_models'
 
 class MainDicomTags(models.Model):

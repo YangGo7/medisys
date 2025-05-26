@@ -6,7 +6,8 @@ from .views import (
     AIResultViewSet, 
     OrthancAPIView, 
     DicomImageAPIView, 
-    YOLOModelAPIView
+    YOLOModelAPIView,
+    vital_alert,
 )
 
 router = DefaultRouter()
@@ -15,6 +16,8 @@ router.register(r'ai-results', AIResultViewSet)
 urlpatterns = [
     # DRF Router URLs
     path('', include(router.urls)),
+    
+    path('vital-alert/', vital_alert, name='vital-alert'),
     
     # Orthanc 연동 API
     path('orthanc/<path:endpoint>/', OrthancAPIView.as_view(), name='orthanc-api'),

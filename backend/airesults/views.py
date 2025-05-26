@@ -297,3 +297,65 @@ class YOLOModelAPIView(APIView):
             
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+        
+        
+        
+# OpenMRS 설정 및 UUID
+OPENMRS_API_BASE = "http://localhost:8081/openmrs/ws/rest/v1"
+OPENMRS_AUTH = ("admin", "Admin123")
+
+TEMP_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+SPO2_UUID = "5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+PULSE_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+SYSTOLIC_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+DIASTOLIC_UUID = "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+RESP_UUID = "5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  # 추가됨
+
+# 환자 바이탈 알림 함수
+def vital_alert(request):
+    patient_uuid = request.GET.get("patient")
+    if not patient_uuid:
+        return JsonResponse({"error": "Missing patient UUID"}, status=400)
+
+    obs_url = f"{OPENMRS_API_BASE}/obs?patient={patient_uuid}&v=full"
+    headers = {"Accept": "application/json"}
+
+    try:
+        response = requests.get(obs_url, auth=OPENMRS_AUTH, headers=headers)
+        data = response.json()
+        results = data.get("results", [])
+
+        def get_latest_value(uuid):
+            filtered = [obs for obs in results if obs.get("concept", {}).get("uuid") == uuid]
+            sorted_obs = sorted(filtered, key=lambda x: x.get("obsDatetime", ""), reverse=True)
+            return sorted_obs[0].get("value") if sorted_obs else None
+
+        temp = get_latest_value(TEMP_UUID)
+        spo2 = get_latest_value(SPO2_UUID)
+        pulse = get_latest_value(PULSE_UUID)
+        sys = get_latest_value(SYSTOLIC_UUID)
+        dia = get_latest_value(DIASTOLIC_UUID)
+        resp = get_latest_value(RESP_UUID)
+
+        bp = None
+        if sys is not None and dia is not None:
+            try:
+                bp = f"{int(dia)}/{int(sys)}"
+            except:
+                bp = None
+
+        return JsonResponse({
+            "temp_alert": temp is not None and temp >= 38.0,
+            "temp": temp,
+            "spo2_alert": spo2 is not None and spo2 <= 90,
+            "spo2": spo2,
+            "pulse_alert": pulse is not None and pulse >= 100,
+            "pulse": pulse,
+            "bp_alert": sys is not None and dia is not None and (int(sys) >= 140 or int(dia) >= 90),
+            "bp": bp,
+            "resp_alert": resp is not None and resp >= 25,
+            "resp": resp
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
