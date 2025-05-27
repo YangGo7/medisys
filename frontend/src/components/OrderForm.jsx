@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-
 const OrderForm = () => {
   const [aliasOptions, setAliasOptions] = useState([]);
   const navigate = useNavigate();
@@ -14,30 +13,33 @@ const OrderForm = () => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/samples/alias-mapping/`)
-        .then(res => {
+      .then(res => {
         const rawData = res.data;
         const aliases = [];
 
         // sample_type별 alias 목록 추출
         Object.entries(rawData).forEach(([sampleType, aliasMap]) => {
-            Object.keys(aliasMap).forEach(alias => {
-            aliases.push(alias);  // 또는 { value: alias, label: alias }
-            });
+          Object.keys(aliasMap).forEach(alias => {
+            aliases.push(alias); // 또는 { value: alias, label: alias }
+          });
         });
 
         setAliasOptions(aliases);
-        })
-        .catch(err => {
+      })
+      .catch(err => {
         console.error('❌ alias 목록 로딩 실패:', err);
-        });
-    }, []);
+      });
+  }, []);
 
+  // ❗ 사용되지 않는 함수 주석 처리 (필요시 상태 통합 방식으로 활용 가능)
+  /*
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+  */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +47,7 @@ const OrderForm = () => {
     const payload = {
       patient_id: parseInt(patientId),
       doctor_id: parseInt(doctorId),
-      test_type: selectedAlias,  // alias_name으로 전달
+      test_type: selectedAlias, // alias_name으로 전달
       order_date: orderDate,
     };
 
@@ -75,8 +77,8 @@ const OrderForm = () => {
       <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
         <option value="">선택하세요</option>
         {aliasOptions.map(alias => (
-            <option key={alias} value={alias}>{alias}</option>
-          ))}
+          <option key={alias} value={alias}>{alias}</option>
+        ))}
       </select><br />
 
       <label>🕒 주문 날짜:</label><br />
@@ -88,4 +90,3 @@ const OrderForm = () => {
 };
 
 export default OrderForm;
-

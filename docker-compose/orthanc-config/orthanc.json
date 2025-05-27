@@ -1,0 +1,30 @@
+{
+  "Name": "Medical System Orthanc",
+  "HttpPort": 8042,
+  "DicomPort": 4242,
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": true,
+  "RegisteredUsers": {
+    "orthanc": "orthanc",
+    "admin": "admin"
+  },
+  "DicomModalities": {},
+  "OrthancPeers": {},
+  "HttpTimeout": 60,
+  "HttpRetries": 3,
+  "StorageAccessOnFind": "Always",
+  "StorageCompression": false,
+  "StoreDicom": true,
+  "DicomAssociationCloseDelay": 5,
+  "DicomScuTimeout": 10,
+  "DicomScpTimeout": 30,
+  "PostgreSQL": {
+    "EnableIndex": true,
+    "EnableStorage": true,
+    "Host": "orthanc-postgres",
+    "Port": 5432,
+    "Database": "orthanc",
+    "Username": "orthanc",
+    "Password": "orthanc"
+  }
+}
