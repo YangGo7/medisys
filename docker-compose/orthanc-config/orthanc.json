@@ -8,16 +8,6 @@
     "orthanc": "orthanc",
     "admin": "admin"
   },
-  "DicomModalities": {},
-  "OrthancPeers": {},
-  "HttpTimeout": 60,
-  "HttpRetries": 3,
-  "StorageAccessOnFind": "Always",
-  "StorageCompression": false,
-  "StoreDicom": true,
-  "DicomAssociationCloseDelay": 5,
-  "DicomScuTimeout": 10,
-  "DicomScpTimeout": 30,
   "PostgreSQL": {
     "EnableIndex": true,
     "EnableStorage": true,
@@ -26,5 +16,11 @@
     "Database": "orthanc",
     "Username": "orthanc",
     "Password": "orthanc"
+  },
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+    "Access-Control-Max-Age": "86400"
   }
 }

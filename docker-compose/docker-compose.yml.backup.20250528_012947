@@ -1,36 +1,29 @@
 services:
-  # OpenMRS MySQL - 최소 설정 (안정성 우선)
+  # OpenMRS MySQL - 최소 설정
   openmrs-mysql:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: openmrs-mysql
-    hostname: openmrs-mysql
     environment:
       MYSQL_ROOT_PASSWORD: Admin123
       MYSQL_DATABASE: openmrs
       MYSQL_USER: openmrs
       MYSQL_PASSWORD: Admin123
-      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     ports:
       - "3307:3306"
     volumes:
       - openmrs_mysql_data:/var/lib/mysql
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.10
     restart: unless-stopped
 
   # OpenMRS Web Application
   openmrs-server:
     image: openmrs/openmrs-reference-application-distro:latest
     container_name: openmrs-server
-    hostname: openmrs-server
     depends_on:
       - openmrs-mysql
     environment:
       DB_DATABASE: openmrs
       DB_HOST: openmrs-mysql
-      DB_PORT: 3306
-      DB_USERNAME: openmrs
+      DB_USERNAME: root
       DB_PASSWORD: Admin123
       DB_CREATE_TABLES: "true"
       DB_AUTO_UPDATE: "true"
@@ -39,16 +32,12 @@ services:
       - "8082:8080"
     volumes:
       - openmrs_data:/openmrs/data
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.11
     restart: unless-stopped
 
   # MariaDB (메인 애플리케이션용)
   mariadb:
     image: mariadb:10.11
     container_name: mariadb-server
-    hostname: mariadb-server
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: medical_platform
@@ -58,16 +47,12 @@ services:
       - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.20
     restart: unless-stopped
 
   # PostgreSQL (Orthanc용)
   orthanc-postgres:
     image: postgres:14
     container_name: orthanc-postgres
-    hostname: orthanc-postgres
     environment:
       POSTGRES_DB: orthanc
       POSTGRES_USER: orthanc
@@ -76,34 +61,34 @@ services:
       - "5432:5432"
     volumes:
       - orthanc_postgres_data:/var/lib/postgresql/data
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.30
     restart: unless-stopped
 
   # Orthanc DICOM Server
   orthanc:
     image: jodogne/orthanc-plugins:latest
     container_name: orthanc-server
-    hostname: orthanc-server
     depends_on:
       - orthanc-postgres
     ports:
       - "8042:8042"
       - "4242:4242"
+    environment:
+      ORTHANC__NAME: "Medical System Orthanc"
+      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
+      ORTHANC__AUTHENTICATION_ENABLED: "true"
+      ORTHANC__REGISTERED_USERS: |
+        {
+          "orthanc": "orthanc",
+          "admin": "admin"
+        }
     volumes:
       - orthanc_data:/var/lib/orthanc/db
-      - ./orthanc-config/orthanc.json:/etc/orthanc/orthanc.json:ro
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.31
     restart: unless-stopped
 
   # MongoDB
   mongodb:
     image: mongo:6.0
     container_name: mongodb-server
-    hostname: mongodb-server
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
@@ -111,33 +96,22 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.40
     restart: unless-stopped
 
   # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
-    hostname: phpmyadmin
     depends_on:
       - mariadb
     environment:
-      PMA_HOST: mariadb-server
+      PMA_HOST: mariadb
       PMA_PORT: 3306
       PMA_USER: root
       PMA_PASSWORD: rootpassword
     ports:
       - "8080:80"
-    networks:
-      medical-network:
-        ipv4_address: 172.20.0.50
     restart: unless-stopped
-
-networks:
-  medical-network:
-    external: true
 
 volumes:
   openmrs_mysql_data:
