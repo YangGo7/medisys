@@ -19,7 +19,7 @@ const LisHome = () => {
           <Link to="/samples">🧪 샘플 목록 확인</Link>
         </li>
         <li>
-          <Link to="/results/new">🔬 결과 기록하기</Link>
+          <Link to="/result/new">🔬 결과 기록하기</Link>
         </li>
       </ul>
     </div>

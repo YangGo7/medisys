@@ -28,14 +28,14 @@ const ResultInputForm = () => {
   const [sampleList, setSampleList] = useState([]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/samples/`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/`)
       .then(res => setSampleList(res.data))
       .catch(err => console.error('샘플 목록 불러오기 실패:', err));
   }, []);
 
   useEffect(() => {
     if (!sampleId) return;
-    axios.get(`${process.env.REACT_APP_API_URL}/api/samples/get/${sampleId}`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/get/${sampleId}`)
       .then((res) => {
         const alias = res.data.test_type;
         if (alias && panelComponents[alias]) {
@@ -57,7 +57,7 @@ const ResultInputForm = () => {
     try {
       await Promise.all(
         entries.map(([component_name, result_value]) =>
-          axios.post(`${process.env.REACT_APP_API_URL}/api/tests/run`, {
+          axios.post(`${process.env.REACT_APP_API_BASE_URL}tests/run`, {
             sample: sampleId,
             test_type: selectedPanel,
             component_name,

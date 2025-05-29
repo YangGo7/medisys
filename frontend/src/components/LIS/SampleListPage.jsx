@@ -5,7 +5,7 @@ const SampleListPage = () => {
   const [samples, setSamples] = useState([]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/samples/`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/`)
       .then(res => setSamples(res.data))
       .catch(err => console.error('샘플 목록 불러오기 실패:', err));
   }, []);

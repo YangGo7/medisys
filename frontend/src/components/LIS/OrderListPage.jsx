@@ -1,5 +1,3 @@
-// frontend > src > components > OCS > OrderListPage.jsx
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -7,7 +5,7 @@ const OrderListPage = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/orders`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}orders`)
       .then(res => setOrders(res.data))
       .catch(err => console.error('오더 목록 불러오기 실패:', err));
   }, []);

@@ -16,7 +16,7 @@ const SampleForm = () => {
 
   // alias-mapping 불러오기
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/../samples/alias-mapping`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/alias-mapping`)
       .then(res => {
         console.log('✅ aliasMappings 불러오기 성공:', res.data);
         setAliasMappings(res.data);
@@ -26,7 +26,7 @@ const SampleForm = () => {
 
   useEffect(() => {
     if (selectedAlias && sampleType) {
-      axios.get(`${process.env.REACT_APP_API_URL}/api/samples/test-types-by-alias/`, {
+      axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/test-types-by-alias/`, {
         params: {
           sample_type: sampleType,
           alias_name: selectedAlias
@@ -46,7 +46,7 @@ const SampleForm = () => {
   useEffect(() => {
     if (selectedTestType && sampleType) {
       console.log('📦 LOINC 매핑 요청:', { sample_type: sampleType, test_type: selectedTestType });
-      axios.get(`${process.env.REACT_APP_API_URL}/api/samples/loinc-by-sample-type`, {
+      axios.get(`${process.env.REACT_APP_API_URL}samples/loinc-by-sample-type`, {
         params: { sample_type: sampleType, test_type: selectedTestType }
       })
         .then(res => {
@@ -78,7 +78,7 @@ const SampleForm = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/samples/create`,
+        `${process.env.REACT_APP_API_URL}samples/create`,
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -100,14 +100,14 @@ const SampleForm = () => {
         value={orderId}
         onChange={e => setOrderId(e.target.value)}
         required
-      />
+      /><br/>
 
       <input
         type="datetime-local"
         value={collectionDate}
         onChange={e => setCollectionDate(e.target.value)}
         required
-      />
+      /><br/>
 
       <select value={sampleType} onChange={e => {
         setSampleType(e.target.value);
@@ -117,7 +117,7 @@ const SampleForm = () => {
         {Object.keys(aliasMappings).map(type => (
           <option key={type} value={type}>{type}</option>
         ))}
-      </select>
+      </select><br/>
 
       <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
         <option value="">Alias 선택</option>
@@ -125,14 +125,14 @@ const SampleForm = () => {
           Object.keys(aliasMappings[sampleType] || {}).map(alias => (
             <option key={alias} value={alias}>{alias}</option>
           ))}
-      </select>
+      </select><br/>
 
       <select value={selectedTestType} onChange={e => setSelectedTestType(e.target.value)} required>
         <option value="">Test Type 선택</option>
         {testTypeOptions.map((tt, idx) => (
           <option key={idx} value={tt}>{tt}</option>
         ))}
-      </select>
+      </select><br/>
 
 
       <p>🔎 자동 매핑된 LOINC 코드: <strong>{loincCode || '없음'}</strong></p>

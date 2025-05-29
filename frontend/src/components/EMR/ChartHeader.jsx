@@ -1,15 +1,22 @@
-// src/components/ChartHeader.jsx
 import React, { useState } from 'react';
+import axios from 'axios';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const ChartHeader = ({ onSearch }) => {
   const [query, setQuery] = useState('');
 
   const handleSearch = async () => {
     try {
-      const res = await fetch(`http://35.225.63.41:8000/api/openmrs/patients/search/?query=${query}`);
-      const data = await res.json();
-      if (data.length > 0) {
-        onSearch(data[0]);  // 첫 번째 환자만 선택
+      const response = await axios.get(`${API_BASE}openmrs/patients/search/`, {
+        params: { query: query }
+      });
+
+      const data = response.data;
+      console.log('서버 응답:', data);
+
+      if (data.results && data.results.length > 0) {
+        onSearch(data.results[0]); // 첫 번째 환자 결과 전달
       } else {
         alert('검색 결과 없음');
       }

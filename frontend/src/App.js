@@ -6,8 +6,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import SampleForm from './components/LIS/SampleForm';
 import LisHome from './components/LIS/LisHome';
 import OrderForm from './components/LIS/OrderForm';
-import OrderListPage from './components/OCS/OrderListPage';
+import OrderListPage from './components/LIS/OrderListPage';
 import SampleListPage from './components/LIS/SampleListPage';
+import ResultInputForm from './components/LIS/ResultInputForm';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
 import VitalAlertBanner from './components/EMR/VitalAlert';
@@ -35,6 +36,7 @@ function App() {
         <Route path="/orders" element={<OrderListPage />} />
         <Route path="/sample/new" element={<SampleForm />} />
         <Route path="/samples" element={<SampleListPage />} />
+        <Route path="/result/new" element={<ResultInputForm />} />
         <Route path="/tests" element={<OpenMRSPatientList />} />
         <Route path="/ocs" element={<OCSLogPage />} />
 

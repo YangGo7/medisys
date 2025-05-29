@@ -12,7 +12,7 @@ const OrderForm = () => {
   const [orderDate, setOrderDate] = useState(new Date().toISOString().slice(0, 16));
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/samples/alias-mapping/`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/alias-mapping/`)
       .then(res => {
         const rawData = res.data;
         const aliases = [];
@@ -52,7 +52,7 @@ const OrderForm = () => {
     };
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/orders/create/`, payload);
+      const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}orders/create/`, payload);
       alert('✅ 주문 생성 성공!');
       console.log('Created:', res.data);
 
