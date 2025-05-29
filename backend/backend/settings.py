@@ -30,13 +30,14 @@ INSTALLED_APPS = [
     'openmrs_models',
     'orthanc_models',
     'worklist',
-    'airesults',
+    'pacs_model',
+    
     'orders',
     'samples',
     'tests',
-    
+    'ocs',
 ]
-
+#'dicom_processor',
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

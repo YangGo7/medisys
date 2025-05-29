@@ -7,7 +7,7 @@ class StudyRequest(models.Model):
     # 1. id - AutoField PK (Django 자동 생성)
     
     # 2-5. 환자 정보 (React에서 입력)
-    patient_id = models.CharField(max_length=100)        
+    patient_id = models.CharField(max_length=20)        
     patient_name = models.CharField(max_length=100)     
     birth_date = models.DateField()                     
     sex = models.CharField(max_length=1, choices=[('M', '남성'), ('F', '여성')])  

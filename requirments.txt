@@ -8,3 +8,5 @@ python-decouple>=3.8
 requests>=2.28.0
 lucide-react
 react-router-dom
+dicom-parser
+@cornerstonejs/core @cornerstonejs/tools @cornerstonejs/streaming-image-volume-loader @cornerstonejs/dicom-image-loader
