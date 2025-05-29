@@ -6770,3 +6770,903 @@ WARNING 2025-05-28 20:05:36,383 log 15704 127961202144960 Not Found: /
 WARNING 2025-05-28 20:05:36,384 basehttp 15704 127961202144960 "GET / HTTP/1.1" 404 3076
 WARNING 2025-05-28 20:06:39,618 log 15704 127961210537664 Not Found: /
 WARNING 2025-05-28 20:06:39,618 basehttp 15704 127961210537664 "GET / HTTP/1.1" 404 3076
+INFO 2025-05-29 09:53:23,494 autoreload 45745 128137162649856 Watching for file changes with StatReloader
+WARNING 2025-05-29 09:53:26,985 log 45745 128136985437888 Not Found: /
+WARNING 2025-05-29 09:53:26,987 basehttp 45745 128136985437888 "GET / HTTP/1.1" 404 3558
+WARNING 2025-05-29 09:53:27,233 log 45745 128136985437888 Not Found: /favicon.ico
+WARNING 2025-05-29 09:53:27,234 basehttp 45745 128136985437888 "GET /favicon.ico HTTP/1.1" 404 3609
+WARNING 2025-05-29 09:53:52,027 log 45745 128136968652480 Bad Request: /api/openmrs/patients/search/
+WARNING 2025-05-29 09:53:52,028 basehttp 45745 128136968652480 "GET /api/openmrs/patients/search/?query=ase%20K HTTP/1.1" 400 43
+WARNING 2025-05-29 09:58:14,854 log 45745 128136968652480 Bad Request: /api/openmrs/patients/search/
+WARNING 2025-05-29 09:58:16,325 basehttp 45745 128136968652480 "GET /api/openmrs/patients/search/?query=ase%20K HTTP/1.1" 400 43
+WARNING 2025-05-29 09:59:54,049 log 45745 128136960259776 Not Found: /api/ocs/logs/
+WARNING 2025-05-29 09:59:54,052 basehttp 45745 128136960259776 "GET /api/ocs/logs/ HTTP/1.1" 404 10370
+WARNING 2025-05-29 09:59:54,373 log 45745 128136960259776 Not Found: /api/ocs/logs/
+WARNING 2025-05-29 09:59:54,375 basehttp 45745 128136960259776 "GET /api/ocs/logs/ HTTP/1.1" 404 10370
+WARNING 2025-05-29 10:00:43,013 log 45745 128136968652480 Bad Request: /api/openmrs/patients/search/
+WARNING 2025-05-29 10:00:43,030 basehttp 45745 128136968652480 "GET /api/openmrs/patients/search/?query=ase%20K HTTP/1.1" 400 43
+WARNING 2025-05-29 10:00:57,352 log 45745 128136960259776 Not Found: /api/ocs/logs/
+WARNING 2025-05-29 10:00:57,354 basehttp 45745 128136960259776 "GET /api/ocs/logs/ HTTP/1.1" 404 10370
+INFO 2025-05-29 10:10:51,116 basehttp 45745 128136943474368 "GET /api/openmrs/patients/search/?q=ase%20K HTTP/1.1" 200 173
+WARNING 2025-05-29 10:10:51,514 log 45745 128136943474368 Not Found: /favicon.ico
+WARNING 2025-05-29 10:10:51,515 basehttp 45745 128136943474368 "GET /favicon.ico HTTP/1.1" 404 3612
+INFO 2025-05-29 10:12:29,764 basehttp 45745 128136968652480 - Broken pipe from ('167.94.146.54', 58270)
+WARNING 2025-05-29 10:12:33,341 log 45745 128136968652480 Not Found: /
+WARNING 2025-05-29 10:12:33,342 basehttp 45745 128136968652480 "GET / HTTP/1.1" 404 3561
+INFO 2025-05-29 10:12:33,487 basehttp 45745 128136968652480 - Broken pipe from ('167.94.146.54', 37018)
+WARNING 2025-05-29 10:12:37,070 log 45745 128136456959680 Not Found: /
+WARNING 2025-05-29 10:12:37,071 basehttp 45745 128136456959680 "GET / HTTP/1.1" 404 3561
+INFO 2025-05-29 10:12:37,559 basehttp 45745 128136448566976 code 505, message Invalid HTTP version (2.0)
+ERROR 2025-05-29 10:12:37,559 basehttp 45745 128136448566976 "PRI * HTTP/2.0" 505 -
+WARNING 2025-05-29 10:12:40,845 log 45745 128136448566976 Not Found: /favicon.ico
+WARNING 2025-05-29 10:12:40,848 basehttp 45745 128136448566976 "GET /favicon.ico HTTP/1.1" 404 3612
+INFO 2025-05-29 10:12:41,232 basehttp 45745 128136440174272 code 400, message Bad request version ('À\x14À')
+ERROR 2025-05-29 10:12:41,232 basehttp 45745 128136440174272 You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2025-05-29 10:13:28,188 log 45745 128136440174272 Not Found: /
+WARNING 2025-05-29 10:13:28,191 basehttp 45745 128136440174272 "GET / HTTP/1.1" 404 3558
+WARNING 2025-05-29 10:13:28,394 log 45745 128136440174272 Not Found: /favicon.ico
+WARNING 2025-05-29 10:13:28,395 basehttp 45745 128136440174272 "GET /favicon.ico HTTP/1.1" 404 3609
+INFO 2025-05-29 10:16:25,209 autoreload 45745 128137162649856 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-29 10:16:26,307 autoreload 50330 129419225846016 Watching for file changes with StatReloader
+INFO 2025-05-29 10:17:14,356 autoreload 50330 129419225846016 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-29 10:17:15,718 autoreload 50657 127013670195456 Watching for file changes with StatReloader
+INFO 2025-05-29 10:24:05,524 autoreload 50657 127013670195456 /home/medical_system/backend/venv/lib/python3.13/site-packages/django/conf/urls/__init__.py changed, reloading.
+INFO 2025-05-29 10:54:17,551 autoreload 4205 124814333169920 Watching for file changes with StatReloader
+INFO 2025-05-29 10:56:53,320 autoreload 5978 135957204279552 Watching for file changes with StatReloader
+WARNING 2025-05-29 10:58:55,115 log 5978 135957034563264 Not Found: /api//logs/
+WARNING 2025-05-29 10:58:55,119 basehttp 5978 135957034563264 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 10:58:55,435 log 5978 135957034563264 Not Found: /api//logs/
+WARNING 2025-05-29 10:58:55,437 basehttp 5978 135957034563264 "GET /api//logs/ HTTP/1.1" 404 10361
+INFO 2025-05-29 10:59:36,297 autoreload 5978 135957204279552 /home/medical_system/backend/accounts/apps.py changed, reloading.
+INFO 2025-05-29 10:59:37,939 autoreload 6869 137945491493120 Watching for file changes with StatReloader
+INFO 2025-05-29 10:59:51,308 basehttp 6869 137945323402944 "GET /admin HTTP/1.1" 301 0
+INFO 2025-05-29 10:59:51,479 basehttp 6869 137945315010240 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-05-29 10:59:51,880 basehttp 6869 137945315010240 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4209
+INFO 2025-05-29 10:59:52,205 basehttp 6869 137945315010240 "GET /static/admin/css/base.css HTTP/1.1" 200 22120
+INFO 2025-05-29 10:59:52,208 basehttp 6869 137945323402944 "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2808
+INFO 2025-05-29 10:59:52,211 basehttp 6869 137945088521920 "GET /static/admin/css/login.css HTTP/1.1" 200 951
+INFO 2025-05-29 10:59:52,214 basehttp 6869 137945306617536 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+INFO 2025-05-29 10:59:52,215 basehttp 6869 137945071736512 "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+INFO 2025-05-29 10:59:52,215 basehttp 6869 137945080129216 "GET /static/admin/css/responsive.css HTTP/1.1" 200 16565
+INFO 2025-05-29 10:59:52,524 basehttp 6869 137945071736512 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+WARNING 2025-05-29 10:59:52,847 log 6869 137945071736512 Not Found: /favicon.ico
+WARNING 2025-05-29 10:59:52,848 basehttp 6869 137945071736512 "GET /favicon.ico HTTP/1.1" 404 3612
+INFO 2025-05-29 10:59:57,465 basehttp 6869 137945071736512 "POST /admin/login/?next=/admin/ HTTP/1.1" 200 4390
+ERROR 2025-05-29 11:02:16,932 exception 6869 137945063343808 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-29 11:02:16,962 log 6869 137945063343808 Bad Request: /www.google.com:443
+WARNING 2025-05-29 11:02:16,963 basehttp 6869 137945063343808 "CONNECT www.google.com:443 HTTP/1.1" 400 76065
+INFO 2025-05-29 11:02:24,791 basehttp 6869 137945071736512 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-05-29 11:02:25,172 basehttp 6869 137945071736512 "GET /admin/ HTTP/1.1" 200 8376
+INFO 2025-05-29 11:02:25,347 basehttp 6869 137945088521920 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2025-05-29 11:02:25,697 basehttp 6869 137945088521920 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-05-29 11:02:25,699 basehttp 6869 137945071736512 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2025-05-29 11:02:29,861 basehttp 6869 137945071736512 "GET /admin/accounts/userprofile/add/ HTTP/1.1" 200 11198
+INFO 2025-05-29 11:02:30,029 basehttp 6869 137945088521920 "GET /static/admin/css/forms.css HTTP/1.1" 200 8525
+INFO 2025-05-29 11:02:30,037 basehttp 6869 137945315010240 "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+INFO 2025-05-29 11:02:30,039 basehttp 6869 137945323402944 "GET /static/admin/js/core.js HTTP/1.1" 200 6208
+INFO 2025-05-29 11:02:30,049 basehttp 6869 137945080129216 "GET /admin/jsi18n/ HTTP/1.1" 200 9860
+INFO 2025-05-29 11:02:30,175 basehttp 6869 137945071736512 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9777
+INFO 2025-05-29 11:02:30,336 basehttp 6869 137945088521920 "GET /static/admin/js/actions.js HTTP/1.1" 200 8076
+INFO 2025-05-29 11:02:30,349 basehttp 6869 137945306617536 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2025-05-29 11:02:30,350 basehttp 6869 137945323402944 "GET /static/admin/css/widgets.css HTTP/1.1" 200 11991
+INFO 2025-05-29 11:02:30,362 basehttp 6869 137945080129216 "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+INFO 2025-05-29 11:02:30,398 basehttp 6869 137945315010240 "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+INFO 2025-05-29 11:02:30,642 basehttp 6869 137945088521920 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+INFO 2025-05-29 11:02:30,803 basehttp 6869 137945071736512 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+INFO 2025-05-29 11:02:30,997 basehttp 6869 137945088521920 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-05-29 11:02:31,137 basehttp 6869 137945071736512 "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+ERROR 2025-05-29 11:02:36,469 log 6869 137945071736512 Internal Server Error: /admin/worklist/studyrequest/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.worklist_studyrequest' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/options.py", line 719, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/sites.py", line 246, in inner
+    return view(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/options.py", line 2024, in changelist_view
+    cl = self.get_changelist_instance(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/options.py", line 867, in get_changelist_instance
+    return ChangeList(
+        request,
+    ...<12 lines>...
+        self.search_help_text,
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/views/main.py", line 146, in __init__
+    self.get_results(request)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/contrib/admin/views/main.py", line 313, in get_results
+    result_count = paginator.count
+                   ^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 110, in count
+    return c()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 604, in count
+    return self.query.get_count(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.worklist_studyrequest' doesn't exist")
+ERROR 2025-05-29 11:02:36,478 basehttp 6869 137945071736512 "GET /admin/worklist/studyrequest/ HTTP/1.1" 500 229136
+INFO 2025-05-29 11:02:38,165 basehttp 6869 137945071736512 "GET /admin/accounts/userprofile/add/ HTTP/1.1" 200 11198
+WARNING 2025-05-29 11:07:07,599 log 6869 137945063343808 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:07,600 basehttp 6869 137945063343808 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:07:07,914 log 6869 137945063343808 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:07,915 basehttp 6869 137945063343808 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:07:08,081 log 6869 137945054951104 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:08,082 basehttp 6869 137945054951104 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:07:18,857 log 6869 137945054951104 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:18,858 basehttp 6869 137945054951104 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:07:19,050 log 6869 137945063343808 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:19,050 basehttp 6869 137945063343808 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:07:19,216 log 6869 137945054951104 Not Found: /api//logs/
+WARNING 2025-05-29 11:07:19,217 basehttp 6869 137945054951104 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:09:38,086 log 6869 137945080129216 Not Found: /api//logs/
+WARNING 2025-05-29 11:09:38,087 basehttp 6869 137945080129216 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:09:43,407 log 6869 137945054951104 Not Found: /api//logs/
+WARNING 2025-05-29 11:09:43,409 basehttp 6869 137945054951104 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:09:43,576 log 6869 137945063343808 Not Found: /api//logs/
+WARNING 2025-05-29 11:09:43,577 basehttp 6869 137945063343808 "GET /api//logs/ HTTP/1.1" 404 10361
+WARNING 2025-05-29 11:09:43,745 log 6869 137945054951104 Not Found: /api//logs/
+WARNING 2025-05-29 11:09:43,746 basehttp 6869 137945054951104 "GET /api//logs/ HTTP/1.1" 404 10361
+ERROR 2025-05-29 11:10:24,166 log 6869 137945080129216 Internal Server Error: /api/logs/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 203, in get
+    return self.list(request, *args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/pagination.py", line 211, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 70, in validate_number
+    if number > self.num_pages:
+                ^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 116, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+       ^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 110, in count
+    return c()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 604, in count
+    return self.query.get_count(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+ERROR 2025-05-29 11:10:24,483 basehttp 6869 137945080129216 "GET /api/logs/ HTTP/1.1" 500 226272
+ERROR 2025-05-29 11:10:25,459 log 6869 137945054951104 Internal Server Error: /api/logs/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 203, in get
+    return self.list(request, *args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/pagination.py", line 211, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 70, in validate_number
+    if number > self.num_pages:
+                ^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 116, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+       ^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 110, in count
+    return c()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 604, in count
+    return self.query.get_count(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+ERROR 2025-05-29 11:10:25,692 log 6869 137945063343808 Internal Server Error: /api/logs/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 203, in get
+    return self.list(request, *args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/pagination.py", line 211, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 70, in validate_number
+    if number > self.num_pages:
+                ^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 116, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+       ^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 110, in count
+    return c()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 604, in count
+    return self.query.get_count(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+ERROR 2025-05-29 11:10:26,004 basehttp 6869 137945063343808 "GET /api/logs/ HTTP/1.1" 500 226266
+ERROR 2025-05-29 11:10:26,071 log 6869 137945323402944 Internal Server Error: /api/logs/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 203, in get
+    return self.list(request, *args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/pagination.py", line 211, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 70, in validate_number
+    if number > self.num_pages:
+                ^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 116, in num_pages
+    if self.count == 0 and not self.allow_empty_first_page:
+       ^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/paginator.py", line 110, in count
+    return c()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 604, in count
+    return self.query.get_count(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.ocs_ocslog' doesn't exist")
+INFO 2025-05-29 11:22:09,120 autoreload 3595 139835036205312 Watching for file changes with StatReloader
+INFO 2025-05-29 11:23:26,670 basehttp 3595 139834869937856 "GET /admin/accounts/userprofile/add/ HTTP/1.1" 200 11198
+INFO 2025-05-29 11:23:26,845 basehttp 3595 139834861545152 "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:26,979 basehttp 3595 139834869937856 "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,002 basehttp 3595 139834853152448 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,006 basehttp 3595 139834844759744 "GET /static/admin/css/forms.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,008 basehttp 3595 139834827974336 "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,009 basehttp 3595 139834836367040 "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,216 basehttp 3595 139834861545152 "GET /admin/jsi18n/ HTTP/1.1" 200 9860
+INFO 2025-05-29 11:23:27,331 basehttp 3595 139834869937856 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,350 basehttp 3595 139834853152448 "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,368 basehttp 3595 139834844759744 "GET /static/admin/js/core.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,370 basehttp 3595 139834836367040 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,372 basehttp 3595 139834827974336 "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,529 basehttp 3595 139834861545152 "GET /static/admin/css/widgets.css HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,684 basehttp 3595 139834869937856 "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,700 basehttp 3595 139834853152448 "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,735 basehttp 3595 139834844759744 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:27,736 basehttp 3595 139834836367040 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:28,106 basehttp 3595 139834844759744 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:28,111 basehttp 3595 139834869937856 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:28,114 basehttp 3595 139834861545152 "GET /static/admin/js/change_form.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:28,115 basehttp 3595 139834836367040 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2025-05-29 11:23:28,117 basehttp 3595 139834853152448 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-05-29 11:24:23,361 autoreload 3595 139835036205312 /home/medical_system/backend/accounts/admin.py changed, reloading.
+INFO 2025-05-29 11:24:38,472 autoreload 5305 136994329514240 Watching for file changes with StatReloader
+INFO 2025-05-29 11:28:31,842 autoreload 5305 136994329514240 /home/medical_system/backend/backend/urls.py changed, reloading.
+INFO 2025-05-29 11:28:33,867 autoreload 6981 139102169690368 Watching for file changes with StatReloader
+WARNING 2025-05-29 11:30:14,557 log 6981 139102072600256 Not Found: /api//logs/
+WARNING 2025-05-29 11:30:14,560 basehttp 6981 139102072600256 "GET /api//logs/ HTTP/1.1" 404 9710
+WARNING 2025-05-29 11:30:14,891 log 6981 139102064207552 Not Found: /api//logs/
+WARNING 2025-05-29 11:30:14,898 basehttp 6981 139102064207552 "GET /api//logs/ HTTP/1.1" 404 9710
+WARNING 2025-05-29 11:30:18,686 log 6981 139102064207552 Not Found: /api/logs/
+WARNING 2025-05-29 11:30:18,687 basehttp 6981 139102064207552 "GET /api/logs/ HTTP/1.1" 404 10373
+WARNING 2025-05-29 11:30:19,197 log 6981 139102064207552 Not Found: /api/logs/
+WARNING 2025-05-29 11:30:19,198 basehttp 6981 139102064207552 "GET /api/logs/ HTTP/1.1" 404 10373
+WARNING 2025-05-29 11:30:20,329 log 6981 139102064207552 Not Found: /api/logs/
+WARNING 2025-05-29 11:30:20,331 basehttp 6981 139102064207552 "GET /api/logs/ HTTP/1.1" 404 10373
+INFO 2025-05-29 11:30:32,461 autoreload 6981 139102169690368 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-29 11:30:34,486 autoreload 7578 124508622000384 Watching for file changes with StatReloader
+WARNING 2025-05-29 11:32:11,308 log 7578 124508455302848 Not Found: /
+WARNING 2025-05-29 11:32:11,309 basehttp 7578 124508455302848 "GET / HTTP/1.1" 404 3566
+INFO 2025-05-29 11:32:42,274 autoreload 7578 124508622000384 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-29 11:32:43,366 autoreload 8010 132212630860032 Watching for file changes with StatReloader
+INFO 2025-05-29 11:35:44,194 autoreload 8010 132212630860032 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-29 11:35:45,355 autoreload 8496 123746146808064 Watching for file changes with StatReloader
+INFO 2025-05-29 11:36:14,993 basehttp 8496 123745976972992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 11:36:15,380 log 8496 123745976972992 Not Found: /favicon.ico
+WARNING 2025-05-29 11:36:15,381 basehttp 8496 123745976972992 "GET /favicon.ico HTTP/1.1" 404 3617
+INFO 2025-05-29 11:43:41,069 autoreload 8496 123746146808064 /home/medical_system/backend/backend/urls.py changed, reloading.
+INFO 2025-05-29 11:43:41,782 autoreload 9247 131612151648512 Watching for file changes with StatReloader
+INFO 2025-05-29 11:50:00,882 autoreload 9247 131612151648512 /home/medical_system/backend/accounts/models.py changed, reloading.
+INFO 2025-05-29 11:50:01,604 autoreload 9797 123716627005696 Watching for file changes with StatReloader
+INFO 2025-05-29 11:50:05,904 autoreload 9797 123716627005696 /home/medical_system/backend/accounts/views.py changed, reloading.
+INFO 2025-05-29 11:50:06,584 autoreload 9828 132780288893184 Watching for file changes with StatReloader
+INFO 2025-05-29 11:50:13,979 autoreload 9828 132780288893184 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 11:50:14,634 autoreload 9877 136716807774464 Watching for file changes with StatReloader
+INFO 2025-05-29 11:50:22,044 autoreload 9877 136716807774464 /home/medical_system/backend/accounts/models.py changed, reloading.
+INFO 2025-05-29 11:50:22,831 autoreload 9952 131209444204800 Watching for file changes with StatReloader
+INFO 2025-05-29 11:55:44,290 autoreload 9952 131209444204800 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 11:55:44,981 autoreload 10385 138200018825472 Watching for file changes with StatReloader
+INFO 2025-05-29 12:13:35,132 autoreload 12402 133914207359232 Watching for file changes with StatReloader
+INFO 2025-05-29 12:28:52,548 autoreload 14166 134128880177408 Watching for file changes with StatReloader
+INFO 2025-05-29 12:33:07,966 autoreload 14166 134128880177408 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:33:08,274 autoreload 12402 133914207359232 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:33:09,623 autoreload 14725 138941309092096 Watching for file changes with StatReloader
+INFO 2025-05-29 12:33:09,623 autoreload 14726 136381601440000 Watching for file changes with StatReloader
+INFO 2025-05-29 12:33:18,079 autoreload 14844 133526124192000 Watching for file changes with StatReloader
+INFO 2025-05-29 12:34:45,522 autoreload 14726 136381601440000 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:34:45,551 autoreload 14844 133526124192000 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:34:47,373 autoreload 15069 135247295160576 Watching for file changes with StatReloader
+INFO 2025-05-29 12:34:47,375 autoreload 15070 128242033234176 Watching for file changes with StatReloader
+INFO 2025-05-29 12:36:30,970 autoreload 15774 123869059256576 Watching for file changes with StatReloader
+INFO 2025-05-29 12:37:19,046 autoreload 15069 135247295160576 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-29 12:37:19,046 autoreload 15774 123869059256576 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-29 12:37:21,475 autoreload 15857 137937271820544 Watching for file changes with StatReloader
+INFO 2025-05-29 12:37:21,475 autoreload 15858 135130649719040 Watching for file changes with StatReloader
+INFO 2025-05-29 12:37:53,654 autoreload 15857 137937271820544 /home/medical_system/backend/backend/urls.py changed, reloading.
+INFO 2025-05-29 12:37:53,670 autoreload 15858 135130649719040 /home/medical_system/backend/backend/urls.py changed, reloading.
+INFO 2025-05-29 12:37:56,491 autoreload 15983 137420738724096 Watching for file changes with StatReloader
+INFO 2025-05-29 12:37:56,491 autoreload 15982 123983508832512 Watching for file changes with StatReloader
+INFO 2025-05-29 12:39:53,062 autoreload 16312 128892901224704 Watching for file changes with StatReloader
+INFO 2025-05-29 12:41:30,643 autoreload 16312 128892901224704 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-29 12:41:32,050 autoreload 16525 125000264741120 Watching for file changes with StatReloader
+INFO 2025-05-29 12:41:51,737 autoreload 16613 126315670225152 Watching for file changes with StatReloader
+INFO 2025-05-29 12:43:17,141 autoreload 16613 126315670225152 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:43:17,608 autoreload 16525 125000264741120 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:43:18,920 autoreload 16727 135281475002624 Watching for file changes with StatReloader
+INFO 2025-05-29 12:43:18,920 autoreload 16726 138882509046016 Watching for file changes with StatReloader
+INFO 2025-05-29 12:45:30,123 autoreload 16988 125091085545728 Watching for file changes with StatReloader
+INFO 2025-05-29 12:45:52,876 autoreload 16988 125091085545728 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:45:53,093 autoreload 16726 138882509046016 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:45:54,745 autoreload 17062 136106998608128 Watching for file changes with StatReloader
+INFO 2025-05-29 12:45:54,745 autoreload 17061 137460449227008 Watching for file changes with StatReloader
+INFO 2025-05-29 12:47:28,946 autoreload 17062 136106998608128 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:47:28,946 autoreload 17061 137460449227008 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:47:31,169 autoreload 17304 134077802979584 Watching for file changes with StatReloader
+INFO 2025-05-29 12:47:34,595 autoreload 17396 138973579194624 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:00,879 autoreload 17304 134077802979584 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:00,879 autoreload 17396 138973579194624 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:03,318 autoreload 17591 130672859107584 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:04,034 autoreload 17635 124059690991872 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:20,065 autoreload 17591 130672859107584 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:20,733 autoreload 17635 124059690991872 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:21,821 autoreload 17697 130738458517760 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:21,821 autoreload 17696 136716580598016 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:27,343 autoreload 17697 130738458517760 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:27,367 autoreload 17696 136716580598016 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:29,062 autoreload 17776 130843172524288 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:29,062 autoreload 17775 125587572060416 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:36,608 autoreload 17776 130843172524288 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:36,614 autoreload 17775 125587572060416 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:38,684 autoreload 17853 133326345003264 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:38,684 autoreload 17854 131319656915200 Watching for file changes with StatReloader
+INFO 2025-05-29 12:50:59,565 autoreload 17854 131319656915200 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:50:59,565 autoreload 17853 133326345003264 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:51:01,665 autoreload 17964 140119506161920 Watching for file changes with StatReloader
+INFO 2025-05-29 12:51:01,666 autoreload 17963 130632062640384 Watching for file changes with StatReloader
+INFO 2025-05-29 12:52:30,885 autoreload 17963 130632062640384 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:52:30,924 autoreload 17964 140119506161920 /home/medical_system/backend/accounts/urls.py changed, reloading.
+INFO 2025-05-29 12:52:33,099 autoreload 18209 134856420307200 Watching for file changes with StatReloader
+INFO 2025-05-29 12:52:33,096 autoreload 18208 130662562332928 Watching for file changes with StatReloader
+INFO 2025-05-29 12:52:39,590 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:52:39,954 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:52:44,982 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:52:45,349 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:55:26,968 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:55:47,460 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:55:47,507 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:55:52,591 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 12:55:55,073 log 18209 134856235275968 Not Found: /
+WARNING 2025-05-29 12:55:55,086 basehttp 18209 134856235275968 "GET / HTTP/1.1" 404 3739
+WARNING 2025-05-29 12:55:55,315 log 18209 134856235275968 Not Found: /favicon.ico
+WARNING 2025-05-29 12:55:55,320 basehttp 18209 134856235275968 "GET /favicon.ico HTTP/1.1" 404 3790
+INFO 2025-05-29 12:56:01,352 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:56:01,554 basehttp 18208 130662447175360 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:56:01,711 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:56:01,926 basehttp 18208 130662447175360 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 12:56:03,698 log 18208 130662447175360 Not Found: /logs/
+WARNING 2025-05-29 12:56:03,699 basehttp 18208 130662447175360 "GET /logs/ HTTP/1.1" 404 3775
+WARNING 2025-05-29 12:56:03,863 log 18208 130662166165184 Not Found: /logs/
+WARNING 2025-05-29 12:56:03,864 basehttp 18208 130662166165184 "GET /logs/ HTTP/1.1" 404 3775
+WARNING 2025-05-29 12:56:06,122 log 18208 130662463960768 Not Found: /logs/
+WARNING 2025-05-29 12:56:06,123 basehttp 18208 130662463960768 "GET /logs/ HTTP/1.1" 404 3775
+WARNING 2025-05-29 12:56:06,286 log 18208 130662455568064 Not Found: /logs/
+WARNING 2025-05-29 12:56:06,287 basehttp 18208 130662455568064 "GET /logs/ HTTP/1.1" 404 3775
+ERROR 2025-05-29 12:56:53,716 exception 18208 130662157772480 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-29 12:56:53,792 log 18208 130662157772480 Bad Request: /www.google.com:443
+WARNING 2025-05-29 12:56:53,793 basehttp 18208 130662157772480 "CONNECT www.google.com:443 HTTP/1.1" 400 75981
+INFO 2025-05-29 12:59:49,441 basehttp 18208 130662166165184 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 12:59:49,806 basehttp 18208 130662447175360 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 12:59:51,924 log 18208 130662447175360 Not Found: /logs/
+WARNING 2025-05-29 12:59:51,925 basehttp 18208 130662447175360 "GET /logs/ HTTP/1.1" 404 3775
+WARNING 2025-05-29 12:59:52,087 log 18208 130662166165184 Not Found: /logs/
+WARNING 2025-05-29 12:59:52,088 basehttp 18208 130662166165184 "GET /logs/ HTTP/1.1" 404 3775
+ERROR 2025-05-29 13:35:13,023 exception 18208 130662463960768 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-29 13:35:13,073 log 18208 130662463960768 Bad Request: /www.google.com:443
+WARNING 2025-05-29 13:35:13,074 basehttp 18208 130662463960768 "CONNECT www.google.com:443 HTTP/1.1" 400 75981
+WARNING 2025-05-29 13:37:09,020 log 18208 130662166165184 Not Found: /api/api/samples/alias-mapping/
+WARNING 2025-05-29 13:37:09,025 basehttp 18208 130662166165184 "GET /api/api/samples/alias-mapping/ HTTP/1.1" 404 3847
+WARNING 2025-05-29 13:37:09,277 log 18208 130662447175360 Not Found: /api/api/samples/alias-mapping/
+WARNING 2025-05-29 13:37:09,279 basehttp 18208 130662447175360 "GET /api/api/samples/alias-mapping/ HTTP/1.1" 404 3847
+WARNING 2025-05-29 13:37:18,561 log 18208 130662447175360 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:18,567 basehttp 18208 130662447175360 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:37:18,734 log 18208 130662166165184 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:18,735 basehttp 18208 130662166165184 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:37:20,762 log 18208 130662166165184 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:20,764 basehttp 18208 130662166165184 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:37:20,965 log 18208 130662447175360 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:20,966 basehttp 18208 130662447175360 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:37:26,895 log 18208 130662447175360 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:26,896 basehttp 18208 130662447175360 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:37:27,094 log 18208 130662166165184 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:37:27,095 basehttp 18208 130662166165184 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+INFO 2025-05-29 13:39:30,002 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping HTTP/1.1" 301 0
+INFO 2025-05-29 13:39:30,411 basehttp 18208 130662157772480 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 13:39:30,638 log 18208 130662157772480 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-05-29 13:39:30,639 basehttp 18208 130662157772480 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3901
+WARNING 2025-05-29 13:39:30,651 log 18208 130662149379776 Not Found: /favicon.ico
+WARNING 2025-05-29 13:39:30,652 basehttp 18208 130662149379776 "GET /favicon.ico HTTP/1.1" 404 3790
+WARNING 2025-05-29 13:39:33,267 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:39:33,268 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:39:33,498 log 18208 130662463960768 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:39:33,499 basehttp 18208 130662463960768 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+INFO 2025-05-29 13:41:37,176 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping HTTP/1.1" 301 0
+INFO 2025-05-29 13:41:37,469 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 13:41:37,657 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 13:42:24,739 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:42:24,750 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:42:37,007 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:42:37,011 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:42:37,202 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:42:37,203 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+INFO 2025-05-29 13:43:03,961 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 13:43:04,149 basehttp 18208 130662455568064 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-29 13:43:12,271 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:43:12,274 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:43:22,790 log 18208 130662455568064 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:43:22,810 basehttp 18208 130662455568064 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:43:23,034 log 18208 130662463960768 Not Found: /apisamples/alias-mapping
+WARNING 2025-05-29 13:43:23,041 basehttp 18208 130662463960768 "GET /apisamples/alias-mapping HTTP/1.1" 404 3829
+WARNING 2025-05-29 13:43:45,723 log 18208 130662140987072 Not Found: /
+WARNING 2025-05-29 13:43:45,727 basehttp 18208 130662140987072 "GET / HTTP/1.1" 404 3742
+INFO 2025-05-29 13:44:08,097 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 13:44:08,277 basehttp 18208 130662463960768 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-29 13:44:14,867 basehttp 18208 130662463960768 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 200 16
+INFO 2025-05-29 13:44:15,980 basehttp 18208 130662463960768 "GET /api/samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=panel.hem%2Fbc HTTP/1.1" 200 76
+WARNING 2025-05-29 13:46:31,971 log 18208 130662463960768 Not Found: /api//samples/alias-mapping
+WARNING 2025-05-29 13:46:31,980 log 18208 130662455568064 Not Found: /api//samples/test-types-by-alias/
+WARNING 2025-05-29 13:46:31,981 basehttp 18208 130662455568064 "GET /api//samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 404 3906
+WARNING 2025-05-29 13:46:31,982 basehttp 18208 130662463960768 "GET /api//samples/alias-mapping HTTP/1.1" 404 3835
+WARNING 2025-05-29 13:46:32,176 log 18208 130662455568064 Not Found: /api//samples/loinc-by-sample-type
+WARNING 2025-05-29 13:46:32,177 basehttp 18208 130662455568064 "GET /api//samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=panel.hem%2Fbc HTTP/1.1" 404 3916
+INFO 2025-05-29 14:50:08,749 autoreload 8168 127965033140480 Watching for file changes with StatReloader
+INFO 2025-05-29 14:54:01,764 autoreload 8168 127965033140480 /home/medical_system/backend/ocs/views.py changed, reloading.
+INFO 2025-05-29 14:54:02,394 autoreload 8497 124495238963456 Watching for file changes with StatReloader
+INFO 2025-05-29 14:54:25,962 autoreload 8591 132425610633472 Watching for file changes with StatReloader
+INFO 2025-05-29 15:00:00,706 autoreload 8591 132425610633472 /home/medical_system/backend/ocs/models.py changed, reloading.
+INFO 2025-05-29 15:00:01,478 autoreload 9222 124045918986496 Watching for file changes with StatReloader
+INFO 2025-05-29 15:00:26,190 autoreload 9222 124045918986496 /home/medical_system/backend/ocs/models.py changed, reloading.
+INFO 2025-05-29 15:00:26,815 autoreload 9292 139446584889600 Watching for file changes with StatReloader

@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'orthanc_models',
     'worklist',
     'pacs_model',
-    
+    'accounts',
     'orders',
     'samples',
     'tests',
@@ -233,3 +233,4 @@ LOGGING = {
 
 # 로그 디렉토리 생성
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+

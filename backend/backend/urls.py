@@ -24,15 +24,18 @@ from openmrs_models.views import openmrs_vitals, openmrs_encounters
 # 추후 dicom_process 연결 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('medical_integration.urls')),
+
+    # 각 앱별 prefix로 충돌 방지
+    path('api/integration/', include('medical_integration.urls')),
     path('api/orders/', include('orders.urls')),
-    path('api/', include('worklist.urls')),
+    path('api/worklist/', include('worklist.urls')),
     path('api/samples/', include('samples.urls')),
     path('api/tests/', include('tests.urls')),
-    path('api/', include('ocs.urls')),
+    path('api/logs/', include('ocs.urls')),
+    path('api/account/', include('accounts.urls')),
     path('api/openmrs-vitals/', openmrs_vitals),
     path('api/openmrs-encounters/', openmrs_encounters),
-    
 ]
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

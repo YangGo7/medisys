@@ -27,7 +27,7 @@ def test_all_connections(request):
         'openmrs': False,
         'orthanc': False
     }
-    
+
     try:
         # OpenMRS 연결 테스트
         openmrs_api = OpenMRSAPI()
@@ -59,16 +59,16 @@ def test_all_connections(request):
 @api_view(['GET'])
 def search_patients(request):
     """OpenMRS에서 환자 검색"""
-    query = request.query_params.get('q', '')
+    query = request.GET.get('q', '')  # 수정된 부분
     if not query:
         return Response({'error': '검색어(q)가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     api = OpenMRSAPI()
     results = api.search_patients(query)
-    
+
     if results is None:
         return Response({'error': '환자 검색에 실패했습니다'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     # 결과를 더 간단한 형식으로 변환
     patients = []
     for result in results.get('results', []):
@@ -81,7 +81,7 @@ def search_patients(request):
             'age': result.get('person', {}).get('age')
         }
         patients.append(patient)
-    
+
     return Response({
         'results': patients,
         'total': len(patients)

@@ -9,7 +9,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # 실제 운영 환경에�
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # GCP 서버에서 React와 통신 가능하도록 임시로 전체 허용
 
 # Application definition
 INSTALLED_APPS = [
@@ -20,10 +20,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',  # CORS 허용을 위한 패키지 추가
     'medical_integration',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # CORS 관련 미들웨어 추가 (가장 위쪽에 위치)
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -31,7 +33,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'ocs.middleware.APILoggingMiddleware', #
+    'ocs.middleware.APILoggingMiddleware',  # 
 ]
 
 ROOT_URLCONF = 'medical_integration.urls'
@@ -102,6 +104,9 @@ STATIC_ROOT = BASE_DIR / 'static'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# CORS 설정: 모든 출처 허용
+CORS_ALLOW_ALL_ORIGINS = True
+
 # 로깅 설정
 LOGGING = {
     'version': 1,
@@ -126,4 +131,4 @@ LOGGING = {
             'propagate': False,
         },
     },
-} 
+}
