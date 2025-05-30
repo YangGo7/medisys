@@ -35,68 +35,72 @@ const ImagingRequestForm = ({ selectedPatient, onRequestCreated }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!selectedPatient) {
-      alert('환자를 먼저 선택해주세요.');
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!selectedPatient) {
+    alert('환자를 먼저 선택해주세요.');
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
+  console.log('🚀 EMR 검사 요청 시작:', selectedPatient);
 
-    try {
-      const requestData = {
-        patient_id: selectedPatient.uuid,
-        patient_name: selectedPatient.display,
-        birth_date: selectedPatient.person.birthdate,
-        sex: selectedPatient.person.gender,
-        modality: formData.modality,
-        body_part: formData.body_part,
-        study_description: formData.study_description,
-        clinical_info: formData.clinical_info,
-        priority: formData.priority,
-        requesting_physician: 'Dr. Current User', // 실제로는 로그인된 의사
-        created_by: 'emr_user'
-      };
+  try {
+    const requestData = {
+      patient_id: selectedPatient.uuid,
+      patient_name: selectedPatient.display,
+      birth_date: selectedPatient.person.birthdate,
+      sex: selectedPatient.person.gender,
+      modality: formData.modality,
+      body_part: formData.body_part,
+      study_description: formData.study_description,
+      clinical_info: formData.clinical_info,
+      priority: formData.priority,
+      requesting_physician: 'Dr. Current User', // 실제로는 로그인된 의사
+      created_by: 'emr_user'
+    };
 
-      const response = await fetch('http://localhost:8000/api/workflow/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
+    console.log('📤 전송할 데이터:', requestData);
+
+    // 🔥 이 부분만 수정: URL을 worklist API로 변경
+    const response = await fetch('http://localhost:8000/api/worklist/create-from-emr/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    const result = await response.json();
+    console.log('📥 응답 받음:', result);
+
+    if (result.success) {
+      alert(`🎉 검사요청 성공!\nStudy ID: ${result.study_request_id}\nAccession: ${result.accession_number}`);
+      
+      // 폼 초기화
+      setFormData({
+        modality: '',
+        body_part: '',
+        study_description: '',
+        clinical_info: '',
+        priority: 'routine'
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        alert(`영상검사 요청이 성공적으로 생성되었습니다!\nWorkflow ID: ${result.workflow_id}\nAccession Number: ${result.accession_number}`);
-        
-        // 폼 초기화
-        setFormData({
-          modality: '',
-          body_part: '',
-          study_description: '',
-          clinical_info: '',
-          priority: 'routine'
-        });
-
-        // 부모 컴포넌트에 알림
-        if (onRequestCreated) {
-          onRequestCreated(result);
-        }
-      } else {
-        throw new Error(result.error);
+      if (onRequestCreated) {
+        onRequestCreated(result);
       }
-
-    } catch (error) {
-      console.error('영상검사 요청 실패:', error);
-      alert(`요청 실패: ${error.message}`);
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(result.error);
     }
-  };
+
+  } catch (error) {
+    console.error('❌ 검사 요청 실패:', error);
+    alert(`요청 실패: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!selectedPatient) {
     return (

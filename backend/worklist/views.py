@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import StudyRequest, WorkflowEvent, DICOMMapping
 from .services import WorkflowService
 from .serializers import StudyRequestSerializer
+import logging
 
 # 워크플로우 서비스 인스턴스
 workflow_service = WorkflowService()
@@ -244,3 +245,49 @@ def get_workflow_events(request, workflow_id):
             'success': False,
             'error': 'Workflow not found'
         }, status=status.HTTP_404_NOT_FOUND)
+        
+logger = logging.getLogger('worklist')
+
+@api_view(['POST'])
+def create_study_request_from_emr(request):
+    """EMR에서 온 검사 요청을 WorkList로 변환"""
+    
+    # 로깅으로 데이터 확인
+    logger.info(f"📥 EMR 요청 수신: {request.data}")
+    
+    try:
+        # EMR 데이터 추출
+        emr_data = request.data
+        
+        # StudyRequest 생성
+        study_request = StudyRequest.objects.create(
+            patient_id=emr_data.get('patient_id'),
+            patient_name=emr_data.get('patient_name'),
+            birth_date=emr_data.get('birth_date'),
+            sex=emr_data.get('sex'),
+            body_part=emr_data.get('body_part'),
+            modality=emr_data.get('modality'),
+            requesting_physician=emr_data.get('requesting_physician'),
+            study_description=emr_data.get('study_description', ''),
+            clinical_info=emr_data.get('clinical_info', ''),
+            priority=emr_data.get('priority', 'routine'),
+            request_datetime=datetime.now(),
+            study_status='requested',
+            report_status='requested'
+        )
+        
+        logger.info(f"✅ StudyRequest 생성 완료: ID={study_request.id}")
+        
+        return Response({
+            'success': True,
+            'study_request_id': study_request.id,
+            'accession_number': f'ACC{study_request.id:06d}',
+            'message': 'EMR 검사 요청이 WorkList에 등록되었습니다.'
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"❌ StudyRequest 생성 실패: {str(e)}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

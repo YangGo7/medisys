@@ -7670,3 +7670,939 @@ INFO 2025-05-29 15:00:00,706 autoreload 8591 132425610633472 /home/medical_syste
 INFO 2025-05-29 15:00:01,478 autoreload 9222 124045918986496 Watching for file changes with StatReloader
 INFO 2025-05-29 15:00:26,190 autoreload 9222 124045918986496 /home/medical_system/backend/ocs/models.py changed, reloading.
 INFO 2025-05-29 15:00:26,815 autoreload 9292 139446584889600 Watching for file changes with StatReloader
+INFO 2025-05-30 09:44:32,847 autoreload 76557 131256475877632 Watching for file changes with StatReloader
+WARNING 2025-05-30 09:44:42,467 log 76557 131256377407168 Not Found: /api/openmrs/patients/search/
+WARNING 2025-05-30 09:44:42,468 basehttp 76557 131256377407168 "GET /api/openmrs/patients/search/?query=ase+k HTTP/1.1" 404 3856
+WARNING 2025-05-30 09:44:59,706 log 76557 131256360621760 Not Found: /api/openmrs/patients/search/
+WARNING 2025-05-30 09:44:59,706 basehttp 76557 131256360621760 "GET /api/openmrs/patients/search/?q=ase%20K HTTP/1.1" 404 3854
+WARNING 2025-05-30 09:45:00,112 log 76557 131256360621760 Not Found: /favicon.ico
+WARNING 2025-05-30 09:45:00,113 basehttp 76557 131256360621760 "GET /favicon.ico HTTP/1.1" 404 3793
+INFO 2025-05-30 09:45:13,064 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:13,473 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:18,033 basehttp 76557 131256079611584 "GET /api/orders HTTP/1.1" 301 0
+ERROR 2025-05-30 09:45:18,472 log 76557 131256071218880 Internal Server Error: /api/orders/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/medical_system/backend/orders/views.py", line 12, in list_orders
+    return Response(serializer.data, status=status.HTTP_200_OK)
+                    ^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 716, in to_representation
+    self.child.to_representation(item) for item in iterable
+                                                   ^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+ERROR 2025-05-30 09:45:18,832 basehttp 76557 131256071218880 "GET /api/orders/ HTTP/1.1" 500 204629
+ERROR 2025-05-30 09:45:18,897 log 76557 131256079611584 Internal Server Error: /api/orders/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/medical_system/backend/orders/views.py", line 12, in list_orders
+    return Response(serializer.data, status=status.HTTP_200_OK)
+                    ^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 716, in to_representation
+    self.child.to_representation(item) for item in iterable
+                                                   ^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+ERROR 2025-05-30 09:45:19,250 basehttp 76557 131256079611584 "GET /api/orders/ HTTP/1.1" 500 204629
+INFO 2025-05-30 09:45:19,576 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:19,974 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:21,760 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:22,161 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:24,135 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:24,545 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:26,856 basehttp 76557 131256071218880 "GET /api/samples/alias-mapping HTTP/1.1" 301 0
+INFO 2025-05-30 09:45:27,039 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:27,447 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:29,728 basehttp 76557 131256079611584 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 200 16
+INFO 2025-05-30 09:45:32,031 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:45:32,437 basehttp 76557 131256079611584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 09:46:39,691 log 76557 131256360621760 Not Found: /api/openmrs/patients/search/
+WARNING 2025-05-30 09:46:39,692 basehttp 76557 131256360621760 "GET /api/openmrs/patients/search/?q=ase%20K HTTP/1.1" 404 3854
+WARNING 2025-05-30 09:46:58,560 log 76557 131256360621760 Not Found: /logs
+WARNING 2025-05-30 09:46:58,561 basehttp 76557 131256360621760 "GET /logs HTTP/1.1" 404 3772
+WARNING 2025-05-30 09:47:01,857 log 76557 131256360621760 Not Found: /logs/
+WARNING 2025-05-30 09:47:01,858 basehttp 76557 131256360621760 "GET /logs/ HTTP/1.1" 404 3775
+WARNING 2025-05-30 09:47:21,103 log 76557 131256360621760 Not Found: /integration/
+WARNING 2025-05-30 09:47:21,104 basehttp 76557 131256360621760 "GET /integration/ HTTP/1.1" 404 3796
+ERROR 2025-05-30 09:49:25,871 exception 76557 131256071218880 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-30 09:49:25,900 log 76557 131256071218880 Bad Request: /www.google.com:443
+WARNING 2025-05-30 09:49:25,900 basehttp 76557 131256071218880 "CONNECT www.google.com:443 HTTP/1.1" 400 76068
+INFO 2025-05-30 09:52:03,383 basehttp 76557 131256377407168 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 09:52:03,782 basehttp 76557 131256377407168 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 09:52:05,276 log 76557 131256062826176 Not Found: /api//logs/
+WARNING 2025-05-30 09:52:05,277 basehttp 76557 131256062826176 "GET /api//logs/ HTTP/1.1" 404 3787
+WARNING 2025-05-30 09:52:05,520 log 76557 131256054433472 Not Found: /api//logs/
+WARNING 2025-05-30 09:52:05,521 basehttp 76557 131256054433472 "GET /api//logs/ HTTP/1.1" 404 3787
+WARNING 2025-05-30 09:52:07,539 log 76557 131256054433472 Not Found: /api//openmrs/patients/search/
+WARNING 2025-05-30 09:52:07,540 basehttp 76557 131256054433472 "GET /api//openmrs/patients/search/?q=1000 HTTP/1.1" 404 3851
+WARNING 2025-05-30 09:52:08,055 log 76557 131256054433472 Not Found: /api//openmrs/patients/search/
+WARNING 2025-05-30 09:52:08,056 basehttp 76557 131256054433472 "GET /api//openmrs/patients/search/?q=10002 HTTP/1.1" 404 3852
+WARNING 2025-05-30 09:52:09,565 log 76557 131256054433472 Not Found: /api//openmrs/patients/search/
+WARNING 2025-05-30 09:52:09,570 basehttp 76557 131256054433472 "GET /api//openmrs/patients/search/?q=10002t HTTP/1.1" 404 3853
+WARNING 2025-05-30 09:52:10,514 log 76557 131256054433472 Not Found: /api//openmrs/patients/search/
+WARNING 2025-05-30 09:52:10,521 basehttp 76557 131256054433472 "GET /api//openmrs/patients/search/?q=10002 HTTP/1.1" 404 3852
+WARNING 2025-05-30 09:52:11,280 log 76557 131256054433472 Not Found: /api//openmrs/patients/search/
+WARNING 2025-05-30 09:52:11,281 basehttp 76557 131256054433472 "GET /api//openmrs/patients/search/?q=10002T HTTP/1.1" 404 3853
+WARNING 2025-05-30 09:55:08,874 log 76557 131256377407168 Not Found: /api/integration/samples/alias-mapping/
+WARNING 2025-05-30 09:55:08,876 basehttp 76557 131256377407168 "GET /api/integration/samples/alias-mapping/ HTTP/1.1" 404 7391
+WARNING 2025-05-30 09:55:09,244 log 76557 131256377407168 Not Found: /api/integration/samples/alias-mapping/
+WARNING 2025-05-30 09:55:09,247 basehttp 76557 131256377407168 "GET /api/integration/samples/alias-mapping/ HTTP/1.1" 404 7391
+WARNING 2025-05-30 09:55:09,258 log 76557 131256071218880 Not Found: /api/integration/samples/alias-mapping/
+WARNING 2025-05-30 09:55:09,260 basehttp 76557 131256071218880 "GET /api/integration/samples/alias-mapping/ HTTP/1.1" 404 7391
+WARNING 2025-05-30 09:55:09,628 log 76557 131256071218880 Not Found: /api/integration/samples/alias-mapping/
+WARNING 2025-05-30 09:55:09,629 basehttp 76557 131256071218880 "GET /api/integration/samples/alias-mapping/ HTTP/1.1" 404 7391
+WARNING 2025-05-30 09:55:11,353 log 76557 131256054433472 Not Found: /api//logs/
+WARNING 2025-05-30 09:55:11,356 basehttp 76557 131256054433472 "GET /api//logs/ HTTP/1.1" 404 3787
+WARNING 2025-05-30 09:55:11,591 log 76557 131256062826176 Not Found: /api//logs/
+WARNING 2025-05-30 09:55:11,592 basehttp 76557 131256062826176 "GET /api//logs/ HTTP/1.1" 404 3787
+WARNING 2025-05-30 09:55:33,862 log 76557 131256071218880 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 09:55:33,863 basehttp 76557 131256071218880 "GET /api/integration/openmrs/patients/search/?query=ase+K HTTP/1.1" 400 43
+WARNING 2025-05-30 09:57:56,962 log 76557 131256071218880 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 09:57:56,963 basehttp 76557 131256071218880 "GET /api/integration/openmrs/patients/search/?query=ase+K HTTP/1.1" 400 43
+INFO 2025-05-30 09:58:39,003 autoreload 76557 131256475877632 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 09:58:40,639 autoreload 78922 124291902075136 Watching for file changes with StatReloader
+INFO 2025-05-30 10:08:21,663 basehttp 78922 124291802724032 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:08:22,073 basehttp 78922 124291802724032 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 10:08:48,415 log 78922 124291802724032 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 10:08:48,415 basehttp 78922 124291802724032 "GET /api/integration/openmrs/patients/search/?query=ase+k HTTP/1.1" 400 43
+WARNING 2025-05-30 10:11:41,848 log 78922 124291723032256 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 10:11:41,848 basehttp 78922 124291723032256 "GET /api/integration/openmrs/patients/search/?query=%EA%B8%B8%EB%8F%99%ED%99%8D HTTP/1.1" 400 43
+WARNING 2025-05-30 10:11:48,036 log 78922 124291723032256 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 10:11:48,037 basehttp 78922 124291723032256 "GET /api/integration/openmrs/patients/search/?query=%EA%B8%B8%EB%8F%99+%ED%99%8D HTTP/1.1" 400 43
+WARNING 2025-05-30 10:11:53,460 log 78922 124291723032256 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 10:11:53,460 basehttp 78922 124291723032256 "GET /api/integration/openmrs/patients/search/?query=%ED%99%8D%EA%B8%B8%EB%8F%99 HTTP/1.1" 400 43
+WARNING 2025-05-30 10:13:55,963 log 78922 124291714639552 Not Found: /
+WARNING 2025-05-30 10:13:55,969 basehttp 78922 124291714639552 "GET / HTTP/1.1" 404 3742
+INFO 2025-05-30 10:14:15,660 basehttp 78922 124291706246848 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:14:16,076 basehttp 78922 124291706246848 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 10:14:16,438 log 78922 124291697854144 Not Found: /api/
+WARNING 2025-05-30 10:14:16,438 basehttp 78922 124291697854144 "GET /api/ HTTP/1.1" 404 3772
+WARNING 2025-05-30 10:14:16,622 log 78922 124291706246848 Not Found: /api/
+WARNING 2025-05-30 10:14:16,622 basehttp 78922 124291706246848 "GET /api/ HTTP/1.1" 404 3772
+WARNING 2025-05-30 10:15:23,278 log 78922 124291714639552 Not Found: /
+WARNING 2025-05-30 10:15:23,280 basehttp 78922 124291714639552 "GET / HTTP/1.1" 404 3739
+WARNING 2025-05-30 10:15:23,506 log 78922 124291714639552 Not Found: /favicon.ico
+WARNING 2025-05-30 10:15:23,507 basehttp 78922 124291714639552 "GET /favicon.ico HTTP/1.1" 404 3790
+INFO 2025-05-30 10:15:32,261 basehttp 78922 124291681068736 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:15:32,674 basehttp 78922 124291681068736 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 10:18:50,843 log 78922 124291706246848 Not Found: /api/
+WARNING 2025-05-30 10:18:50,844 basehttp 78922 124291706246848 "GET /api/ HTTP/1.1" 404 3772
+INFO 2025-05-30 10:21:14,180 basehttp 78922 124291723032256 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:21:14,594 basehttp 78922 124291723032256 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:22:24,980 basehttp 78922 124291723032256 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:22:25,387 basehttp 78922 124291723032256 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:23:44,935 autoreload 78922 124291902075136 /home/medical_system/backend/worklist/views.py changed, reloading.
+INFO 2025-05-30 10:23:46,217 autoreload 81949 138965137891584 Watching for file changes with StatReloader
+INFO 2025-05-30 10:26:26,224 autoreload 81949 138965137891584 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 10:26:27,161 autoreload 82389 135869922775296 Watching for file changes with StatReloader
+INFO 2025-05-30 10:35:38,827 autoreload 83452 128475025072384 Watching for file changes with StatReloader
+INFO 2025-05-30 10:36:29,728 autoreload 83452 128475025072384 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:36:30,350 autoreload 83551 128596455842048 Watching for file changes with StatReloader
+INFO 2025-05-30 10:36:38,642 autoreload 83551 128596455842048 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:36:39,244 autoreload 83609 139866958369024 Watching for file changes with StatReloader
+INFO 2025-05-30 10:36:51,648 autoreload 83609 139866958369024 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:36:52,277 autoreload 83644 123601468965120 Watching for file changes with StatReloader
+INFO 2025-05-30 10:36:56,519 autoreload 83644 123601468965120 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:36:57,185 autoreload 83673 125791549780224 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:02,509 autoreload 83673 125791549780224 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:03,148 autoreload 83726 128714566676736 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:08,404 autoreload 83726 128714566676736 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:09,024 autoreload 83771 139903409205504 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:27,447 autoreload 83771 139903409205504 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:28,060 autoreload 83843 133756440822016 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:38,478 autoreload 83843 133756440822016 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:39,079 autoreload 83891 123245471580416 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:42,393 autoreload 83891 123245471580416 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:42,994 autoreload 83920 131681849303296 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:45,215 autoreload 83920 131681849303296 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:45,895 autoreload 83933 139050366083328 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:56,210 autoreload 83933 139050366083328 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:56,819 autoreload 83981 125267618427136 Watching for file changes with StatReloader
+INFO 2025-05-30 10:37:59,059 autoreload 83981 125267618427136 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:37:59,687 autoreload 84024 140219358281984 Watching for file changes with StatReloader
+INFO 2025-05-30 10:38:16,134 autoreload 84024 140219358281984 /home/medical_system/backend/worklist/views.py changed, reloading.
+INFO 2025-05-30 10:38:16,746 autoreload 84070 135694174834944 Watching for file changes with StatReloader
+INFO 2025-05-30 10:38:30,143 autoreload 84070 135694174834944 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:38:30,766 autoreload 84138 123766662451456 Watching for file changes with StatReloader
+INFO 2025-05-30 10:38:50,217 autoreload 84138 123766662451456 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:38:50,887 autoreload 84194 139912128725248 Watching for file changes with StatReloader
+INFO 2025-05-30 10:38:52,117 autoreload 84194 139912128725248 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:38:52,819 autoreload 84214 132833767108864 Watching for file changes with StatReloader
+INFO 2025-05-30 10:40:06,595 autoreload 84487 125094693241088 Watching for file changes with StatReloader
+INFO 2025-05-30 10:43:01,634 autoreload 84214 132833767108864 /home/medical_system/backend/ocs/views.py changed, reloading.
+INFO 2025-05-30 10:43:02,356 autoreload 84725 139829330743552 Watching for file changes with StatReloader
+INFO 2025-05-30 10:44:31,922 autoreload 84725 139829330743552 /home/medical_system/backend/ocs/views.py changed, reloading.
+INFO 2025-05-30 10:44:32,620 autoreload 84852 127671132811520 Watching for file changes with StatReloader
+INFO 2025-05-30 10:44:54,258 autoreload 84852 127671132811520 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:44:54,908 autoreload 84905 127707946971392 Watching for file changes with StatReloader
+INFO 2025-05-30 10:45:30,765 autoreload 84905 127707946971392 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:45:31,452 autoreload 85005 134378514718976 Watching for file changes with StatReloader
+INFO 2025-05-30 10:45:39,896 autoreload 85005 134378514718976 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:45:40,574 autoreload 85049 125695041773824 Watching for file changes with StatReloader
+INFO 2025-05-30 10:46:01,208 autoreload 85049 125695041773824 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 10:46:01,862 autoreload 85118 126890317758720 Watching for file changes with StatReloader
+INFO 2025-05-30 10:51:59,640 autoreload 87709 138046768083200 Watching for file changes with StatReloader
+INFO 2025-05-30 10:52:10,957 autoreload 87709 138046768083200 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:52:11,945 autoreload 87804 124481679917312 Watching for file changes with StatReloader
+INFO 2025-05-30 10:52:16,568 autoreload 87804 124481679917312 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 10:52:17,226 autoreload 87902 132044588355840 Watching for file changes with StatReloader
+INFO 2025-05-30 10:53:36,129 basehttp 87902 132044491323072 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:53:36,255 basehttp 87902 132044407436992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+ERROR 2025-05-30 10:53:36,526 exception 87902 132044399044288 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+INFO 2025-05-30 10:53:36,544 basehttp 87902 132044491323072 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 10:53:36,654 log 87902 132044399044288 Bad Request: /www.google.com:443
+WARNING 2025-05-30 10:53:36,656 basehttp 87902 132044399044288 "CONNECT www.google.com:443 HTTP/1.1" 400 76069
+INFO 2025-05-30 10:53:36,676 basehttp 87902 132044407436992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:30,378 basehttp 87902 132044491323072 "GET /api/samples/alias-mapping HTTP/1.1" 301 0
+INFO 2025-05-30 10:55:30,743 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:31,150 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:31,554 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:31,957 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:45,131 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:45,544 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:47,110 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:47,513 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:55,359 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:55:55,770 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:00,889 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:01,302 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:04,665 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:05,070 basehttp 87902 132044399044288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:11,832 basehttp 87902 132044491323072 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 10:56:12,239 basehttp 87902 132044491323072 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 10:57:11,367 log 87902 132044390651584 Not Found: /api/openmrs/patients/search/
+WARNING 2025-05-30 10:57:11,368 basehttp 87902 132044390651584 "GET /api/openmrs/patients/search/?q=10002T HTTP/1.1" 404 3853
+WARNING 2025-05-30 10:57:11,759 log 87902 132044390651584 Not Found: /favicon.ico
+WARNING 2025-05-30 10:57:11,760 basehttp 87902 132044390651584 "GET /favicon.ico HTTP/1.1" 404 3793
+INFO 2025-05-30 11:05:19,426 autoreload 90999 139408072593664 Watching for file changes with StatReloader
+INFO 2025-05-30 11:05:40,602 basehttp 90999 139407902373568 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:05:41,005 basehttp 90999 139407902373568 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-05-30 11:05:53,048 log 90999 139407902373568 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 11:05:53,049 basehttp 90999 139407902373568 "GET /api/integration/openmrs/patients/search/?query=jay HTTP/1.1" 400 43
+INFO 2025-05-30 11:07:49,907 autoreload 90999 139408072593664 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 11:07:50,575 autoreload 91594 129574897406208 Watching for file changes with StatReloader
+WARNING 2025-05-30 11:08:33,457 log 91594 129574729938624 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 11:08:33,458 basehttp 91594 129574729938624 "GET /api/integration/openmrs/patients/search/?query=jay HTTP/1.1" 400 43
+INFO 2025-05-30 11:22:58,568 autoreload 91594 129574897406208 /home/medical_system/backend/backend/settings.py changed, reloading.
+INFO 2025-05-30 11:22:59,284 autoreload 92800 139839937376512 Watching for file changes with StatReloader
+INFO 2025-05-30 11:23:10,192 basehttp 92800 139839768884928 "GET /api/integration/openmrs/patients/search/?q=kim HTTP/1.1" 200 24
+INFO 2025-05-30 11:23:13,352 basehttp 92800 139839768884928 "GET /api/integration/openmrs/patients/search/?q=jay HTTP/1.1" 200 178
+INFO 2025-05-30 11:24:29,044 autoreload 92800 139839937376512 /home/medical_system/backend/ocs/views.py changed, reloading.
+INFO 2025-05-30 11:24:29,705 autoreload 92990 129093663113472 Watching for file changes with StatReloader
+INFO 2025-05-30 11:26:24,036 basehttp 92990 129093492274880 "GET /api/integration/openmrs/patients/search/?q=jay HTTP/1.1" 200 178
+INFO 2025-05-30 11:26:32,227 basehttp 92990 129093492274880 "GET /api/integration/openmrs/patients/search/?q=jay HTTP/1.1" 200 178
+INFO 2025-05-30 11:27:21,090 basehttp 92990 129093475489472 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:27:21,495 basehttp 92990 129093475489472 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:29:17,729 basehttp 92990 129093467096768 "GET /api/integration/openmrs/patients/search/?q=jaymay+Lee HTTP/1.1" 200 178
+INFO 2025-05-30 11:30:13,455 basehttp 92990 129093475489472 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:30:13,862 basehttp 92990 129093475489472 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:30:54,764 basehttp 92990 129093492274880 "GET /api/integration/openmrs/patients/search/?q=jay HTTP/1.1" 200 178
+INFO 2025-05-30 11:30:56,959 basehttp 92990 129093467096768 "GET /api/integration/openmrs/patients/search/?q=jaymay+Lee HTTP/1.1" 200 178
+INFO 2025-05-30 11:31:31,418 basehttp 92990 129093450311360 code 400, message Bad request version ('À\x14À')
+ERROR 2025-05-30 11:31:31,418 basehttp 92990 129093450311360 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:31:31,934 basehttp 92990 129093450311360 code 400, message Bad request version ('À\x14À')
+ERROR 2025-05-30 11:31:31,934 basehttp 92990 129093450311360 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:31:32,457 basehttp 92990 129093450311360 code 400, message Bad request syntax ('\x16\x03\x01\x00u\x01\x00\x00q\x03\x03{\x17-Ï*')
+ERROR 2025-05-30 11:31:32,457 basehttp 92990 129093450311360 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:31:32,988 basehttp 92990 129093450311360 code 400, message Bad request version ('À\x14À')
+ERROR 2025-05-30 11:31:32,988 basehttp 92990 129093450311360 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:31:40,697 basehttp 92990 129093467096768 "GET /api/integration/openmrs/patients/search/?q=jaymay+Lee HTTP/1.1" 200 178
+INFO 2025-05-30 11:32:07,394 basehttp 92990 129093450311360 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:32:07,801 basehttp 92990 129093450311360 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 11:37:44,347 autoreload 92990 129093663113472 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 11:37:45,005 autoreload 94654 124535778316544 Watching for file changes with StatReloader
+WARNING 2025-05-30 11:39:24,288 log 94654 124535680530112 Not Found: /
+WARNING 2025-05-30 11:39:24,288 basehttp 94654 124535680530112 "GET / HTTP/1.1" 404 3742
+INFO 2025-05-30 11:39:27,288 basehttp 94654 124535680530112 - Broken pipe from ('198.235.24.138', 62786)
+WARNING 2025-05-30 11:40:29,455 log 94654 124535680530112 Not Found: /api/openmrs/patients/search/
+WARNING 2025-05-30 11:40:29,455 basehttp 94654 124535680530112 "GET /api/openmrs/patients/search/?q=10002T HTTP/1.1" 404 3853
+INFO 2025-05-30 11:40:36,390 basehttp 94654 124535588251328 "GET /api/integration/openmrs/patients/search/?q=jaymay+Lee HTTP/1.1" 200 178
+INFO 2025-05-30 11:41:19,940 basehttp 94654 124535571465920 "OPTIONS /api/integration/openmrs/patients/create/ HTTP/1.1" 200 0
+WARNING 2025-05-30 11:41:20,135 log 94654 124535571465920 Method Not Allowed: /api/integration/openmrs/patients/create/
+WARNING 2025-05-30 11:41:20,137 basehttp 94654 124535571465920 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 405 69
+WARNING 2025-05-30 11:41:23,260 log 94654 124535571465920 Method Not Allowed: /api/integration/openmrs/patients/create/
+WARNING 2025-05-30 11:41:23,261 basehttp 94654 124535571465920 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 405 69
+WARNING 2025-05-30 11:41:35,651 log 94654 124535571465920 Method Not Allowed: /api/integration/openmrs/patients/create/
+WARNING 2025-05-30 11:41:35,652 basehttp 94654 124535571465920 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 405 69
+WARNING 2025-05-30 11:41:42,733 log 94654 124535571465920 Method Not Allowed: /api/integration/openmrs/patients/create/
+WARNING 2025-05-30 11:41:42,734 basehttp 94654 124535571465920 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 405 69
+WARNING 2025-05-30 11:41:46,828 log 94654 124535571465920 Method Not Allowed: /api/integration/openmrs/patients/create/
+WARNING 2025-05-30 11:41:46,829 basehttp 94654 124535571465920 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 405 69
+WARNING 2025-05-30 11:42:15,524 log 94654 124535596644032 Bad Request: /api/integration/openmrs/patients/search/
+WARNING 2025-05-30 11:42:15,525 basehttp 94654 124535596644032 "GET /api/integration/openmrs/patients/search/ HTTP/1.1" 400 43
+WARNING 2025-05-30 11:42:15,958 log 94654 124535596644032 Not Found: /favicon.ico
+WARNING 2025-05-30 11:42:15,959 basehttp 94654 124535596644032 "GET /favicon.ico HTTP/1.1" 404 3793
+ERROR 2025-05-30 11:43:09,589 exception 94654 124535554680512 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-30 11:43:09,625 log 94654 124535554680512 Bad Request: /www.google.com:443
+WARNING 2025-05-30 11:43:09,626 basehttp 94654 124535554680512 "CONNECT www.google.com:443 HTTP/1.1" 400 76068
+INFO 2025-05-30 11:44:09,698 basehttp 94654 124535680530112 "GET /api/integration/openmrs/patients/search/?q=jay HTTP/1.1" 200 178
+INFO 2025-05-30 11:46:16,671 basehttp 94654 124535680530112 "GET /api/integration/openmrs/patients/search/?q=%EA%B8%B8%EB%8F%99 HTTP/1.1" 200 178
+INFO 2025-05-30 11:46:27,825 basehttp 94654 124535680530112 "GET /api/integration/openmrs/patients/search/?q=ase HTTP/1.1" 200 173
+INFO 2025-05-30 11:46:40,643 basehttp 94654 124535680530112 "GET /api/integration/openmrs/patients/search/?q=asek HTTP/1.1" 200 24
+INFO 2025-05-30 11:46:46,541 basehttp 94654 124535680530112 "GET /api/integration/openmrs/patients/search/?q=ase+k HTTP/1.1" 200 173
+INFO 2025-05-30 11:49:56,403 autoreload 94654 124535778316544 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 11:49:57,101 autoreload 95956 130686304588032 Watching for file changes with StatReloader
+INFO 2025-05-30 11:50:31,952 autoreload 95956 130686304588032 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 11:50:32,622 autoreload 96029 134666990379264 Watching for file changes with StatReloader
+INFO 2025-05-30 11:52:09,960 basehttp 96029 134666820515520 code 400, message Bad request version ('À\x13À')
+ERROR 2025-05-30 11:52:09,960 basehttp 96029 134666820515520 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:52:10,154 basehttp 96029 134666820515520 code 400, message Bad request version ('À(À$À\x14À')
+ERROR 2025-05-30 11:52:10,155 basehttp 96029 134666820515520 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-05-30 11:52:17,317 views 96029 134666820515520 환자 생성 요청 수신: POST /api/integration/openmrs/patients/create/
+INFO 2025-05-30 11:52:17,318 views 96029 134666820515520 요청 데이터: {'givenName': 'Junstone', 'familyName': 'Lee', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7353527373', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-05-30 11:52:17,318 views 96029 134666820515520 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'Junstone', 'familyName': 'Lee', 'middleName': '', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-30', 'addresses': [{'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': '', 'preferred': True}]}, 'identifiers': [{'identifier': 'P7353527373', 'identifierType': '05a29f94-c0ed-11e2-94be-8c13b969e334', 'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f'}]}
+ERROR 2025-05-30 11:52:18,039 openmrs_api 96029 134666820515520 환자 생성 실패: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8082/openmrs/ws/rest/v1/patient
+INFO 2025-05-30 11:52:18,041 views 96029 134666820515520 OpenMRS 응답: None
+ERROR 2025-05-30 11:52:18,041 views 96029 134666820515520 OpenMRS API가 None을 반환했습니다
+ERROR 2025-05-30 11:52:18,043 log 96029 134666820515520 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 11:52:18,045 basehttp 96029 134666820515520 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 47
+INFO 2025-05-30 11:54:27,138 autoreload 96029 134666990379264 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 11:54:27,955 autoreload 96531 127111654486272 Watching for file changes with StatReloader
+INFO 2025-05-30 11:54:42,596 autoreload 96531 127111654486272 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 11:54:43,249 autoreload 96588 129311474401536 Watching for file changes with StatReloader
+INFO 2025-05-30 11:55:08,491 views 96588 129311306675904 환자 생성 요청 수신: POST /api/integration/openmrs/patients/create/
+INFO 2025-05-30 11:55:08,492 views 96588 129311306675904 요청 데이터: {'givenName': 'junstone', 'familyName': 'Lee', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7370674523', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-05-30 11:55:08,607 views 96588 129311306675904 OpenMRS 세션 확인: admin
+INFO 2025-05-30 11:55:08,609 views 96588 129311306675904 간소화된 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'junstone', 'familyName': 'Lee', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-30'}, 'identifiers': [{'identifier': 'P7370674523', 'identifierType': 'OpenMRS ID'}]}
+ERROR 2025-05-30 11:55:08,916 openmrs_api 96588 129311306675904 환자 생성 실패: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8082/openmrs/ws/rest/v1/patient
+INFO 2025-05-30 11:55:08,916 views 96588 129311306675904 OpenMRS 응답: None
+ERROR 2025-05-30 11:55:08,917 views 96588 129311306675904 OpenMRS API가 None을 반환했습니다
+ERROR 2025-05-30 11:55:08,917 views 96588 129311306675904 OpenMRS API 호출 오류: name 'settings' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 224, in create_patient
+    openmrs_url = f"http://{settings.EXTERNAL_SERVICES['openmrs']['host']}:{settings.EXTERNAL_SERVICES['openmrs']['port']}/openmrs/ws/rest/v1/patient"
+                            ^^^^^^^^
+NameError: name 'settings' is not defined
+ERROR 2025-05-30 11:55:08,921 log 96588 129311306675904 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 11:55:08,922 basehttp 96588 129311306675904 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 62
+ERROR 2025-05-30 11:58:15,468 exception 96588 129311289890496 Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'www.google.com:443'. You may need to add 'www.google.com' to ALLOWED_HOSTS.
+WARNING 2025-05-30 11:58:15,502 log 96588 129311289890496 Bad Request: /www.google.com:443
+WARNING 2025-05-30 11:58:15,503 basehttp 96588 129311289890496 "CONNECT www.google.com:443 HTTP/1.1" 400 76067
+INFO 2025-05-30 12:00:48,800 basehttp 96588 129311289890496 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:00:49,203 basehttp 96588 129311289890496 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:03:41,178 autoreload 96588 129311474401536 /home/medical_system/backend/ocs/views.py changed, reloading.
+INFO 2025-05-30 12:03:41,902 autoreload 97711 127092001767680 Watching for file changes with StatReloader
+INFO 2025-05-30 12:03:59,331 autoreload 97711 127092001767680 /home/medical_system/backend/ocs/urls.py changed, reloading.
+INFO 2025-05-30 12:03:59,941 autoreload 97785 140487863705856 Watching for file changes with StatReloader
+INFO 2025-05-30 12:04:12,453 autoreload 97785 140487863705856 /home/medical_system/backend/ocs/models.py changed, reloading.
+INFO 2025-05-30 12:04:13,096 autoreload 97838 135876742603008 Watching for file changes with StatReloader
+INFO 2025-05-30 12:04:27,645 autoreload 97838 135876742603008 /home/medical_system/backend/ocs/serializers.py changed, reloading.
+INFO 2025-05-30 12:04:28,304 autoreload 97910 136521262821632 Watching for file changes with StatReloader
+INFO 2025-05-30 12:04:51,700 basehttp 97910 136521097148096 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:04:52,111 basehttp 97910 136521097148096 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:05:01,543 basehttp 97910 136521080362688 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:05:01,950 basehttp 97910 136521080362688 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-05-30 12:05:14,826 views 97910 136521071969984 환자 생성 요청 수신: POST /api/integration/openmrs/patients/create/
+INFO 2025-05-30 12:05:14,827 views 97910 136521071969984 요청 데이터: {'givenName': 'junstone', 'familyName': 'lee', 'gender': 'M', 'birthdate': '2025-05-15', 'identifier': 'P7431303223', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-05-30 12:05:14,955 views 97910 136521071969984 OpenMRS 세션 확인: admin
+INFO 2025-05-30 12:05:14,956 views 97910 136521071969984 간소화된 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'junstone', 'familyName': 'lee', 'preferred': True}], 'gender': 'M', 'birthdate': '2025-05-15'}, 'identifiers': [{'identifier': 'P7431303223', 'identifierType': 'OpenMRS ID'}]}
+ERROR 2025-05-30 12:05:15,137 openmrs_api 97910 136521071969984 환자 생성 실패: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8082/openmrs/ws/rest/v1/patient
+INFO 2025-05-30 12:05:15,137 views 97910 136521071969984 OpenMRS 응답: None
+ERROR 2025-05-30 12:05:15,138 views 97910 136521071969984 OpenMRS API가 None을 반환했습니다
+ERROR 2025-05-30 12:05:15,138 views 97910 136521071969984 OpenMRS API 호출 오류: name 'settings' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 224, in create_patient
+    openmrs_url = f"http://{settings.EXTERNAL_SERVICES['openmrs']['host']}:{settings.EXTERNAL_SERVICES['openmrs']['port']}/openmrs/ws/rest/v1/patient"
+                            ^^^^^^^^
+NameError: name 'settings' is not defined
+ERROR 2025-05-30 12:05:15,140 log 97910 136521071969984 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:05:15,141 basehttp 97910 136521071969984 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 62
+INFO 2025-05-30 12:06:32,038 basehttp 97910 136521055184576 "GET /api/integration/openmrs/patients/search?q=jaymay%20Lee HTTP/1.1" 301 0
+INFO 2025-05-30 12:06:32,358 basehttp 97910 136520702883520 "GET /api/integration/openmrs/patients/search/?q=jaymay%20Lee HTTP/1.1" 200 178
+INFO 2025-05-30 12:07:05,981 autoreload 97910 136521262821632 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 12:07:06,658 autoreload 98283 129364882092288 Watching for file changes with StatReloader
+INFO 2025-05-30 12:07:51,771 views 98283 129364712748736 환자 생성 요청: {'givenName': 'junstone', 'familyName': 'lee', 'gender': 'M', 'birthdate': '2025-05-15', 'identifier': 'P7431303223', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+ERROR 2025-05-30 12:07:51,783 views 98283 129364712748736 환자 생성 실패: name 'date' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 165, in create_patient
+    today = date.today()
+            ^^^^
+NameError: name 'date' is not defined. Did you mean: 'data'?
+ERROR 2025-05-30 12:07:51,793 log 98283 129364712748736 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:07:51,800 basehttp 98283 129364712748736 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 53
+WARNING 2025-05-30 12:08:16,864 log 98283 129364712748736 Not Found: /api/integration/check-openmrs-status/
+WARNING 2025-05-30 12:08:16,865 basehttp 98283 129364712748736 "GET /api/integration/check-openmrs-status/ HTTP/1.1" 404 7385
+INFO 2025-05-30 12:08:17,053 views 98283 129364712748736 환자 생성 요청: {'givenName': 'JunStone', 'familyName': 'Lee', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7449601647', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+ERROR 2025-05-30 12:08:17,054 views 98283 129364712748736 환자 생성 실패: name 'date' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 165, in create_patient
+    today = date.today()
+            ^^^^
+NameError: name 'date' is not defined. Did you mean: 'data'?
+ERROR 2025-05-30 12:08:17,055 log 98283 129364712748736 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:08:17,056 basehttp 98283 129364712748736 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 53
+INFO 2025-05-30 12:09:27,233 autoreload 98283 129364882092288 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 12:09:28,240 autoreload 98820 125681196544256 Watching for file changes with StatReloader
+INFO 2025-05-30 12:09:35,686 autoreload 98820 125681196544256 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-05-30 12:09:36,350 autoreload 98863 124441172381952 Watching for file changes with StatReloader
+WARNING 2025-05-30 12:10:46,587 log 98863 124441006700224 Not Found: /api//integration/openmrs/patients/search
+WARNING 2025-05-30 12:10:46,588 basehttp 98863 124441006700224 "GET /api//integration/openmrs/patients/search?q=jaymay%20Lee HTTP/1.1" 404 3895
+WARNING 2025-05-30 12:13:02,362 log 98863 124441006700224 Not Found: /api//integration/openmrs/patients/search
+WARNING 2025-05-30 12:13:02,363 basehttp 98863 124441006700224 "GET /api//integration/openmrs/patients/search?q=jaymay%20Lee HTTP/1.1" 404 3895
+WARNING 2025-05-30 12:13:07,003 log 98863 124441006700224 Not Found: /api//integration/openmrs/patients/search
+WARNING 2025-05-30 12:13:07,003 basehttp 98863 124441006700224 "GET /api//integration/openmrs/patients/search?q=jaymay%20Lee HTTP/1.1" 404 3895
+INFO 2025-05-30 12:13:40,048 basehttp 98863 124440989914816 "GET /api/integration/openmrs/patients/search/?q=jaymay%20Lee HTTP/1.1" 200 178
+INFO 2025-05-30 12:14:56,232 basehttp 98863 124441006700224 "GET /api/integration/openmrs/patients/search?q=jaymay%20Lee HTTP/1.1" 301 0
+INFO 2025-05-30 12:14:56,779 basehttp 98863 124440998307520 "GET /api/integration/openmrs/patients/search/?q=jaymay%20Lee HTTP/1.1" 200 178
+WARNING 2025-05-30 12:14:58,952 log 98863 124440998307520 Not Found: /api/logs/
+WARNING 2025-05-30 12:14:58,952 basehttp 98863 124440998307520 "GET /api/logs/?patient_id=048df775-7c93-44a8-afff-ecbeb0f57922 HTTP/1.1" 404 3951
+WARNING 2025-05-30 12:14:59,312 log 98863 124440998307520 Not Found: /api/logs/
+WARNING 2025-05-30 12:14:59,313 basehttp 98863 124440998307520 "GET /api/logs/?patient_id=048df775-7c93-44a8-afff-ecbeb0f57922 HTTP/1.1" 404 3951
+WARNING 2025-05-30 12:16:59,357 log 98863 124440763426496 Not Found: /
+WARNING 2025-05-30 12:16:59,357 basehttp 98863 124440763426496 "GET / HTTP/1.1" 404 3739
+ERROR 2025-05-30 12:17:30,567 log 98863 124440746641088 Internal Server Error: /api/integration/check-openmrs-status/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 291, in check_openmrs_status
+    config = settings.EXTERNAL_SERVICES['openmrs']
+             ^^^^^^^^
+NameError: name 'settings' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/medical_system/backend/medical_integration/views.py", line 315, in check_openmrs_status
+    except requests.exceptions.ConnectionError:
+           ^^^^^^^^
+NameError: name 'requests' is not defined. Did you mean: 'request'?
+ERROR 2025-05-30 12:17:30,571 basehttp 98863 124440746641088 "GET /api/integration/check-openmrs-status/ HTTP/1.1" 500 110051
+INFO 2025-05-30 12:17:30,940 views 98863 124440746641088 환자 생성 요청: {'givenName': 'junstone', 'familyName': 'lee', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7504868015', 'address': {'address1': '', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+ERROR 2025-05-30 12:17:30,943 views 98863 124440746641088 환자 생성 실패: name 'date' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 165, in create_patient
+    today = date.today()
+            ^^^^
+NameError: name 'date' is not defined. Did you mean: 'data'?
+ERROR 2025-05-30 12:17:30,945 log 98863 124440746641088 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:17:30,946 basehttp 98863 124440746641088 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 53
+INFO 2025-05-30 12:18:36,685 views 98863 124440746641088 환자 생성 요청: {'givenName': 'stone', 'familyName': 'jun', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7511578409'}
+ERROR 2025-05-30 12:18:36,686 views 98863 124440746641088 환자 생성 실패: name 'date' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 165, in create_patient
+    today = date.today()
+            ^^^^
+NameError: name 'date' is not defined. Did you mean: 'data'?
+ERROR 2025-05-30 12:18:36,687 log 98863 124440746641088 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:18:36,688 basehttp 98863 124440746641088 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 53
+INFO 2025-05-30 12:18:39,051 views 98863 124440746641088 환자 생성 요청: {'givenName': 'stone', 'familyName': 'jun', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7511578409'}
+ERROR 2025-05-30 12:18:39,051 views 98863 124440746641088 환자 생성 실패: name 'date' is not defined
+Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/views.py", line 165, in create_patient
+    today = date.today()
+            ^^^^
+NameError: name 'date' is not defined. Did you mean: 'data'?
+ERROR 2025-05-30 12:18:39,053 log 98863 124440746641088 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:18:39,054 basehttp 98863 124440746641088 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 53
+INFO 2025-05-30 12:19:20,451 autoreload 98863 124441172381952 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-05-30 12:19:21,117 autoreload 100283 139656767987968 Watching for file changes with StatReloader
+INFO 2025-05-30 12:19:24,723 views 100283 139656599434944 환자 생성 요청: {'givenName': 'stone', 'familyName': 'jun', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7511578409'}
+INFO 2025-05-30 12:19:24,821 views 100283 139656599434944 OpenMRS 세션 확인: admin
+INFO 2025-05-30 12:19:24,822 views 100283 139656599434944 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'stone', 'familyName': 'jun', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-30'}}
+INFO 2025-05-30 12:19:24,882 views 100283 139656599434944 OpenMRS 응답 상태: 500
+ERROR 2025-05-30 12:19:24,882 views 100283 139656599434944 OpenMRS 환자 생성 실패: 500
+ERROR 2025-05-30 12:19:24,883 views 100283 139656599434944 응답 내용: <!doctype html><html lang="en"><head><title>HTTP Status 500 – Internal Server Error</title><style type="text/css">H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}</style></head><body><h1>HTTP Status 500 – Internal Server Error</h1><hr class="line" /><p><b>Type</b> Exception Report</p><p><b>Message</b> Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers</p><p><b>Description</b> The server encountered an unexpected condition that prevented it from fulfilling the request.</p><p><b>Exception</b> <pre>org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Root Cause</b> <pre>org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResource.setConvertedProperties(BaseDelegatingResource.java:701)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.getPatient(PatientResource1_8.java:242)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.create(PatientResource1_8.java:222)
+	org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController.create(MainResourceController.java:91)
+	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	java.lang.reflect.Method.invoke(Method.java:498)
+	org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:190)
+	org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:138)
+	org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:105)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:878)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:792)
+	org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1040)
+	org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:943)
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Note</b> The full stack trace of the root cause is available in the server logs.</p><hr class="line" /><h3>Apache Tomcat/7.0.94</h3></body></html>
+ERROR 2025-05-30 12:19:24,885 log 100283 139656599434944 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:19:24,886 basehttp 100283 139656599434944 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 9240
+INFO 2025-05-30 12:19:34,684 views 100283 139656599434944 환자 생성 요청: {'givenName': 'stone', 'familyName': 'jun', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7517372731'}
+INFO 2025-05-30 12:19:34,720 views 100283 139656599434944 OpenMRS 세션 확인: admin
+INFO 2025-05-30 12:19:34,721 views 100283 139656599434944 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'stone', 'familyName': 'jun', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-30'}}
+INFO 2025-05-30 12:19:34,758 views 100283 139656599434944 OpenMRS 응답 상태: 500
+ERROR 2025-05-30 12:19:34,758 views 100283 139656599434944 OpenMRS 환자 생성 실패: 500
+ERROR 2025-05-30 12:19:34,758 views 100283 139656599434944 응답 내용: <!doctype html><html lang="en"><head><title>HTTP Status 500 – Internal Server Error</title><style type="text/css">H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}</style></head><body><h1>HTTP Status 500 – Internal Server Error</h1><hr class="line" /><p><b>Type</b> Exception Report</p><p><b>Message</b> Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers</p><p><b>Description</b> The server encountered an unexpected condition that prevented it from fulfilling the request.</p><p><b>Exception</b> <pre>org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Root Cause</b> <pre>org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResource.setConvertedProperties(BaseDelegatingResource.java:701)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.getPatient(PatientResource1_8.java:242)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.create(PatientResource1_8.java:222)
+	org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController.create(MainResourceController.java:91)
+	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	java.lang.reflect.Method.invoke(Method.java:498)
+	org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:190)
+	org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:138)
+	org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:105)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:878)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:792)
+	org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1040)
+	org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:943)
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Note</b> The full stack trace of the root cause is available in the server logs.</p><hr class="line" /><h3>Apache Tomcat/7.0.94</h3></body></html>
+ERROR 2025-05-30 12:19:34,760 log 100283 139656599434944 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:19:34,761 basehttp 100283 139656599434944 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 9240
+INFO 2025-05-30 12:19:48,278 views 100283 139656599434944 환자 생성 요청: {'givenName': 'stone', 'familyName': 'jun', 'gender': 'M', 'birthdate': '1985-03-30', 'identifier': 'P7517372731'}
+INFO 2025-05-30 12:19:48,314 views 100283 139656599434944 OpenMRS 세션 확인: admin
+INFO 2025-05-30 12:19:48,314 views 100283 139656599434944 OpenMRS 전송 데이터: {'person': {'names': [{'givenName': 'stone', 'familyName': 'jun', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-30'}}
+INFO 2025-05-30 12:19:48,352 views 100283 139656599434944 OpenMRS 응답 상태: 500
+ERROR 2025-05-30 12:19:48,352 views 100283 139656599434944 OpenMRS 환자 생성 실패: 500
+ERROR 2025-05-30 12:19:48,353 views 100283 139656599434944 응답 내용: <!doctype html><html lang="en"><head><title>HTTP Status 500 – Internal Server Error</title><style type="text/css">H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}</style></head><body><h1>HTTP Status 500 – Internal Server Error</h1><hr class="line" /><p><b>Type</b> Exception Report</p><p><b>Message</b> Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers</p><p><b>Description</b> The server encountered an unexpected condition that prevented it from fulfilling the request.</p><p><b>Exception</b> <pre>org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Root Cause</b> <pre>org.openmrs.module.webservices.rest.web.response.ConversionException: Some required properties are missing: identifiers
+	org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResource.setConvertedProperties(BaseDelegatingResource.java:701)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.getPatient(PatientResource1_8.java:242)
+	org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs1_8.PatientResource1_8.create(PatientResource1_8.java:222)
+	org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceController.create(MainResourceController.java:91)
+	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	java.lang.reflect.Method.invoke(Method.java:498)
+	org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:190)
+	org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:138)
+	org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:105)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:878)
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:792)
+	org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1040)
+	org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:943)
+	org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:650)
+	org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	javax.servlet.http.HttpServlet.service(HttpServlet.java:731)
+	org.openmrs.module.web.filter.ForcePasswordChangeFilter.doFilter(ForcePasswordChangeFilter.java:60)
+	org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:73)
+	org.openmrs.web.filter.GZIPFilter.doFilterInternal(GZIPFilter.java:65)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.AuthorizationFilter.doFilter(AuthorizationFilter.java:105)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.webservices.rest.web.filter.ContentTypeFilter.doFilter(ContentTypeFilter.java:64)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.springframework.web.filter.ShallowEtagHeaderFilter.doFilterInternal(ShallowEtagHeaderFilter.java:106)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:93)
+	org.openmrs.module.owa.filter.OwaFilter.doFilter(OwaFilter.java:71)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.spa.filter.SpaFilter.doFilter(SpaFilter.java:53)
+	org.openmrs.module.web.filter.ModuleFilterChain.doFilter(ModuleFilterChain.java:71)
+	org.openmrs.module.web.filter.ModuleFilter.doFilter(ModuleFilter.java:57)
+	org.openmrs.web.filter.OpenmrsFilter.doFilterInternal(OpenmrsFilter.java:105)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.springframework.orm.hibernate5.support.OpenSessionInViewFilter.doFilterInternal(OpenSessionInViewFilter.java:156)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.openmrs.web.filter.StartupFilter.doFilter(StartupFilter.java:108)
+	org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+</pre></p><p><b>Note</b> The full stack trace of the root cause is available in the server logs.</p><hr class="line" /><h3>Apache Tomcat/7.0.94</h3></body></html>
+ERROR 2025-05-30 12:19:48,359 log 100283 139656599434944 Internal Server Error: /api/integration/openmrs/patients/create/
+ERROR 2025-05-30 12:19:48,360 basehttp 100283 139656599434944 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 500 9240
+WARNING 2025-05-30 12:20:42,108 log 100283 139656582649536 Not Found: /api/logs/
+WARNING 2025-05-30 12:20:42,109 basehttp 100283 139656582649536 "GET /api/logs/?patient_id=048df775-7c93-44a8-afff-ecbeb0f57922 HTTP/1.1" 404 3951

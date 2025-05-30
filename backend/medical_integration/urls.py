@@ -7,11 +7,12 @@ urlpatterns = [
     # 시스템 상태
     path('health/', views.health_check, name='health_check'),
     path('test-connections/', views.test_all_connections, name='test_connections'),
+    path('check-openmrs-status/', views.check_openmrs_status, name='check_openmrs_status'),  # 👈 추가
     
     # OpenMRS 환자 관리
     path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
-    path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
+    path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     
     # Orthanc 환자 관리
     path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),

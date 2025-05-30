@@ -38,7 +38,7 @@ function App() {
         <Route path="/samples" element={<SampleListPage />} />
         <Route path="/result/new" element={<ResultInputForm />} />
         <Route path="/tests" element={<OpenMRSPatientList />} />
-        <Route path="/ocs" element={<OCSLogPage />} />
+        <Route path="/ocs/log" element={<OCSLogPage />} />
 
         {/* 예외 경로는 메인으로 */}
         <Route path="*" element={<Navigate to="/main" />} />

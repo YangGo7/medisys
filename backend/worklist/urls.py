@@ -21,4 +21,5 @@ urlpatterns = [
     # 워크리스트 API
     path('ris/worklist/', views.get_ris_worklist, name='ris-worklist'),
     path('emr/completed-studies/', views.get_emr_completed_studies, name='emr-completed-studies'),
+    path('create-from-emr/', views.create_study_request_from_emr, name='create_from_emr'),
 ]
