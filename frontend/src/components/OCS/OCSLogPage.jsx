@@ -31,15 +31,14 @@ const OCSLogPage = () => {
     setOpenMrsPatientData(null);
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/openmrs/patients/search/?q=${query}`);
-      });
+        const response = await axios.get(`${API_BASE_URL}/openmrs/patients/search/?q=${openMrsPatientId}`);
 
-      if (response.data.results && response.data.results.length > 0) {
-        setOpenMrsPatientData(response.data.results[0]);
-      } else {
-        setOpenMrsPatientError('해당 ID의 OpenMRS 환자를 찾을 수 없습니다.');
-      }
-    } catch (err) {
+        if (response.data.results && response.data.results.length > 0) {
+          setOpenMrsPatientData(response.data.results[0]);
+        } else {
+          setOpenMrsPatientError('해당 ID의 OpenMRS 환자를 찾을 수 없습니다.');
+        }
+      } catch (err) {
       console.error('❗ OpenMRS 환자 조회 실패:', err);
       if (err.response) {
         setOpenMrsPatientError(
