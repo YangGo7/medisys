@@ -2,17 +2,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import logging
-from datetime import datetime, date  # 👈 date import 추가!
+from datetime import datetime
 from .openmrs_api import OpenMRSAPI
 from .orthanc_api import OrthancAPI
 from .models import PatientMapping
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.conf import settings
-import requests
-from requests.auth import HTTPBasicAuth
-import uuid
 
+logger = logging.getLogger('medical_integration')
 
 @api_view(['GET'])
 def health_check(request):
@@ -62,7 +59,7 @@ def test_all_connections(request):
 @api_view(['GET'])
 def search_patients(request):
     """OpenMRS에서 환자 검색"""
-    query = request.GET.get('q', '')  # 수정된 부분
+    query = request.GET.get('q', '')
     if not query:
         return Response({'error': '검색어(q)가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -72,19 +69,32 @@ def search_patients(request):
     if results is None:
         return Response({'error': '환자 검색에 실패했습니다'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # 결과를 더 간단한 형식으로 변환
+    # OpenMRS의 실제 응답 구조에 맞게 파싱
     patients = []
     for result in results.get('results', []):
+        # OpenMRS는 보통 display 필드에 환자 이름이 들어있음
+        display_name = result.get('display', '')
+        
+        # person 객체에서 세부 정보 추출
+        person_data = result.get('person', {})
+        
+        # 첫 번째 식별자 가져오기
+        identifiers = result.get('identifiers', [])
+        identifier = identifiers[0].get('identifier') if identifiers else None
+        
         patient = {
             'uuid': result.get('uuid'),
-            'identifier': next((id.get('identifier') for id in result.get('identifiers', [])), None),
-            'name': f"{result.get('person', {}).get('preferredName', {}).get('givenName', '')} {result.get('person', {}).get('preferredName', {}).get('familyName', '')}",
-            'gender': result.get('person', {}).get('gender'),
-            'birthdate': result.get('person', {}).get('birthdate'),
-            'age': result.get('person', {}).get('age')
+            'identifier': identifier,
+            'name': display_name,
+            'display': display_name,  # ChartHeader.jsx에서 사용하는 필드
+            'gender': person_data.get('gender'),
+            'birthdate': person_data.get('birthdate'),
+            'age': person_data.get('age'),
+            'identifiers': identifiers
         }
         patients.append(patient)
 
+    logger.info(f"환자 검색 결과: {len(patients)}명")
     return Response({
         'results': patients,
         'total': len(patients)
@@ -145,258 +155,78 @@ def get_patient(request, uuid):
     
     return Response(formatted_patient)
 
-logger = logging.getLogger('medical_integration')
-
 @api_view(['POST'])
 def create_patient(request):
     """OpenMRS에 새 환자 생성"""
+    api = OpenMRSAPI()
     
+    # 요청에서 환자 데이터 구성
     try:
         data = request.data
-        logger.info(f"환자 생성 요청: {data}")
         
         # 필수 필드 검증
         required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
         for field in required_fields:
-            if field not in data or not data[field]:
-                logger.error(f'필수 필드 누락: {field}')
+            if field not in data:
                 return Response({'error': f'필수 필드가 누락되었습니다: {field}'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # 생년월일 유효성 검사
-        try:
-            birth_date = datetime.strptime(data['birthdate'], '%Y-%m-%d').date()
-            today = date.today()
-            
-            if birth_date > today:
-                return Response({
-                    'error': f'생년월일은 오늘({today}) 이전이어야 합니다. 입력된 날짜: {birth_date}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            if birth_date < date(1900, 1, 1):
-                return Response({
-                    'error': '생년월일은 1900년 이후여야 합니다.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-                
-        except ValueError:
-            return Response({
-                'error': '올바른 날짜 형식(YYYY-MM-DD)으로 입력해주세요.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # OpenMRS 연결 확인
-        try:
-            config = settings.EXTERNAL_SERVICES['openmrs']
-            base_url = f"http://{config['host']}:{config['port']}/openmrs"
-            auth = HTTPBasicAuth(config['username'], config['password'])
-            
-            # 세션 확인
-            session_response = requests.get(
-                f"{base_url}/ws/rest/v1/session",
-                auth=auth,
-                timeout=10
-            )
-            
-            if session_response.status_code != 200:
-                logger.error(f"OpenMRS 세션 확인 실패: {session_response.status_code}")
-                return Response({
-                    'error': 'OpenMRS 서버에 연결할 수 없습니다.'
-                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            
-            session_data = session_response.json()
-            logger.info(f"OpenMRS 세션 확인: {session_data.get('user', {}).get('display', 'Unknown')}")
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"OpenMRS 연결 오류: {e}")
-            return Response({
-                'error': 'OpenMRS 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.'
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        
-        # 환자 데이터 준비 (최소한의 정보만)
+        # 환자 데이터 객체 구성
         patient_data = {
-            "person": {
-                "names": [
+            'person': {
+                'names': [
                     {
-                        "givenName": data['givenName'].strip(),
-                        "familyName": data['familyName'].strip(),
-                        "preferred": True
+                        'givenName': data['givenName'],
+                        'familyName': data['familyName'],
+                        'middleName': data.get('middleName', ''),
+                        'preferred': True
                     }
                 ],
-                "gender": data['gender'],
-                "birthdate": data['birthdate']
-            }
+                'gender': data['gender'],
+                'birthdate': data['birthdate'],
+                'addresses': []
+            },
+            'identifiers': [
+                {
+                    'identifier': data.get('identifier', f'GEN-{datetime.now().strftime("%Y%m%d%H%M%S")}'),
+                    'identifierType': '05a29f94-c0ed-11e2-94be-8c13b969e334',  # 기본 식별자 유형 UUID
+                    'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f'  # 기본 위치 UUID
+                }
+            ]
         }
         
-        # 중간 이름이 있으면 추가
-        if data.get('middleName', '').strip():
-            patient_data["person"]["names"][0]["middleName"] = data['middleName'].strip()
-        
-        logger.info(f"OpenMRS 전송 데이터: {patient_data}")
-        
-        # 환자 생성 API 호출
-        try:
-            patient_response = requests.post(
-                f"{base_url}/ws/rest/v1/patient",
-                json=patient_data,
-                auth=auth,
-                headers={'Content-Type': 'application/json'},
-                timeout=30
-            )
-            
-            logger.info(f"OpenMRS 응답 상태: {patient_response.status_code}")
-            
-            if patient_response.status_code == 201:
-                result = patient_response.json()
-                logger.info("환자 생성 성공!")
-                
-                return Response({
-                    'success': True,
-                    'patient': {
-                        'uuid': result.get('uuid'),
-                        'identifiers': [
-                            {
-                                'identifier': id.get('identifier'),
-                                'identifierType': id.get('identifierType', {}).get('display', 'OpenMRS ID')
-                            } for id in result.get('identifiers', [])
-                        ]
-                    }
-                }, status=status.HTTP_201_CREATED)
-            
-            else:
-                # 오류 응답 파싱
-                logger.error(f"OpenMRS 환자 생성 실패: {patient_response.status_code}")
-                logger.error(f"응답 내용: {patient_response.text}")
-                
-                try:
-                    error_data = patient_response.json()
-                    error_message = error_data.get('error', {}).get('message', patient_response.text)
-                except:
-                    error_message = patient_response.text
-                
-                return Response({
-                    'error': f'OpenMRS 환자 생성 실패: {error_message}'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"OpenMRS 요청 오류: {str(e)}")
-            return Response({
-                'error': f'OpenMRS 서버 요청 실패: {str(e)}'
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        
-    except Exception as e:
-        logger.error(f"환자 생성 실패: {str(e)}", exc_info=True)
-        return Response({'error': f'서버 오류: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# 추가: OpenMRS 상태 확인 API
-@api_view(['GET'])
-def check_openmrs_status(request):
-    """OpenMRS 서버 연결 상태 확인"""
-    try:
-        config = settings.EXTERNAL_SERVICES['openmrs']
-        base_url = f"http://{config['host']}:{config['port']}/openmrs"
-        
-        response = requests.get(
-            f"{base_url}/ws/rest/v1/session",
-            auth=HTTPBasicAuth(config['username'], config['password']),
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            session_data = response.json()
-            return Response({
-                'status': 'connected',
-                'openmrs_version': session_data.get('version', 'Unknown'),
-                'user': session_data.get('user', {}).get('display', 'Unknown'),
-                'message': 'OpenMRS 서버 연결 정상'
+        # 주소 정보가 있으면 추가
+        if 'address' in data:
+            patient_data['person']['addresses'].append({
+                'address1': data['address'].get('address1', ''),
+                'address2': data['address'].get('address2', ''),
+                'cityVillage': data['address'].get('cityVillage', ''),
+                'stateProvince': data['address'].get('stateProvince', ''),
+                'country': data['address'].get('country', ''),
+                'postalCode': data['address'].get('postalCode', ''),
+                'preferred': True
             })
-        else:
-            return Response({
-                'status': 'error',
-                'message': f'OpenMRS 연결 실패: HTTP {response.status_code}',
-                'details': response.text
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            
-    except requests.exceptions.ConnectionError:
+        
+        # 환자 생성
+        result = api.create_patient(patient_data)
+        if result is None:
+            return Response({'error': '환자 생성에 실패했습니다'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
         return Response({
-            'status': 'offline',
-            'message': 'OpenMRS 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.'
-        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': f'오류 발생: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# 추가: OpenMRS 연결 및 설정 테스트 함수
-@api_view(['GET'])
-def test_openmrs_configuration(request):
-    """OpenMRS 설정 및 연결 상태 상세 테스트"""
-    import requests
-    from requests.auth import HTTPBasicAuth
-    from django.conf import settings
-    
-    try:
-        config = settings.EXTERNAL_SERVICES['openmrs']
-        base_url = f"http://{config['host']}:{config['port']}/openmrs"
-        
-        results = {
-            'config': config,
-            'base_url': base_url,
-            'tests': {}
-        }
-        
-        auth = HTTPBasicAuth(config['username'], config['password'])
-        
-        # 1. 기본 연결 테스트
-        try:
-            response = requests.get(f"{base_url}/ws/rest/v1/session", auth=auth, timeout=10)
-            results['tests']['session'] = {
-                'status': response.status_code,
-                'success': response.status_code == 200,
-                'data': response.json() if response.status_code == 200 else response.text
+            'success': True,
+            'patient': {
+                'uuid': result.get('uuid'),
+                'identifiers': [
+                    {
+                        'identifier': id.get('identifier'),
+                        'identifierType': id.get('identifierType', {}).get('display')
+                    } for id in result.get('identifiers', [])
+                ]
             }
-        except Exception as e:
-            results['tests']['session'] = {'success': False, 'error': str(e)}
-        
-        # 2. 환자 목록 테스트
-        try:
-            response = requests.get(f"{base_url}/ws/rest/v1/patient", auth=auth, timeout=10)
-            results['tests']['patient_list'] = {
-                'status': response.status_code,
-                'success': response.status_code == 200,
-                'data': response.json() if response.status_code == 200 else response.text[:500]
-            }
-        except Exception as e:
-            results['tests']['patient_list'] = {'success': False, 'error': str(e)}
-        
-        # 3. 식별자 타입 조회
-        try:
-            response = requests.get(f"{base_url}/ws/rest/v1/patientidentifiertype", auth=auth, timeout=10)
-            results['tests']['identifier_types'] = {
-                'status': response.status_code,
-                'success': response.status_code == 200,
-                'data': response.json() if response.status_code == 200 else response.text[:500]
-            }
-        except Exception as e:
-            results['tests']['identifier_types'] = {'success': False, 'error': str(e)}
-        
-        # 4. 위치 정보 조회
-        try:
-            response = requests.get(f"{base_url}/ws/rest/v1/location", auth=auth, timeout=10)
-            results['tests']['locations'] = {
-                'status': response.status_code,
-                'success': response.status_code == 200,
-                'data': response.json() if response.status_code == 200 else response.text[:500]
-            }
-        except Exception as e:
-            results['tests']['locations'] = {'success': False, 'error': str(e)}
-        
-        return Response(results)
+        }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
-        return Response({
-            'error': f'설정 테스트 실패: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"환자 생성 실패: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 환자 매핑 관련 API
 

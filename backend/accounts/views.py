@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from .models import Notice
+from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from .models import UserProfile
 
