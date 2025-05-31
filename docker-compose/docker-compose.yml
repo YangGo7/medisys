@@ -114,6 +114,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_DATABASE: medical_system  # 기본 데이터베이스 추가
     ports:
       - "27017:27017"
     volumes:
@@ -122,6 +123,13 @@ services:
       medical-network:
         ipv4_address: 172.20.0.40
     restart: unless-stopped
+    # 헬스체크 추가
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # phpMyAdmin
   phpmyadmin:
@@ -167,9 +175,43 @@ services:
       retries: 3
       start_period: 30s
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    hostname: mongo-express
+    depends_on:
+      mongodb:
+        condition: service_healthy  # MongoDB가 완전히 시작된 후에 실행
+    environment:
+      # 기본 설정
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
+      ME_CONFIG_MONGODB_SERVER: mongodb-server
+      ME_CONFIG_MONGODB_PORT: 27017
+      
+      # 추가 보안 설정
+      ME_CONFIG_BASICAUTH_USERNAME: webadmin      # 웹 접속용 계정
+      ME_CONFIG_BASICAUTH_PASSWORD: webpassword   # 웹 접속용 비밀번호
+      
+      # MongoDB 연결 URL (명시적 설정)
+      ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongodb-server:27017/
+      
+      # 기타 설정
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_OPTIONS_EDITORTHEME: "ambiance"
+      
+    ports:
+      - "8081:8081"
+    networks:
+      medical-network:
+        ipv4_address: 172.20.0.41
+    restart: unless-stopped
+    # 시작 지연 추가
+    command: sh -c "sleep 10 && tini -- /docker-entrypoint.sh mongo-express"
+
 networks:
   medical-network:
-    external: true
+   external: true
 
 volumes:
   openmrs_mysql_data:
