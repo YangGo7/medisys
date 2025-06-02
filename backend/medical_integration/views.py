@@ -8,6 +8,7 @@ from .orthanc_api import OrthancAPI
 from .models import PatientMapping
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger('medical_integration')
 
@@ -155,20 +156,44 @@ def get_patient(request, uuid):
     
     return Response(formatted_patient)
 
-@api_view(['POST'])
+@csrf_exempt  # CSRF 보호 비활성화 (API용)
+@api_view(['POST', 'OPTIONS'])  # POST와 OPTIONS 메소드 명시적 허용
 def create_patient(request):
-    """OpenMRS에 새 환자 생성"""
+    """OpenMRS에 새 환자 생성 - 수정된 버전"""
+    
+    # OPTIONS 요청 처리 (CORS preflight)
+    if request.method == 'OPTIONS':
+        response = Response(status=status.HTTP_200_OK)
+        response['Allow'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
     api = OpenMRSAPI()
     
-    # 요청에서 환자 데이터 구성
     try:
         data = request.data
+        logger.info(f"환자 생성 요청 데이터: {data}")
+        
+        # 요청 데이터 로깅
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Request content type: {request.content_type}")
+        logger.info(f"Request data: {data}")
         
         # 필수 필드 검증
         required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
+        missing_fields = []
+        
         for field in required_fields:
-            if field not in data:
-                return Response({'error': f'필수 필드가 누락되었습니다: {field}'}, status=status.HTTP_400_BAD_REQUEST)
+            if field not in data or not data[field]:
+                missing_fields.append(field)
+        
+        if missing_fields:
+            return Response({
+                'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}',
+                'required_fields': required_fields,
+                'received_data': data
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         # 환자 데이터 객체 구성
         patient_data = {
@@ -182,21 +207,13 @@ def create_patient(request):
                     }
                 ],
                 'gender': data['gender'],
-                'birthdate': data['birthdate'],
-                'addresses': []
-            },
-            'identifiers': [
-                {
-                    'identifier': data.get('identifier', f'GEN-{datetime.now().strftime("%Y%m%d%H%M%S")}'),
-                    'identifierType': '05a29f94-c0ed-11e2-94be-8c13b969e334',  # 기본 식별자 유형 UUID
-                    'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f'  # 기본 위치 UUID
-                }
-            ]
+                'birthdate': data['birthdate']
+            }
         }
         
         # 주소 정보가 있으면 추가
-        if 'address' in data:
-            patient_data['person']['addresses'].append({
+        if 'address' in data and any(data['address'].values()):
+            patient_data['person']['addresses'] = [{
                 'address1': data['address'].get('address1', ''),
                 'address2': data['address'].get('address2', ''),
                 'cityVillage': data['address'].get('cityVillage', ''),
@@ -204,30 +221,63 @@ def create_patient(request):
                 'country': data['address'].get('country', ''),
                 'postalCode': data['address'].get('postalCode', ''),
                 'preferred': True
-            })
+            }]
+        
+        # 식별자 처리 - OpenMRS에서 None 값 허용 설정했다면 식별자 없이도 생성 가능
+        if data.get('identifier'):
+            # 동적으로 식별자 타입과 위치 조회
+            identifier_type = api.get_default_identifier_type()
+            location = api.get_default_location()
+            
+            if identifier_type and location:
+                patient_data['identifiers'] = [{
+                    'identifier': data['identifier'],
+                    'identifierType': identifier_type,
+                    'location': location,
+                    'preferred': True
+                }]
+            else:
+                logger.warning("기본 식별자 타입 또는 위치를 찾을 수 없음 - 식별자 없이 생성 시도")
+        
+        logger.info(f"OpenMRS로 전송할 데이터: {patient_data}")
         
         # 환자 생성
         result = api.create_patient(patient_data)
-        if result is None:
-            return Response({'error': '환자 생성에 실패했습니다'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+        if result is None:
+            return Response({
+                'success': False,
+                'error': '환자 생성에 실패했습니다. OpenMRS 서버를 확인해주세요.',
+                'debug_info': {
+                    'openmrs_url': api.base_url,
+                    'patient_data_sent': patient_data
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # 성공 응답
         return Response({
             'success': True,
+            'message': '환자가 성공적으로 생성되었습니다',
             'patient': {
                 'uuid': result.get('uuid'),
-                'identifiers': [
-                    {
-                        'identifier': id.get('identifier'),
-                        'identifierType': id.get('identifierType', {}).get('display')
-                    } for id in result.get('identifiers', [])
-                ]
+                'display': result.get('display'),
+                'identifiers': result.get('identifiers', [])
             }
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
         logger.error(f"환자 생성 실패: {e}")
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}',
+            'debug_info': {
+                'request_method': request.method,
+                'request_data': request.data if hasattr(request, 'data') else 'No data',
+            }
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # 환자 매핑 관련 API
 
 @api_view(['GET'])

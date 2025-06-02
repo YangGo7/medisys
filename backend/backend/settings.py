@@ -1,3 +1,5 @@
+# backend/backend/settings.py (CORS 및 연결 설정 수정)
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,7 +16,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# ✅ 수정: ALLOWED_HOSTS 확장
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '35.225.63.41',
+    '0.0.0.0',  # Docker 컨테이너용
+    '*'  # 개발 환경용 (운영환경에서는 제거)
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -37,9 +46,9 @@ INSTALLED_APPS = [
     'tests',
     'ocs',
 ]
-#'dicom_processor',
+
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS를 맨 위에
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,19 +116,19 @@ DATABASES = {
 # 데이터베이스 라우터 설정
 DATABASE_ROUTERS = ['db_router.DatabaseRouter']
 
-# 외부 서비스 API 설정
+# ✅ 수정: 외부 서비스 API 설정 - 정확한 호스트 주소 사용
 EXTERNAL_SERVICES = {
     'openmrs': {
-        'host': os.getenv('OPENMRS_API_HOST', '127.0.0.1'),
-        'port': os.getenv('OPENMRS_API_PORT', '8082'),
-        'username': os.getenv('OPENMRS_API_USER', 'admin'),
-        'password': os.getenv('OPENMRS_API_PASSWORD', 'Admin123'),
+        'host': '35.225.63.41',  # 고정된 올바른 주소
+        'port': '8082',
+        'username': 'admin',
+        'password': 'Admin123',
     },
     'orthanc': {
-        'host': os.getenv('ORTHANC_API_HOST', '127.0.0.1'),
-        'port': os.getenv('ORTHANC_API_PORT', '8042'),
-        'username': os.getenv('ORTHANC_API_USER', 'orthanc'),
-        'password': os.getenv('ORTHANC_API_PASSWORD', 'orthanc'),
+        'host': '35.225.63.41',  # 고정된 올바른 주소
+        'port': '8042',
+        'username': 'orthanc',
+        'password': 'orthanc',
     }
 }
 
@@ -172,19 +181,57 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
 
-# CORS 설정
+# ✅ 수정: CORS 설정 확장
 CORS_ALLOWED_ORIGINS = [
     "http://35.225.63.41:3000",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://0.0.0.0:3000",
+    "http://35.225.63.41:8000",
 ]
 
+# ✅ 추가: 개발 환경에서 모든 오리진 허용 (주의: 운영환경에서는 제거)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# ✅ 추가: CORS 헤더 설정
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# ✅ 추가: CSRF 설정
+CSRF_TRUSTED_ORIGINS = [
+    "http://35.225.63.41:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://35.225.63.41:8000",
+]
+
+
 
 # 로깅 설정
 LOGGING = {
@@ -225,7 +272,7 @@ LOGGING = {
         },
         'medical_integration': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'DEBUG',  # 디버그 레벨로 변경
             'propagate': False,
         },
     },
@@ -233,4 +280,3 @@ LOGGING = {
 
 # 로그 디렉토리 생성
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
-

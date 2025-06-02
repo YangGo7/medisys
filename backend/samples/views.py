@@ -95,3 +95,25 @@ def list_all_samples(request):  # 전체 샘플 조회
     samples = Sample.objects.all()
     serializer = SampleSerializer(samples, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_sample_by_id(request, sample_id):
+    try:
+        sample = Sample.objects.get(id=sample_id)
+        serializer = SampleSerializer(sample)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Sample.DoesNotExist:
+        return Response({"error": "해당 샘플이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def create_test_result_for_sample(request, sample_id):
+    sample = get_object_or_404(Sample, id=sample_id)
+    data = request.data.copy()
+    data['sample'] = sample.id
+
+    serializer = TestResultSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save(result_status="recorded")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

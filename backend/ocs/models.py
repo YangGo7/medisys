@@ -1,19 +1,6 @@
 # ocs/models.py
 from django.db import models
 
-# class OCSLog(models.Model):
-#     patient_id = models.CharField(max_length=100)
-#     doctor_id = models.CharField(max_length=100)
-#     request_type = models.CharField(max_length=100)
-#     request_detail = models.TextField()
-#     request_time = models.DateTimeField()
-#     result_type = models.CharField(max_length=100, null=True, blank=True)
-#     result_detail = models.TextField(null=True, blank=True)
-#     result_time = models.DateTimeField(null=True, blank=True)
-
-#     def __str__(self):
-#         return f"{self.patient_id} / {self.request_type} @ {self.request_time}"
-
 class OCSLog(models.Model):
     patient_id = models.CharField(max_length=100)
     patient_name = models.CharField(max_length=100, null=True, blank=True)

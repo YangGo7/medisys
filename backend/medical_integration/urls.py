@@ -9,9 +9,9 @@ urlpatterns = [
     path('test-connections/', views.test_all_connections, name='test_connections'),
     
     # OpenMRS 환자 관리
-    path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
-    path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
+    path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
+    path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
     
     
     # Orthanc 환자 관리
