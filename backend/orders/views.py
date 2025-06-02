@@ -4,6 +4,8 @@ from rest_framework import status
 from .models import TestOrder
 from .serializers import TestOrderSerializer
 from django.shortcuts import get_object_or_404
+import logging
+logger = logging.getLogger('medical_integration')
 
 @api_view(['GET'])
 def list_orders(request):
@@ -13,6 +15,9 @@ def list_orders(request):
 
 @api_view(['POST']) # 요청 받아오기 
 def create_order(request):
+    logger.debug("✅ POST 요청 도착")
+    logger.debug(f"받은 데이터: {request.data}")
+    
     print("POST된 데이터:", request.data)
     serializer = TestOrderSerializer(data=request.data)
     if serializer.is_valid():

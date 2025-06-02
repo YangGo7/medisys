@@ -156,12 +156,11 @@ def get_patient(request, uuid):
     
     return Response(formatted_patient)
 
-@csrf_exempt  # CSRF 보호 비활성화 (API용)
-@api_view(['POST', 'OPTIONS'])  # POST와 OPTIONS 메소드 명시적 허용
+@csrf_exempt
+@api_view(['POST', 'OPTIONS'])
 def create_patient(request):
-    """OpenMRS에 새 환자 생성 - 수정된 버전"""
+    """OpenMRS에 새 환자 생성 - 고유 식별자 자동 생성"""
     
-    # OPTIONS 요청 처리 (CORS preflight)
     if request.method == 'OPTIONS':
         response = Response(status=status.HTTP_200_OK)
         response['Allow'] = 'POST, OPTIONS'
@@ -175,43 +174,34 @@ def create_patient(request):
         data = request.data
         logger.info(f"환자 생성 요청 데이터: {data}")
         
-        # 요청 데이터 로깅
-        logger.info(f"Request method: {request.method}")
-        logger.info(f"Request content type: {request.content_type}")
-        logger.info(f"Request data: {data}")
-        
         # 필수 필드 검증
         required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
-        missing_fields = []
-        
-        for field in required_fields:
-            if field not in data or not data[field]:
-                missing_fields.append(field)
+        missing_fields = [field for field in required_fields if field not in data or not data[field]]
         
         if missing_fields:
             return Response({
-                'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}',
-                'required_fields': required_fields,
-                'received_data': data
+                'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # 환자 데이터 객체 구성
+        # 고유한 식별자 생성
+        auto_identifier = api.generate_unique_identifier()
+        logger.info(f"생성된 고유 식별자: {auto_identifier}")
+        
+        # 환자 데이터 구성
         patient_data = {
             'person': {
-                'names': [
-                    {
-                        'givenName': data['givenName'],
-                        'familyName': data['familyName'],
-                        'middleName': data.get('middleName', ''),
-                        'preferred': True
-                    }
-                ],
+                'names': [{
+                    'givenName': data['givenName'],
+                    'familyName': data['familyName'],
+                    'middleName': data.get('middleName', ''),
+                    'preferred': True
+                }],
                 'gender': data['gender'],
                 'birthdate': data['birthdate']
             }
         }
         
-        # 주소 정보가 있으면 추가
+        # 주소 정보 추가
         if 'address' in data and any(data['address'].values()):
             patient_data['person']['addresses'] = [{
                 'address1': data['address'].get('address1', ''),
@@ -223,21 +213,20 @@ def create_patient(request):
                 'preferred': True
             }]
         
-        # 식별자 처리 - OpenMRS에서 None 값 허용 설정했다면 식별자 없이도 생성 가능
-        if data.get('identifier'):
-            # 동적으로 식별자 타입과 위치 조회
-            identifier_type = api.get_default_identifier_type()
-            location = api.get_default_location()
-            
-            if identifier_type and location:
-                patient_data['identifiers'] = [{
-                    'identifier': data['identifier'],
-                    'identifierType': identifier_type,
-                    'location': location,
-                    'preferred': True
-                }]
-            else:
-                logger.warning("기본 식별자 타입 또는 위치를 찾을 수 없음 - 식별자 없이 생성 시도")
+        # 식별자 타입과 위치 정보 가져오기
+        identifier_type = api.get_default_identifier_type()
+        location = api.get_default_location()
+        
+        if identifier_type and location:
+            patient_data['identifiers'] = [{
+                'identifier': auto_identifier,  # 자동 생성된 고유 식별자
+                'identifierType': identifier_type,
+                'location': location,
+                'preferred': True
+            }]
+            logger.info(f"식별자 정보 추가: {patient_data['identifiers']}")
+        else:
+            logger.warning("기본 식별자 타입 또는 위치를 찾을 수 없음")
         
         logger.info(f"OpenMRS로 전송할 데이터: {patient_data}")
         
@@ -247,21 +236,17 @@ def create_patient(request):
         if result is None:
             return Response({
                 'success': False,
-                'error': '환자 생성에 실패했습니다. OpenMRS 서버를 확인해주세요.',
-                'debug_info': {
-                    'openmrs_url': api.base_url,
-                    'patient_data_sent': patient_data
-                }
+                'error': '환자 생성에 실패했습니다.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        # 성공 응답
         return Response({
             'success': True,
             'message': '환자가 성공적으로 생성되었습니다',
             'patient': {
                 'uuid': result.get('uuid'),
                 'display': result.get('display'),
-                'identifiers': result.get('identifiers', [])
+                'identifiers': result.get('identifiers', []),
+                'auto_generated_id': auto_identifier
             }
         }, status=status.HTTP_201_CREATED)
         
@@ -272,11 +257,7 @@ def create_patient(request):
         
         return Response({
             'success': False,
-            'error': f'서버 오류: {str(e)}',
-            'debug_info': {
-                'request_method': request.method,
-                'request_data': request.data if hasattr(request, 'data') else 'No data',
-            }
+            'error': f'서버 오류: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # 환자 매핑 관련 API
 
@@ -508,3 +489,168 @@ def get_orthanc_patient(request, patient_id):
     except Exception as e:
         logger.error(f"Orthanc 환자 조회 실패: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+# backend/medical_integration/views.py에 추가
+
+import tempfile
+import os
+import pydicom
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+@csrf_exempt
+@api_view(['POST'])
+def upload_dicom_with_mapping(request):
+    """DICOM 파일 업로드 및 환자 UUID 매핑"""
+    try:
+        # 파일 및 환자 정보 확인
+        if 'dicom_file' not in request.FILES:
+            return Response({
+                'error': 'DICOM 파일이 없습니다'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        patient_uuid = request.POST.get('patient_uuid')
+        if not patient_uuid:
+            return Response({
+                'error': '환자 UUID가 필요합니다'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        dicom_file = request.FILES['dicom_file']
+        
+        logger.info(f"DICOM 업로드 시작: {dicom_file.name}, 환자 UUID: {patient_uuid}")
+        
+        # 1. OpenMRS 환자 정보 확인
+        openmrs_api = OpenMRSAPI()
+        patient_info = openmrs_api.get_patient(patient_uuid)
+        
+        if not patient_info:
+            return Response({
+                'error': f'환자 UUID {patient_uuid}를 찾을 수 없습니다'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 환자 이름 추출
+        person = patient_info.get('person', {})
+        names = person.get('names', [])
+        if names:
+            name_obj = names[0]
+            patient_name = f"{name_obj.get('familyName', '')}^{name_obj.get('givenName', '')}".strip()
+        else:
+            patient_name = "Unknown^Patient"
+        
+        patient_birth_date = person.get('birthdate', '')
+        patient_sex = person.get('gender', 'O')
+        
+        logger.info(f"환자 정보: {patient_name}, {patient_birth_date}, {patient_sex}")
+        
+        # 2. 임시 파일로 저장
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.dcm') as temp_file:
+            for chunk in dicom_file.chunks():
+                temp_file.write(chunk)
+            temp_file_path = temp_file.name
+        
+        try:
+            # 3. DICOM 파일 수정 (환자 정보 업데이트)
+            ds = pydicom.dcmread(temp_file_path)
+            
+            # 환자 정보 업데이트
+            ds.PatientName = patient_name
+            ds.PatientID = patient_uuid  # OpenMRS UUID를 Patient ID로 사용
+            ds.PatientBirthDate = patient_birth_date.replace('-', '') if patient_birth_date else ''
+            ds.PatientSex = patient_sex
+            
+            # Study 정보 업데이트 (필요시)
+            if not hasattr(ds, 'StudyInstanceUID') or not ds.StudyInstanceUID:
+                ds.StudyInstanceUID = pydicom.uid.generate_uid()
+            
+            if not hasattr(ds, 'SeriesInstanceUID') or not ds.SeriesInstanceUID:
+                ds.SeriesInstanceUID = pydicom.uid.generate_uid()
+            
+            if not hasattr(ds, 'SOPInstanceUID') or not ds.SOPInstanceUID:
+                ds.SOPInstanceUID = pydicom.uid.generate_uid()
+            
+            # 수정된 DICOM 저장
+            modified_file_path = temp_file_path + '_modified.dcm'
+            ds.save_as(modified_file_path)
+            
+            logger.info(f"DICOM 파일 수정 완료: {modified_file_path}")
+            
+            # 4. Orthanc에 업로드
+            orthanc_api = OrthancAPI()
+            
+            with open(modified_file_path, 'rb') as f:
+                dicom_data = f.read()
+            
+            # Orthanc에 DICOM 업로드
+            upload_result = orthanc_api.upload_dicom(dicom_data)
+            
+            if not upload_result:
+                return Response({
+                    'error': 'Orthanc 업로드에 실패했습니다'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            logger.info(f"Orthanc 업로드 성공: {upload_result}")
+            
+            # 5. 매핑 생성 또는 업데이트
+            orthanc_patient_id = upload_result.get('ParentPatient')
+            
+            if orthanc_patient_id:
+                mapping, created = PatientMapping.objects.get_or_create(
+                    openmrs_patient_uuid=patient_uuid,
+                    defaults={
+                        'orthanc_patient_id': orthanc_patient_id,
+                        'sync_status': 'SYNCED'
+                    }
+                )
+                
+                if not created and mapping.orthanc_patient_id != orthanc_patient_id:
+                    # 기존 매핑의 Orthanc ID 업데이트
+                    mapping.orthanc_patient_id = orthanc_patient_id
+                    mapping.update_sync_time('SYNCED')
+                
+                logger.info(f"환자 매핑 {'생성' if created else '업데이트'}: {mapping}")
+            
+            # 6. 업로드 결과 반환
+            return Response({
+                'success': True,
+                'message': 'DICOM 파일이 성공적으로 업로드되었습니다',
+                'upload_result': {
+                    'orthanc_instance_id': upload_result.get('ID'),
+                    'orthanc_patient_id': orthanc_patient_id,
+                    'study_instance_uid': ds.StudyInstanceUID,
+                    'series_instance_uid': ds.SeriesInstanceUID,
+                    'sop_instance_uid': ds.SOPInstanceUID
+                },
+                'patient_info': {
+                    'uuid': patient_uuid,
+                    'name': patient_name,
+                    'modified_dicom_tags': {
+                        'PatientName': ds.PatientName,
+                        'PatientID': ds.PatientID,
+                        'PatientBirthDate': ds.PatientBirthDate,
+                        'PatientSex': ds.PatientSex
+                    }
+                },
+                'mapping': {
+                    'mapping_id': mapping.mapping_id if 'mapping' in locals() else None,
+                    'created': created if 'created' in locals() else False
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        finally:
+            # 임시 파일 정리
+            try:
+                os.unlink(temp_file_path)
+                if 'modified_file_path' in locals():
+                    os.unlink(modified_file_path)
+            except:
+                pass
+        
+    except Exception as e:
+        logger.error(f"DICOM 업로드 실패: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        return Response({
+            'error': str(e),
+            'traceback': traceback.format_exc() if settings.DEBUG else None
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
