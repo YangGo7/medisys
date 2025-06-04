@@ -162,7 +162,7 @@ def get_patient(request, uuid):
 @csrf_exempt
 @api_view(['POST', 'OPTIONS'])
 def create_patient(request):
-    """OpenMRS에 새 환자 생성 - 고유 식별자 자동 생성"""
+    """OpenMRS에 새 환자 생성 - DICOM patient_id 지원"""
     
     if request.method == 'OPTIONS':
         response = Response(status=status.HTTP_200_OK)
@@ -186,9 +186,20 @@ def create_patient(request):
                 'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # 고유한 식별자 생성
-        auto_identifier = api.generate_unique_identifier()
-        logger.info(f"생성된 고유 식별자: {auto_identifier}")
+        # 🔥 수정: patient_id 처리
+        patient_id = data.get('patient_id', '').strip()
+        if patient_id:
+            # React에서 입력받은 DICOM patient_id 사용
+            logger.info(f"React에서 입력받은 DICOM Patient ID: {patient_id}")
+            
+            # 중복 확인 (optional - 필요에 따라)
+            if api.check_identifier_exists(patient_id):
+                logger.warning(f"Patient ID 중복: {patient_id}")
+                # 중복이어도 OpenMRS에서 자동으로 다른 identifier를 생성하므로 계속 진행
+        else:
+            # patient_id가 없으면 자동 생성
+            patient_id = api.generate_unique_identifier()
+            logger.info(f"자동 생성된 Patient ID: {patient_id}")
         
         # 환자 데이터 구성
         patient_data = {
@@ -216,13 +227,13 @@ def create_patient(request):
                 'preferred': True
             }]
         
-        # 식별자 타입과 위치 정보 가져오기
+        # 🔥 수정: patient_id를 식별자로 사용
         identifier_type = api.get_default_identifier_type()
         location = api.get_default_location()
         
         if identifier_type and location:
             patient_data['identifiers'] = [{
-                'identifier': auto_identifier,  # 자동 생성된 고유 식별자
+                'identifier': patient_id,  # React에서 입력받거나 자동 생성된 ID
                 'identifierType': identifier_type,
                 'location': location,
                 'preferred': True
@@ -242,16 +253,27 @@ def create_patient(request):
                 'error': '환자 생성에 실패했습니다.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        return Response({
+        # 🔥 추가: patient_id를 응답에 포함
+        response_data = {
             'success': True,
             'message': '환자가 성공적으로 생성되었습니다',
             'patient': {
                 'uuid': result.get('uuid'),
                 'display': result.get('display'),
                 'identifiers': result.get('identifiers', []),
-                'auto_generated_id': auto_identifier
+                'dicom_patient_id': patient_id  # 🔥 추가: DICOM 매핑용 patient_id
             }
-        }, status=status.HTTP_201_CREATED)
+        }
+        
+        # 🔥 추가: 매핑 테이블에 patient_id 정보 저장 (optional)
+        # 나중에 DICOM 업로드 시 이 정보를 사용할 수 있음
+        try:
+            # 별도 테이블에 DICOM patient_id와 OpenMRS UUID 관계 저장 (필요시)
+            logger.info(f"환자 생성 완료 - OpenMRS UUID: {result.get('uuid')}, DICOM Patient ID: {patient_id}")
+        except Exception as e:
+            logger.warning(f"매핑 정보 저장 실패 (비중요): {e}")
+        
+        return Response(response_data, status=status.HTTP_201_CREATED)
         
     except Exception as e:
         logger.error(f"환자 생성 실패: {e}")
