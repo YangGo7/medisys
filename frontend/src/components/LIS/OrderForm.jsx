@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { saveLog } from '../../saveLog'; // log 저장
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -45,16 +46,39 @@ const OrderForm = () => {
     e.preventDefault();
 
     const payload = {
-      patient_id: parseInt(patientId),
-      doctor_id: parseInt(doctorId),
+      patient_id: patientId,
+      doctor_id: doctorId,
       test_type: selectedAlias, // alias_name으로 전달
-      order_date: orderDate,
+      order_date: new Date(orderDate).toISOString(),
     };
-
+    
+    console.log("보내는 payload:", payload);
+    
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}orders/create/`, payload);
+      
       alert('✅ 주문 생성 성공!');
       console.log('Created:', res.data);
+
+      // 여기! 버튼 누른 후 성공했을 때 
+      // 👇 saveLog 호출 시도
+      const patientName = localStorage.getItem('selectedPatientName') || '-';
+      const doctorName = localStorage.getItem('username') || '-';
+
+      if ([patientId, patientName, doctorId, doctorName, selectedAlias, collectionDate].every(Boolean)) {
+        console.log('📡 saveLog 호출 시도!');
+        saveLog(
+          patientId,
+          patientName,
+          doctorId,
+          doctorName,
+          '검사 오더',
+          `LIS 오더 생성: ${selectedAlias}, 주문날짜: ${collectionDate}`
+        );
+      } else {
+        console.warn('❗ 로그 저장 조건 부족. 생략됨');
+      }
+
 
       navigate('/');
     } catch (err) {
@@ -67,21 +91,21 @@ const OrderForm = () => {
     <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
       <h2>📝 주문 생성</h2>
 
-      <label>👤 환자 ID:</label><br />
+      <label>👤 환자 ID</label><br />
       <input value={patientId} onChange={e => setPatientId(e.target.value)} required /><br />
 
-      <label>🧑‍⚕️ 의사 ID:</label><br />
+      <label>🧑‍⚕️ 의사 ID</label><br />
       <input value={doctorId} onChange={e => setDoctorId(e.target.value)} required /><br />
 
-      <label>🔬 검사 타입 (alias):</label><br />
+      <label>🔬 검사 종류</label><br />
       <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
-        <option value="">선택하세요</option>
+        <option value="">Test Type 선택</option>
         {aliasOptions.map(alias => (
           <option key={alias} value={alias}>{alias}</option>
         ))}
       </select><br />
 
-      <label>🕒 주문 날짜:</label><br />
+      <label>🕒 주문 날짜</label><br />
       <input type="datetime-local" value={collectionDate} onChange={e => setCollectionDate(e.target.value)} required /><br /><br />
 
       <button type="submit">생성하기</button>

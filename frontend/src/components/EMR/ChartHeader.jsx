@@ -1,4 +1,4 @@
-// frontend/src/components/EMR/ChartHeader.jsx - URL 수정
+/// frontend/src/components/EMR/ChartHeader.jsx - URL 수정
 
 import React, { useState } from 'react';
 import axios from 'axios';

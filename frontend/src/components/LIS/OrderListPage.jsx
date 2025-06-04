@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const OrderListPage = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ const OrderListPage = () => {
               <td>{order.doctor_id}</td>
               <td>{order.test_type}</td>
               <td>{order.order_date}</td>
+              <button onClick={() => navigate(`/sample/new/${order.id}`)}>샘플 등록</button>
             </tr>
           ))}
         </tbody>

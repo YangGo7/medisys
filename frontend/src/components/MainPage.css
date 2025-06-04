@@ -1,0 +1,52 @@
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+}
+
+.chart-header {
+  padding: 1rem;
+  background-color: #e9ecef;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.search-bar input {
+  margin-left: 0.5rem;
+  padding: 0.4rem;
+  width: 250px;
+}
+
+.content-body {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #f1f3f5;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar button, .sidebar a button {
+  padding: 0.5rem;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.main-panel {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #ffffff;
+}
+
+.calendar-container {
+  width: 300px;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-left: 1px solid #ddd;
+}

@@ -12,7 +12,6 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
     
     // 선택 필드
     middleName: '',
-    identifier: '',
     
     // 주소 정보
     address: {
@@ -28,7 +27,7 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const API_BASE = 'http://localhost:8000/api/integration/';
+  const API_BASE = 'http://35.225.63.41:8000/api/integration/';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -141,18 +140,6 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
     return age;
   };
 
-  const generatePatientId = () => {
-    const timestamp = new Date().getTime().toString().slice(-8);
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    return `P${timestamp}${random}`;
-  };
-
-  const handleGenerateId = () => {
-    setFormData(prev => ({
-      ...prev,
-      identifier: generatePatientId()
-    }));
-  };
 
   return (
     <div style={styles.overlay}>
@@ -268,31 +255,7 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
               </div>
             </div>
 
-            <div style={styles.row}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>환자번호</label>
-                <div style={styles.inputGroup}>
-                  <input
-                    type="text"
-                    name="identifier"
-                    value={formData.identifier}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="자동 생성 또는 직접 입력"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleGenerateId}
-                    style={styles.generateButton}
-                  >
-                    생성
-                  </button>
-                </div>
-                <small style={styles.helpText}>
-                  비워두면 자동으로 생성됩니다
-                </small>
-              </div>
-            </div>
+            
           </div>
 
           {/* 주소 정보 섹션 */}
@@ -512,16 +475,7 @@ const styles = {
     display: 'flex',
     gap: '8px'
   },
-  generateButton: {
-    padding: '10px 15px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '12px',
-    whiteSpace: 'nowrap'
-  },
+
   helpText: {
     fontSize: '12px',
     color: '#6c757d',

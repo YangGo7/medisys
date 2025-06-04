@@ -7,6 +7,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '');
 const OCSLogOrders = ({ patientId }) => {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
+  const [useMongo, setUseMongo] = useState(false); // 
 
   useEffect(() => {
     const fetchLogs = async () => {

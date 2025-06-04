@@ -22694,3 +22694,598 @@ INFO 2025-06-02 14:08:49,084 autoreload 583840 129953138450688 /home/medical_sys
 INFO 2025-06-02 14:08:49,866 autoreload 583927 135219999047936 Watching for file changes with StatReloader
 INFO 2025-06-02 14:09:16,451 autoreload 583927 135219999047936 /home/medical_system/backend/medical_integration/views.py changed, reloading.
 INFO 2025-06-02 14:09:17,177 autoreload 584039 126596882428160 Watching for file changes with StatReloader
+INFO 2025-06-02 14:22:53,271 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:22:53,680 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:03,798 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:04,209 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:10,747 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:11,157 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:14,598 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:15,006 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:21,555 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:21,965 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:22,782 basehttp 584039 126596579063488 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:23:23,001 basehttp 584039 126596570670784 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:23,193 basehttp 584039 126596579063488 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:23:23,442 basehttp 584039 126596570670784 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:25,335 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:25,748 basehttp 584039 126596579063488 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:23:54,904 basehttp 584039 126596579063488 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:55,064 basehttp 584039 126596570670784 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:23:55,366 basehttp 584039 126596579063488 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:55,470 basehttp 584039 126596570670784 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:23:55,825 basehttp 584039 126596579063488 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:55,882 basehttp 584039 126596570670784 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:23:56,256 basehttp 584039 126596579063488 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 14:23:56,292 basehttp 584039 126596570670784 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 14:25:02,647 basehttp 584039 126596570670784 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:25:03,054 basehttp 584039 126596570670784 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:32:49,485 basehttp 584039 126596553885376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:32:49,604 basehttp 584039 126596545492672 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:32:49,900 basehttp 584039 126596553885376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:33:05,474 basehttp 584039 126596570670784 - Broken pipe from ('167.94.146.60', 51606)
+WARNING 2025-06-02 14:33:08,615 log 584039 126596570670784 Not Found: /
+WARNING 2025-06-02 14:33:08,616 basehttp 584039 126596570670784 "GET / HTTP/1.1" 404 4137
+INFO 2025-06-02 14:33:08,793 basehttp 584039 126596570670784 - Broken pipe from ('167.94.146.60', 51672)
+WARNING 2025-06-02 14:33:12,949 log 584039 126596579063488 Not Found: /
+WARNING 2025-06-02 14:33:12,950 basehttp 584039 126596579063488 "GET / HTTP/1.1" 404 4137
+INFO 2025-06-02 14:33:13,344 basehttp 584039 126596562278080 code 505, message Invalid HTTP version (2.0)
+ERROR 2025-06-02 14:33:13,344 basehttp 584039 126596562278080 "PRI * HTTP/2.0" 505 -
+WARNING 2025-06-02 14:33:17,361 log 584039 126596562278080 Not Found: /favicon.ico
+WARNING 2025-06-02 14:33:17,362 basehttp 584039 126596562278080 "GET /favicon.ico HTTP/1.1" 404 4188
+INFO 2025-06-02 14:33:17,640 basehttp 584039 126596537099968 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-02 14:33:17,640 basehttp 584039 126596537099968 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-02 14:33:22,619 basehttp 584039 126596553885376 "OPTIONS /api/orders/create/ HTTP/1.1" 200 0
+DEBUG 2025-06-02 14:33:23,022 views 584039 126596553885376 ✅ POST 요청 도착
+DEBUG 2025-06-02 14:33:23,023 views 584039 126596553885376 받은 데이터: {'patient_id': 'P31024', 'doctor_id': 'D05263', 'test_type': 'CBC', 'order_date': '2025-06-02T05:32'}
+ERROR 2025-06-02 14:33:23,121 log 584039 126596553885376 Internal Server Error: /api/orders/create/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/medical_system/backend/orders/views.py", line 24, in create_order
+    serializer.save()
+    ~~~~~~~~~~~~~~~^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 1864, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+ERROR 2025-06-02 14:33:23,485 basehttp 584039 126596553885376 "POST /api/orders/create/ HTTP/1.1" 500 235235
+INFO 2025-06-02 14:36:09,045 basehttp 584039 126596553885376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:36:09,435 basehttp 584039 126596545492672 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 14:36:09,452 basehttp 584039 126596553885376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 14:36:26,377 views 584039 126596553885376 ✅ POST 요청 도착
+DEBUG 2025-06-02 14:36:26,378 views 584039 126596553885376 받은 데이터: {'patient_id': 'P340248', 'doctor_id': 'D202505', 'test_type': 'CBC', 'order_date': '2025-06-01T20:36:00.000Z'}
+ERROR 2025-06-02 14:36:26,478 log 584039 126596553885376 Internal Server Error: /api/orders/create/
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+MySQLdb.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/medical_system/backend/orders/views.py", line 24, in create_order
+    serializer.save()
+    ~~~~~~~~~~~~~~~^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/rest_framework/serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 663, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/query.py", line 1864, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/cursors.py", line 330, in _query
+    db.query(q)
+    ~~~~~~~~^^^
+  File "/home/medical_system/backend/venv/lib/python3.13/site-packages/MySQLdb/connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: (1146, "Table 'medical_platform.orders_testorder' doesn't exist")
+ERROR 2025-06-02 14:36:26,487 basehttp 584039 126596553885376 "POST /api/orders/create/ HTTP/1.1" 500 235308
+INFO 2025-06-02 14:56:44,981 autoreload 584039 126596882428160 /home/medical_system/backend/orders/migrations/0001_initial.py changed, reloading.
+INFO 2025-06-02 14:56:46,589 autoreload 592523 135852443525376 Watching for file changes with StatReloader
+INFO 2025-06-02 15:05:28,507 basehttp 592523 135852143408832 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:05:28,921 basehttp 592523 135852143408832 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:07:47,258 basehttp 592523 135852143408832 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:07:47,677 basehttp 592523 135852143408832 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:07:53,409 openmrs_api 592523 135852143408832 OpenMRS 검색 응답: 0명의 환자 발견
+INFO 2025-06-02 15:07:53,410 views 592523 135852143408832 환자 검색 결과: 0명
+INFO 2025-06-02 15:07:53,414 basehttp 592523 135852143408832 "GET /api/integration/openmrs/patients/search/?q=may%27bn HTTP/1.1" 200 24
+INFO 2025-06-02 15:07:55,657 openmrs_api 592523 135852143408832 OpenMRS 검색 응답: 1명의 환자 발견
+INFO 2025-06-02 15:07:55,658 views 592523 135852143408832 환자 검색 결과: 1명
+INFO 2025-06-02 15:07:55,661 basehttp 592523 135852143408832 "GET /api/integration/openmrs/patients/search/?q=may%27n HTTP/1.1" 200 544
+INFO 2025-06-02 15:10:45,229 autoreload 592523 135852443525376 /home/medical_system/backend/orders/migrations/0001_initial.py changed, reloading.
+INFO 2025-06-02 15:10:46,777 autoreload 595463 140045616431360 Watching for file changes with StatReloader
+INFO 2025-06-02 15:20:13,632 autoreload 595463 140045616431360 /home/medical_system/backend/orders/migrations/0001_initial.py changed, reloading.
+INFO 2025-06-02 15:20:14,497 autoreload 597893 137675418886400 Watching for file changes with StatReloader
+INFO 2025-06-02 15:20:28,029 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:20:28,449 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:20:52,693 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:20:54,872 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:34,882 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:35,296 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:35,727 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:36,135 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:36,538 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:36,951 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:38,801 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:39,209 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 2
+INFO 2025-06-02 15:24:39,534 basehttp 597893 137675086476992 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:24:39,623 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:24:39,948 basehttp 597893 137675086476992 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:24:40,079 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:24:40,368 basehttp 597893 137675086476992 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:24:40,507 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:24:40,770 basehttp 597893 137675086476992 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:24:40,952 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:28:24,651 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:28:25,070 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 15:28:57,360 views 597893 137675111655104 ✅ POST 요청 도착
+DEBUG 2025-06-02 15:28:57,361 views 597893 137675111655104 받은 데이터: {'patient_id': 'P12301004', 'doctor_id': 'D02180116', 'test_type': 'CBC', 'order_date': '2025-06-01T21:28:00.000Z'}
+INFO 2025-06-02 15:28:57,371 basehttp 597893 137675111655104 "POST /api/orders/create/ HTTP/1.1" 201 116
+INFO 2025-06-02 15:29:09,263 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:09,670 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:14,052 basehttp 597893 137675111655104 "GET /api/orders/ HTTP/1.1" 200 118
+INFO 2025-06-02 15:29:14,459 basehttp 597893 137675111655104 "GET /api/orders/ HTTP/1.1" 200 118
+INFO 2025-06-02 15:29:18,141 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:18,554 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:24,185 basehttp 597893 137675111655104 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 200 16
+INFO 2025-06-02 15:29:25,209 basehttp 597893 137675111655104 "GET /api/samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=panel.hem%2Fbc HTTP/1.1" 200 76
+INFO 2025-06-02 15:29:27,921 basehttp 597893 137675111655104 "OPTIONS /api/samples/create HTTP/1.1" 200 0
+INFO 2025-06-02 15:29:28,350 basehttp 597893 137675111655104 "POST /api/samples/create HTTP/1.1" 201 156
+INFO 2025-06-02 15:29:30,040 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:30,452 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:29:33,241 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 158
+INFO 2025-06-02 15:29:33,651 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 158
+INFO 2025-06-02 15:30:05,024 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:05,441 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 15:30:16,523 views 597893 137675111655104 ✅ POST 요청 도착
+DEBUG 2025-06-02 15:30:16,523 views 597893 137675111655104 받은 데이터: {'patient_id': 'p1202', 'doctor_id': 'd1230', 'test_type': 'CBC', 'order_date': '2025-06-01T21:29:00.000Z'}
+INFO 2025-06-02 15:30:16,533 basehttp 597893 137675111655104 "POST /api/orders/create/ HTTP/1.1" 201 108
+INFO 2025-06-02 15:30:18,212 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:18,630 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:23,065 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:23,476 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:27,231 basehttp 597893 137675111655104 "GET /api/orders/ HTTP/1.1" 200 227
+INFO 2025-06-02 15:30:27,650 basehttp 597893 137675111655104 "GET /api/orders/ HTTP/1.1" 200 227
+INFO 2025-06-02 15:30:28,992 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:29,407 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:34,491 basehttp 597893 137675111655104 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 200 16
+INFO 2025-06-02 15:30:35,813 basehttp 597893 137675111655104 "GET /api/samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=panel.hem%2Fbc HTTP/1.1" 200 76
+INFO 2025-06-02 15:30:36,927 basehttp 597893 137675111655104 "POST /api/samples/create HTTP/1.1" 201 156
+INFO 2025-06-02 15:30:38,583 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:38,993 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:41,296 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 315
+INFO 2025-06-02 15:30:41,708 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 315
+INFO 2025-06-02 15:30:49,763 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:50,174 basehttp 597893 137675111655104 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:30:52,170 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 315
+INFO 2025-06-02 15:30:52,580 basehttp 597893 137675111655104 "GET /api/samples/ HTTP/1.1" 200 315
+INFO 2025-06-02 15:30:55,015 basehttp 597893 137675111655104 "GET /api/samples/get/2 HTTP/1.1" 301 0
+INFO 2025-06-02 15:30:55,382 basehttp 597893 137675120047808 "GET /api/samples/get/2/ HTTP/1.1" 200 156
+INFO 2025-06-02 15:31:05,655 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:06,069 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:47,829 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:48,231 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:48,832 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:49,244 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:31:52,762 basehttp 597893 137675086476992 "GET /api/orders HTTP/1.1" 301 0
+INFO 2025-06-02 15:31:52,949 basehttp 597893 137675103262400 "GET /api/orders/ HTTP/1.1" 200 227
+INFO 2025-06-02 15:31:53,359 basehttp 597893 137675103262400 "GET /api/orders/ HTTP/1.1" 200 227
+INFO 2025-06-02 15:32:01,608 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:02,017 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 15:32:26,287 views 597893 137675120047808 ✅ POST 요청 도착
+DEBUG 2025-06-02 15:32:26,288 views 597893 137675120047808 받은 데이터: {'patient_id': 'p1023', 'doctor_id': 'd0231', 'test_type': 'LFT', 'order_date': '2025-06-01T21:30:00.000Z'}
+INFO 2025-06-02 15:32:26,298 basehttp 597893 137675120047808 "POST /api/orders/create/ HTTP/1.1" 201 108
+INFO 2025-06-02 15:32:28,301 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:28,709 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:30,901 basehttp 597893 137675120047808 "GET /api/orders/ HTTP/1.1" 200 336
+INFO 2025-06-02 15:32:31,315 basehttp 597893 137675120047808 "GET /api/orders/ HTTP/1.1" 200 336
+INFO 2025-06-02 15:32:33,598 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:34,009 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:39,952 basehttp 597893 137675120047808 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=LFT HTTP/1.1" 200 2
+INFO 2025-06-02 15:32:43,120 basehttp 597893 137675120047808 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=CBC HTTP/1.1" 200 16
+INFO 2025-06-02 15:32:44,343 basehttp 597893 137675120047808 "GET /api/samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=panel.hem%2Fbc HTTP/1.1" 200 76
+INFO 2025-06-02 15:32:45,959 basehttp 597893 137675120047808 "POST /api/samples/create HTTP/1.1" 201 156
+INFO 2025-06-02 15:32:47,380 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:47,790 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:50,196 basehttp 597893 137675120047808 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:32:50,600 basehttp 597893 137675120047808 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:32:55,485 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:55,886 basehttp 597893 137675120047808 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:32:59,964 basehttp 597893 137675120047808 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:33:00,372 basehttp 597893 137675120047808 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:33:02,263 basehttp 597893 137675120047808 "GET /api/samples/get/3 HTTP/1.1" 301 0
+INFO 2025-06-02 15:33:02,633 basehttp 597893 137675086476992 "GET /api/samples/get/3/ HTTP/1.1" 200 156
+INFO 2025-06-02 15:33:07,718 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:08,125 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:12,941 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:13,340 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:43,475 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:43,878 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:58,649 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:33:59,065 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:05,144 openmrs_api 597893 137675086476992 OpenMRS 검색 응답: 0명의 환자 발견
+INFO 2025-06-02 15:34:05,145 views 597893 137675086476992 환자 검색 결과: 0명
+INFO 2025-06-02 15:34:05,147 basehttp 597893 137675086476992 "GET /api/integration/openmrs/patients/search/?q=P HTTP/1.1" 200 24
+INFO 2025-06-02 15:34:24,063 openmrs_api 597893 137675086476992 OpenMRS 검색 응답: 1명의 환자 발견
+INFO 2025-06-02 15:34:24,064 views 597893 137675086476992 환자 검색 결과: 1명
+INFO 2025-06-02 15:34:24,066 basehttp 597893 137675086476992 "GET /api/integration/openmrs/patients/search/?q=P3408203042 HTTP/1.1" 200 544
+INFO 2025-06-02 15:34:32,858 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:33,263 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:34,294 basehttp 597893 137675094869696 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:34:34,319 basehttp 597893 137675103262400 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:34:34,698 basehttp 597893 137675094869696 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:34:34,748 basehttp 597893 137675103262400 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:34:42,264 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:42,664 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:44,562 basehttp 597893 137675103262400 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:34:44,965 basehttp 597893 137675094869696 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:34:48,871 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:49,279 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:34:52,720 basehttp 597893 137675103262400 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:34:53,130 basehttp 597893 137675094869696 "GET /api/samples/ HTTP/1.1" 200 472
+INFO 2025-06-02 15:34:55,176 basehttp 597893 137675094869696 "GET /api/samples/get/1 HTTP/1.1" 301 0
+INFO 2025-06-02 15:34:55,366 basehttp 597893 137675103262400 "GET /api/samples/get/1/ HTTP/1.1" 200 156
+INFO 2025-06-02 15:35:02,821 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:35:03,232 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:36:42,551 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:36:42,964 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:19,010 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:19,415 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:21,869 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:22,278 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:23,619 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:37:24,035 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:38:39,343 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:38:39,746 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:38:40,153 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:38:40,559 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 15:40:51,952 basehttp 597893 137675103262400 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:40:51,976 basehttp 597893 137675077035712 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 15:40:52,361 basehttp 597893 137675103262400 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 15:40:52,408 basehttp 597893 137675077035712 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+WARNING 2025-06-02 16:10:22,139 log 597893 137675051857600 Method Not Allowed: /api/logs/create/
+WARNING 2025-06-02 16:10:22,140 basehttp 597893 137675051857600 "GET /api/logs/create/ HTTP/1.1" 405 68
+INFO 2025-06-02 16:12:23,989 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:12:24,392 basehttp 597893 137675077035712 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:12:31,848 openmrs_api 597893 137675103262400 OpenMRS 검색 응답: 1명의 환자 발견
+INFO 2025-06-02 16:12:31,849 views 597893 137675103262400 환자 검색 결과: 1명
+INFO 2025-06-02 16:12:31,850 basehttp 597893 137675103262400 "GET /api/integration/openmrs/patients/search/?q=may HTTP/1.1" 200 544
+INFO 2025-06-02 16:12:37,999 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:12:38,410 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:12:40,428 basehttp 597893 137675103262400 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:12:40,632 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:12:40,834 basehttp 597893 137675103262400 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:12:41,062 basehttp 597893 137675094869696 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:13:03,799 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:13:04,207 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:13:06,790 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:13:07,204 basehttp 597893 137675094869696 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:13:15,755 openmrs_api 597893 137675094869696 OpenMRS 검색 응답: 1명의 환자 발견
+INFO 2025-06-02 16:13:15,758 views 597893 137675094869696 환자 검색 결과: 1명
+INFO 2025-06-02 16:13:15,761 basehttp 597893 137675094869696 "GET /api/integration/openmrs/patients/search/?q=may HTTP/1.1" 200 544
+INFO 2025-06-02 16:24:20,611 basehttp 597893 137675051857600 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:24:21,024 basehttp 597893 137675051857600 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:26:13,995 openmrs_api 597893 137675094869696 OpenMRS 검색 응답: 1명의 환자 발견
+INFO 2025-06-02 16:26:13,996 views 597893 137675094869696 환자 검색 결과: 1명
+INFO 2025-06-02 16:26:13,999 basehttp 597893 137675094869696 "GET /api/integration/openmrs/patients/search/?q=may HTTP/1.1" 200 544
+INFO 2025-06-02 16:26:30,607 basehttp 597893 137675094869696 "OPTIONS /api/worklist/create-from-emr/ HTTP/1.1" 200 0
+ERROR 2025-06-02 16:26:30,967 log 597893 137675094869696 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 16:26:30,968 basehttp 597893 137675094869696 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 58
+INFO 2025-06-02 16:30:41,305 basehttp 597893 137675051857600 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:30:41,717 basehttp 597893 137675051857600 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:30:42,280 basehttp 597893 137675103262400 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:30:50,597 basehttp 597893 137675051857600 "OPTIONS /api/orders/create/ HTTP/1.1" 200 0
+DEBUG 2025-06-02 16:30:51,002 views 597893 137675051857600 ✅ POST 요청 도착
+DEBUG 2025-06-02 16:30:51,003 views 597893 137675051857600 받은 데이터: {'patient_id': 'P0147', 'doctor_id': 'D452', 'test_type': 'CBC', 'order_date': '2025-06-01T22:24:00.000Z'}
+INFO 2025-06-02 16:30:51,034 basehttp 597893 137675051857600 "POST /api/orders/create/ HTTP/1.1" 201 107
+INFO 2025-06-02 16:30:52,967 basehttp 597893 137675051857600 "OPTIONS /api/logs/create/ HTTP/1.1" 200 0
+INFO 2025-06-02 16:30:52,982 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-06-02 16:30:53,366 log 597893 137675051857600 Bad Request: /api/logs/create/
+WARNING 2025-06-02 16:30:53,367 basehttp 597893 137675051857600 "POST /api/logs/create/ HTTP/1.1" 400 32
+INFO 2025-06-02 16:30:53,390 basehttp 597893 137675086476992 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:36:11,044 autoreload 597893 137675418886400 /home/medical_system/backend/worklist/views.py changed, reloading.
+INFO 2025-06-02 16:36:12,981 autoreload 610636 131653229646080 Watching for file changes with StatReloader
+ERROR 2025-06-02 16:36:14,469 log 610636 131652931024576 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 16:36:14,470 basehttp 610636 131652931024576 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 141
+INFO 2025-06-02 16:38:31,258 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:31,281 basehttp 610636 131652913190592 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:31,681 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:32,091 basehttp 610636 131652913190592 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:38,433 basehttp 610636 131652922631872 "GET /api/orders/ HTTP/1.1" 200 444
+INFO 2025-06-02 16:38:38,848 basehttp 610636 131652904797888 "GET /api/orders/ HTTP/1.1" 200 444
+INFO 2025-06-02 16:38:47,860 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:48,269 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:51,207 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:38:51,615 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 16:39:23,418 views 610636 131652904797888 ✅ POST 요청 도착
+DEBUG 2025-06-02 16:39:23,419 views 610636 131652904797888 받은 데이터: {'patient_id': 'P0147', 'doctor_id': 'D7878', 'test_type': 'Coagulation Panel', 'order_date': '2025-06-01T22:38:00.000Z'}
+INFO 2025-06-02 16:39:23,438 basehttp 610636 131652904797888 "POST /api/orders/create/ HTTP/1.1" 201 122
+INFO 2025-06-02 16:39:25,307 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:39:25,718 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:39:34,063 basehttp 610636 131652922631872 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:39:34,188 basehttp 610636 131652904797888 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:39:34,475 basehttp 610636 131652922631872 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:39:34,630 basehttp 610636 131652904797888 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:40:05,754 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:40:06,172 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+ERROR 2025-06-02 16:43:32,369 log 610636 131652931024576 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 16:43:32,370 basehttp 610636 131652931024576 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 16:43:36,506 log 610636 131652931024576 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 16:43:36,507 basehttp 610636 131652931024576 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+INFO 2025-06-02 16:43:48,276 basehttp 610636 131652659427008 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:43:53,304 basehttp 610636 131652922631872 "GET /api/orders/ HTTP/1.1" 200 567
+INFO 2025-06-02 16:43:53,721 basehttp 610636 131652904797888 "GET /api/orders/ HTTP/1.1" 200 567
+INFO 2025-06-02 16:44:18,563 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:44:18,971 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:44:20,566 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:44:20,970 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:44:25,535 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:44:25,942 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+DEBUG 2025-06-02 16:45:09,741 views 610636 131652922631872 ✅ POST 요청 도착
+DEBUG 2025-06-02 16:45:09,742 views 610636 131652922631872 받은 데이터: {'patient_id': 'P782', 'doctor_id': 'D7878', 'test_type': 'LFT', 'order_date': '2025-06-01T22:44:00.000Z'}
+INFO 2025-06-02 16:45:09,751 basehttp 610636 131652922631872 "POST /api/orders/create/ HTTP/1.1" 201 107
+INFO 2025-06-02 16:45:11,643 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:45:12,045 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:46:07,320 basehttp 610636 131652904797888 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:46:07,343 basehttp 610636 131652922631872 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:46:07,724 basehttp 610636 131652904797888 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 16:46:07,773 basehttp 610636 131652922631872 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 16:50:10,309 basehttp 610636 131652659427008 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 16:53:18,147 basehttp 610636 131652659427008 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-06-02 17:11:17,311 log 610636 131652684605120 Method Not Allowed: /api/logs/create/
+WARNING 2025-06-02 17:11:17,312 basehttp 610636 131652684605120 "GET /api/logs/create/ HTTP/1.1" 405 68
+INFO 2025-06-02 17:11:55,777 basehttp 610636 131652659427008 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-02 17:11:55,778 basehttp 610636 131652659427008 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-02 17:11:55,803 basehttp 610636 131652659427008 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-02 17:11:55,804 basehttp 610636 131652659427008 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-02 17:11:55,829 basehttp 610636 131652659427008 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-02 17:11:55,830 basehttp 610636 131652659427008 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-02 17:11:55,855 basehttp 610636 131652659427008 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-02 17:11:55,856 basehttp 610636 131652659427008 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2025-06-02 17:12:25,404 log 610636 131652659427008 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:12:25,405 basehttp 610636 131652659427008 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:12:26,927 log 610636 131652659427008 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:12:26,928 basehttp 610636 131652659427008 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:12:29,558 log 610636 131652659427008 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:12:29,559 basehttp 610636 131652659427008 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+INFO 2025-06-02 17:25:23,704 autoreload 618249 131726540747008 Watching for file changes with StatReloader
+INFO 2025-06-02 17:25:37,077 basehttp 610636 131652922631872 "GET /api/health/ HTTP/1.1" 200 87
+WARNING 2025-06-02 17:25:40,905 log 610636 131652922631872 Not Found: /
+WARNING 2025-06-02 17:25:40,905 basehttp 610636 131652922631872 "GET / HTTP/1.1" 404 4137
+INFO 2025-06-02 17:49:01,291 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 17:49:01,694 basehttp 610636 131652904797888 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 17:49:15,047 basehttp 610636 131652904797888 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 17:49:15,249 basehttp 610636 131652922631872 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 17:49:15,462 basehttp 610636 131652904797888 "GET /api/logs/ HTTP/1.1" 200 346
+INFO 2025-06-02 17:49:15,680 basehttp 610636 131652922631872 "GET /api/logs/test-logs/ HTTP/1.1" 200 362
+INFO 2025-06-02 17:49:17,276 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 17:49:17,677 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 17:49:18,089 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-02 17:49:18,496 basehttp 610636 131652922631872 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+ERROR 2025-06-02 17:49:29,507 log 610636 131652922631872 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:49:29,508 basehttp 610636 131652922631872 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:49:30,801 log 610636 131652922631872 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:49:30,802 basehttp 610636 131652922631872 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:49:31,655 log 610636 131652922631872 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:49:31,655 basehttp 610636 131652922631872 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:49:32,521 log 610636 131652922631872 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:49:32,522 basehttp 610636 131652922631872 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100
+ERROR 2025-06-02 17:49:33,345 log 610636 131652922631872 Internal Server Error: /api/worklist/create-from-emr/
+ERROR 2025-06-02 17:49:33,351 basehttp 610636 131652922631872 "POST /api/worklist/create-from-emr/ HTTP/1.1" 500 100

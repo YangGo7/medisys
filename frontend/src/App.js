@@ -35,8 +35,10 @@ function App() {
         <Route path="/order/new" element={<OrderForm />} />
         <Route path="/orders" element={<OrderListPage />} />
         <Route path="/sample/new" element={<SampleForm />} />
+        <Route path="/sample/new/:orderId" element={<SampleForm />} />
         <Route path="/samples" element={<SampleListPage />} />
         <Route path="/result/new" element={<ResultInputForm />} />
+        <Route path="/result/new/:sampleId" element={<ResultInputForm />} />
         <Route path="/tests" element={<OpenMRSPatientList />} />
         <Route path="/ocs/log" element={<OCSLogPage />} />
 

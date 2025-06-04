@@ -6,8 +6,8 @@ import WaitingRoom from './WaitingRoom';
 import PatientInfoPanel from './PatientInfoPanel';
 import VisitHistoryPanel from './VisitHistoryPanel';
 import DiagnosisPanel from './DiagnosisPanel';
-import ImagingRequestPanel from './ImagingRequestPanel'; // 새로 추가
 import PatientDetailModal from './PatientDetailModal';
+// import ImagingRequestPanel from './ImagingRequestPanel'; // 일단 주석 처리
 
 const EmrMainPage = () => {
   const [activeTab, setActiveTab] = useState('진료');
@@ -76,16 +76,49 @@ const EmrMainPage = () => {
             )}
           </div>
 
-          {/* 🔥 새로 추가: 영상검사 요청 패널 */}
+          {/* 🔥 새로 추가: 영상검사 요청 패널 - 임시로 간단한 폼 */}
           <div style={cardStyle}>
             <h3 style={cardTitleStyle}>🏥 영상검사 요청</h3>
-            <ImagingRequestPanel 
-              selectedPatient={selectedPatient}
-              onRequestSuccess={(result) => {
-                console.log('🎉 영상검사 요청 성공:', result);
-                alert(`영상검사 요청이 완료되었습니다!\nAccession Number: ${result.accession_number || 'N/A'}`);
-              }}
-            />
+            {selectedPatient ? (
+              <div>
+                <p><strong>환자:</strong> {selectedPatient.display}</p>
+                <div style={{ marginTop: '10px' }}>
+                  <select style={{ width: '100%', padding: '8px', marginBottom: '8px' }}>
+                    <option value="">검사 종류 선택</option>
+                    <option value="CR">Chest X-ray</option>
+                    <option value="CT">CT Scan</option>
+                    <option value="MR">MRI</option>
+                    <option value="US">Ultrasound</option>
+                  </select>
+                  <select style={{ width: '100%', padding: '8px', marginBottom: '8px' }}>
+                    <option value="">검사 부위 선택</option>
+                    <option value="CHEST">CHEST</option>
+                    <option value="ABDOMEN">ABDOMEN</option>
+                    <option value="HEAD">HEAD</option>
+                    <option value="SPINE">SPINE</option>
+                  </select>
+                  <button 
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px', 
+                      backgroundColor: '#28a745', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      console.log('🏥 영상검사 요청 (임시)');
+                      alert('영상검사 요청 기능을 구현중입니다!');
+                    }}
+                  >
+                    🏥 영상검사 요청
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p style={emptyTextStyle}>환자를 선택해주세요.</p>
+            )}
           </div>
 
           <div style={cardStyle}>

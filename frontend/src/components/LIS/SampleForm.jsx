@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const SampleForm = () => {
@@ -10,9 +10,16 @@ const SampleForm = () => {
   const [sampleType, setSampleType] = useState('');
   const [testTypeOptions, setTestTypeOptions] = useState([]);
   const [collectionDate, setCollectionDate] = useState('');
+  const { orderId: paramOrderId } = useParams();
   const [orderId, setOrderId] = useState('');
   const [loincCode, setLoincCode] = useState('');
   const [sampleStatus] = useState('collected');
+
+  useEffect(() => {
+    if (paramOrderId) {
+      setOrderId(paramOrderId);
+    }
+  }, [paramOrderId]);
 
   // alias-mapping 불러오기
   useEffect(() => {
@@ -93,22 +100,27 @@ const SampleForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+      <h2>💉 샘플 등록</h2>
+
+      <label>🧾 오더 ID</label><br />
       <input
         type="text"
-        placeholder="Order ID"
         value={orderId}
         onChange={e => setOrderId(e.target.value)}
+        placeholder="Order ID"
         required
-      /><br/>
+      /><br />
 
+      <label>📅 채취일시</label><br />
       <input
         type="datetime-local"
         value={collectionDate}
         onChange={e => setCollectionDate(e.target.value)}
         required
-      /><br/>
+      /><br />
 
+      <label>🧪 검체 종류</label><br />
       <select value={sampleType} onChange={e => {
         setSampleType(e.target.value);
         setSelectedAlias(''); // sampleType 바꾸면 alias 초기화
@@ -119,16 +131,18 @@ const SampleForm = () => {
         ))}
       </select><br/>
 
+      <label>📁 검사 종류</label><br />
       <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
-        <option value="">Alias 선택</option>
+        <option value="">Test Type 선택</option>
         {sampleType &&
           Object.keys(aliasMappings[sampleType] || {}).map(alias => (
             <option key={alias} value={alias}>{alias}</option>
           ))}
       </select><br/>
 
+      <label>📂 세부 검사</label><br />
       <select value={selectedTestType} onChange={e => setSelectedTestType(e.target.value)} required>
-        <option value="">Test Type 선택</option>
+        <option value="">Detail Type 선택</option>
         {testTypeOptions.map((tt, idx) => (
           <option key={idx} value={tt}>{tt}</option>
         ))}

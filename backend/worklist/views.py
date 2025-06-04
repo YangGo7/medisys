@@ -9,6 +9,7 @@ from .models import StudyRequest, WorkflowEvent, DICOMMapping
 from .services import WorkflowService
 from .serializers import StudyRequestSerializer
 import logging
+from datetime import datetime
 
 # 워크플로우 서비스 인스턴스
 workflow_service = WorkflowService()
