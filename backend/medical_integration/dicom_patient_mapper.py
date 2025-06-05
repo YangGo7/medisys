@@ -17,9 +17,6 @@ class DicomPatientMapper:
         self.openmrs_api = OpenMRSAPI()
         self.orthanc_api = OrthancAPI()
     
-    # backend/medical_integration/dicom_patient_mapper.py 수정
-    # extract_patient_info_from_dicom 함수만 수정
-
     def extract_patient_info_from_dicom(self, dicom_data):
         """DICOM 파일에서 환자 정보 추출 - bytes 처리 개선"""
         try:
@@ -244,8 +241,6 @@ class DicomPatientMapper:
             logger.error(f"환자 정보 검증 실패: {e}")
             return False
         
-        
-        
     def create_or_update_mapping(self, orthanc_patient_id, openmrs_patient_uuid, dicom_info=None):
         """환자 매핑 생성 또는 업데이트 - patient_identifier 정보 포함"""
         try:
@@ -301,15 +296,105 @@ class DicomPatientMapper:
         except Exception as e:
             logger.error(f"환자 매핑 생성/업데이트 실패: {e}")
             return None
-        
-        
     
+    def _evaluate_mapping_quality(self, dicom_patient_info, matched_patient):
+        """🔥 추가: 매핑 품질 평가 메서드"""
+        try:
+            logger.debug("매핑 품질 평가 시작")
             
+            quality_factors = {
+                'patient_identifier_match': False,
+                'birth_date_match': False,
+                'gender_match': False,
+                'name_similarity': 0.0
+            }
+            
+            confidence_score = 0.0
+            
+            # 1. Patient Identifier 매칭 확인 (가장 중요 - 50점)
+            dicom_identifier = dicom_patient_info.get('patient_identifier', '').strip()
+            if dicom_identifier:
+                matched_identifiers = matched_patient.get('identifiers', [])
+                for id_info in matched_identifiers:
+                    if id_info.get('identifier') == dicom_identifier:
+                        quality_factors['patient_identifier_match'] = True
+                        confidence_score += 0.5
+                        logger.debug(f"  ✅ Patient Identifier 매칭: +50점")
+                        break
+            
+            # 2. 생년월일 매칭 확인 (30점)
+            dicom_birth_date = dicom_patient_info.get('formatted_birth_date')
+            if dicom_birth_date:
+                openmrs_birth_date = matched_patient.get('person', {}).get('birthdate', '')
+                if openmrs_birth_date:
+                    openmrs_date = openmrs_birth_date.split('T')[0] if 'T' in openmrs_birth_date else openmrs_birth_date
+                    if openmrs_date == dicom_birth_date:
+                        quality_factors['birth_date_match'] = True
+                        confidence_score += 0.3
+                        logger.debug(f"  ✅ 생년월일 매칭: +30점")
+            
+            # 3. 성별 매칭 확인 (10점)
+            dicom_sex = dicom_patient_info.get('patient_sex')
+            if dicom_sex:
+                openmrs_gender = matched_patient.get('person', {}).get('gender')
+                if openmrs_gender == dicom_sex:
+                    quality_factors['gender_match'] = True
+                    confidence_score += 0.1
+                    logger.debug(f"  ✅ 성별 매칭: +10점")
+            
+            # 4. 이름 유사도 확인 (10점)
+            dicom_name = dicom_patient_info.get('formatted_name', '').lower().replace(' ', '')
+            openmrs_name = matched_patient.get('display', '').lower().replace(' ', '')
+            
+            if dicom_name and openmrs_name:
+                # 간단한 유사도 계산
+                if dicom_name == openmrs_name:
+                    name_similarity = 1.0
+                elif dicom_name in openmrs_name or openmrs_name in dicom_name:
+                    name_similarity = 0.8
+                else:
+                    # 공통 문자 비율 계산
+                    common_chars = set(dicom_name) & set(openmrs_name)
+                    total_chars = set(dicom_name) | set(openmrs_name)
+                    name_similarity = len(common_chars) / len(total_chars) if total_chars else 0
+                
+                quality_factors['name_similarity'] = name_similarity
+                confidence_score += 0.1 * name_similarity
+                logger.debug(f"  📝 이름 유사도: {name_similarity:.2f} (+{0.1 * name_similarity:.1f}점)")
+            
+            # 최종 점수 정규화 (0.0 - 1.0)
+            confidence_score = min(confidence_score, 1.0)
+            
+            criteria = {
+                'patient_identifier_matched': quality_factors['patient_identifier_match'],
+                'birth_date_matched': quality_factors['birth_date_match'],
+                'gender_matched': quality_factors['gender_match'],
+                'name_similarity_score': quality_factors['name_similarity'],
+                'dicom_patient_identifier': dicom_patient_info.get('patient_identifier'),
+                'dicom_patient_name': dicom_patient_info.get('formatted_name'),
+                'openmrs_patient_display': matched_patient.get('display'),
+                'evaluation_timestamp': datetime.now().isoformat()
+            }
+            
+            logger.info(f"매핑 품질 평가 완료: 신뢰도 {confidence_score:.3f}")
+            
+            return {
+                'confidence_score': confidence_score,
+                'criteria': criteria,
+                'quality_factors': quality_factors
+            }
+            
+        except Exception as e:
+            logger.error(f"매핑 품질 평가 실패: {e}")
+            return {
+                'confidence_score': 0.5,  # 기본값
+                'criteria': {},
+                'quality_factors': {}
+            }
     
     def _validate_patient_match(self, openmrs_patient, dicom_patient_info):
         """기존 환자 정보 매칭 검증 (호환성 유지)"""
         return self._validate_patient_match_enhanced(openmrs_patient, dicom_patient_info)
-    
     
     def process_dicom_upload(self, dicom_data, orthanc_upload_result):
         """DICOM 업로드 후 자동 매핑 처리 (개선된 버전)"""
@@ -374,7 +459,7 @@ class DicomPatientMapper:
                     'orthanc_patient_id': orthanc_patient_id,
                     'requires_manual_mapping': True,
                     'suggested_search_terms': [
-                        dicom_patient_info.get('patient_id', ''),
+                        dicom_patient_info.get('patient_identifier', ''),
                         dicom_patient_info.get('formatted_name', ''),
                         dicom_patient_info.get('family_name', ''),
                         dicom_patient_info.get('given_name', '')
