@@ -19,7 +19,7 @@ def send_to_cdss_on_result_save(sender, instance, created, **kwargs):
     }
 
     try:
-        response = requests.post("http://cdss-server/api/predict/", json=data, timeout=5)
+        response = requests.post("http://35.225.63.41:8000/api/predict/", json=data, timeout=5)
         response.raise_for_status()
         print("✅ CDSS 연동 성공")
     except requests.RequestException as e:

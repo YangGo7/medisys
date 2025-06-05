@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import logging
+from django.conf import settings
 from datetime import datetime
 from .openmrs_api import OpenMRSAPI
 from .orthanc_api import OrthancAPI
@@ -12,6 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .dicom_patient_mapper import DicomPatientMapper
 import tempfile
 import os
+import requests
+from requests.auth import HTTPBasicAuth
+from requests.exceptions import RequestException, ConnectionError, Timeout
 
 logger = logging.getLogger('medical_integration')
 
@@ -62,46 +66,57 @@ def test_all_connections(request):
 
 @api_view(['GET'])
 def search_patients(request):
-    """OpenMRS에서 환자 검색"""
+    """🔥 수정: OpenMRS에서 환자 검색 - patient_identifier 우선"""
     query = request.GET.get('q', '')
     if not query:
         return Response({'error': '검색어(q)가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
 
     api = OpenMRSAPI()
-    results = api.search_patients(query)
+    results = api.search_patients(query)  # 🔥 이미 수정된 API 사용
 
     if results is None:
         return Response({'error': '환자 검색에 실패했습니다'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # OpenMRS의 실제 응답 구조에 맞게 파싱
+    # 🔥 수정: patient_identifier 정보 포함해서 응답 구성
     patients = []
     for result in results.get('results', []):
-        # OpenMRS는 보통 display 필드에 환자 이름이 들어있음
         display_name = result.get('display', '')
-        
-        # person 객체에서 세부 정보 추출
         person_data = result.get('person', {})
         
-        # 첫 번째 식별자 가져오기
+        # 🔥 핵심: patient_identifier 정보 추출
         identifiers = result.get('identifiers', [])
-        identifier = identifiers[0].get('identifier') if identifiers else None
+        primary_identifier = None
+        all_identifiers = []
+        
+        for identifier_info in identifiers:
+            identifier_value = identifier_info.get('identifier')
+            if identifier_value:
+                all_identifiers.append(identifier_value)
+                if identifier_info.get('preferred') and not primary_identifier:
+                    primary_identifier = identifier_value
+        
+        # preferred가 없으면 첫 번째 identifier 사용
+        if not primary_identifier and all_identifiers:
+            primary_identifier = all_identifiers[0]
         
         patient = {
             'uuid': result.get('uuid'),
-            'identifier': identifier,
+            'patient_identifier': primary_identifier,  # 🔥 핵심: DICOM 매핑용
+            'all_identifiers': all_identifiers,
             'name': display_name,
-            'display': display_name,  # ChartHeader.jsx에서 사용하는 필드
+            'display': display_name,
             'gender': person_data.get('gender'),
             'birthdate': person_data.get('birthdate'),
             'age': person_data.get('age'),
-            'identifiers': identifiers
+            'identifiers': identifiers  # 전체 identifier 정보
         }
         patients.append(patient)
 
-    logger.info(f"환자 검색 결과: {len(patients)}명")
+    logger.info(f"환자 검색 결과: {len(patients)}명 (검색어: {query})")
     return Response({
         'results': patients,
-        'total': len(patients)
+        'total': len(patients),
+        'search_query': query
     })
 
 @api_view(['GET'])
@@ -159,10 +174,40 @@ def get_patient(request, uuid):
     
     return Response(formatted_patient)
 
+@api_view(['GET'])
+def get_patient_by_identifier(request, identifier):
+    """Patient Identifier로 환자 조회"""
+    try:
+        api = OpenMRSAPI()
+        patient = api.get_patient_by_identifier(identifier)
+        
+        if not patient:
+            return Response({
+                'error': f'Patient Identifier "{identifier}"에 해당하는 환자를 찾을 수 없습니다'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 환자 데이터 형식 지정
+        formatted_patient = {
+            'uuid': patient.get('uuid'),
+            'patient_identifier': identifier,
+            'display': patient.get('display'),
+            'identifiers': patient.get('identifiers', []),
+            'person': patient.get('person', {}),
+            'addresses': patient.get('person', {}).get('addresses', []),
+            'attributes': patient.get('person', {}).get('attributes', [])
+        }
+        
+        return Response(formatted_patient)
+        
+    except Exception as e:
+        logger.error(f"Patient Identifier 환자 조회 실패: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @csrf_exempt
 @api_view(['POST', 'OPTIONS'])
 def create_patient(request):
-    """OpenMRS에 새 환자 생성 - DICOM patient_id 지원"""
+    """🔥 수정: OpenMRS에 새 환자 생성 - patient_identifier 기반"""
     
     if request.method == 'OPTIONS':
         response = Response(status=status.HTTP_200_OK)
@@ -186,66 +231,25 @@ def create_patient(request):
                 'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # 🔥 수정: patient_id 처리
-        patient_id = data.get('patient_id', '').strip()
-        if patient_id:
-            # React에서 입력받은 DICOM patient_id 사용
-            logger.info(f"React에서 입력받은 DICOM Patient ID: {patient_id}")
+        # 🔥 핵심 수정: patient_identifier 처리
+        patient_identifier = data.get('patient_identifier', '').strip()
+        if patient_identifier:
+            # React에서 입력받은 patient_identifier 사용 (P003, DCM001 등)
+            logger.info(f"React에서 입력받은 Patient Identifier: {patient_identifier}")
             
-            # 중복 확인 (optional - 필요에 따라)
-            if api.check_identifier_exists(patient_id):
-                logger.warning(f"Patient ID 중복: {patient_id}")
-                # 중복이어도 OpenMRS에서 자동으로 다른 identifier를 생성하므로 계속 진행
+            # 🔥 중복 확인
+            if api.check_identifier_exists(patient_identifier):
+                return Response({
+                    'success': False,
+                    'error': f'Patient Identifier "{patient_identifier}"가 이미 존재합니다. 다른 식별자를 사용해주세요.'
+                }, status=status.HTTP_400_BAD_REQUEST)
         else:
-            # patient_id가 없으면 자동 생성
-            patient_id = api.generate_unique_identifier()
-            logger.info(f"자동 생성된 Patient ID: {patient_id}")
+            # patient_identifier가 없으면 자동 생성
+            patient_identifier = api.generate_unique_identifier()
+            logger.info(f"자동 생성된 Patient Identifier: {patient_identifier}")
         
-        # 환자 데이터 구성
-        patient_data = {
-            'person': {
-                'names': [{
-                    'givenName': data['givenName'],
-                    'familyName': data['familyName'],
-                    'middleName': data.get('middleName', ''),
-                    'preferred': True
-                }],
-                'gender': data['gender'],
-                'birthdate': data['birthdate']
-            }
-        }
-        
-        # 주소 정보 추가
-        if 'address' in data and any(data['address'].values()):
-            patient_data['person']['addresses'] = [{
-                'address1': data['address'].get('address1', ''),
-                'address2': data['address'].get('address2', ''),
-                'cityVillage': data['address'].get('cityVillage', ''),
-                'stateProvince': data['address'].get('stateProvince', ''),
-                'country': data['address'].get('country', ''),
-                'postalCode': data['address'].get('postalCode', ''),
-                'preferred': True
-            }]
-        
-        # 🔥 수정: patient_id를 식별자로 사용
-        identifier_type = api.get_default_identifier_type()
-        location = api.get_default_location()
-        
-        if identifier_type and location:
-            patient_data['identifiers'] = [{
-                'identifier': patient_id,  # React에서 입력받거나 자동 생성된 ID
-                'identifierType': identifier_type,
-                'location': location,
-                'preferred': True
-            }]
-            logger.info(f"식별자 정보 추가: {patient_data['identifiers']}")
-        else:
-            logger.warning("기본 식별자 타입 또는 위치를 찾을 수 없음")
-        
-        logger.info(f"OpenMRS로 전송할 데이터: {patient_data}")
-        
-        # 환자 생성
-        result = api.create_patient(patient_data)
+        # 🔥 수정된 API 호출
+        result = api.create_patient_with_identifier(data, patient_identifier)
         
         if result is None:
             return Response({
@@ -253,7 +257,7 @@ def create_patient(request):
                 'error': '환자 생성에 실패했습니다.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        # 🔥 추가: patient_id를 응답에 포함
+        # 🔥 수정된 응답 데이터
         response_data = {
             'success': True,
             'message': '환자가 성공적으로 생성되었습니다',
@@ -261,17 +265,12 @@ def create_patient(request):
                 'uuid': result.get('uuid'),
                 'display': result.get('display'),
                 'identifiers': result.get('identifiers', []),
-                'dicom_patient_id': patient_id  # 🔥 추가: DICOM 매핑용 patient_id
+                'patient_identifier': patient_identifier,  # 🔥 핵심: DICOM 매핑용 patient_identifier
+                'internal_id': result.get('uuid')  # OpenMRS 내부 UUID
             }
         }
         
-        # 🔥 추가: 매핑 테이블에 patient_id 정보 저장 (optional)
-        # 나중에 DICOM 업로드 시 이 정보를 사용할 수 있음
-        try:
-            # 별도 테이블에 DICOM patient_id와 OpenMRS UUID 관계 저장 (필요시)
-            logger.info(f"환자 생성 완료 - OpenMRS UUID: {result.get('uuid')}, DICOM Patient ID: {patient_id}")
-        except Exception as e:
-            logger.warning(f"매핑 정보 저장 실패 (비중요): {e}")
+        logger.info(f"환자 생성 완료 - OpenMRS UUID: {result.get('uuid')}, Patient Identifier: {patient_identifier}")
         
         return Response(response_data, status=status.HTTP_201_CREATED)
         
@@ -1114,3 +1113,252 @@ def get_mapping_test_status(request):
             'success': False,
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_all_patients_simple(request):
+    """간단한 환자 목록 조회 (커스텀 REST API 기반)"""
+    try:
+        logger.info("=== 커스텀 환자 목록 조회 시작 ===")
+
+        try:
+            openmrs_config = settings.EXTERNAL_SERVICES['openmrs']
+            logger.info(f"OpenMRS 설정: {openmrs_config}")
+        except Exception as e:
+            logger.error(f"설정 오류: {e}")
+            return Response({'success': False, 'error': f'OpenMRS 설정 오류: {str(e)}'}, status=500)
+
+        # 파라미터 설정
+        limit = request.GET.get('limit', '20')
+        start_index = request.GET.get('startIndex', '0')
+
+        openmrs_host = openmrs_config['host']
+        openmrs_port = openmrs_config['port']
+        openmrs_username = openmrs_config['username']
+        openmrs_password = openmrs_config['password']
+
+        api_url = f"http://{openmrs_host}:{openmrs_port}/openmrs/ws/rest/v1/custompatient"
+        params = {
+            'limit': limit,
+            'startIndex': start_index
+        }
+
+        logger.info(f"커스텀 API 요청: {api_url} with params: {params}")
+
+        auth = HTTPBasicAuth(openmrs_username, openmrs_password)
+        response = requests.get(api_url, params=params, auth=auth, headers={'Accept': 'application/json'}, timeout=30)
+
+        logger.info(f"OpenMRS 응답 상태: {response.status_code}")
+
+        if response.status_code != 200:
+            logger.error(f"OpenMRS API 오류: {response.status_code} - {response.text}")
+            return Response({'success': False, 'error': f'OpenMRS API 오류: {response.status_code}'}, status=500)
+
+        data = response.json()
+        results = data.get('results', [])
+
+        logger.info(f"총 환자 수: {len(results)}명")
+
+        return Response({
+            'success': True,
+            'results': results,
+            'total': len(results),
+            'limit': int(limit),
+            'startIndex': int(start_index)
+        })
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"OpenMRS 서버 요청 실패: {e}")
+        return Response({'success': False, 'error': f'OpenMRS 서버 요청 실패: {str(e)}'}, status=500)
+
+    except Exception as e:
+        logger.error(f"전체 오류: {e}", exc_info=True)
+        return Response({'success': False, 'error': f'서버 내부 오류: {str(e)}'}, status=500)
+
+
+def calculate_age_from_birthdate(birthdate):
+    """생년월일로 나이 계산"""
+    try:
+        from datetime import datetime
+        if isinstance(birthdate, str) and birthdate:
+            birth_date = datetime.strptime(birthdate.split('T')[0], '%Y-%m-%d')
+            today = datetime.today()
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            return age
+    except:
+        pass
+    return None
+
+
+@api_view(['GET'])
+def get_mapping_status(request):
+    """현재 매핑 상태 확인"""
+    try:
+        from .models import PatientMapping
+        
+        # 전체 매핑 통계
+        total_mappings = PatientMapping.objects.filter(is_active=True).count()
+        auto_mappings = PatientMapping.objects.filter(is_active=True, mapping_type='AUTO').count()
+        manual_mappings = PatientMapping.objects.filter(is_active=True, mapping_type='MANUAL').count()
+        
+        # 최근 매핑들
+        recent_mappings = PatientMapping.objects.filter(is_active=True).order_by('-created_date')[:10]
+        
+        mapping_list = []
+        for mapping in recent_mappings:
+            mapping_list.append({
+                'mapping_id': mapping.mapping_id,
+                'orthanc_patient_id': mapping.orthanc_patient_id,
+                'openmrs_patient_uuid': mapping.openmrs_patient_uuid,
+                'mapping_type': mapping.mapping_type,
+                'sync_status': mapping.sync_status,
+                'created_date': mapping.created_date.isoformat() if mapping.created_date else None,
+                'notes': mapping.notes
+            })
+        
+        return Response({
+            'success': True,
+            'statistics': {
+                'total_mappings': total_mappings,
+                'auto_mappings': auto_mappings,
+                'manual_mappings': manual_mappings
+            },
+            'recent_mappings': mapping_list
+        })
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@api_view(['POST'])
+def create_test_mapping(request):
+    """테스트 매핑 생성"""
+    try:
+        openmrs_uuid = request.data.get('openmrs_uuid')
+        patient_id = request.data.get('patient_id')
+        
+        if not openmrs_uuid or not patient_id:
+            return Response({
+                'success': False,
+                'error': 'openmrs_uuid와 patient_id가 필요합니다'
+            }, status=400)
+        
+        # 테스트 DICOM 생성 및 업로드 로직은 여기서 구현
+        # 지금은 간단한 응답만
+        
+        return Response({
+            'success': True,
+            'message': f'테스트 매핑 준비 완료',
+            'openmrs_uuid': openmrs_uuid,
+            'patient_id': patient_id
+        })
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+        
+        
+# openmrs_integration/views.py (또는 유사한 앱의 views.py)
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+# openmrs_models 앱의 모델들을 가져옵니다.
+# 경로는 실제 프로젝트 구조에 맞게 수정해야 할 수 있습니다.
+# 예를 들어, openmrs_models 앱이 backend 디렉토리 바로 아래에 있다면:
+# from backend.openmrs_models.models import Patient, Person, PersonName, PatientIdentifier
+# 또는 settings.py에 openmrs_models가 INSTALLED_APPS에 등록되어 있다면:
+from openmrs_models.models import Patient, Person # PersonName, PatientIdentifier 등 필요에 따라 추가
+
+@api_view(['GET'])
+def get_all_openmrs_patients(request):
+    try:
+        patients_data = []
+        # Patient 모델을 기준으로 모든 환자(Person) 정보를 가져옵니다.
+        # select_related를 사용하여 관련된 Person 객체를 한 번의 쿼리로 가져옵니다.
+        all_patient_entries = Patient.objects.select_related('patient_id').filter(voided=False)
+
+        for patient_entry in all_patient_entries:
+            person = patient_entry.patient_id  # patient_id는 Person 객체입니다.
+
+            # 활성화된 이름 가져오기 (Patient 모델에 get_active_name 메서드가 있다고 가정)
+            active_name_obj = patient_entry.get_active_name()
+            full_name = active_name_obj.get_full_name() if active_name_obj else "N/A"
+
+            # 주요 식별자 가져오기 (PatientIdentifier 모델 사용, 여기서는 간단히 Person의 uuid 사용)
+            # 실제로는 PatientIdentifier 모델을 쿼리하여 원하는 타입의 식별자를 가져와야 합니다.
+            # 예: PatientIdentifier.objects.filter(patient=patient_entry, preferred=True).first()
+            identifier = person.uuid # 예시로 Person의 UUID를 사용
+
+            patients_data.append({
+                "uuid": person.uuid,
+                "identifier": identifier, # 실제 식별자 로직으로 대체 필요
+                "display": full_name, # OpenMRS REST API의 'display' 필드와 유사하게
+                "person": { # 중첩된 person 객체 구조를 맞추기 위함
+                    "display": full_name,
+                    "gender": person.gender,
+                    "birthdate": person.birthdate,
+                    # 필요에 따라 Person의 다른 필드 추가
+                },
+                "identifiers": [{ # OpenMRS REST API 응답 형식과 유사하게 맞추려면
+                    "identifier": identifier # 실제 식왠자 로직으로 대체 필요
+                }]
+                # 필요한 다른 최상위 필드 (예: auditInfo 등은 여기서는 생략)
+            })
+
+        # 프론트엔드가 `response.data.results`를 기대하고 있다면 아래와 같이 수정
+        # return Response({"results": patients_data}, status=status.HTTP_200_OK)
+        # 만약 `response.data`가 바로 배열이길 기대한다면:
+        return Response(patients_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        # 실제 운영에서는 더 구체적인 오류 로깅 및 처리가 필요
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+    
+
+from medical_integration.models import Provider, Person
+
+
+@api_view(['GET'])
+def get_all_openmrs_providers(request):
+    try:
+        providers_data = []
+
+        # 모든 Provider 정보 (voided 되지 않은 것만)
+        all_providers = Provider.objects.select_related('person').filter(retired=False)
+
+        for provider in all_providers:
+            person = provider.person
+
+            if person:
+                full_name = person.get_full_name() if hasattr(person, 'get_full_name') else str(person)
+                providers_data.append({
+                    "uuid": provider.uuid,
+                    "identifier": provider.identifier,
+                    "display": full_name,
+                    "person": {
+                        "display": full_name,
+                        "gender": person.gender,
+                        "birthdate": person.birthdate,
+                    }
+                })
+            else:
+                # 연결 안 된 provider 처리
+                providers_data.append({
+                    "uuid": provider.uuid,
+                    "identifier": provider.identifier,
+                    "display": "Unlinked Provider",
+                    "person": None
+                })
+
+        return Response(providers_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'orders',
     'samples',
     'tests',
+    'lis_cdss',
     'ocs',
 ]
 

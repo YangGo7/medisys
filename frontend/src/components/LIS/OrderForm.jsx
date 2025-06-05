@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { saveLog } from '../../saveLog'; // log 저장
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
+// log
+import { saveLog } from '../utils/saveLog';
 
 const OrderForm = () => {
   const [aliasOptions, setAliasOptions] = useState([]);
@@ -60,25 +62,13 @@ const OrderForm = () => {
       alert('✅ 주문 생성 성공!');
       console.log('Created:', res.data);
 
-      // 여기! 버튼 누른 후 성공했을 때 
-      // 👇 saveLog 호출 시도
-      const patientName = localStorage.getItem('selectedPatientName') || '-';
-      const doctorName = localStorage.getItem('username') || '-';
-
-      if ([patientId, patientName, doctorId, doctorName, selectedAlias, collectionDate].every(Boolean)) {
-        console.log('📡 saveLog 호출 시도!');
-        saveLog(
-          patientId,
-          patientName,
-          doctorId,
-          doctorName,
-          '검사 오더',
-          `LIS 오더 생성: ${selectedAlias}, 주문날짜: ${collectionDate}`
-        );
-      } else {
-        console.warn('❗ 로그 저장 조건 부족. 생략됨');
-      }
-
+      // 로그 저장
+      saveLog({
+        patient_id: patientId,
+        doctor_id: doctorId,
+        request_type: '오더 생성',
+        request_detail: `검사: ${selectedAlias}, 날짜: ${orderDate}`,
+      }); // 
 
       navigate('/');
     } catch (err) {

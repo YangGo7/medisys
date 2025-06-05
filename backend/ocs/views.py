@@ -27,28 +27,26 @@ class OCSLogListAPIView(ListAPIView):
 def create_log_view(request):
     try:
         data = request.data
-        patient_id = data.get('patient_id')
-        doctor_id = data.get('doctor_id')
-        request_type = data.get('request_type')
-        request_detail = data.get('request_detail')
-
+        patient_id = data.get('patient_id', '')
+        patient_name = data.get('patient_name', '')
+        doctor_id = data.get('doctor_id', '')
+        doctor_name = data.get('doctor_name', '')
+        request_type = data.get('request_type', '')
+        request_detail = data.get('request_detail', '')
+        
         if not all([patient_id, doctor_id, request_type, request_detail]):
             return Response({"error": "필수 필드 누락"}, status=400)
 
-        client = MongoClient("mongodb://ocs_user:ocs_pass@localhost:27017/?authSource=ocslog")
-        db = client["ocslog"]
-        logs_collection = db["logs"]
+        log = OCSLog.objects.create(
+            patient_id=patient_id,
+            patient_name=patient_name,
+            doctor_id=doctor_id,
+            doctor_name=doctor_name,
+            request_type=request_type,
+            request_detail=request_detail
+        )
 
-        log_data = {
-            "patient_id": patient_id,
-            "doctor_id": doctor_id,
-            "request_type": request_type,
-            "request_detail": request_detail,
-            "timestamp": datetime.utcnow()
-        }
-
-        result = logs_collection.insert_one(log_data)
-        return Response({"message": "로그 저장 완료", "inserted_id": str(result.inserted_id)}, status=201)
+        return Response({"message": "로그 저장 완료", "log_id": log.id}, status=201)
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)

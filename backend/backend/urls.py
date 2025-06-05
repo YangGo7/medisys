@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/tests/', include('tests.urls')),
     path('api/logs/', include('ocs.urls')),
     path('api/account/', include('accounts.urls')),
+    path('api/cdss/', include('lis_cdss.urls')),
     
     # OpenMRS 직접 연결 (호환성 유지)
     path('api/openmrs-vitals/', openmrs_vitals, name='openmrs_vitals'),

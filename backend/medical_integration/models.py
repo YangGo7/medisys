@@ -1,4 +1,4 @@
-# backend/medical_integration/models.py (업데이트)
+# backend/medical_integration/models.py (PatientMapping 모델 수정)
 
 from django.db import models
 from django.utils import timezone
@@ -8,24 +8,26 @@ import logging
 logger = logging.getLogger('medical_integration')
 
 class PatientMapping(models.Model):
-    """OpenMRS와 Orthanc 환자 ID 간의 매핑 (향상된 버전)"""
+    """🔥 수정: OpenMRS patient_identifier와 Orthanc 환자 ID 간의 매핑"""
     SYNC_STATUS_CHOICES = [
         ('PENDING', '대기중'),
         ('SYNCED', '동기화됨'),
         ('ERROR', '오류'),
         ('AUTO_MAPPED', '자동매핑됨'),
         ('MANUAL_MAPPED', '수동매핑됨'),
+        ('IDENTIFIER_MATCHED', 'Patient ID 매칭됨'),  # 🔥 추가
     ]
 
     MAPPING_TYPE_CHOICES = [
         ('AUTO', '자동'),
         ('MANUAL', '수동'),
         ('BATCH', '일괄'),
+        ('IDENTIFIER_BASED', 'Patient ID 기반'),  # 🔥 추가
     ]
 
     mapping_id = models.AutoField(primary_key=True)
     
-    # 외래키 대신 문자열 ID로 저장 (다른 DB 테이블이므로)
+    # 외래키 대신 문자열 ID로 저장
     orthanc_patient_id = models.CharField(
         max_length=255, 
         verbose_name='Orthanc 환자 PublicId',
@@ -37,9 +39,19 @@ class PatientMapping(models.Model):
         db_index=True
     )
     
+    # 🔥 핵심 추가: Patient Identifier 필드
+    patient_identifier = models.CharField(
+        max_length=255,
+        verbose_name='Patient Identifier (DICOM Patient ID)',
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text='DICOM Patient ID 또는 OpenMRS Patient Identifier'
+    )
+    
     # 매핑 타입 및 상태
     mapping_type = models.CharField(
-        max_length=10,
+        max_length=20,  # 🔥 길이 증가
         choices=MAPPING_TYPE_CHOICES,
         default='MANUAL',
         verbose_name='매핑 타입'
@@ -91,6 +103,7 @@ class PatientMapping(models.Model):
         indexes = [
             models.Index(fields=['orthanc_patient_id']),
             models.Index(fields=['openmrs_patient_uuid']),
+            models.Index(fields=['patient_identifier']),  # 🔥 추가
             models.Index(fields=['created_date']),
             models.Index(fields=['last_sync']),
             models.Index(fields=['sync_status']),
@@ -99,7 +112,8 @@ class PatientMapping(models.Model):
         ]
 
     def __str__(self):
-        return f"매핑({self.mapping_type}): Orthanc {self.orthanc_patient_id} -> OpenMRS {self.openmrs_patient_uuid}"
+        identifier_info = f" (ID: {self.patient_identifier})" if self.patient_identifier else ""
+        return f"매핑({self.mapping_type}): Orthanc {self.orthanc_patient_id} -> OpenMRS {self.openmrs_patient_uuid}{identifier_info}"
 
     def update_sync_time(self, status='SYNCED', error_message=None, confidence_score=None):
         """동기화 상태 및 시간 업데이트"""
@@ -116,7 +130,7 @@ class PatientMapping(models.Model):
         self.save(update_fields=['mapping_criteria'])
 
     def get_mapping_criteria_display(self):
-        """매핑 기준 정보를 읽기 쉬운 형태로 반환"""
+        """🔥 수정: patient_identifier 기반 매핑 기준 정보 표시"""
         if not self.mapping_criteria:
             return "기준 정보 없음"
         
@@ -124,14 +138,20 @@ class PatientMapping(models.Model):
             criteria = self.mapping_criteria if isinstance(self.mapping_criteria, dict) else json.loads(self.mapping_criteria)
             display_parts = []
             
-            if criteria.get('matched_by_patient_id'):
-                display_parts.append("환자ID 일치")
+            # 🔥 Patient Identifier 매칭 우선 표시
+            if criteria.get('matched_by_identifier') or criteria.get('dicom_patient_identifier'):
+                display_parts.append(f"Patient ID 일치 ({criteria.get('dicom_patient_identifier', 'N/A')})")
+            
             if criteria.get('matched_by_name'):
                 display_parts.append(f"이름 일치 ({criteria.get('name_similarity', 0):.2f})")
             if criteria.get('matched_by_birth_date'):
                 display_parts.append("생년월일 일치")
             if criteria.get('matched_by_gender'):
                 display_parts.append("성별 일치")
+            
+            # 매핑 방법 표시
+            if criteria.get('mapping_method'):
+                display_parts.append(f"방법: {criteria.get('mapping_method')}")
             
             return ", ".join(display_parts) if display_parts else "기타 기준"
         except:
@@ -143,28 +163,12 @@ class PatientMapping(models.Model):
         return cls.objects.filter(is_active=True)
 
     @classmethod
-    def get_pending_mappings(cls):
-        """대기 중인 매핑만 조회"""
-        return cls.objects.filter(sync_status='PENDING', is_active=True)
-
-    @classmethod
-    def get_error_mappings(cls):
-        """오류 상태의 매핑만 조회"""
-        return cls.objects.filter(sync_status='ERROR', is_active=True)
-
-    @classmethod
-    def get_auto_mappings(cls):
-        """자동 생성된 매핑만 조회"""
-        return cls.objects.filter(mapping_type='AUTO', is_active=True)
-
-    @classmethod
-    def get_high_confidence_mappings(cls, threshold=0.8):
-        """높은 신뢰도의 매핑만 조회"""
+    def get_identifier_based_mappings(cls):
+        """🔥 추가: Patient Identifier 기반 매핑만 조회"""
         return cls.objects.filter(
-            mapping_type='AUTO',
-            confidence_score__gte=threshold,
+            mapping_type='IDENTIFIER_BASED',
             is_active=True
-        )
+        ).exclude(patient_identifier__isnull=True)
 
     @classmethod
     def find_by_orthanc_id(cls, orthanc_id):
@@ -179,6 +183,14 @@ class PatientMapping(models.Model):
         """OpenMRS Patient UUID로 매핑 찾기"""
         return cls.objects.filter(
             openmrs_patient_uuid=openmrs_uuid, 
+            is_active=True
+        ).first()
+
+    @classmethod
+    def find_by_patient_identifier(cls, patient_identifier):
+        """🔥 추가: Patient Identifier로 매핑 찾기"""
+        return cls.objects.filter(
+            patient_identifier=patient_identifier,
             is_active=True
         ).first()
 
@@ -203,7 +215,7 @@ class PatientMapping(models.Model):
             return None
 
     def validate_mapping(self):
-        """매핑된 환자들이 실제로 존재하는지 검증"""
+        """🔥 수정: patient_identifier 포함 매핑 검증"""
         errors = []
         
         # Orthanc 환자 존재 확인
@@ -216,25 +228,29 @@ class PatientMapping(models.Model):
         if not openmrs_info:
             errors.append(f"OpenMRS 환자를 찾을 수 없습니다: {self.openmrs_patient_uuid}")
         
+        # 🔥 Patient Identifier 일치성 확인
+        if self.patient_identifier and orthanc_info and openmrs_info:
+            # Orthanc의 Patient ID 확인
+            orthanc_patient_id = orthanc_info.get('MainDicomTags', {}).get('PatientID', '')
+            if orthanc_patient_id != self.patient_identifier:
+                errors.append(f"Orthanc Patient ID 불일치: {orthanc_patient_id} != {self.patient_identifier}")
+            
+            # OpenMRS의 patient_identifier 확인
+            from .openmrs_api import OpenMRSAPI
+            api = OpenMRSAPI()
+            patient_by_identifier = api.get_patient_by_identifier(self.patient_identifier)
+            if not patient_by_identifier or patient_by_identifier.get('uuid') != self.openmrs_patient_uuid:
+                errors.append(f"OpenMRS Patient Identifier 불일치: {self.patient_identifier}")
+        
         return errors
 
-    def get_dicom_studies_count(self):
-        """연결된 DICOM Study 수 조회"""
-        try:
-            from .orthanc_api import OrthancAPI
-            api = OrthancAPI()
-            studies = api.get_patient_studies(self.orthanc_patient_id)
-            return len(studies) if studies else 0
-        except Exception as e:
-            logger.error(f"DICOM Study 수 조회 실패: {e}")
-            return 0
-
     def get_mapping_summary(self):
-        """매핑 요약 정보 반환"""
+        """🔥 수정: patient_identifier 포함 매핑 요약 정보"""
         return {
             'mapping_id': self.mapping_id,
             'orthanc_patient_id': self.orthanc_patient_id,
             'openmrs_patient_uuid': self.openmrs_patient_uuid,
+            'patient_identifier': self.patient_identifier,  # 🔥 추가
             'mapping_type': self.get_mapping_type_display(),
             'sync_status': self.get_sync_status_display(),
             'confidence_score': self.confidence_score,
@@ -247,54 +263,38 @@ class PatientMapping(models.Model):
         }
 
     @classmethod
-    def create_auto_mapping(cls, orthanc_patient_id, openmrs_patient_uuid, 
-                           confidence_score=None, criteria=None, created_by='auto_system'):
-        """자동 매핑 생성 헬퍼 메서드"""
+    def create_identifier_based_mapping(cls, orthanc_patient_id, openmrs_patient_uuid, 
+                                      patient_identifier, confidence_score=None, 
+                                      criteria=None, created_by='identifier_mapper'):
+        """🔥 추가: Patient Identifier 기반 매핑 생성"""
         try:
             mapping = cls.objects.create(
                 orthanc_patient_id=orthanc_patient_id,
                 openmrs_patient_uuid=openmrs_patient_uuid,
-                mapping_type='AUTO',
-                sync_status='AUTO_MAPPED',
-                confidence_score=confidence_score,
+                patient_identifier=patient_identifier,
+                mapping_type='IDENTIFIER_BASED',
+                sync_status='IDENTIFIER_MATCHED',
+                confidence_score=confidence_score or 0.9,  # identifier 매칭은 높은 신뢰도
                 mapping_criteria=criteria,
                 created_by=created_by
             )
-            logger.info(f"자동 매핑 생성됨: {mapping}")
+            logger.info(f"Patient Identifier 기반 매핑 생성: {mapping}")
             return mapping
         except Exception as e:
-            logger.error(f"자동 매핑 생성 실패: {e}")
-            return None
-
-    @classmethod
-    def create_manual_mapping(cls, orthanc_patient_id, openmrs_patient_uuid, 
-                             created_by='manual_user', notes=None):
-        """수동 매핑 생성 헬퍼 메서드"""
-        try:
-            mapping = cls.objects.create(
-                orthanc_patient_id=orthanc_patient_id,
-                openmrs_patient_uuid=openmrs_patient_uuid,
-                mapping_type='MANUAL',
-                sync_status='MANUAL_MAPPED',
-                created_by=created_by,
-                notes=notes
-            )
-            logger.info(f"수동 매핑 생성됨: {mapping}")
-            return mapping
-        except Exception as e:
-            logger.error(f"수동 매핑 생성 실패: {e}")
+            logger.error(f"Patient Identifier 기반 매핑 생성 실패: {e}")
             return None
 
     @classmethod
     def get_mapping_statistics(cls):
-        """매핑 통계 정보 반환"""
+        """🔥 수정: patient_identifier 기반 통계 포함"""
         from django.db.models import Count, Avg
         
         stats = cls.objects.filter(is_active=True).aggregate(
             total_mappings=Count('mapping_id'),
             auto_mappings=Count('mapping_id', filter=models.Q(mapping_type='AUTO')),
             manual_mappings=Count('mapping_id', filter=models.Q(mapping_type='MANUAL')),
-            avg_confidence=Avg('confidence_score', filter=models.Q(mapping_type='AUTO'))
+            identifier_mappings=Count('mapping_id', filter=models.Q(mapping_type='IDENTIFIER_BASED')),  # 🔥 추가
+            avg_confidence=Avg('confidence_score', filter=models.Q(mapping_type__in=['AUTO', 'IDENTIFIER_BASED']))
         )
         
         # 상태별 통계
@@ -309,6 +309,28 @@ class PatientMapping(models.Model):
             'total_mappings': stats['total_mappings'] or 0,
             'auto_mappings': stats['auto_mappings'] or 0,
             'manual_mappings': stats['manual_mappings'] or 0,
+            'identifier_mappings': stats['identifier_mappings'] or 0,  # 🔥 추가
             'average_confidence': round(stats['avg_confidence'] or 0, 3),
             'status_breakdown': status_stats
         }
+        
+
+from django.db import models
+
+class Person(models.Model):
+    uuid = models.CharField(max_length=38, primary_key=True)
+    gender = models.CharField(max_length=1, null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.uuid}"
+
+
+class Provider(models.Model):
+    uuid = models.CharField(max_length=38, primary_key=True)
+    identifier = models.CharField(max_length=255)
+    person = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='providers')
+    retired = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.identifier

@@ -35,12 +35,27 @@ def get_test_types_by_alias(request):
         return Response({'error': 'sample_type과 alias_name 모두 필요합니다.'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    test_types = LOINCCode.objects.filter(
-        sample_type=sample_type,
-        name__icontains=alias_name  # 또는 다른 로직으로도 OK
-    ).values_list('test_type', flat=True).distinct()
+    try:
+        mapping = AliasMapping.objects.filter(
+            sample_type=sample_type,
+            alias_name=alias_name
+        ).first()
 
-    return Response(list(test_types))
+        if not mapping:
+            return Response([], status=status.HTTP_200_OK)
+
+        keywords = mapping.test_type_keywords.split(',') if mapping.test_type_keywords else []
+
+        test_types = LOINCCode.objects.filter(
+            sample_type=sample_type,
+            test_type__in=keywords
+        ).values_list('test_type', flat=True).distinct()
+
+        return Response(list(test_types))
+    except Exception as e:
+        print("❌ 검사 종류 로딩 실패:", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 def get_loinc_by_sample_type(request):

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
+// log 
+import { saveLog } from '../utils/saveLog';
+
 const SampleForm = () => {
   const navigate = useNavigate();
   const [aliasMappings, setAliasMappings] = useState({});
@@ -75,11 +78,12 @@ const SampleForm = () => {
     const payload = {
       order: parseInt(orderId),
       sample_type: sampleType,
-      test_type: selectedAlias,
+      test_type: selectedTestType,  // ✅ 고침
       collection_date: collectionDate,
       loinc_code: loincCode,
       sample_status: sampleStatus
     };
+
 
     console.log('📦 보낼 payload:', payload);
 
@@ -91,6 +95,22 @@ const SampleForm = () => {
       );
       alert('✅ 샘플 등록 성공!');
       console.log('🎉 등록된 샘플:', res.data);
+
+       // 로그 저장 추가
+      const doctor_id = localStorage.getItem('doctor_id') || 'UNKNOWN';
+      const doctor_name = localStorage.getItem('doctor_name') || '';
+      const patient_id = res.data?.patient_id || 'UNKNOWN'; // 응답에 patient_id가 포함돼 있을 경우
+      const patient_name = res.data?.patient_name || '';
+
+      saveLog({
+        patient_id,
+        patient_name,
+        doctor_id,
+        doctor_name,
+        request_type: '샘플 등록',
+        request_detail: `샘플 종류: ${sampleType}, 검사: ${selectedAlias}, 세부: ${selectedTestType}, LOINC: ${loincCode}`,
+      }); // 
+
 
       navigate('/');
     } catch (error) {

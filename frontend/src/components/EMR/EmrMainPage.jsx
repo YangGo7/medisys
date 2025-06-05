@@ -1,4 +1,4 @@
-// src/components/EMR/EmrMainPage.jsx - 영상검사 요청 패널 추가
+// src/components/EMR/EmrMainPage.jsx - 설정 컴포넌트 통합버전
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import ChartHeader from './ChartHeader';
@@ -6,8 +6,14 @@ import WaitingRoom from './WaitingRoom';
 import PatientInfoPanel from './PatientInfoPanel';
 import VisitHistoryPanel from './VisitHistoryPanel';
 import DiagnosisPanel from './DiagnosisPanel';
-import ImagingRequestPanel from './ImagingRequestPanel'; // 새로 추가
+import ImagingRequestPanel from './ImagingRequestPanel';
 import PatientDetailModal from './PatientDetailModal';
+
+// 🧩 추가된 설정 컴포넌트들
+import ThemeSettings from './Settings/ThemeSettings';
+import LogViewer from './Settings/LogViewer';
+import HelpGuide from './Settings/HelpGuide';
+import { saveLog } from '../utils/saveLog';
 
 const EmrMainPage = () => {
   const [activeTab, setActiveTab] = useState('진료');
@@ -19,6 +25,21 @@ const EmrMainPage = () => {
     if (!selectedPatient) return;
     setAssignedPatients((prev) => ({ ...prev, [roomNumber]: selectedPatient }));
     setSelectedPatient(null);
+    // 로그 저장
+    const doctor_id = localStorage.getItem('doctor_id') || 'UNKNOWN';
+    const doctor_name = localStorage.getItem('doctor_name') || '';
+
+    const patient_id = selectedPatient?.id || selectedPatient?.patient_id || 'UNKNOWN';
+    const patient_name = selectedPatient?.name || selectedPatient?.patient_name || '';
+
+    saveLog({
+      patient_id,
+      patient_name,
+      doctor_id,
+      doctor_name,
+      request_type: '진료실 배정',
+      request_detail: `${roomNumber} 진료실로 배정됨`,
+    }); // 
   };
 
   const openModal = () => {
@@ -44,7 +65,9 @@ const EmrMainPage = () => {
         <div style={pageContainerStyle}>
           <h2 style={pageTitleStyle}>⚙️ 설정 페이지</h2>
           <div style={cardStyle}>
-            <p>사용자 환경 설정, 권한 관리 등의 기능이 들어갈 수 있습니다.</p>
+            <ThemeSettings />
+            <LogViewer />
+            <HelpGuide />
           </div>
         </div>
       );
@@ -76,10 +99,9 @@ const EmrMainPage = () => {
             )}
           </div>
 
-          {/* 🔥 새로 추가: 영상검사 요청 패널 */}
           <div style={cardStyle}>
             <h3 style={cardTitleStyle}>🏥 영상검사 요청</h3>
-            <ImagingRequestPanel 
+            <ImagingRequestPanel
               selectedPatient={selectedPatient}
               onRequestSuccess={(result) => {
                 console.log('🎉 영상검사 요청 성공:', result);
@@ -145,7 +167,8 @@ const cardStyle = {
   backgroundColor: '#fff',
   boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
   transition: 'box-shadow 0.2s ease',
-  minHeight: '200px'
+  minHeight: '200px',
+  marginBottom: '1.5rem'
 };
 
 const cardTitleStyle = {

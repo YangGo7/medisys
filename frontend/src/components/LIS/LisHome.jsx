@@ -21,6 +21,9 @@ const LisHome = () => {
         <li>
           <Link to="/result/new">🔬 결과 기록하기</Link>
         </li>
+        <li>
+          <Link to="/results">📊 결과 확인</Link>
+        </li>
       </ul>
     </div>
   );

@@ -1,4 +1,4 @@
-// frontend/src/components/EMR/PatientRegistrationForm.jsx
+// frontend/src/components/EMR/PatientRegistrationForm.jsx (수정된 버전)
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -9,6 +9,9 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
     familyName: '',
     gender: 'M',
     birthdate: '',
+    
+    // 🔥 핵심 추가: patient_identifier 입력 필드
+    patient_identifier: '',
     
     // 선택 필드
     middleName: '',
@@ -57,6 +60,21 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
     if (!formData.familyName.trim()) newErrors.familyName = '성을 입력해주세요';
     if (!formData.birthdate) newErrors.birthdate = '생년월일을 입력해주세요';
 
+    // 🔥 Patient Identifier 검증
+    if (formData.patient_identifier.trim()) {
+      const identifier = formData.patient_identifier.trim();
+      // 기본적인 형식 검증 (영문, 숫자, 하이픈 허용)
+      if (!/^[A-Za-z0-9\-_]+$/.test(identifier)) {
+        newErrors.patient_identifier = 'Patient ID는 영문, 숫자, 하이픈(-), 언더스코어(_)만 사용 가능합니다';
+      }
+      if (identifier.length < 3) {
+        newErrors.patient_identifier = 'Patient ID는 최소 3자 이상이어야 합니다';
+      }
+      if (identifier.length > 50) {
+        newErrors.patient_identifier = 'Patient ID는 최대 50자까지 가능합니다';
+      }
+    }
+
     // 생년월일 유효성 검사
     if (formData.birthdate) {
       const birthDate = new Date(formData.birthdate);
@@ -71,6 +89,21 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const generateSampleIdentifier = () => {
+    // 🔥 샘플 Patient Identifier 생성 (사용자가 참고용으로 사용)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    
+    const sampleId = `P${year}${month}${day}${random}`;
+    setFormData(prev => ({
+      ...prev,
+      patient_identifier: sampleId
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -95,19 +128,25 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
       const response = await axios.post(`${API_BASE}openmrs/patients/create/`, submitData);
 
       if (response.data.success) {
-        alert(`환자가 성공적으로 등록되었습니다!\nUUID: ${response.data.patient.uuid}\n환자번호: ${response.data.patient.identifiers[0]?.identifier}`);
+        const patientInfo = response.data.patient;
+        
+        alert(`환자가 성공적으로 등록되었습니다!\n` +
+              `Patient ID: ${patientInfo.patient_identifier}\n` +
+              `UUID: ${patientInfo.uuid}\n` +
+              `환자명: ${formData.givenName} ${formData.familyName}`);
         
         // 등록된 환자 정보를 부모 컴포넌트에 전달
         if (onPatientCreated) {
-          // 새로 등록된 환자 정보를 검색해서 전달
           const newPatient = {
-            uuid: response.data.patient.uuid,
+            uuid: patientInfo.uuid,
+            patient_identifier: patientInfo.patient_identifier, // 🔥 핵심
             display: `${formData.givenName} ${formData.familyName}`,
             person: {
               gender: formData.gender,
               birthdate: formData.birthdate,
               age: calculateAge(formData.birthdate)
-            }
+            },
+            identifiers: patientInfo.identifiers || []
           };
           onPatientCreated(newPatient);
         }
@@ -140,7 +179,6 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
     return age;
   };
 
-
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
@@ -156,6 +194,44 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
+          {/* 🔥 Patient Identifier 섹션 - 최상단에 추가 */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>🆔 Patient ID (DICOM 매핑용)</h3>
+            
+            <div style={styles.row}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  Patient ID
+                  <span style={styles.optional}> (선택사항)</span>
+                </label>
+                <div style={styles.inputGroup}>
+                  <input
+                    type="text"
+                    name="patient_identifier"
+                    value={formData.patient_identifier}
+                    onChange={handleChange}
+                    style={{
+                      ...styles.input,
+                      ...(errors.patient_identifier ? styles.inputError : {})
+                    }}
+                    placeholder="P003, DCM001, PATIENT123 등"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateSampleIdentifier}
+                    style={styles.generateButton}
+                  >
+                    자동생성
+                  </button>
+                </div>
+                {errors.patient_identifier && <span style={styles.errorText}>{errors.patient_identifier}</span>}
+                <div style={styles.helpText}>
+                  DICOM 파일의 Patient ID와 매핑됩니다. 비워두면 자동 생성됩니다.
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 기본 정보 섹션 */}
           <div style={styles.section}>
             <h3 style={styles.sectionTitle}>기본 정보</h3>
@@ -254,11 +330,9 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
                 />
               </div>
             </div>
-
-            
           </div>
 
-          {/* 주소 정보 섹션 */}
+          {/* 주소 정보 섹션 (기존과 동일) */}
           <div style={styles.section}>
             <h3 style={styles.sectionTitle}>주소 정보 (선택사항)</h3>
             
@@ -387,7 +461,7 @@ const styles = {
     backgroundColor: 'white',
     borderRadius: '12px',
     width: '100%',
-    maxWidth: '800px',
+    maxWidth: '900px',
     maxHeight: '90vh',
     overflowY: 'auto',
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
@@ -452,6 +526,10 @@ const styles = {
   required: {
     color: '#dc3545'
   },
+  optional: {
+    color: '#6c757d',
+    fontWeight: 'normal'
+  },
   input: {
     padding: '10px 12px',
     border: '2px solid #ced4da',
@@ -475,7 +553,16 @@ const styles = {
     display: 'flex',
     gap: '8px'
   },
-
+  generateButton: {
+    padding: '10px 16px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '12px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap'
+  },
   helpText: {
     fontSize: '12px',
     color: '#6c757d',

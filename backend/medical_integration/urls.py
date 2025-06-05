@@ -2,7 +2,7 @@
 
 from django.urls import path
 from . import views
-
+from .views import get_all_openmrs_patients
 app_name = 'medical_integration'
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
     path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
     path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
+    path('openmrs/patients/', views.get_all_patients_simple, name='get_all_patients'),
     
     # Orthanc 환자 관리
     path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),
@@ -43,4 +44,6 @@ urlpatterns = [
     path('dummy-data/create/', views.create_dummy_data, name='create_dummy_data'),
     path('dummy-data/clear/', views.clear_dummy_data, name='clear_dummy_data'),
     path('mappings/test-status/', views.get_mapping_test_status, name='get_mapping_test_status'),
+    
+    path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
 ]
