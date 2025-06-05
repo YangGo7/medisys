@@ -36715,3 +36715,415 @@ INFO 2025-06-05 10:13:46,461 basehttp 173684 126336766039744 "GET /api/samples/a
 INFO 2025-06-05 10:13:46,867 basehttp 173684 126336766039744 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
 INFO 2025-06-05 10:15:51,110 autoreload 173684 126337166827776 /home/medical_system/backend/samples/views.py changed, reloading.
 INFO 2025-06-05 10:15:52,148 autoreload 174364 130411688825088 Watching for file changes with StatReloader
+INFO 2025-06-05 10:19:05,230 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:05,646 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:12,206 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:12,627 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:12,641 basehttp 174364 130411296450240 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:12,919 basehttp 174364 130411296450240 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:13,737 basehttp 174364 130411296450240 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:13,947 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:13,981 basehttp 174364 130411296450240 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:14,357 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:32,321 basehttp 174364 130411296450240 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:32,571 basehttp 174364 130411288057536 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:19:32,724 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:19:33,138 basehttp 174364 130411305891520 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+WARNING 2025-06-05 10:20:50,710 log 174364 130411279664832 Not Found: /api/integration/openmrs/providers/
+WARNING 2025-06-05 10:20:50,711 basehttp 174364 130411279664832 "GET /api/integration/openmrs/providers/ HTTP/1.1" 404 11579
+INFO 2025-06-05 10:22:03,990 autoreload 174364 130411688825088 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-06-05 10:22:04,869 autoreload 175707 135918330556672 Watching for file changes with StatReloader
+INFO 2025-06-05 10:22:12,839 autoreload 175707 135918330556672 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-06-05 10:22:13,653 autoreload 175773 138437304037632 Watching for file changes with StatReloader
+INFO 2025-06-05 10:24:51,430 autoreload 175773 138437304037632 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-06-05 10:24:52,216 autoreload 176199 135759549255936 Watching for file changes with StatReloader
+INFO 2025-06-05 10:25:06,915 autoreload 176199 135759549255936 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-06-05 10:25:07,707 autoreload 176279 139910696399104 Watching for file changes with StatReloader
+INFO 2025-06-05 10:25:19,398 autoreload 176279 139910696399104 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-06-05 10:25:20,179 autoreload 176345 136392221810944 Watching for file changes with StatReloader
+INFO 2025-06-05 10:25:36,166 autoreload 176345 136392221810944 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-06-05 10:25:37,037 autoreload 176428 126521546453248 Watching for file changes with StatReloader
+INFO 2025-06-05 10:25:49,218 basehttp 176428 126521161283264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:25:49,634 basehttp 176428 126521161283264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:25:51,140 basehttp 176428 126521079494336 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:25:51,407 basehttp 176428 126521079494336 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+WARNING 2025-06-05 10:25:52,086 log 176428 126521079494336 Not Found: /api/integration/openmrs-providers/
+WARNING 2025-06-05 10:25:52,087 basehttp 176428 126521079494336 "GET /api/integration/openmrs-providers/ HTTP/1.1" 404 11846
+WARNING 2025-06-05 10:25:52,275 log 176428 126521071101632 Not Found: /api/integration/openmrs-providers/
+WARNING 2025-06-05 10:25:52,276 basehttp 176428 126521071101632 "GET /api/integration/openmrs-providers/ HTTP/1.1" 404 11846
+INFO 2025-06-05 10:26:42,990 autoreload 176428 126521546453248 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-06-05 10:26:43,790 autoreload 176664 126145939349760 Watching for file changes with StatReloader
+INFO 2025-06-05 10:26:53,927 basehttp 176664 126145556117184 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+WARNING 2025-06-05 10:26:54,101 log 176664 126145547724480 Not Found: /api/integration/openmrs-providers/
+WARNING 2025-06-05 10:26:54,102 basehttp 176664 126145547724480 "GET /api/integration/openmrs-providers/ HTTP/1.1" 404 11872
+INFO 2025-06-05 10:26:54,179 basehttp 176664 126145556117184 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+WARNING 2025-06-05 10:26:54,305 log 176664 126145471182528 Not Found: /api/integration/openmrs-providers/
+WARNING 2025-06-05 10:26:54,306 basehttp 176664 126145471182528 "GET /api/integration/openmrs-providers/ HTTP/1.1" 404 11872
+INFO 2025-06-05 10:27:27,624 basehttp 176664 126145471182528 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:27:27,858 basehttp 176664 126145556117184 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:27:33,136 basehttp 176664 126145461741248 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:27:33,537 basehttp 176664 126145461741248 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:26,382 basehttp 176664 126145453348544 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:26,781 basehttp 176664 126145453348544 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:29,645 basehttp 176664 126145453348544 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:30,057 basehttp 176664 126145453348544 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:30,294 basehttp 176664 126145461741248 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:30,693 basehttp 176664 126145461741248 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:28:33,327 basehttp 176664 126145453348544 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=LFT HTTP/1.1" 200 8
+INFO 2025-06-05 10:28:38,629 basehttp 176664 126145453348544 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=Glucose HTTP/1.1" 200 8
+INFO 2025-06-05 10:29:04,147 autoreload 176664 126145939349760 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-06-05 10:29:05,133 autoreload 177289 140248394174720 Watching for file changes with StatReloader
+INFO 2025-06-05 10:29:19,969 basehttp 177289 140248009930432 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:20,381 basehttp 177289 140248009930432 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:22,872 basehttp 177289 140248009930432 "GET /api/orders/ HTTP/1.1" 200 1221
+INFO 2025-06-05 10:29:23,107 basehttp 177289 140247929190080 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:23,236 basehttp 177289 140248009930432 "GET /api/orders/ HTTP/1.1" 200 1221
+INFO 2025-06-05 10:29:23,519 basehttp 177289 140247929190080 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:25,742 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:29:26,024 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:29:28,083 basehttp 177289 140248009930432 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:28,487 basehttp 177289 140248009930432 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:33,672 basehttp 177289 140248009930432 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=LFT HTTP/1.1" 200 8
+INFO 2025-06-05 10:29:34,646 basehttp 177289 140248009930432 "GET /api/samples/loinc-by-sample-type?sample_type=%ED%98%88%EC%95%A1&test_type=chem HTTP/1.1" 200 69
+INFO 2025-06-05 10:29:35,253 basehttp 177289 140248009930432 "POST /api/samples/create HTTP/1.1" 201 158
+INFO 2025-06-05 10:29:36,791 basehttp 177289 140248009930432 "POST /api/logs/create HTTP/1.1" 201 45
+INFO 2025-06-05 10:29:36,809 basehttp 177289 140247920797376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:37,228 basehttp 177289 140247920797376 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:29:39,289 basehttp 177289 140247920797376 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:29:39,698 basehttp 177289 140247920797376 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:29:44,080 basehttp 177289 140247920797376 "GET /api/samples/get/6 HTTP/1.1" 301 0
+INFO 2025-06-05 10:29:44,267 basehttp 177289 140248009930432 "GET /api/samples/get/6/ HTTP/1.1" 200 158
+INFO 2025-06-05 10:29:51,626 basehttp 177289 140248009930432 "GET /api/samples/get/1/ HTTP/1.1" 200 156
+INFO 2025-06-05 10:30:01,245 basehttp 177289 140248009930432 "GET /api/samples/get/4 HTTP/1.1" 301 0
+INFO 2025-06-05 10:30:01,633 basehttp 177289 140247895619264 "GET /api/samples/get/4/ HTTP/1.1" 200 165
+INFO 2025-06-05 10:30:03,302 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:03,710 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:10,196 basehttp 177289 140247895619264 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:30:10,610 basehttp 177289 140247895619264 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:30:14,397 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:14,811 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:15,707 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:16,120 basehttp 177289 140247895619264 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:19,606 basehttp 177289 140247895619264 "GET /api/samples/test-types-by-alias/?sample_type=%ED%98%88%EC%95%A1&alias_name=Glucose HTTP/1.1" 200 8
+INFO 2025-06-05 10:30:38,371 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:30:38,602 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:30:40,085 basehttp 177289 140247895619264 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:30:40,501 basehttp 177289 140247895619264 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:30:43,101 basehttp 177289 140247895619264 "GET /api/samples/get/1/ HTTP/1.1" 200 156
+INFO 2025-06-05 10:30:52,791 basehttp 177289 140247895619264 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:52,969 basehttp 177289 140248009930432 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:52,972 basehttp 177289 140247920797376 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:52,977 basehttp 177289 140247878833856 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:52,978 basehttp 177289 140247887226560 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:52,978 basehttp 177289 140247392319168 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:53,194 basehttp 177289 140247895619264 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+INFO 2025-06-05 10:30:53,364 basehttp 177289 140248009930432 "OPTIONS /api/tests/run HTTP/1.1" 200 0
+WARNING 2025-06-05 10:30:53,415 log 177289 140247383926464 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,418 basehttp 177289 140247383926464 "POST /api/predict/ HTTP/1.1" 404 4344
+WARNING 2025-06-05 10:30:53,423 log 177289 140247375533760 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,432 log 177289 140247367141056 Not Found: /api/predict/
+INFO 2025-06-05 10:30:53,434 basehttp 177289 140247887226560 "POST /api/tests/run HTTP/1.1" 201 198
+WARNING 2025-06-05 10:30:53,436 basehttp 177289 140247375533760 "POST /api/predict/ HTTP/1.1" 404 4344
+WARNING 2025-06-05 10:30:53,436 basehttp 177289 140247367141056 "POST /api/predict/ HTTP/1.1" 404 4344
+WARNING 2025-06-05 10:30:53,443 log 177289 140247358748352 Not Found: /api/predict/
+INFO 2025-06-05 10:30:53,446 basehttp 177289 140247920797376 "POST /api/tests/run HTTP/1.1" 201 193
+INFO 2025-06-05 10:30:53,449 basehttp 177289 140247392319168 "POST /api/tests/run HTTP/1.1" 201 199
+WARNING 2025-06-05 10:30:53,450 basehttp 177289 140247358748352 "POST /api/predict/ HTTP/1.1" 404 4344
+INFO 2025-06-05 10:30:53,453 basehttp 177289 140247878833856 "POST /api/tests/run HTTP/1.1" 201 198
+WARNING 2025-06-05 10:30:53,623 log 177289 140247350355648 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,623 basehttp 177289 140247350355648 "POST /api/predict/ HTTP/1.1" 404 4344
+INFO 2025-06-05 10:30:53,626 basehttp 177289 140247895619264 "POST /api/tests/run HTTP/1.1" 201 202
+WARNING 2025-06-05 10:30:53,791 log 177289 140247341962944 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,791 basehttp 177289 140247341962944 "POST /api/predict/ HTTP/1.1" 404 4344
+INFO 2025-06-05 10:30:53,794 basehttp 177289 140248009930432 "POST /api/tests/run HTTP/1.1" 201 193
+WARNING 2025-06-05 10:30:53,856 log 177289 140247350355648 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,857 basehttp 177289 140247350355648 "POST /api/predict/ HTTP/1.1" 404 4344
+INFO 2025-06-05 10:30:53,861 basehttp 177289 140247887226560 "POST /api/tests/run HTTP/1.1" 201 196
+WARNING 2025-06-05 10:30:53,879 log 177289 140247358748352 Not Found: /api/predict/
+WARNING 2025-06-05 10:30:53,879 basehttp 177289 140247358748352 "POST /api/predict/ HTTP/1.1" 404 4344
+INFO 2025-06-05 10:30:53,881 basehttp 177289 140247878833856 "POST /api/tests/run HTTP/1.1" 201 204
+INFO 2025-06-05 10:30:58,290 basehttp 177289 140247878833856 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:30:58,707 basehttp 177289 140247878833856 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:31:00,892 basehttp 177289 140247878833856 "GET /api/cdss/results/ HTTP/1.1" 200 629
+INFO 2025-06-05 10:31:01,313 basehttp 177289 140247878833856 "GET /api/cdss/results/ HTTP/1.1" 200 629
+WARNING 2025-06-05 10:31:13,055 log 177289 140247912404672 Not Found: /api/integration/openmrs/providers/
+WARNING 2025-06-05 10:31:13,056 basehttp 177289 140247912404672 "GET /api/integration/openmrs/providers/ HTTP/1.1" 404 11878
+WARNING 2025-06-05 10:31:14,967 log 177289 140247912404672 Not Found: /api/integration/openmrs/providers/
+WARNING 2025-06-05 10:31:14,968 basehttp 177289 140247912404672 "GET /api/integration/openmrs/providers/ HTTP/1.1" 404 11878
+INFO 2025-06-05 10:31:18,191 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:31:18,439 basehttp 177289 140247912404672 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+WARNING 2025-06-05 10:31:18,633 log 177289 140247912404672 Not Found: /api/integration/openmrs/providers/
+WARNING 2025-06-05 10:31:18,634 basehttp 177289 140247912404672 "GET /api/integration/openmrs/providers/ HTTP/1.1" 404 11878
+WARNING 2025-06-05 10:31:18,822 log 177289 140247912404672 Not Found: /api/integration/openmrs/providers/
+WARNING 2025-06-05 10:31:18,822 basehttp 177289 140247912404672 "GET /api/integration/openmrs/providers/ HTTP/1.1" 404 11878
+INFO 2025-06-05 10:32:26,700 autoreload 177289 140248394174720 /home/medical_system/backend/backend/urls.py changed, reloading.
+INFO 2025-06-05 10:32:27,598 autoreload 178290 139430213853440 Watching for file changes with StatReloader
+INFO 2025-06-05 10:32:30,425 basehttp 178290 139429830194880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:32:30,831 basehttp 178290 139429830194880 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:32:33,644 basehttp 178290 139429830194880 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:32:34,057 basehttp 178290 139429830194880 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:32:34,566 autoreload 178290 139430213853440 /home/medical_system/backend/medical_integration/views.py changed, reloading.
+INFO 2025-06-05 10:32:35,489 autoreload 178338 139866853335296 Watching for file changes with StatReloader
+INFO 2025-06-05 10:32:37,579 basehttp 178338 139866469824192 "GET /api/samples/get/5/ HTTP/1.1" 200 159
+INFO 2025-06-05 10:32:39,250 basehttp 178338 139866469824192 "GET /api/samples/get/6/ HTTP/1.1" 200 158
+INFO 2025-06-05 10:32:47,697 autoreload 178338 139866853335296 /home/medical_system/backend/medical_integration/urls.py changed, reloading.
+INFO 2025-06-05 10:32:48,590 autoreload 178452 132038691279104 Watching for file changes with StatReloader
+INFO 2025-06-05 10:32:55,508 basehttp 178452 132038308918976 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:32:55,788 basehttp 178452 132038308918976 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:32:56,273 basehttp 178452 132038299477696 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 1158
+INFO 2025-06-05 10:32:56,540 basehttp 178452 132038299477696 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 1158
+INFO 2025-06-05 10:33:32,852 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:33:33,272 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:38:47,537 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:47,951 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:49,017 basehttp 178452 132038282692288 "GET /api/samples/get/6/ HTTP/1.1" 200 158
+INFO 2025-06-05 10:38:50,355 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:38:50,764 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:38:53,422 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:53,830 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:55,815 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:56,224 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:57,774 basehttp 178452 132038282692288 "GET /api/samples/get/1/ HTTP/1.1" 200 156
+INFO 2025-06-05 10:38:59,446 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:38:59,854 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:39:43,974 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:39:44,380 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:39:46,795 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:39:47,203 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:40:21,726 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:40:22,133 basehttp 178452 132038282692288 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:40:24,100 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:40:24,518 basehttp 178452 132038282692288 "GET /api/samples/ HTTP/1.1" 200 957
+INFO 2025-06-05 10:42:28,903 basehttp 178452 132038274299584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:42:29,309 basehttp 178452 132038274299584 "GET /api/samples/alias-mapping/ HTTP/1.1" 200 246
+INFO 2025-06-05 10:42:31,315 basehttp 178452 132038265906880 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 1158
+INFO 2025-06-05 10:42:31,513 basehttp 178452 132038257514176 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:42:31,574 basehttp 178452 132038265906880 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 1158
+INFO 2025-06-05 10:42:31,798 basehttp 178452 132038257514176 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 3490
+INFO 2025-06-05 10:54:59,067 basehttp 178452 132038282692288 "OPTIONS /api/integration/openmrs/patients/create/ HTTP/1.1" 200 0
+INFO 2025-06-05 10:54:59,469 views 178452 132038282692288 환자 생성 요청 데이터: {'givenName': 'John', 'familyName': 'Smith', 'gender': 'M', 'birthdate': '1985-03-15', 'patient_identifier': 'P001', 'middleName': '', 'address': {'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-06-05 10:54:59,470 views 178452 132038282692288 React에서 입력받은 Patient Identifier: P001
+INFO 2025-06-05 10:54:59,470 openmrs_api 178452 132038282692288 Patient Identifier로 검색: P001
+INFO 2025-06-05 10:55:00,019 openmrs_api 178452 132038282692288 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 10:55:00,019 openmrs_api 178452 132038282692288 환자 생성 요청 (사용자 지정 identifier): {'givenName': 'John', 'familyName': 'Smith', 'gender': 'M', 'birthdate': '1985-03-15', 'patient_identifier': 'P001', 'middleName': '', 'address': {'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-06-05 10:55:00,019 openmrs_api 178452 132038282692288 사용자 지정 Patient Identifier 사용: P001
+INFO 2025-06-05 10:55:00,019 openmrs_api 178452 132038282692288 Patient Identifier로 검색: P001
+INFO 2025-06-05 10:55:00,104 openmrs_api 178452 132038282692288 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 10:55:00,308 openmrs_api 178452 132038282692288 Patient Identifier 설정: P001
+INFO 2025-06-05 10:55:00,309 openmrs_api 178452 132038282692288 OpenMRS로 전송할 데이터: {'person': {'names': [{'givenName': 'John', 'familyName': 'Smith', 'middleName': '', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-15', 'addresses': [{'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': '', 'preferred': True}]}, 'identifiers': [{'identifier': 'P001', 'identifierType': '8d79403a-c2cc-11de-8d13-0010c6dffd0f', 'location': 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e', 'preferred': True}]}
+INFO 2025-06-05 10:55:00,309 openmrs_api 178452 132038282692288 환자 생성 요청: {'person': {'names': [{'givenName': 'John', 'familyName': 'Smith', 'middleName': '', 'preferred': True}], 'gender': 'M', 'birthdate': '1985-03-15', 'addresses': [{'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': '', 'preferred': True}]}, 'identifiers': [{'identifier': 'P001', 'identifierType': '8d79403a-c2cc-11de-8d13-0010c6dffd0f', 'location': 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e', 'preferred': True}]}
+INFO 2025-06-05 10:55:00,743 openmrs_api 178452 132038282692288 OpenMRS 응답 상태: 201
+INFO 2025-06-05 10:55:00,744 openmrs_api 178452 132038282692288 OpenMRS 응답 내용: {"uuid":"b24946fe-e2ed-479a-8680-79ab0f626cbf","display":"P001 - John Smith","identifiers":[{"uuid":"7756f0b1-6746-4d00-b12c-809e45cf8e2e","display":"Old Identification Number = P001","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/b24946fe-e2ed-479a-8680-79ab0f626cbf/identifier/7756f0b1-6746-4d00-b12c-809e45cf8e2e","resourceAlias":"identifier"}]}],"person":{"uuid":"b24946fe-e2ed-479a-8680-79ab0f626cbf","display":"John Smith","gender":"M","age":40,"birthdate":"1985-03-15T00:00:00.000+0000","birthdateEstimated":false,"dead":false,"deathDate":null,"causeOfDeath":null,"preferredName":{"uuid":"a64b53b5-474a-455a-9bc3-8749227b992b","display":"John Smith","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/b24946fe-e2ed-479a-8680-79ab0f626cbf/name/a64b53b5-474a-455a-9bc3-8749227b992b","resourceAlias":"name"}]},"preferredAddress":{"uuid":"42c9e211-bfcc-46ea-b10b-d3705c6c547a","display":"daejeon","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/b24946fe-e2ed-479a-8680-79ab0f626cbf/address/42c9e211-bfcc-46ea-b10b-d3705c6c547a","resourceAlias":"address"}]},"attributes":[],"voided":false,"birthtime":null,"deathdateEstimated":false,"links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/b24946fe-e2ed-479a-8680-79ab0f626cbf","resourceAlias":"person"},{"rel":"full","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/b24946fe-e2ed-479a-8680-79ab0f626cbf?v=full","resourceAlias":"person"}],"resourceVersion":"1.11"},"voided":false,"links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/b24946fe-e2ed-479a-8680-79ab0f626cbf","resourceAlias":"patient"},{"rel":"full","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/b24946fe-e2ed-479a-8680-79ab0f626cbf?v=full","resourceAlias":"patient"}],"resourceVersion":"1.8"}
+INFO 2025-06-05 10:55:00,744 openmrs_api 178452 132038282692288 생성된 식별자들: [None]
+INFO 2025-06-05 10:55:00,745 openmrs_api 178452 132038282692288 환자 생성 성공 - Patient Identifier: P001
+INFO 2025-06-05 10:55:00,745 views 178452 132038282692288 환자 생성 완료 - OpenMRS UUID: b24946fe-e2ed-479a-8680-79ab0f626cbf, Patient Identifier: P001
+INFO 2025-06-05 10:55:00,746 basehttp 178452 132038282692288 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 201 553
+INFO 2025-06-05 10:55:31,530 views 178452 132038282692288 환자 생성 요청 데이터: {'givenName': 'Jane', 'familyName': 'Wilson', 'gender': 'F', 'birthdate': '1990-07-22', 'patient_identifier': 'P002', 'middleName': '', 'address': {'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-06-05 10:55:31,531 views 178452 132038282692288 React에서 입력받은 Patient Identifier: P002
+INFO 2025-06-05 10:55:31,531 openmrs_api 178452 132038282692288 Patient Identifier로 검색: P002
+INFO 2025-06-05 10:55:31,677 openmrs_api 178452 132038282692288 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 10:55:31,679 openmrs_api 178452 132038282692288 환자 생성 요청 (사용자 지정 identifier): {'givenName': 'Jane', 'familyName': 'Wilson', 'gender': 'F', 'birthdate': '1990-07-22', 'patient_identifier': 'P002', 'middleName': '', 'address': {'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': ''}}
+INFO 2025-06-05 10:55:31,680 openmrs_api 178452 132038282692288 사용자 지정 Patient Identifier 사용: P002
+INFO 2025-06-05 10:55:31,681 openmrs_api 178452 132038282692288 Patient Identifier로 검색: P002
+INFO 2025-06-05 10:55:31,782 openmrs_api 178452 132038282692288 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 10:55:31,984 openmrs_api 178452 132038282692288 Patient Identifier 설정: P002
+INFO 2025-06-05 10:55:31,984 openmrs_api 178452 132038282692288 OpenMRS로 전송할 데이터: {'person': {'names': [{'givenName': 'Jane', 'familyName': 'Wilson', 'middleName': '', 'preferred': True}], 'gender': 'F', 'birthdate': '1990-07-22', 'addresses': [{'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': '', 'preferred': True}]}, 'identifiers': [{'identifier': 'P002', 'identifierType': '8d79403a-c2cc-11de-8d13-0010c6dffd0f', 'location': 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e', 'preferred': True}]}
+INFO 2025-06-05 10:55:31,986 openmrs_api 178452 132038282692288 환자 생성 요청: {'person': {'names': [{'givenName': 'Jane', 'familyName': 'Wilson', 'middleName': '', 'preferred': True}], 'gender': 'F', 'birthdate': '1990-07-22', 'addresses': [{'address1': 'daejeon', 'address2': '', 'cityVillage': '', 'stateProvince': '', 'country': 'South Korea', 'postalCode': '', 'preferred': True}]}, 'identifiers': [{'identifier': 'P002', 'identifierType': '8d79403a-c2cc-11de-8d13-0010c6dffd0f', 'location': 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e', 'preferred': True}]}
+INFO 2025-06-05 10:55:32,455 openmrs_api 178452 132038282692288 OpenMRS 응답 상태: 201
+INFO 2025-06-05 10:55:32,455 openmrs_api 178452 132038282692288 OpenMRS 응답 내용: {"uuid":"a9215bcd-0796-4389-b0fe-5b51722efa60","display":"P002 - Jane Wilson","identifiers":[{"uuid":"8e54225b-2202-4ea5-add5-7ce5e5775986","display":"Old Identification Number = P002","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/a9215bcd-0796-4389-b0fe-5b51722efa60/identifier/8e54225b-2202-4ea5-add5-7ce5e5775986","resourceAlias":"identifier"}]}],"person":{"uuid":"a9215bcd-0796-4389-b0fe-5b51722efa60","display":"Jane Wilson","gender":"F","age":34,"birthdate":"1990-07-22T00:00:00.000+0000","birthdateEstimated":false,"dead":false,"deathDate":null,"causeOfDeath":null,"preferredName":{"uuid":"c4338263-03a1-4e79-8cf9-3959c9785e56","display":"Jane Wilson","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/a9215bcd-0796-4389-b0fe-5b51722efa60/name/c4338263-03a1-4e79-8cf9-3959c9785e56","resourceAlias":"name"}]},"preferredAddress":{"uuid":"3572f7fe-041f-4c4f-92ea-eff2b0eb8fd7","display":"daejeon","links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/a9215bcd-0796-4389-b0fe-5b51722efa60/address/3572f7fe-041f-4c4f-92ea-eff2b0eb8fd7","resourceAlias":"address"}]},"attributes":[],"voided":false,"birthtime":null,"deathdateEstimated":false,"links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/a9215bcd-0796-4389-b0fe-5b51722efa60","resourceAlias":"person"},{"rel":"full","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/person/a9215bcd-0796-4389-b0fe-5b51722efa60?v=full","resourceAlias":"person"}],"resourceVersion":"1.11"},"voided":false,"links":[{"rel":"self","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/a9215bcd-0796-4389-b0fe-5b51722efa60","resourceAlias":"patient"},{"rel":"full","uri":"http://35.225.63.41:8082/openmrs/ws/rest/v1/patient/a9215bcd-0796-4389-b0fe-5b51722efa60?v=full","resourceAlias":"patient"}],"resourceVersion":"1.8"}
+INFO 2025-06-05 10:55:32,455 openmrs_api 178452 132038282692288 생성된 식별자들: [None]
+INFO 2025-06-05 10:55:32,456 openmrs_api 178452 132038282692288 환자 생성 성공 - Patient Identifier: P002
+INFO 2025-06-05 10:55:32,456 views 178452 132038282692288 환자 생성 완료 - OpenMRS UUID: a9215bcd-0796-4389-b0fe-5b51722efa60, Patient Identifier: P002
+INFO 2025-06-05 10:55:32,457 basehttp 178452 132038282692288 "POST /api/integration/openmrs/patients/create/ HTTP/1.1" 201 554
+WARNING 2025-06-05 10:55:44,508 log 178452 132038274299584 Not Found: /
+WARNING 2025-06-05 10:55:44,509 basehttp 178452 132038274299584 "GET / HTTP/1.1" 404 4286
+WARNING 2025-06-05 10:55:44,736 log 178452 132038274299584 Not Found: /favicon.ico
+WARNING 2025-06-05 10:55:44,740 basehttp 178452 132038274299584 "GET /favicon.ico HTTP/1.1" 404 4337
+INFO 2025-06-05 10:58:26,183 orthanc_api 182637 134271056302336 Orthanc 연결 성공: Medical System Orthanc 버전 mainline
+INFO 2025-06-05 10:58:26,197 orthanc_api 182637 134271056302336 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 10:58:26,260 orthanc_api 182637 134271056302336 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 10:58:26,261 orthanc_api 182637 134271056302336 DICOM 업로드 성공: {'ID': 'de5b02e9-3f1e55df-88d6e97e-4a30f220-a62c2d03', 'ParentPatient': 'dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84', 'ParentSeries': 'ea10759c-db3be20d-cf03b2d3-76301ec1-541528fa', 'ParentStudy': '2d8110de-2429c129-135510ae-2d1f93fd-50cb0fe9', 'Path': '/instances/de5b02e9-3f1e55df-88d6e97e-4a30f220-a62c2d03', 'Status': 'Success'}
+INFO 2025-06-05 10:58:26,261 dicom_patient_mapper 182637 134271056302336 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 10:58:26,261 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 10:58:26,262 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 10:58:26,266 orthanc_api 182637 134271056302336 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 10:58:26,317 orthanc_api 182637 134271056302336 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 10:58:26,318 orthanc_api 182637 134271056302336 DICOM 업로드 성공: {'ID': '77f58c10-dd48ff4c-cfc454ed-79c8c082-8db65e63', 'ParentPatient': '9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037', 'ParentSeries': 'b2096b8d-70d81c24-830c774d-ab9b3a6c-d0a567bc', 'ParentStudy': '3da799a3-80ec3d59-e9708632-fad87cd3-4ac95cca', 'Path': '/instances/77f58c10-dd48ff4c-cfc454ed-79c8c082-8db65e63', 'Status': 'Success'}
+INFO 2025-06-05 10:58:26,318 dicom_patient_mapper 182637 134271056302336 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 10:58:26,319 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 10:58:26,320 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 10:58:26,323 orthanc_api 182637 134271056302336 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 10:58:26,352 orthanc_api 182637 134271056302336 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 10:58:26,352 orthanc_api 182637 134271056302336 DICOM 업로드 성공: {'ID': 'b208d63f-923b20c8-cf5f29b3-bc62dc0c-e7391dbc', 'ParentPatient': 'a395aa9a-a544a13f-363e9513-34f39902-9179a977', 'ParentSeries': 'aac973b2-0dc28c88-94b58c7a-c7516f75-3053dfad', 'ParentStudy': '04dcaecd-c1e25ca8-db45c811-57e2b644-4f24d591', 'Path': '/instances/b208d63f-923b20c8-cf5f29b3-bc62dc0c-e7391dbc', 'Status': 'Success'}
+INFO 2025-06-05 10:58:26,353 dicom_patient_mapper 182637 134271056302336 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 10:58:26,353 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 10:58:26,354 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 10:58:26,358 orthanc_api 182637 134271056302336 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 10:58:26,409 orthanc_api 182637 134271056302336 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 10:58:26,410 orthanc_api 182637 134271056302336 DICOM 업로드 성공: {'ID': '151ebe2a-f02410fc-bd9f14ff-6a1549f4-59126f7c', 'ParentPatient': '1a56c50c-862767e0-2a4d0227-57047132-6a5c5e9c', 'ParentSeries': '920e016b-d3324d4c-9519bb00-46c21b2d-7cbf7799', 'ParentStudy': '548a2d8f-19beb3fe-25fb9fd8-1853c685-1190472f', 'Path': '/instances/151ebe2a-f02410fc-bd9f14ff-6a1549f4-59126f7c', 'Status': 'Success'}
+INFO 2025-06-05 10:58:26,410 dicom_patient_mapper 182637 134271056302336 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 10:58:26,410 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 10:58:26,410 dicom_patient_mapper 182637 134271056302336 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:05:23,396 basehttp 178452 132037755266752 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-05 11:05:23,397 basehttp 178452 132037755266752 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-05 11:05:23,484 basehttp 178452 132037755266752 code 400, message Bad request syntax ('\x16\x03\x01\x00u\x01\x00\x00q\x03\x031Gf\x87#\x8d')
+ERROR 2025-06-05 11:05:23,484 basehttp 178452 132037755266752 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-05 11:05:23,562 basehttp 178452 132037755266752 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-05 11:05:23,562 basehttp 178452 132037755266752 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-05 11:05:23,641 basehttp 178452 132037755266752 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-05 11:05:23,641 basehttp 178452 132037755266752 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-06-05 11:12:51,466 orthanc_api 184556 126311144050944 Orthanc 연결 성공: Medical System Orthanc 버전 mainline
+INFO 2025-06-05 11:12:51,473 orthanc_api 184556 126311144050944 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:12:51,499 orthanc_api 184556 126311144050944 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:12:51,499 orthanc_api 184556 126311144050944 DICOM 업로드 성공: {'ID': 'bbe2c17d-e7d522fe-7da06a40-e5a985b4-57ba23a2', 'ParentPatient': 'dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84', 'ParentSeries': 'e3c8926b-c4332b35-e3c25ab9-19dc8392-0ff8b95d', 'ParentStudy': 'a1a9a527-e6f484e4-1a00a4fc-38b4f314-e1d006ae', 'Path': '/instances/bbe2c17d-e7d522fe-7da06a40-e5a985b4-57ba23a2', 'Status': 'Success'}
+INFO 2025-06-05 11:12:51,500 dicom_patient_mapper 184556 126311144050944 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:12:51,500 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:12:51,500 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:12:51,507 orthanc_api 184556 126311144050944 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:12:51,539 orthanc_api 184556 126311144050944 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:12:51,539 orthanc_api 184556 126311144050944 DICOM 업로드 성공: {'ID': 'aaeb8b3e-9d513c94-b2afc417-a8bd9929-380cfaa4', 'ParentPatient': '9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037', 'ParentSeries': 'c915eacd-4ed3b21b-c90f77b6-0b50be8f-53cb837a', 'ParentStudy': 'e05afcdb-3541610c-6f234aa4-e30c0d54-d22faa63', 'Path': '/instances/aaeb8b3e-9d513c94-b2afc417-a8bd9929-380cfaa4', 'Status': 'Success'}
+INFO 2025-06-05 11:12:51,540 dicom_patient_mapper 184556 126311144050944 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:12:51,540 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:12:51,540 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:12:51,546 orthanc_api 184556 126311144050944 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:12:51,584 orthanc_api 184556 126311144050944 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:12:51,584 orthanc_api 184556 126311144050944 DICOM 업로드 성공: {'ID': 'a41adba7-47669843-994ea76d-fff1decf-436f94a2', 'ParentPatient': 'a395aa9a-a544a13f-363e9513-34f39902-9179a977', 'ParentSeries': '115ce460-b18a7ad3-d6861378-098481e3-2e553939', 'ParentStudy': 'b33be038-e0b5db04-f7929585-1172fe8c-82636f6f', 'Path': '/instances/a41adba7-47669843-994ea76d-fff1decf-436f94a2', 'Status': 'Success'}
+INFO 2025-06-05 11:12:51,585 dicom_patient_mapper 184556 126311144050944 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:12:51,586 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:12:51,586 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:12:51,591 orthanc_api 184556 126311144050944 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:12:51,613 orthanc_api 184556 126311144050944 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:12:51,613 orthanc_api 184556 126311144050944 DICOM 업로드 성공: {'ID': '59050c79-2df7632f-c1905b51-b92bbfda-89a0a7f7', 'ParentPatient': '1a56c50c-862767e0-2a4d0227-57047132-6a5c5e9c', 'ParentSeries': 'e97342f6-fb1b8c6e-e43fa044-cef7ae33-f685b7f9', 'ParentStudy': 'c7b136db-842ba568-5c76b164-eb33a755-508414a3', 'Path': '/instances/59050c79-2df7632f-c1905b51-b92bbfda-89a0a7f7', 'Status': 'Success'}
+INFO 2025-06-05 11:12:51,614 dicom_patient_mapper 184556 126311144050944 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:12:51,614 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:12:51,615 dicom_patient_mapper 184556 126311144050944 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:13:00,795 orthanc_api 184607 137331972292864 Orthanc 연결 성공: Medical System Orthanc 버전 mainline
+INFO 2025-06-05 11:13:00,802 orthanc_api 184607 137331972292864 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:13:00,822 orthanc_api 184607 137331972292864 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:13:00,822 orthanc_api 184607 137331972292864 DICOM 업로드 성공: {'ID': '7e2c2d7d-22e2f8e3-0303e1c9-14e11115-39c0c131', 'ParentPatient': 'dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84', 'ParentSeries': 'dbbd082a-bb71cc99-c0676ebc-43d1252f-424dcb67', 'ParentStudy': 'adfd62a6-e441e2c9-6a18095b-3e6629b0-0898204c', 'Path': '/instances/7e2c2d7d-22e2f8e3-0303e1c9-14e11115-39c0c131', 'Status': 'Success'}
+INFO 2025-06-05 11:13:00,823 dicom_patient_mapper 184607 137331972292864 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:13:00,823 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:13:00,823 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:13:00,828 orthanc_api 184607 137331972292864 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:13:00,848 orthanc_api 184607 137331972292864 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:13:00,848 orthanc_api 184607 137331972292864 DICOM 업로드 성공: {'ID': 'd6c48b6c-5effc5ce-b406d5ee-d34c837f-d7bd26fb', 'ParentPatient': '9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037', 'ParentSeries': '35f8435a-2a270e4b-9c8a0f96-07ebd2ef-761dd60c', 'ParentStudy': 'bd3193a6-9738dfbb-df553fdb-def805f1-7ef5fec7', 'Path': '/instances/d6c48b6c-5effc5ce-b406d5ee-d34c837f-d7bd26fb', 'Status': 'Success'}
+INFO 2025-06-05 11:13:00,848 dicom_patient_mapper 184607 137331972292864 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:13:00,849 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:13:00,849 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:13:00,854 orthanc_api 184607 137331972292864 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:13:00,875 orthanc_api 184607 137331972292864 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:13:00,876 orthanc_api 184607 137331972292864 DICOM 업로드 성공: {'ID': 'abfdab35-7bbb19aa-84a638b3-10abce7c-099d24df', 'ParentPatient': 'a395aa9a-a544a13f-363e9513-34f39902-9179a977', 'ParentSeries': '6191e2ce-aca17bfd-dc2f6368-c6a5a8c7-b3d733ad', 'ParentStudy': '1f98bce0-97c33672-f0b19752-225ecba0-b024d3f8', 'Path': '/instances/abfdab35-7bbb19aa-84a638b3-10abce7c-099d24df', 'Status': 'Success'}
+INFO 2025-06-05 11:13:00,876 dicom_patient_mapper 184607 137331972292864 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:13:00,876 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:13:00,876 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패
+INFO 2025-06-05 11:13:00,881 orthanc_api 184607 137331972292864 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:13:00,902 orthanc_api 184607 137331972292864 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:13:00,902 orthanc_api 184607 137331972292864 DICOM 업로드 성공: {'ID': 'b8967e84-99eeab8f-1fcb0d39-3a629a50-b1a059b2', 'ParentPatient': '1a56c50c-862767e0-2a4d0227-57047132-6a5c5e9c', 'ParentSeries': '9c62eb5c-61546a05-6385eb02-8cbd82c1-5fceddd0', 'ParentStudy': '343953df-371227e5-ecd415c1-25620c70-256f58da', 'Path': '/instances/b8967e84-99eeab8f-1fcb0d39-3a629a50-b1a059b2', 'Status': 'Success'}
+INFO 2025-06-05 11:13:00,902 dicom_patient_mapper 184607 137331972292864 🔥 개선된 DICOM 자동 매핑 처리 시작
+ERROR 2025-06-05 11:13:00,903 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패: dcmread: Expected a file path, file-like or readable buffer, but got bytes
+ERROR 2025-06-05 11:13:00,903 dicom_patient_mapper 184607 137331972292864 DICOM 환자 정보 추출 실패
+WARNING 2025-06-05 11:15:04,955 log 178452 132037755266752 Not Found: /www.google.com:443
+WARNING 2025-06-05 11:15:04,956 basehttp 178452 132037755266752 "CONNECT www.google.com:443 HTTP/1.1" 404 1862
+INFO 2025-06-05 11:22:34,632 autoreload 178452 132038691279104 /home/medical_system/backend/medical_integration/dicom_patient_mapper.py changed, reloading.
+INFO 2025-06-05 11:22:35,939 autoreload 185863 123248351740160 Watching for file changes with StatReloader
+INFO 2025-06-05 11:22:42,331 autoreload 185863 123248351740160 /home/medical_system/backend/medical_integration/dicom_patient_mapper.py changed, reloading.
+INFO 2025-06-05 11:22:43,294 autoreload 185910 136519896723712 Watching for file changes with StatReloader
+INFO 2025-06-05 11:25:57,762 autoreload 185910 136519896723712 /home/medical_system/backend/medical_integration/dicom_patient_mapper.py changed, reloading.
+INFO 2025-06-05 11:25:58,858 autoreload 186473 128022098661632 Watching for file changes with StatReloader
+INFO 2025-06-05 11:26:00,751 orthanc_api 186494 126302394089728 Orthanc 연결 성공: Medical System Orthanc 버전 mainline
+INFO 2025-06-05 11:26:00,759 orthanc_api 186494 126302394089728 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:26:00,789 orthanc_api 186494 126302394089728 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:26:00,789 orthanc_api 186494 126302394089728 DICOM 업로드 성공: {'ID': 'a1a1e56d-345205a4-eb88ee73-bca418ed-c9de87a7', 'ParentPatient': 'dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84', 'ParentSeries': 'f4360f69-9bebbe46-7db1d524-7cc80640-c3d6ef43', 'ParentStudy': 'f3d00c22-44ed2f75-f6392740-1b0f7fd1-f9c8f4d3', 'Path': '/instances/a1a1e56d-345205a4-eb88ee73-bca418ed-c9de87a7', 'Status': 'Success'}
+INFO 2025-06-05 11:26:00,790 dicom_patient_mapper 186494 126302394089728 🔥 개선된 DICOM 자동 매핑 처리 시작
+INFO 2025-06-05 11:26:00,791 dicom_patient_mapper 186494 126302394089728 DICOM에서 추출된 환자 정보: {'patient_identifier': 'P001', 'patient_name': 'Smith^John', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112600', 'study_date': '20250605', 'modality': 'CR', 'study_description': 'CR Study', 'accession_number': 'ACC112600', 'family_name': 'Smith', 'given_name': 'John', 'formatted_name': 'John Smith', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:00,792 dicom_patient_mapper 186494 126302394089728 추출된 DICOM 환자 정보: {'patient_identifier': 'P001', 'patient_name': 'Smith^John', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112600', 'study_date': '20250605', 'modality': 'CR', 'study_description': 'CR Study', 'accession_number': 'ACC112600', 'family_name': 'Smith', 'given_name': 'John', 'formatted_name': 'John Smith', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:00,792 dicom_patient_mapper 186494 126302394089728 Orthanc Patient ID: dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84
+INFO 2025-06-05 11:26:00,822 dicom_patient_mapper 186494 126302394089728 🔍 DICOM Patient Identifier로 검색: P001
+INFO 2025-06-05 11:26:00,822 openmrs_api 186494 126302394089728 Patient Identifier로 검색: P001
+INFO 2025-06-05 11:26:01,786 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 1명
+INFO 2025-06-05 11:26:01,786 openmrs_api 186494 126302394089728 Patient Identifier 검색 성공: 1명
+INFO 2025-06-05 11:26:01,787 dicom_patient_mapper 186494 126302394089728 🔸 Patient Identifier 부분 매칭: P001 - John Smith
+INFO 2025-06-05 11:26:01,787 dicom_patient_mapper 186494 126302394089728 매칭된 OpenMRS 환자: P001 - John Smith (b24946fe-e2ed-479a-8680-79ab0f626cbf)
+INFO 2025-06-05 11:26:01,801 dicom_patient_mapper 186494 126302394089728 새 환자 매핑 생성: 매핑(AUTO): Orthanc dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84 -> OpenMRS b24946fe-e2ed-479a-8680-79ab0f626cbf
+INFO 2025-06-05 11:26:01,807 dicom_patient_mapper 186494 126302394089728 🎉 DICOM 자동 매핑 성공: 매핑(AUTO): Orthanc dc3a2358-d3d6ff77-c0e3b3ed-ce1256f5-c8779d84 -> OpenMRS b24946fe-e2ed-479a-8680-79ab0f626cbf
+ERROR 2025-06-05 11:26:01,808 dicom_patient_mapper 186494 126302394089728 DICOM 자동 매핑 처리 실패: 'DicomPatientMapper' object has no attribute '_evaluate_mapping_quality'
+ERROR 2025-06-05 11:26:01,810 dicom_patient_mapper 186494 126302394089728 상세 오류: Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/dicom_patient_mapper.py", line 398, in process_dicom_upload
+    mapping_quality = self._evaluate_mapping_quality(dicom_patient_info, matching_patient)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DicomPatientMapper' object has no attribute '_evaluate_mapping_quality'
+
+INFO 2025-06-05 11:26:01,818 orthanc_api 186494 126302394089728 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:26:01,846 orthanc_api 186494 126302394089728 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:26:01,846 orthanc_api 186494 126302394089728 DICOM 업로드 성공: {'ID': 'd0f7e704-416fc769-859872b0-7b37fbde-db0f02bb', 'ParentPatient': '9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037', 'ParentSeries': '3ba8fd5d-352be3e3-48b361a1-88418add-62151105', 'ParentStudy': '2ed9966c-362b2c65-73f060af-8a2f375c-fc1b1b00', 'Path': '/instances/d0f7e704-416fc769-859872b0-7b37fbde-db0f02bb', 'Status': 'Success'}
+INFO 2025-06-05 11:26:01,847 dicom_patient_mapper 186494 126302394089728 🔥 개선된 DICOM 자동 매핑 처리 시작
+INFO 2025-06-05 11:26:01,849 dicom_patient_mapper 186494 126302394089728 DICOM에서 추출된 환자 정보: {'patient_identifier': 'P002', 'patient_name': 'Wilson^Jane', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112601', 'study_date': '20250605', 'modality': 'CT', 'study_description': 'CT Study', 'accession_number': 'ACC112601', 'family_name': 'Wilson', 'given_name': 'Jane', 'formatted_name': 'Jane Wilson', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:01,850 dicom_patient_mapper 186494 126302394089728 추출된 DICOM 환자 정보: {'patient_identifier': 'P002', 'patient_name': 'Wilson^Jane', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112601', 'study_date': '20250605', 'modality': 'CT', 'study_description': 'CT Study', 'accession_number': 'ACC112601', 'family_name': 'Wilson', 'given_name': 'Jane', 'formatted_name': 'Jane Wilson', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:01,850 dicom_patient_mapper 186494 126302394089728 Orthanc Patient ID: 9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037
+INFO 2025-06-05 11:26:01,853 dicom_patient_mapper 186494 126302394089728 🔍 DICOM Patient Identifier로 검색: P002
+INFO 2025-06-05 11:26:01,854 openmrs_api 186494 126302394089728 Patient Identifier로 검색: P002
+INFO 2025-06-05 11:26:02,090 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 1명
+INFO 2025-06-05 11:26:02,093 openmrs_api 186494 126302394089728 Patient Identifier 검색 성공: 1명
+INFO 2025-06-05 11:26:02,093 dicom_patient_mapper 186494 126302394089728 🔸 Patient Identifier 부분 매칭: P002 - Jane Wilson
+INFO 2025-06-05 11:26:02,093 dicom_patient_mapper 186494 126302394089728 매칭된 OpenMRS 환자: P002 - Jane Wilson (a9215bcd-0796-4389-b0fe-5b51722efa60)
+INFO 2025-06-05 11:26:02,112 dicom_patient_mapper 186494 126302394089728 새 환자 매핑 생성: 매핑(AUTO): Orthanc 9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037 -> OpenMRS a9215bcd-0796-4389-b0fe-5b51722efa60
+INFO 2025-06-05 11:26:02,128 dicom_patient_mapper 186494 126302394089728 🎉 DICOM 자동 매핑 성공: 매핑(AUTO): Orthanc 9693c81a-c9899f21-31b0dd9f-c4ad7eb2-8465e037 -> OpenMRS a9215bcd-0796-4389-b0fe-5b51722efa60
+ERROR 2025-06-05 11:26:02,129 dicom_patient_mapper 186494 126302394089728 DICOM 자동 매핑 처리 실패: 'DicomPatientMapper' object has no attribute '_evaluate_mapping_quality'
+ERROR 2025-06-05 11:26:02,130 dicom_patient_mapper 186494 126302394089728 상세 오류: Traceback (most recent call last):
+  File "/home/medical_system/backend/medical_integration/dicom_patient_mapper.py", line 398, in process_dicom_upload
+    mapping_quality = self._evaluate_mapping_quality(dicom_patient_info, matching_patient)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DicomPatientMapper' object has no attribute '_evaluate_mapping_quality'
+
+INFO 2025-06-05 11:26:02,135 orthanc_api 186494 126302394089728 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:26:02,165 orthanc_api 186494 126302394089728 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:26:02,166 orthanc_api 186494 126302394089728 DICOM 업로드 성공: {'ID': '926221b4-0e474327-e57048e3-d7a3a2d4-bb4342eb', 'ParentPatient': 'a395aa9a-a544a13f-363e9513-34f39902-9179a977', 'ParentSeries': '6a795f75-214d8db4-5ad88350-a5eb15fb-b41ee3ca', 'ParentStudy': 'a3d0e8e8-8be31e45-268069be-fd97578f-4bcd0ef1', 'Path': '/instances/926221b4-0e474327-e57048e3-d7a3a2d4-bb4342eb', 'Status': 'Success'}
+INFO 2025-06-05 11:26:02,166 dicom_patient_mapper 186494 126302394089728 🔥 개선된 DICOM 자동 매핑 처리 시작
+INFO 2025-06-05 11:26:02,169 dicom_patient_mapper 186494 126302394089728 DICOM에서 추출된 환자 정보: {'patient_identifier': 'DCM001', 'patient_name': 'Brown^Michael', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112602', 'study_date': '20250605', 'modality': 'MR', 'study_description': 'MR Study', 'accession_number': 'ACC112602', 'family_name': 'Brown', 'given_name': 'Michael', 'formatted_name': 'Michael Brown', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:02,169 dicom_patient_mapper 186494 126302394089728 추출된 DICOM 환자 정보: {'patient_identifier': 'DCM001', 'patient_name': 'Brown^Michael', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112602', 'study_date': '20250605', 'modality': 'MR', 'study_description': 'MR Study', 'accession_number': 'ACC112602', 'family_name': 'Brown', 'given_name': 'Michael', 'formatted_name': 'Michael Brown', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:02,169 dicom_patient_mapper 186494 126302394089728 Orthanc Patient ID: a395aa9a-a544a13f-363e9513-34f39902-9179a977
+INFO 2025-06-05 11:26:02,173 dicom_patient_mapper 186494 126302394089728 🔍 DICOM Patient Identifier로 검색: DCM001
+INFO 2025-06-05 11:26:02,173 openmrs_api 186494 126302394089728 Patient Identifier로 검색: DCM001
+INFO 2025-06-05 11:26:02,365 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:02,366 openmrs_api 186494 126302394089728 일반 검색으로 fallback: DCM001
+INFO 2025-06-05 11:26:02,589 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+WARNING 2025-06-05 11:26:02,591 dicom_patient_mapper 186494 126302394089728 Patient Identifier 'DCM001'로 환자를 찾을 수 없음
+INFO 2025-06-05 11:26:02,592 dicom_patient_mapper 186494 126302394089728 Patient Identifier 매칭 실패, 이름으로 검색 시도
+INFO 2025-06-05 11:26:02,592 dicom_patient_mapper 186494 126302394089728 환자 이름으로 검색 시도: Michael Brown
+INFO 2025-06-05 11:26:02,592 openmrs_api 186494 126302394089728 Patient Identifier로 검색: Michael Brown
+INFO 2025-06-05 11:26:02,775 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:02,775 openmrs_api 186494 126302394089728 일반 검색으로 fallback: Michael Brown
+INFO 2025-06-05 11:26:02,938 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+INFO 2025-06-05 11:26:02,938 dicom_patient_mapper 186494 126302394089728 성으로 검색 시도: Brown
+INFO 2025-06-05 11:26:02,941 openmrs_api 186494 126302394089728 Patient Identifier로 검색: Brown
+INFO 2025-06-05 11:26:03,135 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:03,137 openmrs_api 186494 126302394089728 일반 검색으로 fallback: Brown
+INFO 2025-06-05 11:26:03,313 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+WARNING 2025-06-05 11:26:03,314 dicom_patient_mapper 186494 126302394089728 매칭되는 OpenMRS 환자를 찾을 수 없음: {'patient_identifier': 'DCM001', 'patient_name': 'Brown^Michael', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112602', 'study_date': '20250605', 'modality': 'MR', 'study_description': 'MR Study', 'accession_number': 'ACC112602', 'family_name': 'Brown', 'given_name': 'Michael', 'formatted_name': 'Michael Brown', 'formatted_birth_date': '1990-01-01'}
+WARNING 2025-06-05 11:26:03,315 dicom_patient_mapper 186494 126302394089728 매칭되는 OpenMRS 환자를 찾을 수 없음
+INFO 2025-06-05 11:26:03,330 orthanc_api 186494 126302394089728 Orthanc에 DICOM 업로드 시작
+INFO 2025-06-05 11:26:03,367 orthanc_api 186494 126302394089728 Orthanc 업로드 응답 상태: 200
+INFO 2025-06-05 11:26:03,368 orthanc_api 186494 126302394089728 DICOM 업로드 성공: {'ID': '8232f961-c6dd5409-3b4cbd48-740346b0-eac406ad', 'ParentPatient': '1a56c50c-862767e0-2a4d0227-57047132-6a5c5e9c', 'ParentSeries': '582bee9a-383d39b1-996110a7-cf6d64b2-1f758cc4', 'ParentStudy': '0eeb91b1-b8743d8c-26b867ca-6420330a-7e5139b1', 'Path': '/instances/8232f961-c6dd5409-3b4cbd48-740346b0-eac406ad', 'Status': 'Success'}
+INFO 2025-06-05 11:26:03,369 dicom_patient_mapper 186494 126302394089728 🔥 개선된 DICOM 자동 매핑 처리 시작
+INFO 2025-06-05 11:26:03,371 dicom_patient_mapper 186494 126302394089728 DICOM에서 추출된 환자 정보: {'patient_identifier': 'PATIENT123', 'patient_name': 'Davis^Sarah', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112603', 'study_date': '20250605', 'modality': 'US', 'study_description': 'US Study', 'accession_number': 'ACC112603', 'family_name': 'Davis', 'given_name': 'Sarah', 'formatted_name': 'Sarah Davis', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:03,371 dicom_patient_mapper 186494 126302394089728 추출된 DICOM 환자 정보: {'patient_identifier': 'PATIENT123', 'patient_name': 'Davis^Sarah', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112603', 'study_date': '20250605', 'modality': 'US', 'study_description': 'US Study', 'accession_number': 'ACC112603', 'family_name': 'Davis', 'given_name': 'Sarah', 'formatted_name': 'Sarah Davis', 'formatted_birth_date': '1990-01-01'}
+INFO 2025-06-05 11:26:03,371 dicom_patient_mapper 186494 126302394089728 Orthanc Patient ID: 1a56c50c-862767e0-2a4d0227-57047132-6a5c5e9c
+INFO 2025-06-05 11:26:03,376 dicom_patient_mapper 186494 126302394089728 🔍 DICOM Patient Identifier로 검색: PATIENT123
+INFO 2025-06-05 11:26:03,377 openmrs_api 186494 126302394089728 Patient Identifier로 검색: PATIENT123
+INFO 2025-06-05 11:26:03,506 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:03,509 openmrs_api 186494 126302394089728 일반 검색으로 fallback: PATIENT123
+INFO 2025-06-05 11:26:03,667 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+WARNING 2025-06-05 11:26:03,669 dicom_patient_mapper 186494 126302394089728 Patient Identifier 'PATIENT123'로 환자를 찾을 수 없음
+INFO 2025-06-05 11:26:03,670 dicom_patient_mapper 186494 126302394089728 Patient Identifier 매칭 실패, 이름으로 검색 시도
+INFO 2025-06-05 11:26:03,671 dicom_patient_mapper 186494 126302394089728 환자 이름으로 검색 시도: Sarah Davis
+INFO 2025-06-05 11:26:03,673 openmrs_api 186494 126302394089728 Patient Identifier로 검색: Sarah Davis
+INFO 2025-06-05 11:26:03,841 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:03,842 openmrs_api 186494 126302394089728 일반 검색으로 fallback: Sarah Davis
+INFO 2025-06-05 11:26:03,961 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+INFO 2025-06-05 11:26:03,961 dicom_patient_mapper 186494 126302394089728 성으로 검색 시도: Davis
+INFO 2025-06-05 11:26:03,963 openmrs_api 186494 126302394089728 Patient Identifier로 검색: Davis
+INFO 2025-06-05 11:26:04,089 openmrs_api 186494 126302394089728 Patient Identifier 검색 결과: 0명
+INFO 2025-06-05 11:26:04,095 openmrs_api 186494 126302394089728 일반 검색으로 fallback: Davis
+INFO 2025-06-05 11:26:04,286 openmrs_api 186494 126302394089728 일반 검색 결과: 0명
+WARNING 2025-06-05 11:26:04,287 dicom_patient_mapper 186494 126302394089728 매칭되는 OpenMRS 환자를 찾을 수 없음: {'patient_identifier': 'PATIENT123', 'patient_name': 'Davis^Sarah', 'patient_birth_date': '19900101', 'patient_sex': 'M', 'study_instance_uid': '1.2.826.0.1.3680043.8.498.20250605112603', 'study_date': '20250605', 'modality': 'US', 'study_description': 'US Study', 'accession_number': 'ACC112603', 'family_name': 'Davis', 'given_name': 'Sarah', 'formatted_name': 'Sarah Davis', 'formatted_birth_date': '1990-01-01'}
+WARNING 2025-06-05 11:26:04,288 dicom_patient_mapper 186494 126302394089728 매칭되는 OpenMRS 환자를 찾을 수 없음

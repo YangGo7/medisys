@@ -1323,42 +1323,28 @@ def get_all_openmrs_patients(request):
     
     
 
-from medical_integration.models import Provider, Person
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import requests
+from requests.auth import HTTPBasicAuth
 
 @api_view(['GET'])
-def get_all_openmrs_providers(request):
+def proxy_openmrs_providers(request):
+    """OpenMRS의 /ws/rest/v1/provider 데이터 프록시"""
     try:
-        providers_data = []
+        OPENMRS_HOST = 'http://localhost:8082/openmrs'  # 또는 35.225.63.41:8082/openmrs
+        username = 'admin'
+        password = 'Admin123'
 
-        # 모든 Provider 정보 (voided 되지 않은 것만)
-        all_providers = Provider.objects.select_related('person').filter(retired=False)
+        res = requests.get(
+            f"{OPENMRS_HOST}/ws/rest/v1/provider",
+            auth=HTTPBasicAuth(username, password),
+            headers={"Accept": "application/json"}
+        )
 
-        for provider in all_providers:
-            person = provider.person
-
-            if person:
-                full_name = person.get_full_name() if hasattr(person, 'get_full_name') else str(person)
-                providers_data.append({
-                    "uuid": provider.uuid,
-                    "identifier": provider.identifier,
-                    "display": full_name,
-                    "person": {
-                        "display": full_name,
-                        "gender": person.gender,
-                        "birthdate": person.birthdate,
-                    }
-                })
-            else:
-                # 연결 안 된 provider 처리
-                providers_data.append({
-                    "uuid": provider.uuid,
-                    "identifier": provider.identifier,
-                    "display": "Unlinked Provider",
-                    "person": None
-                })
-
-        return Response(providers_data, status=status.HTTP_200_OK)
+        if res.status_code == 200:
+            return Response(res.json())
+        return Response({'error': 'OpenMRS 요청 실패'}, status=res.status_code)
 
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=500)

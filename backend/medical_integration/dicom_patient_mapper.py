@@ -17,10 +17,32 @@ class DicomPatientMapper:
         self.openmrs_api = OpenMRSAPI()
         self.orthanc_api = OrthancAPI()
     
+    # backend/medical_integration/dicom_patient_mapper.py 수정
+    # extract_patient_info_from_dicom 함수만 수정
+
     def extract_patient_info_from_dicom(self, dicom_data):
-        """DICOM 파일에서 환자 정보 추출"""
+        """DICOM 파일에서 환자 정보 추출 - bytes 처리 개선"""
         try:
-            ds = pydicom.dcmread(dicom_data, force=True)
+            # bytes 데이터인 경우 임시 파일로 저장 후 읽기
+            if isinstance(dicom_data, bytes):
+                import tempfile
+                import os
+                
+                with tempfile.NamedTemporaryFile(suffix='.dcm', delete=False) as temp_file:
+                    temp_file.write(dicom_data)
+                    temp_file_path = temp_file.name
+                
+                try:
+                    ds = pydicom.dcmread(temp_file_path, force=True)
+                finally:
+                    # 임시 파일 정리
+                    try:
+                        os.unlink(temp_file_path)
+                    except:
+                        pass
+            else:
+                # 파일 경로나 file-like 객체인 경우
+                ds = pydicom.dcmread(dicom_data, force=True)
             
             patient_info = {
                 # 🔥 핵심: DICOM Patient ID는 OpenMRS의 patient_identifier.identifier와 매핑
