@@ -1,33 +1,24 @@
 window.config = {
   routerBasename: '/',
-  extensions: [],
-  modes: [],
   showStudyList: true,
+  
   dataSources: [
     {
-      namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'dicomweb',
+      namespace: '@ohif/extension-default.dataSourcesModule.dicomjson',
+      sourceName: 'dicomjson',
       configuration: {
-        friendlyName: 'Orthanc DICOMweb',
+        friendlyName: 'Orthanc REST API',
         name: 'orthanc',
-        wadoUriRoot: 'http://35.225.63.41:8042/wado',
-        qidoRoot: 'http://35.225.63.41:8042/dicom-web',
-        wadoRoot: 'http://35.225.63.41:8042/dicom-web',
-        qidoSupportsIncludeField: false,
-        supportsReject: false,
-        imageRendering: 'wadors',
-        thumbnailRendering: 'wadors',
-        enableStudyLazyLoad: true,
-        supportsFuzzyMatching: false,
-        supportsWildcard: true,
-        staticWado: true,
-        singlepart: 'bulkdata,video',
+        
+        // Orthanc 기본 REST API 사용
+        orthancApiRoot: '/orthanc',
+        
         requestOptions: {
-          requestCredentials: 'omit',
-          auth: 'Basic b3J0aGFuYzpvcnRoYW5j'
+          requestCredentials: 'omit'
         }
       }
     }
   ],
-  defaultDataSourceName: 'dicomweb'
+  
+  defaultDataSourceName: 'dicomjson'
 };
