@@ -6,17 +6,7 @@
   "AuthenticationEnabled": true,
   "RegisteredUsers": {
     "orthanc": "orthanc",
-    "admin": "admin",
-    "ohif": "ohif123"
-  },
-  
-  "DicomWeb": {
-    "Enable": true,
-    "Root": "/dicom-web/",
-    "EnableMetadata": true,
-    "Host": "0.0.0.0",
-    "Port": 8042,
-    "Ssl": false
+    "admin": "admin"
   },
   
   "PostgreSQL": {
@@ -27,68 +17,23 @@
     "Database": "orthanc",
     "Username": "orthanc",
     "Password": "orthanc",
-    "MaximumConnectionRetries": 10,
-    "ConnectionRetryInterval": 5
+    "MaximumConnectionRetries": 30,
+    "ConnectionRetryInterval": 5,
+    "Lock": false
   },
   
   "HttpHeaders": {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin",
-    "Access-Control-Max-Age": "86400",
-    "Access-Control-Allow-Credentials": "true"
+    "Access-Control-Max-Age": "86400"
   },
-  
-  "Plugins": [
-    "/usr/share/orthanc/plugins",
-    "/etc/orthanc/plugins"
-  ],
-  
-  "DicomModalities": {},
-  "OrthancPeers": {},
-  
-  "HttpTimeout": 60,
-  "HttpRetries": 3,
-  "StorageAccessOnFind": "Always",
-  "StorageCompression": false,
-  "StoreDicom": true,
-  "DicomAssociationCloseDelay": 5,
-  "DicomScuTimeout": 10,
-  "DicomScpTimeout": 30,
   
   "VerboseEnabled": true,
   "LogLevel": "INFO",
-  
-  "ConcurrentJobs": 2,
-  "JobsHistorySize": 10,
-  "SaveJobs": true,
+  "StoreDicom": true,
   "OverwriteInstances": false,
-  
-  "StableAge": 60,
-  "StrictAet": false,
   "DefaultEncoding": "Latin1",
-  "StoreMD5ForAttachments": true,
-  
-  "LuaScripts": [],
-  "HttpsCertificate": "",
-  "HttpsPrivateKey": "",
-  "SslEnabled": false,
-  
-  "ExecuteLuaEnabled": true,
-  
-  "DicomTlsEnabled": false,
-  "DicomTlsCertificate": "",
-  "DicomTlsPrivateKey": "",
-  "DicomTlsTrustedCertificates": "",
-  
-  "MaximumStorageSize": 0,
-  "MaximumPatientCount": 0,
-  
-  "OverwriteInstances": false,
-  "CheckRevisions": false,
-  
-  "UserMetadata": {},
-  "DefaultPrivateCreator": "",
-  
-  "StorageDirectory": "/var/lib/orthanc/db"
+  "HttpTimeout": 60,
+  "ExecuteLuaEnabled": true
 }
