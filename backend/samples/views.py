@@ -137,7 +137,13 @@ def create_test_result_for_sample(request, sample_id):
 def delete_sample(requlest, sample_id):
     try:
         sample = Sample.objects.get(id=sample_id)
+        order = sample.order
         sample.delete()
+        
+        # 연결된 샘플이 더 이상 없다면 상태를 False로 변경
+        if not order.sample_set.exists():
+            order.has_sample = False
+            order.save()
         
         # CDSS 결과도 함께 삭제
         CDSSRecord.objects.filter(sample_id=sample_id).delete()

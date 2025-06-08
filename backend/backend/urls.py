@@ -34,7 +34,7 @@ urlpatterns = [
     path('api/logs/', include('ocs.urls')),
     path('api/account/', include('accounts.urls')),
     path('api/cdss/', include('lis_cdss.urls')),
-    
+    path('api/ohif/', include('medical_integration.ohif_urls')),
     # OpenMRS 직접 연결 (호환성 유지)
     path('api/openmrs-vitals/', openmrs_vitals, name='openmrs_vitals'),
     path('api/openmrs-encounters/', openmrs_encounters, name='openmrs_encounters'),
