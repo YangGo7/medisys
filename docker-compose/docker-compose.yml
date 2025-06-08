@@ -1,5 +1,5 @@
 services:
-  # OpenMRS MySQL
+  # OpenMRS MySQL - 안정화 설정
   openmrs-mysql:
     image: mysql:8.0
     container_name: openmrs-mysql
@@ -9,14 +9,24 @@ services:
       MYSQL_DATABASE: openmrs
       MYSQL_USER: openmrs
       MYSQL_PASSWORD: Admin123
-      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_HOST: '%'
     ports:
       - "3307:3306"
     volumes:
       - openmrs_mysql_data:/var/lib/mysql
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.10
+        aliases:
+          - mysql-server
+          - openmrs-db
     restart: unless-stopped
+    command: [
+      "--character-set-server=utf8",
+      "--collation-server=utf8_general_ci",
+      "--skip-character-set-client-handshake",
+      "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+    ]
 
   # OpenMRS Web Application
   openmrs-server:
@@ -39,7 +49,10 @@ services:
     volumes:
       - openmrs_data:/openmrs/data
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.11
+        aliases:
+          - openmrs-app
     restart: unless-stopped
 
   # MariaDB (메인 애플리케이션용)
@@ -57,7 +70,10 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.20
+        aliases:
+          - main-db
     restart: unless-stopped
 
   # PostgreSQL (Orthanc용)
@@ -74,10 +90,14 @@ services:
     volumes:
       - orthanc_postgres_data:/var/lib/postgresql/data
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.30
+        aliases:
+          - postgres-db
+          - orthanc-db
     restart: unless-stopped
 
-  # 🔥 수정된 Orthanc with DICOMweb Plugin
+  # Orthanc DICOM Server - 웹 인터페이스 포함 이미지로 변경
   orthanc:
     image: orthancteam/orthanc:24.4.0
     container_name: orthanc-server
@@ -89,107 +109,12 @@ services:
       - "4242:4242"
     volumes:
       - orthanc_data:/var/lib/orthanc/db
-      - ./orthanc-config:/etc/orthanc:ro
-    environment:
-      # DICOMweb 플러그인 강제 활성화
-      ORTHANC__DICOM_WEB__ENABLE: "true"
-      ORTHANC__DICOM_WEB__ROOT: "/dicom-web/"
-      ORTHANC__DICOM_WEB__ENABLE_METADATA: "true"
-      ORTHANC__DICOM_WEB__PUBLIC_ROOT: "/dicom-web/"
-      
-      # CORS 설정 (OHIF 연동 핵심)
-      ORTHANC__HTTP_CORS_ENABLED: "true"
-      ORTHANC__HTTP_CORS_ALLOW_CREDENTIALS: "true"
-      ORTHANC__HTTP_CORS_ALLOW_HEADERS: "Content-Type,Authorization,X-Requested-With,Accept,Origin,Cache-Control"
-      ORTHANC__HTTP_CORS_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
-      ORTHANC__HTTP_CORS_ALLOW_ORIGIN: "*"
-      
-      # PostgreSQL 연결
-      ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
-      ORTHANC__POSTGRESQL__ENABLE_STORAGE: "true"
-      ORTHANC__POSTGRESQL__HOST: "orthanc-postgres"
-      ORTHANC__POSTGRESQL__PORT: "5432"
-      ORTHANC__POSTGRESQL__DATABASE: "orthanc"
-      ORTHANC__POSTGRESQL__USERNAME: "orthanc"
-      ORTHANC__POSTGRESQL__PASSWORD: "orthanc"
-      
-      # 인증 설정
-      ORTHANC__AUTHENTICATION_ENABLED: "true"
-      ORTHANC__REGISTERED_USERS: '{"orthanc": "orthanc", "admin": "admin", "ohif": "ohif123"}'
-      
-      # 기본 설정
-      ORTHANC__NAME: "Medical Platform Orthanc"
-      ORTHANC__HTTP_PORT: "8042"
-      ORTHANC__DICOM_PORT: "4242"
-      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
-      ORTHANC__VERBOSE_ENABLED: "true"
-      ORTHANC__LOG_LEVEL: "INFO"
-      
+      - ./orthanc-config/orthanc.json:/etc/orthanc/orthanc.json:ro
     networks:
-      - medical-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8042/system"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
-  # 🔥 수정된 OHIF Viewer - 마운트 제거하고 환경변수로만 설정
-  ohif-viewer:
-    image: ohif/app:v3.8.2
-    container_name: ohif-viewer
-    hostname: ohif-viewer
-    depends_on:
-      orthanc:
-        condition: service_healthy
-    ports:
-      - "3001:80"
-    environment:
-      # 🔥 핵심: OHIF 환경변수로 Orthanc 연결 설정
-      NODE_ENV: production
-      PUBLIC_URL: "/"
-      
-      # Orthanc DICOMweb 연결 설정
-      REACT_APP_CONFIG: |
-        window.config = {
-          routerBasename: '/',
-          extensions: ['@ohif/extension-default', '@ohif/extension-cornerstone'],
-          modes: ['@ohif/mode-basic-viewer'],
-          defaultMode: '@ohif/mode-basic-viewer',
-          showStudyList: true,
-          dataSources: [{
-            namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-            sourceName: 'dicomweb',
-            configuration: {
-              friendlyName: 'Medical Platform Orthanc',
-              name: 'orthanc',
-              wadoUriRoot: 'http://35.225.63.41:8042/wado',
-              qidoRoot: 'http://35.225.63.41:8042/dicom-web',
-              wadoRoot: 'http://35.225.63.41:8042/dicom-web',
-              requestOptions: {
-                requestCredentials: 'omit',
-                auth: 'b3J0aGFuYzpvcnRoYW5j',
-                headers: {
-                  'Authorization': 'Basic b3J0aGFuYzpvcnRoYW5j'
-                }
-              },
-              qidoSupportsIncludeField: false,
-              supportsReject: false,
-              imageRendering: 'wadors',
-              thumbnailRendering: 'wadors',
-              enableStudyLazyLoad: true,
-              supportsFuzzyMatching: false,
-              supportsWildcard: true,
-              staticWado: true,
-              singlepart: 'bulkdata,video'
-            }
-          }],
-          defaultDataSourceName: 'dicomweb'
-        };
-      
-    networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.31
+        aliases:
+          - orthanc-app
     restart: unless-stopped
 
   # MongoDB
@@ -200,13 +125,15 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
-      MONGO_INITDB_DATABASE: medical_system
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.40
+        aliases:
+          - mongo-db
     restart: unless-stopped
 
   # phpMyAdmin
@@ -224,32 +151,20 @@ services:
     ports:
       - "8080:80"
     networks:
-      - medical-network
+      medical-network:
+        ipv4_address: 172.20.0.50
+        aliases:
+          - phpmyadmin-app
     restart: unless-stopped
 
-  # MongoDB Express
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    hostname: mongo-express
-    depends_on:
-      - mongodb
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
-      ME_CONFIG_MONGODB_SERVER: mongodb-server
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_BASICAUTH_USERNAME: webadmin
-      ME_CONFIG_BASICAUTH_PASSWORD: webpassword
-    ports:
-      - "8081:8081"
-    networks:
-      - medical-network
-    restart: unless-stopped
-
+# 🔥 수정된 네트워크 정의 - 사용자 정의 서브넷 추가
 networks:
   medical-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
 
 volumes:
   openmrs_mysql_data:
