@@ -1,5 +1,5 @@
 {
-  "Name": "Medical System Orthanc",
+  "Name": "Medical Platform Orthanc",
   "HttpPort": 8042,
   "DicomPort": 4242,
   "RemoteAccessAllowed": true,
@@ -8,6 +8,8 @@
     "orthanc": "orthanc",
     "admin": "admin"
   },
+
+  "__comment1__": "🔥 PostgreSQL 플러그인 설정 - 필수!",
   "PostgreSQL": {
     "EnableIndex": true,
     "EnableStorage": true,
@@ -15,12 +17,86 @@
     "Port": 5432,
     "Database": "orthanc",
     "Username": "orthanc",
-    "Password": "orthanc"
+    "Password": "orthanc",
+    "MaximumConnectionRetries": 20,
+    "ConnectionRetryInterval": 5,
+    "Lock": false,
+    "VerboseEnabled": true
   },
+
+  "__comment2__": "🔥 기본 저장소 비활성화 - PostgreSQL 사용 시 필수",
+  "StorageDirectory": "",
+  "IndexDirectory": "",
+
+  "__comment3__": "🔥 관대한 DICOM 처리 - 태그 누락 허용",
+  "UnknownSopClassAccepted": true,
+  "DicomAlwaysAllowStore": true,
+  "DicomAlwaysAllowEcho": true,
+  "DicomAlwaysAllowFind": true,
+  "DicomAlwaysAllowMove": true,
+  "StrictAet": false,
+  "StoreDicom": true,
+  "OverwriteInstances": false,
+
+  "__comment4__": "🔥 DICOMweb 플러그인 - OHIF 연동용",
+  "DicomWeb": {
+    "Enable": true,
+    "Root": "/dicom-web/",
+    "EnableMetadata": true,
+    "StudiesMetadata": "MainDicomTags",
+    "SeriesMetadata": "MainDicomTags"
+  },
+
+  "__comment5__": "🔥 WADO 플러그인",
+  "Wado": {
+    "Enable": true,
+    "Root": "/wado"
+  },
+
+  "__comment6__": "🔥 CORS 설정 - 웹 접근 허용",
   "HttpHeaders": {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-    "Access-Control-Max-Age": "86400"
-  }
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control",
+    "Access-Control-Allow-Credentials": "true"
+  },
+
+  "__comment7__": "🔥 플러그인 경로 - jogne/orthanc 플러그인 위치",
+  "Plugins": [
+    "/usr/share/orthanc/plugins",
+    "/usr/local/share/orthanc/plugins"
+  ],
+
+  "__comment8__": "🔥 로깅 설정",
+  "VerboseEnabled": true,
+  "LogLevel": "INFO",
+  "VerboseStartup": true,
+
+  "__comment9__": "🔥 성능 및 안정성 설정",
+  "ConcurrentJobs": 2,
+  "JobsHistorySize": 10,
+  "SaveJobs": true,
+  "HttpTimeout": 60,
+  "HttpRetries": 3,
+  "DicomScpTimeout": 30,
+  "DicomAssociationCloseDelay": 5,
+  "StableAge": 60,
+  "StorageAccessOnFind": "Always",
+  "StorageCompression": false,
+  "DefaultEncoding": "Latin1",
+  "StoreMD5ForAttachments": true,
+
+  "__comment10__": "🔥 빈 설정들",
+  "DicomModalities": {},
+  "OrthancPeers": {},
+  "LuaScripts": [],
+  "UserMetadata": {},
+  "DefaultPrivateCreator": "",
+  "HttpsCertificate": "",
+  "HttpsPrivateKey": "",
+  "SslEnabled": false,
+  "DicomTlsEnabled": false,
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  "ExecuteLuaEnabled": false
 }
