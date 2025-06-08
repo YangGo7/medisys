@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Sample, LOINCCode, AliasMapping
-from orders.models import TestOrder
+#from orders.models import TestOrder
 from .serializers import SampleSerializer
 from django.core.exceptions import ValidationError
 import traceback
@@ -86,11 +86,11 @@ def create_sample(request): # 샘플 등록
             status=status.HTTP_400_BAD_REQUEST
         )
         
-    if not TestOrder.objects.filter(id=order_id).exists():
-        return Response(
-            {"error": f"주문 ID '{order_id}'는 존재하지 않습니다."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    # if not TestOrder.objects.filter(id=order_id).exists():
+    #     return Response(
+    #         {"error": f"주문 ID '{order_id}'는 존재하지 않습니다."},
+    #         status=status.HTTP_400_BAD_REQUEST
+    #     )
 
     serializer = SampleSerializer(data=request.data)
     if serializer.is_valid():
@@ -132,3 +132,18 @@ def create_test_result_for_sample(request, sample_id):
         serializer.save(result_status="recorded")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def delete_sample(requlest, sample_id):
+    try:
+        sample = Sample.objects.get(id=sample_id)
+        sample.delete()
+        
+        # CDSS 결과도 함께 삭제
+        CDSSRecord.objects.filter(sample_id=sample_id).delete()
+        
+        return Response({'message': '삭제 성공'}, status=status.HTTP_204_NO_CONTENT)
+    except Sample.DoesNotExist:
+        return Response({'error': '해당 샘플이 존재하지 않습니다.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

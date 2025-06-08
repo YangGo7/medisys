@@ -1,9 +1,9 @@
 # ocs/serializers.py
 
 from rest_framework import serializers
-from .models import OCSLog
+from .models import LISLog
 
-class OCSLogSerializer(serializers.ModelSerializer):
+class LISLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OCSLog
+        model = LISLog
         fields = '__all__'

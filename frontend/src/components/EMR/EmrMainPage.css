@@ -1,211 +1,182 @@
-// src/components/EMR/EmrMainPage.jsx - 영상검사 요청 패널 추가
-import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import ChartHeader from './ChartHeader';
-import WaitingRoom from './WaitingRoom';
-import PatientInfoPanel from './PatientInfoPanel';
-import VisitHistoryPanel from './VisitHistoryPanel';
-import DiagnosisPanel from './DiagnosisPanel';
-import PatientDetailModal from './PatientDetailModal';
-// import ImagingRequestPanel from './ImagingRequestPanel'; // 일단 주석 처리
+html, body, #root, .App {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 
-const EmrMainPage = () => {
-  const [activeTab, setActiveTab] = useState('진료');
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [assignedPatients, setAssignedPatients] = useState({ 1: null, 2: null });
-  const [isModalOpen, setIsModalOpen] = useState(false);
+/* ─── 전체 페이지 컨테이너 ─── */
+.emr-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f6f8fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-  const assignToRoom = (roomNumber) => {
-    if (!selectedPatient) return;
-    setAssignedPatients((prev) => ({ ...prev, [roomNumber]: selectedPatient }));
-    setSelectedPatient(null);
-  };
+/* ─── 헤더 ─── */
+.emr-header {
+  height: 50px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 20;
+}
 
-  const openModal = () => {
-    if (!selectedPatient) return;
-    setIsModalOpen(true);
-  };
+/* ─── 콘텐츠 영역 ─── */
+.emr-content {
+  display: flex;
+  flex: 1;
+  height: calc(100% - 50px);
+  overflow: hidden;
+}
 
-  const closeModal = () => setIsModalOpen(false);
+/* ─── 사이드바 칼럼 ─── */
+.sidebar-col {
+  flex: 0 0 200px;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.03);
+  position: relative;
+}
 
-  const renderTabContent = () => {
-    if (activeTab === '홈') {
-      return (
-        <div style={pageContainerStyle}>
-          <h2 style={pageTitleStyle}>🏠 홈 화면</h2>
-          <div style={cardStyle}>
-            <p>이곳은 홈 탭입니다. 시스템 공지, 최근 진료 요약 등을 표시할 수 있습니다.</p>
-          </div>
-        </div>
-      );
-    }
-    if (activeTab === '설정') {
-      return (
-        <div style={pageContainerStyle}>
-          <h2 style={pageTitleStyle}>⚙️ 설정 페이지</h2>
-          <div style={cardStyle}>
-            <p>사용자 환경 설정, 권한 관리 등의 기능이 들어갈 수 있습니다.</p>
-          </div>
-        </div>
-      );
-    }
+/* ─── 사이드바 안 알림 박스 중앙 배치 ─── */
+.sidebar-col .notification-container {
+  position: absolute;
+  top: 100px;        /* 제목 박스 아래로 충분히 띄우기 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  z-index: 5;
+}
 
-    return (
-      <div style={pageContainerStyle}>
-        <ChartHeader onSearch={setSelectedPatient} />
 
-        <div style={cardGridStyle}>
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>🧑‍⚕️ 진료실 배정</h3>
-            <WaitingRoom
-              selectedPatient={selectedPatient}
-              assignToRoom={assignToRoom}
-              assignedPatients={assignedPatients}
-            />
-          </div>
+/* ─── 메인 콘텐츠 ─── */
+.content-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>📄 환자 정보</h3>
-            {selectedPatient ? (
-              <PatientInfoPanel
-                patient={selectedPatient}
-                onOpenDetailModal={openModal}
-              />
-            ) : (
-              <p style={emptyTextStyle}>환자를 선택해주세요.</p>
-            )}
-          </div>
+/* ─── 홈 / 설정 전용 full-width ─── */
+.page-container-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f6f8fa;
+  overflow: hidden;
+}
 
-          {/* 🔥 새로 추가: 영상검사 요청 패널 - 임시로 간단한 폼 */}
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>🏥 영상검사 요청</h3>
-            {selectedPatient ? (
-              <div>
-                <p><strong>환자:</strong> {selectedPatient.display}</p>
-                <div style={{ marginTop: '10px' }}>
-                  <select style={{ width: '100%', padding: '8px', marginBottom: '8px' }}>
-                    <option value="">검사 종류 선택</option>
-                    <option value="CR">Chest X-ray</option>
-                    <option value="CT">CT Scan</option>
-                    <option value="MR">MRI</option>
-                    <option value="US">Ultrasound</option>
-                  </select>
-                  <select style={{ width: '100%', padding: '8px', marginBottom: '8px' }}>
-                    <option value="">검사 부위 선택</option>
-                    <option value="CHEST">CHEST</option>
-                    <option value="ABDOMEN">ABDOMEN</option>
-                    <option value="HEAD">HEAD</option>
-                    <option value="SPINE">SPINE</option>
-                  </select>
-                  <button 
-                    style={{ 
-                      width: '100%', 
-                      padding: '10px', 
-                      backgroundColor: '#28a745', 
-                      color: 'white', 
-                      border: 'none', 
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => {
-                      console.log('🏥 영상검사 요청 (임시)');
-                      alert('영상검사 요청 기능을 구현중입니다!');
-                    }}
-                  >
-                    🏥 영상검사 요청
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p style={emptyTextStyle}>환자를 선택해주세요.</p>
-            )}
-          </div>
+/* ─── 홈 탭: 2×2 그리드 ─── */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+  height: 100%;
+}
 
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>📁 내원 기록</h3>
-            {assignedPatients[1] ? (
-              <VisitHistoryPanel patient={assignedPatients[1]} />
-            ) : (
-              <p style={emptyTextStyle}>환자가 배정되지 않았습니다.</p>
-            )}
-          </div>
+.home-grid > * {
+  height: 100%;
+  overflow-y: auto;
+}
 
-          <div style={cardStyle}>
-            <h3 style={cardTitleStyle}>🧠 AI 진단 및 판독</h3>
-            {assignedPatients[1] ? (
-              <DiagnosisPanel patient={assignedPatients[1]} />
-            ) : (
-              <p style={emptyTextStyle}>환자가 배정되지 않았습니다.</p>
-            )}
-          </div>
-        </div>
+/* ─── “진료” 탭 고정 4컬럼 레이아웃 ─── */
+.clinical-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 2fr;
+  flex: 1;
+  gap: 1rem;
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  height: 100%;
+  background-color: #f6f8fa;
+}
 
-        {isModalOpen && (
-          <PatientDetailModal
-            patient={selectedPatient}
-            onClose={closeModal}
-          />
-        )}
-      </div>
-    );
-  };
+.tab-col {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div style={{ flexGrow: 1 }}>{renderTabContent()}</div>
-    </div>
-  );
-};
+.tab1 .search-section {
+  margin-bottom: 1rem;
+}
 
-const pageContainerStyle = {
-  padding: '2rem',
-  width: '100%',
-  boxSizing: 'border-box',
-};
+.tab1 .room-section .section-title,
+.tab2 .section-title,
+.tab3 .section-title,
+.tab4-5 .section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
 
-const cardGridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-  gap: '1rem',
-  marginTop: '1rem'
-};
+.tab4-5 {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 1rem;
+}
 
-const cardStyle = {
-  border: '1px solid #ddd',
-  borderRadius: '8px',
-  padding: '1.5rem',
-  backgroundColor: '#fff',
-  boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-  transition: 'box-shadow 0.2s ease',
-  minHeight: '200px'
-};
+.tab4-5 .imaging-section {
+  margin-bottom: 1rem;
+}
 
-const cardTitleStyle = {
-  marginTop: 0,
-  fontSize: '18px',
-  fontWeight: 'bold',
-  color: '#333',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  marginBottom: '1rem'
-};
+.empty-text {
+  font-style: italic;
+  color: #888;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
 
-const pageTitleStyle = {
-  fontSize: '24px',
-  fontWeight: 'bold',
-  marginBottom: '1.5rem',
-  color: '#333',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem'
-};
+/* ─── 모달 오버레이 & 컨텐츠 ─── */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
 
-const emptyTextStyle = {
-  fontStyle: 'italic',
-  color: '#888',
-  fontSize: '14px'
-};
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 
-export default EmrMainPage;
+/* ─── 모달 내부 스크롤바 ─── */
+.modal::-webkit-scrollbar {
+  width: 8px;
+}
+.modal::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}

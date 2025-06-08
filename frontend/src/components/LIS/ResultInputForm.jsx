@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { saveLog } from '../utils/saveLog';
 
 const panelComponents = {
   CBC: ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets'],
@@ -40,6 +41,8 @@ const ResultInputForm = () => {
         const alias = res.data.test_type;
         if (alias && panelComponents[alias]) {
           setSelectedPanel(alias);
+        } else {
+          setSelectedPanel('');
         }
       })
       .catch((err) => {
@@ -54,7 +57,22 @@ const ResultInputForm = () => {
 
   const handleSubmit = async () => {
     const entries = Object.entries(results);
+    const expectedComponents = panelComponents[selectedPanel] || [];
+    const hasAllValues = expectedComponents.every((comp) => results[comp]?.trim());
+
+    if (!hasAllValues) {
+      alert('❗ 모든 검사 항목을 입력해야 합니다.');
+      return;
+    }
     try {
+      // 중복 제출 방지를 위한 검사
+      const allCdssResults = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
+      const exists = allCdssResults.data.some(r => r.sample_id === sampleId);
+      if (exists) {
+        alert('⚠ 이미 CDSS로 전송된 샘플입니다. 결과를 다시 등록할 수 없습니다.');
+        return;
+      }
+
       await Promise.all(
         entries.map(([component_name, result_value]) =>
           axios.post(`${process.env.REACT_APP_API_BASE_URL}tests/run`, {
@@ -68,9 +86,54 @@ const ResultInputForm = () => {
           })
         )
       );
-      alert('모든 결과가 성공적으로 등록되었습니다.');
+
+      await Promise.all(
+        entries.map(([component_name, result_value]) => {
+          const payload = {
+            sample_id: sampleId,
+            test_type: selectedPanel,
+            component_name,
+            value: result_value,
+            unit: componentUnits[component_name] || '',
+            verified_by: 1,
+           verified_date: new Date().toISOString()
+          }; 
+          console.log("CDSS 전송 payload 확인:",);
+          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/receive/`, payload);
+          })
+      );
+
+      // 로그 저장
+      try {
+        const allLogs = await axios.get(`${process.env.REACT_APP_API_BASE_URL}logs/`);
+        const matched = allLogs.data.find(
+          log =>
+            log.sample_id?.toString() === sampleId?.toString() &&
+            log.step === 'sample'
+        );
+
+        const patient_id = matched?.patient_id || 'UNKNOWN';
+        const doctor_id = matched?.doctor_id || 'UNKNOWN';
+
+        const resultText = entries.map(
+          ([comp, val]) => `${comp}: ${val} ${componentUnits[comp] || ''}`
+        ).join(', ');
+
+        await saveLog({
+          patient_id,
+          doctor_id,
+          sample_id: sampleId,
+          step: 'result',
+          result_detail: resultText
+        });
+
+      } catch (logErr) {
+        console.warn('❗ 로그 저장 중 오류:', logErr);
+      } //
+
+      alert('모든 결과가 성공적으로 등록 및 CDSS 전송되었습니다.');
     } catch (error) {
-      console.error('등록 실패:', error);
+      console.error('등록 또는 전송 실패:', error);
       alert('일부 또는 전체 결과 등록 실패');
     }
   };
@@ -104,6 +167,7 @@ const ResultInputForm = () => {
                   onChange={(e) => handleChange(component, e.target.value)}
                   className="border px-2 py-1 rounded w-40"
                   placeholder="값 입력"
+                  required 
                 />
               </div>
             ))}

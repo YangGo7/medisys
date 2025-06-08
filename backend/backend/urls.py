@@ -38,6 +38,8 @@ urlpatterns = [
     # OpenMRS 직접 연결 (호환성 유지)
     path('api/openmrs-vitals/', openmrs_vitals, name='openmrs_vitals'),
     path('api/openmrs-encounters/', openmrs_encounters, name='openmrs_encounters'),
+    
+
 ]
 
 if settings.DEBUG:

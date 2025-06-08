@@ -1,3 +1,5 @@
+// LIS > SampleForm.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -17,6 +19,7 @@ const SampleForm = () => {
   const [orderId, setOrderId] = useState('');
   const [loincCode, setLoincCode] = useState('');
   const [sampleStatus] = useState('collected');
+  
 
   useEffect(() => {
     if (paramOrderId) {
@@ -78,7 +81,7 @@ const SampleForm = () => {
     const payload = {
       order: parseInt(orderId),
       sample_type: sampleType,
-      test_type: selectedTestType,  // ✅ 고침
+      test_type: selectedAlias,  // ✅ 고침
       collection_date: collectionDate,
       loinc_code: loincCode,
       sample_status: sampleStatus
@@ -97,18 +100,19 @@ const SampleForm = () => {
       console.log('🎉 등록된 샘플:', res.data);
 
        // 로그 저장 추가
-      const doctor_id = localStorage.getItem('doctor_id') || 'UNKNOWN';
-      const doctor_name = localStorage.getItem('doctor_name') || '';
-      const patient_id = res.data?.patient_id || 'UNKNOWN'; // 응답에 patient_id가 포함돼 있을 경우
-      const patient_name = res.data?.patient_name || '';
+      const orderRes = await axios.get(`${process.env.REACT_APP_API_BASE_URL}orders/${orderId}/`);
+      const orderInfo = orderRes.data;
 
-      saveLog({
+      const patient_id = orderInfo.patient_id || 'UNKNOWN';
+      const doctor_id = orderInfo.doctor_id || 'UNKNOWN';
+
+      await saveLog({
         patient_id,
-        patient_name,
         doctor_id,
-        doctor_name,
-        request_type: '샘플 등록',
-        request_detail: `샘플 종류: ${sampleType}, 검사: ${selectedAlias}, 세부: ${selectedTestType}, LOINC: ${loincCode}`,
+        order_id: orderId,
+        sample_id: res.data.id,
+        step: 'sample',
+        request_detail: `샘플: ${selectedAlias}, 세부: ${selectedTestType}, LOINC: ${loincCode}`
       }); // 
 
 

@@ -19,3 +19,14 @@ def receive_test_result(request):
         return Response({"message": "저장 완료"}, status=201)
     return Response(serializer.errors, status=400)
     
+@api_view(['DELETE'])
+def delete_cdss_result(request, sample_id):
+    try:
+        results = CDSSRecord.objects.filter(sample_id=sample_id)
+        if results.exists():
+            results.delete()
+            return Response({'message': 'CDSS 결과 삭제 완료'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'error': '해당 샘플의 결과가 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

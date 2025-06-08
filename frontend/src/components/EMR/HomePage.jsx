@@ -1,13 +1,23 @@
-// src/pages/HomePage.jsx
+// src/components/EMR/HomePage.jsx
 import React from 'react';
+import { DashboardCards, ScheduleCalendar, UrgentWidget, QuickActions } from './home';
+import NotificationBell from './NotificationBell'; // 헤더 알림 벨, 나중에 구현
 
-const HomePage = () => {
-  return (
-    <div style={{ padding: '1rem' }}>
-      <h2>🏠 홈 화면</h2>
-      <p>이곳은 홈 탭입니다. 시스템 공지, 최근 진료 요약 등을 표시할 수 있습니다.</p>
+import './HomePage.css';
+
+const HomePage = () => (
+  <>
+    <header className="home-header">
+      <h1>🏥 EMR 대시보드</h1>
+      <NotificationBell />
+    </header>
+    <div className="home-grid">
+      <DashboardCards withProgress withSparkline />
+      <ScheduleCalendar enableDragDrop />
+      <UrgentWidget marquee withTabs showActionButtons />
+      <QuickActions />
     </div>
-  );
-};
+  </>
+);
 
 export default HomePage;

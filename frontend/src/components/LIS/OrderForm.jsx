@@ -20,10 +20,9 @@ const OrderForm = () => {
         const rawData = res.data;
         const aliases = [];
 
-        // sample_type별 alias 목록 추출
         Object.entries(rawData).forEach(([sampleType, aliasMap]) => {
           Object.keys(aliasMap).forEach(alias => {
-            aliases.push(alias); // 또는 { value: alias, label: alias }
+            aliases.push(alias);
           });
         });
 
@@ -62,13 +61,15 @@ const OrderForm = () => {
       alert('✅ 주문 생성 성공!');
       console.log('Created:', res.data);
 
-      // 로그 저장
-      saveLog({
+      
+      // 로그 저장 (LISLog 구조 기반)
+      await saveLog({
         patient_id: patientId,
         doctor_id: doctorId,
-        request_type: '오더 생성',
-        request_detail: `검사: ${selectedAlias}, 날짜: ${orderDate}`,
-      }); // 
+        order_id: res.data.id,
+        step: 'order',
+        request_detail: `검사: ${selectedAlias}, 날짜: ${orderDate}`
+      }); //
 
       navigate('/');
     } catch (err) {

@@ -16,8 +16,9 @@ const HelpGuide = () => {
             <h2>📘 EMR 사용 가이드</h2>
             <p>이 시스템은 다음과 같은 기능을 제공합니다.</p>
             <ul style={{ textAlign: 'left', marginTop: '1rem' }}>
-              <li><strong>🏠 홈: </strong> 공지사항 및 요약 정보 확인</li>
+              <li><strong>🏠 홈: </strong> 알림사항 및 요약 정보 확인</li>
               <li><strong>🧑‍⚕️ 진료: </strong> 환자 배정, 진료 기록, AI 분석 결과 보기</li>
+              <li><strong>🧑‍⚕️ 대기 목록: </strong> 환자 대기 목록, 진료실 배정 상황 확인</li>
               <li><strong>⚙️ 설정: </strong> 테마, 요청 로그, 도움말/사용 가이드 등 개인 설정</li>
             </ul>
             <button onClick={() => setIsOpen(false)} style={closeStyle}>닫기</button>

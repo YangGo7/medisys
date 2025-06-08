@@ -1,7 +1,8 @@
-// App.js - ThemeContext 적용 + 테마 클래스 적용 버전
+// App.js 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+// --- 기존 컴포넌트 임포트 ---
 import SampleForm from './components/LIS/SampleForm';
 import LisHome from './components/LIS/LisHome';
 import OrderForm from './components/LIS/OrderForm';
@@ -10,22 +11,24 @@ import SampleListPage from './components/LIS/SampleListPage';
 import ResultInputForm from './components/LIS/ResultInputForm';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
-import VitalAlertBanner from './components/EMR/VitalAlert';
+// import VitalAlertBanner from './components/EMR/VitalAlert'; // VitalAlertBanner는 Routes 내에 직접 사용되지 않는 것 같아 주석 처리 (필요시 해제)
 import MainPage from './components/MainPage';
 import EmrMainPage from './components/EMR/EmrMainPage';
-import PatientList from './components/patientsList';
+import PatientList from './components/patientsList'; // 기존 환자 목록 (경로 확인 필요)
 import SettingsPage from './components/EMR/SettingsPage';
-import LisResult from './components/LIS/ResultCdss';
-import { ThemeProvider, useTheme } from './components/EMR/contexts/ThemeContext';
+// ---------------------------
+
+
+// ✅ ThemeContext 추가
+import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 
 import './App.css';
 
-// ⭐ 테마 적용을 위한 래퍼 컴포넌트
-const ThemedApp = () => {
-  const { theme } = useTheme(); // 'light' or 'dark'
+function App() {
+  console.log("✅ API URL:", process.env.REACT_APP_API_URL);
 
   return (
-    <div className={`app-wrapper ${theme}`}>
+    <ThemeProvider>
       <Router>
         <Routes>
           {/* 기존 메인 페이지 */}
@@ -45,25 +48,18 @@ const ThemedApp = () => {
           <Route path="/samples" element={<SampleListPage />} />
           <Route path="/result/new" element={<ResultInputForm />} />
           <Route path="/result/new/:sampleId" element={<ResultInputForm />} />
-          <Route path="/results" element={<LisResult />} />
           <Route path="/tests" element={<OpenMRSPatientList />} />
           <Route path="/ocs/log" element={<OCSLogPage />} />
-          <Route path="/patients" element={<PatientList />} />
+          
+          {/* 기존 환자 목록 페이지 (이 페이지가 새로운 데스크의 환자 목록과 기능적으로 겹치는지 확인 필요) */}
+          <Route path="/patients" element={<PatientList />} /> 
+
+ 
 
           {/* 예외 경로는 메인으로 */}
           <Route path="*" element={<Navigate to="/main" />} />
         </Routes>
       </Router>
-    </div>
-  );
-};
-
-function App() {
-  console.log("✅ API URL:", process.env.REACT_APP_API_URL);
-
-  return (
-    <ThemeProvider>
-      <ThemedApp />
     </ThemeProvider>
   );
 }

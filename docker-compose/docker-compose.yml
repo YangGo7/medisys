@@ -1,105 +1,7 @@
-# docker-compose/docker-compose.yml (수정됨)
+version: '3.8'
+
 services:
-  # PostgreSQL (기존과 동일)
-  orthanc-postgres:
-    image: postgres:14
-    container_name: orthanc-postgres
-    hostname: orthanc-postgres
-    environment:
-      POSTGRES_DB: orthanc
-      POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: orthanc
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - orthanc_postgres_data:/var/lib/postgresql/data
-    networks:
-      - medical-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U orthanc -d orthanc"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # 🔥 해결책: PostgreSQL 플러그인 포함된 이미지 사용
-  orthanc:
-    image: orthancteam/orthanc:24.3.5  # PostgreSQL 플러그인 포함 확인된 버전
-    container_name: orthanc-server
-    hostname: orthanc-server
-    depends_on:
-      orthanc-postgres:
-        condition: service_healthy
-    ports:
-      - "8042:8042"
-      - "4242:4242"
-    volumes:
-      - orthanc_data:/var/lib/orthanc/db
-    environment:
-      # 🔥 기본 설정
-      ORTHANC__NAME: "Medical Platform Orthanc"
-      ORTHANC__VERBOSE_ENABLED: "true"
-      ORTHANC__LOG_LEVEL: "INFO"
-      
-      # 🔥 PostgreSQL 설정 (환경변수로)
-      ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
-      ORTHANC__POSTGRESQL__ENABLE_STORAGE: "true" 
-      ORTHANC__POSTGRESQL__HOST: "orthanc-postgres"
-      ORTHANC__POSTGRESQL__PORT: "5432"
-      ORTHANC__POSTGRESQL__DATABASE: "orthanc"
-      ORTHANC__POSTGRESQL__USERNAME: "orthanc"
-      ORTHANC__POSTGRESQL__PASSWORD: "orthanc"
-      ORTHANC__POSTGRESQL__LOCK: "false"
-      ORTHANC__POSTGRESQL__MAXIMUM_CONNECTION_RETRIES: "20"
-      ORTHANC__POSTGRESQL__CONNECTION_RETRY_INTERVAL: "5"
-      
-      # 🔥 핵심: 기본 저장소 비활성화
-      ORTHANC__STORAGE_DIRECTORY: ""
-      ORTHANC__INDEX_DIRECTORY: ""
-      
-      # 🔥 관대한 DICOM 처리
-      ORTHANC__UNKNOWN_SOP_CLASS_ACCEPTED: "true"
-      ORTHANC__DICOM_ALWAYS_ALLOW_STORE: "true"
-      ORTHANC__DICOM_ALWAYS_ALLOW_ECHO: "true"
-      ORTHANC__DICOM_ALWAYS_ALLOW_FIND: "true"
-      ORTHANC__DICOM_ALWAYS_ALLOW_MOVE: "true"
-      ORTHANC__STRICT_AET: "false"
-      ORTHANC__STORE_DICOM: "true"
-      ORTHANC__OVERWRITE_INSTANCES: "true"
-      
-      # 🔥 인증 설정
-      ORTHANC__AUTHENTICATION_ENABLED: "true"
-      ORTHANC__REGISTERED_USERS: '{"orthanc": "orthanc", "admin": "admin"}'
-      
-      # 🔥 DICOMweb 플러그인
-      ORTHANC__DICOM_WEB__ENABLE: "true"
-      ORTHANC__DICOM_WEB__ROOT: "/dicom-web/"
-      ORTHANC__DICOM_WEB__ENABLE_METADATA: "true"
-      
-      # 🔥 CORS 설정
-      ORTHANC__HTTP_CORS_ENABLED: "true"
-      ORTHANC__HTTP_CORS_ALLOW_CREDENTIALS: "true"
-      ORTHANC__HTTP_CORS_ALLOW_HEADERS: "Content-Type,Authorization,X-Requested-With,Accept,Origin,Cache-Control"
-      ORTHANC__HTTP_CORS_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
-      ORTHANC__HTTP_CORS_ALLOW_ORIGIN: "*"
-      
-      # 🔥 네트워크 설정
-      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
-      ORTHANC__HTTP_PORT: "8042"
-      ORTHANC__DICOM_PORT: "4242"
-      
-    networks:
-      - medical-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "-u", "orthanc:orthanc", "http://localhost:8042/system"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 120s
-
-  # OpenMRS MySQL (기존 유지)
+  # OpenMRS MySQL
   openmrs-mysql:
     image: mysql:8.0
     container_name: openmrs-mysql
@@ -118,7 +20,7 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # OpenMRS Web Application (기존 유지)
+  # OpenMRS Web Application
   openmrs-server:
     image: openmrs/openmrs-reference-application-distro:latest
     container_name: openmrs-server
@@ -142,7 +44,7 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # MariaDB (메인 애플리케이션용 - 기존 유지)
+  # MariaDB (메인 애플리케이션용)
   mariadb:
     image: mariadb:10.11
     container_name: mariadb-server
@@ -160,10 +62,63 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # 🔥 OHIF는 일단 제거 (Orthanc 문제 해결 후 추가)
-  # ohif-viewer: ... (나중에 추가)
+  # PostgreSQL (Orthanc용)
+  orthanc-postgres:
+    image: postgres:14
+    container_name: orthanc-postgres
+    hostname: orthanc-postgres
+    environment:
+      POSTGRES_DB: orthanc
+      POSTGRES_USER: orthanc
+      POSTGRES_PASSWORD: orthanc
+    ports:
+      - "5432:5432"
+    volumes:
+      - orthanc_postgres_data:/var/lib/postgresql/data
+    networks:
+      - medical-network
+    restart: unless-stopped
 
-  # MongoDB (기존 유지)
+  # Orthanc DICOM Server with DICOMweb Support
+  orthanc:
+    image: jodogne/orthanc-plugins:latest
+    container_name: orthanc-server
+    hostname: orthanc-server
+    depends_on:
+      - orthanc-postgres
+    ports:
+      - "8042:8042"
+      - "4242:4242"
+    volumes:
+      - orthanc_data:/var/lib/orthanc/db
+      - ./orthanc-config/orthanc.json:/etc/orthanc/orthanc.json:ro
+    environment:
+      # OHIF 연동을 위한 CORS 설정
+      - ORTHANC__HTTP_CORS_ENABLED=true
+      - ORTHANC__HTTP_CORS_ALLOW_CREDENTIALS=true
+      - ORTHANC__HTTP_CORS_ALLOW_HEADERS=Content-Type,Authorization,X-Requested-With,Accept,Origin
+      - ORTHANC__HTTP_CORS_ALLOW_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - ORTHANC__HTTP_CORS_ALLOW_ORIGIN=http://35.225.63.41:3001,http://localhost:3001,http://localhost:3000
+      
+      # DICOMweb 플러그인 활성화
+      - ORTHANC__DICOM_WEB_ENABLED=true
+      - ORTHANC__DICOM_WEB_ROOT=/dicom-web/
+      - ORTHANC__DICOM_WEB_ENABLE_METADATA=true
+      
+      # 로깅
+      - ORTHANC__VERBOSE_ENABLED=true
+      - ORTHANC__LOG_LEVEL=INFO
+    networks:
+      - medical-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB
   mongodb:
     image: mongo:6.0
     container_name: mongodb-server
@@ -179,8 +134,14 @@ services:
     networks:
       - medical-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # phpMyAdmin (기존 유지)
+  # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -198,6 +159,31 @@ services:
       - medical-network
     restart: unless-stopped
 
+  # MongoDB Express
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    hostname: mongo-express
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
+      ME_CONFIG_MONGODB_SERVER: mongodb-server
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: webadmin
+      ME_CONFIG_BASICAUTH_PASSWORD: webpassword
+      ME_CONFIG_MONGODB_URL: mongodb://admin:adminpassword@mongodb-server:27017/
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_OPTIONS_EDITORTHEME: "ambiance"
+    ports:
+      - "8081:8081"
+    networks:
+      - medical-network
+    restart: unless-stopped
+    command: sh -c "sleep 10 && tini -- /docker-entrypoint.sh mongo-express"
+
 networks:
   medical-network:
     driver: bridge
@@ -208,5 +194,4 @@ volumes:
   mariadb_data:
   orthanc_postgres_data:
   orthanc_data:
-  orthanc_logs:  # 🔥 로그 볼륨 추가
   mongodb_data:

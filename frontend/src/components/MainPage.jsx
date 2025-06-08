@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // ✅ react-router-dom에서 Link를 가져옵니다.
 import OrderForm from './LIS/OrderForm';
 import SampleForm from './LIS/SampleForm';
 import DicomViewer from './RIS/DicomViewer';
 import LisHome from './LIS/LisHome';
 import OCSLogPage from './OCS/OCSLogPage';
 import LoginPage from './login/LoginPage';
-import Calendar from 'react-calendar'; // 설치 필요: npm install react-calendar
+import Calendar from 'react-calendar';
+import PatientsList from './patientsList'; // ✅ 컴포넌트 이름을 PascalCase로
+import Medicalemployee from './Medicalemployee';
 import 'react-calendar/dist/Calendar.css';
-import './MainPage.css'; // 스타일 분리 권장
-import PatientsList from './patientsList'
-import  Medicalemployee from './Medicalemployee'
-//import Patientlist from './list.jsx'
+import './MainPage.css';
+
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('order');
   const [username, setUsername] = useState('홍길동'); // 실제 로그인 상태에 따라 변경 필요
@@ -23,8 +24,8 @@ export default function MainPage() {
       case 'lis': return <LisHome />;
       case 'logs': return <OCSLogPage />;
       case 'logins': return <LoginPage />;
-      case 'PatientsList': return <PatientsList />;  
-      case 'medical_employee': return <Medicalemployee />; 
+      case 'patientsList': return <PatientsList />;
+      case 'Medicalemployee': return <Medicalemployee />;
       default: return <OrderForm />;
     }
   };
@@ -47,10 +48,14 @@ export default function MainPage() {
           <button onClick={() => setCurrentTab('lis')}>🏠 LIS</button>
           <button onClick={() => setCurrentTab('logs')}>📄 로그</button>
           <button onClick={() => setCurrentTab('logins')}>🔐 로그인</button>
-          <button onClick={() => setCurrentTab('PatientsList')}>PatientsList</button>
-          <button onClick={() => setCurrentTab('Medicalemployee')}>medical_employee</button>
+          <button onClick={() => setCurrentTab('patientsList')}>🧑‍🤝‍🧑 환자 목록</button>
+          <button onClick={() => setCurrentTab('Medicalemployee')}>👨‍⚕️ 의료인 정보</button>
           
-          <a href="/emr"><button>📁 EMR 이동</button></a>
+          {/* EMR 이동 버튼 */}
+          <Link to="/emr"><button>📁 EMR 이동</button></Link>
+
+          {/* 데스크 페이지 이동 버튼 */}
+
         </aside>
 
         {/* 메인 패널 */}

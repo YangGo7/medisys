@@ -6,7 +6,10 @@ from dotenv import load_dotenv
 
 # .env 파일 로드
 load_dotenv(dotenv_path='.env')
-
+OPENMRS_API_BASE = os.getenv("OPENMRS_API_BASE")
+OPENMRS_USERNAME = os.getenv("OPENMRS_USERNAME")
+OPENMRS_PASSWORD = os.getenv("OPENMRS_PASSWORD")
+DEFAULT_IDENTIFIER_TYPE_UUID = os.getenv("82f18b44-6814-11e8-923f-e9a88dcb533f")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -44,8 +47,10 @@ INSTALLED_APPS = [
     'orders',
     'samples',
     'tests',
-    'lis_cdss',
-    'ocs',
+    'lis_cdss.apps.LisCdssConfig',
+    'ocs.apps.OcsConfig',
+    
+
 ]
 
 MIDDLEWARE = [
