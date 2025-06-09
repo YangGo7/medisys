@@ -19,6 +19,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from django.utils import timezone
+from datetime import timedelta
 
 logger = logging.getLogger('medical_integration')
 
@@ -1187,14 +1188,23 @@ def calculate_age_from_birthdate(birthdate):
     """생년월일로 나이 계산"""
     try:
         from datetime import datetime
+
+        # 1. 문자열이며 비어있지 않은 경우만 처리
         if isinstance(birthdate, str) and birthdate:
+            # 2. ISO 포맷에서 T 기준으로 앞부분만 취함 (예: '1999-09-15')
             birth_date = datetime.strptime(birthdate.split('T')[0], '%Y-%m-%d')
+
+            # 3. 오늘 날짜와 비교하여 나이 계산
             today = datetime.today()
             age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
             return age
     except:
         pass
+
+    # 잘못된 포맷이거나 계산 불가 시 None 반환
     return None
+
 
 
 @api_view(['GET'])
@@ -1341,20 +1351,37 @@ def proxy_openmrs_providers(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
+    
 @api_view(['POST'])
 def create_identifier_based_mapping(request):
     """
     IDENTIFIER_BASED 타입의 매핑 생성 (대기창용)
+    삭제된 환자가 다시 등록될 수 있도록 기존 매핑을 재활성화
     """
     try:
-        orthanc_id = request.data.get("orthanc_patient_id")
+        orthanc_id = request.data.get("orthanc_patient_id") or f"DUMMY-{timezone.now().strftime('%H%M%S')}"
         openmrs_uuid = request.data.get("openmrs_patient_uuid")
         patient_identifier = request.data.get("patient_identifier")
 
-        if not (orthanc_id and openmrs_uuid and patient_identifier):
-            return Response({'error': '모든 필드가 필요합니다.'}, status=400)
+        if not (openmrs_uuid and patient_identifier):
+            return Response({'error': 'UUID 또는 식별자가 누락되었습니다.'}, status=400)
 
+        # ✅ 기존 비활성화된 매핑 재활성화
+        existing = PatientMapping.objects.filter(
+            openmrs_patient_uuid=openmrs_uuid,
+            patient_identifier=patient_identifier,
+            mapping_type='IDENTIFIER_BASED',
+            is_active=False
+        ).first()
+
+        if existing:
+            existing.is_active = True
+            existing.orthanc_patient_id = orthanc_id  # 최신 ID 반영
+            existing.sync_status = "PENDING"
+            existing.save(update_fields=['is_active', 'orthanc_patient_id', 'sync_status'])
+            return Response({'success': True, 'mapping_id': existing.mapping_id, 'message': '기존 매핑 재활성화됨'}, status=200)
+
+        # 🔥 신규 생성
         mapping = PatientMapping.create_identifier_based_mapping(
             orthanc_patient_id=orthanc_id,
             openmrs_patient_uuid=openmrs_uuid,
@@ -1366,8 +1393,9 @@ def create_identifier_based_mapping(request):
         return Response({'error': '매핑 생성 실패'}, status=500)
 
     except Exception as e:
-        logger.error(f"IDENTIFIER_BASED 매핑 생성 중 예외: {e}")
+        logger.error(f"[IDENTIFIER_BASED] 매핑 생성 중 예외: {e}")
         return Response({'error': str(e)}, status=500)
+
 
 @api_view(['GET'])
 def openmrs_patients_with_mapping(request):
@@ -1392,18 +1420,32 @@ def assign_room(request):
     """
     진료실 배정 API: 선택된 환자를 특정 진료실에 배정
     """
-    patient_id = request.data.get("patientId")
+    mapping_id = request.data.get("patientId")  # 실제로는 매핑 ID
     room = request.data.get("room")
 
-    if not patient_id or not room:
+    if not mapping_id or not room:
         return Response({"error": "필드 누락"}, status=400)
 
-    # 예시로 로직은 생략하고 로그만 출력
-    print(f"✅ 배정 요청: 환자 {patient_id} → 진료실 {room}")
+    try:
+        mapping = PatientMapping.objects.get(mapping_id=mapping_id, is_active=True)
 
-    # TODO: 실제 매핑 및 상태 업데이트 필요
-    return Response({"success": True})
+        mapping.assigned_room = room
+        mapping.save(update_fields=["assigned_room"])
 
+        # 호출 메시지 알림용 로그 또는 후속 처리
+        logger.info(f"✅ 환자 {mapping.display or mapping.patient_identifier} → 진료실 {room} 배정 완료")
+
+        return Response({
+            "success": True,
+            "message": f"환자가 진료실 {room}에 배정되었습니다.",
+            "assigned_room": mapping.assigned_room
+        })
+
+    except PatientMapping.DoesNotExist:
+        return Response({"error": "해당 환자 매핑을 찾을 수 없습니다."}, status=404)
+    except Exception as e:
+        logger.error(f"[assign_room] 오류 발생: {e}")
+        return Response({"error": str(e)}, status=500)
 
 @api_view(['POST'])
 def unassign_room(request):
@@ -1414,10 +1456,18 @@ def unassign_room(request):
     if room not in [1, 2]:
         return Response({'error': '유효하지 않은 진료실 번호입니다.'}, status=400)
 
-    # 여기서는 상태를 저장하는 DB가 없다면 프론트 상태만 관리됨
-    # 저장형으로 만들고 싶다면 AssignedRoom 모델 추가 필요
-    return Response({'success': True})
+    # 해당 진료실에 배정된 환자 찾기
+    try:
+        patient = PatientMapping.objects.get(assigned_room=room)
+    except PatientMapping.DoesNotExist:
+        return Response({'message': f'{room}번 진료실에는 배정된 환자가 없습니다.'}, status=200)
 
+    # 진료실 해제 처리
+    patient.assigned_room = None
+    patient.just_assigned = False
+    patient.save()
+
+    return Response({'success': True, 'message': f'{room}번 진료실 배정이 해제되었습니다.'})
 @api_view(['GET'])
 def identifier_based_waiting_list(request):
     today = timezone.now().date()
@@ -1433,35 +1483,77 @@ def identifier_based_waiting_list(request):
             result.append({
                 'mapping_id': m.mapping_id,
                 'patient_identifier': m.patient_identifier,
-                'display': getattr(m, 'display', m.patient_identifier),
-                'name': getattr(m, 'display', m.patient_identifier),
-                'gender': getattr(m, 'gender', '-'),
-                'birthdate': getattr(m, 'birthdate', '-'),
+                'name': m.display or m.patient_identifier or '이름 없음',
+                'display': m.display or m.patient_identifier,
+                'gender': m.gender or '-',
+                'birthdate': str(m.birthdate) if m.birthdate else '-',
                 'waitTime': m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
-                'assigned_room': getattr(m, 'assigned_room', None),
+                'assigned_room': m.assigned_room,
             })
+
         except Exception as e:
             logger.warning(f"[대기목록] 매핑 {m.mapping_id} 처리 실패: {e}")
     return Response(result)
 
 
+
+@api_view(['GET'])
+def get_orthanc_studies(request):
+    """Orthanc Studies 목록 조회"""
+    try:
+        orthanc_api = OrthancAPI()
+        studies = orthanc_api.get_studies()  # 이 메서드가 있어야 함
+        
+        return Response({
+            'success': True,
+            'studies': studies
+        })
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+        
+        
+
 @api_view(['GET'])
 def waiting_board_view(request):
     today = timezone.now().date()
-    mappings = PatientMapping.objects.filter(
-        created_date__date=today,
+    
+    # 1. 대기 중인 환자 (진료실 미배정, 오늘자, 활성화)
+    waiting_list = PatientMapping.objects.filter(
+        is_active=True,
         mapping_type='IDENTIFIER_BASED',
         assigned_room__isnull=True,
-        is_active=True
-    )
-    result = [
+        created_date__date=today
+    ).order_by('created_date')
+
+    waiting = [
         {
-            'name': m.display,
-            'patient_identifier': m.patient_identifier,
-            'birthdate': m.birthdate,
-            'gender': m.gender,
-            'waitTime': m.waiting_minutes()
+            "name": m.display or m.patient_identifier,
+            "room": None
         }
-        for m in mappings
+        for m in waiting_list
     ]
-    return Response(result)
+
+    # 2. 최근 1분 내 배정된 환자
+    one_minute_ago = timezone.now() - timedelta(seconds=60)
+    recent_assigned = PatientMapping.objects.filter(
+        is_active=True,
+        mapping_type='IDENTIFIER_BASED',
+        assigned_room__isnull=False,
+        created_date__date=today,
+        # 최근 1분 내에 배정되었을 것 (created_date 말고 updated_at 쓰는 게 더 명확하나 일단 created 기준)
+    ).order_by('-created_date').first()
+
+    assigned_recent = None
+    if recent_assigned:
+        assigned_recent = {
+            "name": recent_assigned.display or recent_assigned.patient_identifier,
+            "room": recent_assigned.assigned_room
+        }
+
+    return Response({
+        "waiting": waiting,
+        "assigned_recent": assigned_recent
+    })

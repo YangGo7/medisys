@@ -93,7 +93,7 @@ const ResultInputForm = () => {
       await Promise.all(
         entries.map(([component_name, result_value]) => {
           const payload = {
-            sample_id: sampleId,
+            sample: sampleId,
             test_type: selectedPanel,
             component_name,
             value: result_value,
@@ -102,9 +102,12 @@ const ResultInputForm = () => {
            verified_date: new Date().toISOString()
           }; 
           console.log("CDSS 전송 payload 확인:",);
-          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/receive/`, payload);
-          })
-      );
+          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/receive/`, payload)
+          .catch(err => {
+            console.log('CDSS POST error:', err?.response?.data);
+            throw err;
+          });
+      }));
 
       // 로그 저장
       try {

@@ -79,9 +79,10 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # Orthanc DICOM Server with DICOMweb Support
+  # ✅ 수정된 Orthanc 설정 (DICOMweb 플러그인 포함)
   orthanc:
-    image: jodogne/orthanc-plugins:latest
+    image: jodogne/orthanc-plugins:1.12.3-full
+  # ← 이미지 변경
     container_name: orthanc-server
     hostname: orthanc-server
     depends_on:
@@ -92,27 +93,34 @@ services:
     volumes:
       - orthanc_data:/var/lib/orthanc/db
       - ./orthanc-config/orthanc.json:/etc/orthanc/orthanc.json:ro
-    environment:
-      # OHIF 연동을 위한 CORS 설정
-      - ORTHANC__HTTP_CORS_ENABLED=true
-      - ORTHANC__HTTP_CORS_ALLOW_CREDENTIALS=true
-      - ORTHANC__HTTP_CORS_ALLOW_HEADERS=Content-Type,Authorization,X-Requested-With,Accept,Origin
-      - ORTHANC__HTTP_CORS_ALLOW_METHODS=GET,POST,PUT,DELETE,OPTIONS
-      - ORTHANC__HTTP_CORS_ALLOW_ORIGIN=http://35.225.63.41:3001,http://localhost:3001,http://localhost:3000
-      
-      # DICOMweb 플러그인 활성화
-      - ORTHANC__DICOM_WEB_ENABLED=true
-      - ORTHANC__DICOM_WEB_ROOT=/dicom-web/
-      - ORTHANC__DICOM_WEB_ENABLE_METADATA=true
-      
-      # 로깅
-      - ORTHANC__VERBOSE_ENABLED=true
-      - ORTHANC__LOG_LEVEL=INFO
     networks:
       - medical-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8042/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ✅ 완전히 수정된 OHIF 설정
+  ohif-viewer:
+    image: ohif/viewer:latest
+    container_name: ohif-viewer
+    hostname: ohif-viewer
+    depends_on:
+      orthanc:
+        condition: service_healthy
+    ports:
+      - "3001:80"
+    volumes:
+      # ✅ 올바른 파일 마운트 방식
+      - ./config/app-config.js:/usr/share/nginx/html/app-config.js:ro
+    networks:
+      - medical-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -183,27 +191,6 @@ services:
       - medical-network
     restart: unless-stopped
     command: sh -c "sleep 10 && tini -- /docker-entrypoint.sh mongo-express"
-
-  ohif-viewer:
-      image: ohif/app:latest
-      container_name: ohif-viewer
-      ports:
-        - "3001:80"
-      volumes:
-        - ./config/app-config.js:/usr/share/nginx/html/app-config.js:ro
-      depends_on:
-        - orthanc
-      networks:
-        - medical-network
-      restart: unless-stopped
-      environment:
-        - NGINX_ENTRYPOINT_QUIET_LOGS=1
-      healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:80"]
-        interval: 30s
-        timeout: 10s
-        retries: 3
-
 
 networks:
   medical-network:

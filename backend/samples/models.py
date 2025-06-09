@@ -8,6 +8,7 @@ class Sample(models.Model):
     collection_date = models.DateTimeField()
     test_type = models.CharField(max_length=50, default='기타')
     sample_status = models.CharField(max_length=20, default="collected")
+    is_deleted = models.BooleanField(default=False)
     
     def __str__(self):
         return f"Sample {self.id} - {self.sample_type}"

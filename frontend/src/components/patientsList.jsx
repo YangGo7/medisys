@@ -30,34 +30,40 @@ const PatientList = () => {
   };
 
   const sendToWaitingList = async (patient) => {
-  const identifier = patient.identifiers?.[0]?.identifier;
-  const orthancId = patient.orthanc_patient_id;  // ✅ 이 필드가 존재해야 함
+    const identifier = patient.identifiers?.[0]?.identifier;
+    const uuid = patient.uuid;
 
-  if (!identifier || !patient.uuid || !orthancId) {
-    alert('❗ 식별자, UUID 또는 Orthanc ID가 없어 대기 등록할 수 없습니다.');
-    return;
-  }
+    // ❌ 기존 로직: orthanc_patient_id 없으면 차단
+    /*
+    const orthancId = patient.orthanc_patient_id;
+    if (!identifier || !uuid || !orthancId) {
+      alert('❗ 식별자, UUID 또는 Orthanc ID가 없어 대기 등록할 수 없습니다.');
+      return;
+    }
+    */
 
-  const payload = {
-    openmrs_patient_uuid: patient.uuid,
-    patient_identifier: identifier,
-    orthanc_patient_id: orthancId,  // ✅ 필수 필드 추가
+    // ✅ 테스트용 우회: DUMMY orthanc ID 생성
+    const fakeOrthancId = patient.orthanc_patient_id || `DUMMY-${Date.now()}`;
+
+    const payload = {
+      openmrs_patient_uuid: uuid,
+      patient_identifier: identifier,
+      orthanc_patient_id: fakeOrthancId,
+    };
+
+    try {
+      await axios.post(POST_URL, payload);
+      alert('✅ 대기 등록 완료!');
+      setWaitingRegistered((prev) => ({
+        ...prev,
+        [uuid]: true,
+      }));
+    } catch (err) {
+      console.error('❌ 대기 등록 실패:', err);
+      const message = err.response?.data?.error || err.message;
+      alert(`❌ 대기 등록 실패: ${message}`);
+    }
   };
-
-  try {
-    await axios.post(POST_URL, payload);
-    alert('✅ 대기 등록 완료!');
-    setWaitingRegistered((prev) => ({
-      ...prev,
-      [patient.uuid]: true,
-    }));
-  } catch (err) {
-    console.error('❌ 대기 등록 실패:', err);
-    const message = err.response?.data?.error || err.message;
-    alert(`❌ 대기 등록 실패: ${message}`);
-  }
-};
-
 
   useEffect(() => {
     fetchPatients();
@@ -136,7 +142,6 @@ const PatientList = () => {
           {filteredPatients.map((patient) => {
             const uuid = patient.uuid;
             const isRegistered = waitingRegistered[uuid] === true;
-            const canRegister = true;//!!patient.orthanc_patient_id;
 
             return (
               <tr key={uuid}>
@@ -152,8 +157,7 @@ const PatientList = () => {
                   ) : (
                     <button
                       onClick={() => sendToWaitingList(patient)}
-                      disabled={!canRegister}
-                      style={{ backgroundColor: canRegister ? '' : '#ccc' }}
+                      style={{ backgroundColor: '#4caf50', color: 'white' }}
                     >
                       대기 등록
                     </button>

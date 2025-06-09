@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // ✅ react-router-dom에서 Link를 가져옵니다.
 import OrderForm from './LIS/OrderForm';
 import SampleForm from './LIS/SampleForm';
-import DicomViewer from './RIS/DicomViewer';
+import DicomViewer2 from './RIS/DicomViewer';
 import LisHome from './LIS/LisHome';
 import OCSLogPage from './OCS/OCSLogPage';
 import LoginPage from './login/LoginPage';
 import Calendar from 'react-calendar';
 import PatientsList from './patientsList'; // ✅ 컴포넌트 이름을 PascalCase로
 import Medicalemployee from './Medicalemployee';
-import OHIFViewer from './OHIF/OHIFViewer'
+import DicomViewer from './OHIF/OHIFViewer'
 import 'react-calendar/dist/Calendar.css';
 import './MainPage.css';
 
@@ -21,7 +21,7 @@ export default function MainPage() {
     switch (currentTab) {
       case 'order': return <OrderForm />;
       case 'sample': return <SampleForm />;
-      case 'dicom': return <OHIFViewer />;
+      case 'dicom': return <DicomViewer />;
       case 'lis': return <LisHome />;
       case 'logs': return <OCSLogPage />;
       case 'logins': return <LoginPage />;

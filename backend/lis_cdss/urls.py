@@ -1,6 +1,4 @@
 from django.urls import path
-from .views import receive_test_result, get_cdss_results
-from django.urls import path
 from .views import receive_test_result, get_cdss_results, delete_cdss_result
 
 urlpatterns = [

@@ -47,8 +47,8 @@ INSTALLED_APPS = [
     'orders',
     'samples',
     'tests',
-    'lis_cdss.apps.LisCdssConfig',
     'ocs.apps.OcsConfig',
+    'lis_cdss',
     
 
 ]

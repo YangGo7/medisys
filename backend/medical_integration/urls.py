@@ -10,7 +10,8 @@ from .views import (
     UrgentAlertList,
     UrgentAlertCount,
     AlertMarkRead,
-    unassign_room, get_patient_mapping  ,assign_room
+    unassign_room, get_patient_mapping  ,assign_room,
+    # get_all_openmrs_patients
 )
 
 
@@ -26,8 +27,10 @@ urlpatterns = [
     path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
     path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/', views.get_all_patients_simple, name='get_all_patients'),
+    # path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
     
     # Orthanc 환자 관리
+    path('orthanc/studies/', views.get_orthanc_studies, name='get_orthanc_studies'),
     path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),
     path('orthanc/patients/<str:patient_id>/', views.get_orthanc_patient, name='get_orthanc_patient'),
     
@@ -65,7 +68,10 @@ urlpatterns = [
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
     path('alerts/<int:pk>/mark-read/', AlertMarkRead.as_view(), name='alert_mark_read'),
     
-    
+    # 환자 목록 
     path('assign-room/', views.assign_room, name='assign_room'),
     path('unassign-room/', unassign_room, name='unassign-room'),  # 🔥 추가
+    path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),
+    path('waiting-board/', views.waiting_board_view, name='waiting_board'),
+
 ]

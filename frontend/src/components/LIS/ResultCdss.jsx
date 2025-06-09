@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
 const CdssResultTable = () => {
+  const [allResults, setAllResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [sampleOptions, setSampleOptions] = useState([]);
   const [selectedSampleId, setSelectedSampleId] = useState('');
@@ -9,32 +10,50 @@ const CdssResultTable = () => {
   const [error, setError] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`)
-      .then((res) => {
-        const dateFiltered = res.data.filter(r => r.verified_date?.slice(0, 10) === selectedDate);
-
-        // 초기 상태
-        setFilteredResults(dateFiltered);
-        const uniqueIds = [...new Set(dateFiltered.map(r => r.sample_id))];
-        setSampleOptions(uniqueIds);
-        setSelectedSampleId(''); // 날짜 바뀌면 샘플 필터 초기화
-      })
-      .catch((err) => {
-        console.error('CDSS 결과 불러오기 실패:', err);
-
-        if (err.response) {
-          console.log("서버 응답 내용:", err.response.data);  // 🔍 서버에서 전달된 상세 오류 메시지
-        }
-        setError('결과를 불러오는 데 실패했습니다.');
-      });
-  }, [selectedDate]);
-
-  useEffect(() => {
-    if (selectedSampleId !== '') {
-      setFilteredResults(prev => prev.filter(r => r.sample_id.toString() === selectedSampleId));
+  const fetchCdssResults = useCallback(async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
+      setAllResults(res.data); // 원본 저장
+      setError('');
+    } catch (err) {
+      console.error('CDSS 결과 불러오기 실패:', err);
+      if (err.response) {
+        console.log("서버 응답 내용:", err.response.data);
+      }
+      setError('결과를 불러오는 데 실패했습니다.');
+      setAllResults([]);
     }
-  }, [selectedSampleId]);
+  }, []);
+
+  useEffect(() => {
+    fetchCdssResults();
+  }, [selectedDate, fetchCdssResults]);
+
+  useEffect(() => {
+    let filtered = allResults.filter(
+      r => r.verified_date?.slice(0, 10) === selectedDate
+    );
+
+    // 샘플ID select
+    if (selectedSampleId) {
+      filtered = filtered.filter(r => String(r.sample_id) === String(selectedSampleId));
+    }
+    // 검색
+    if (searchKeyword) {
+      filtered = filtered.filter(r => String(r.sample_id).includes(searchKeyword));
+    }
+
+    setFilteredResults(filtered);
+
+    // 샘플 ID 목록 옵션
+    const uniqueIds = [...new Set(
+      allResults
+        .filter(r => r.verified_date?.slice(0, 10) === selectedDate)
+        .map(r => r.sample_id)
+    )];
+    setSampleOptions(uniqueIds);
+  }, [allResults, selectedDate, selectedSampleId, searchKeyword]);
+
 
   const handleDeleteResult = async (sampleId) => {
     if (!window.confirm(`샘플 ID ${sampleId}의 결과를 삭제하시겠습니까?`)) return;
@@ -42,8 +61,7 @@ const CdssResultTable = () => {
       await axios.delete(`${process.env.REACT_APP_API_BASE_URL}cdss/delete/${sampleId}`);
       alert('✅ 결과가 삭제되었습니다.');
       // 상태 업데이트 (삭제 후 새로 불러오기)
-      setFilteredResults(prev => prev.filter(r => r.sample_id !== sampleId));
-      setSampleOptions(prev => prev.filter(id => id !== sampleId));
+      fetchCdssResults(); 
     } catch (error) {
       console.error('❌ 삭제 실패:', error);
       alert('결과 삭제에 실패했습니다.');
@@ -60,7 +78,11 @@ const CdssResultTable = () => {
         <input
           type="date"
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          onChange={(e) => {
+            setSelectedDate(e.target.value);
+            setSelectedSampleId('');
+            setSearchKeyword('');
+          }}
           className="border rounded px-2 py-1"
         />
       </div>
@@ -78,7 +100,7 @@ const CdssResultTable = () => {
         <label className="mr-2 font-semibold">🔍 Sample ID 선택:</label>
         <select
           value={selectedSampleId}
-          onChange={(e) => setSelectedSampleId(e.target.value)}
+          onChange={e => setSelectedSampleId(e.target.value)}
           className="border rounded px-2 py-1"
         >
           <option value="">전체 보기</option>
@@ -114,7 +136,8 @@ const CdssResultTable = () => {
                 <td className="border px-4 py-2">{result.verified_by}</td>
                 <td className="border px-4 py-2">{new Date(result.verified_date).toLocaleString()}</td>
                 <td className="border px-4 py-2">
-                  <button onClick={() => handleDeleteResult(result.sample_id)}
+                  <button 
+                    onClick={() => handleDeleteResult(result.sample_id)}
                     className="text-red-600 hover:underline">삭제</button>
                 </td>
               </tr>

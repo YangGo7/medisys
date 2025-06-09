@@ -1,28 +1,33 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CDSSRecord
-from .serializers import CDSSRecordSerializer
+from .models import CDSSResult
+from .serializers import CDSSResultSerializer
 
 @api_view(['GET'])
 def get_cdss_results(request):
-    results = CDSSRecord.objects.all().order_by('-id')[:30]  # 최근 30건
-    serializer = CDSSRecordSerializer(results, many=True)
+    results = CDSSResult.objects.all().order_by('-id')[:30]  # 최근 30건
+    serializer = CDSSResultSerializer(results, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 @api_view(['POST'])
 def receive_test_result(request):
-    print("✅ CDSS 요청 수신 데이터:", request.data)  # 이 줄 로그 찍히는지 확인!
-    serializer = CDSSRecordSerializer(data=request.data)
+    print("DEBUG: request.data =", request.data)  # ✅ 확인용 로그
+    serializer = CDSSResultSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response({"message": "저장 완료"}, status=201)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        print("ERROR: serializer.errors =", serializer.errors)  # ✅ 오류 로그
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 @api_view(['DELETE'])
 def delete_cdss_result(request, sample_id):
     try:
-        results = CDSSRecord.objects.filter(sample_id=sample_id)
+        results = CDSSResult.objects.filter(sample_id=sample_id)
         if results.exists():
             results.delete()
             return Response({'message': 'CDSS 결과 삭제 완료'}, status=status.HTTP_204_NO_CONTENT)

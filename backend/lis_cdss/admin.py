@@ -1,5 +1,5 @@
 # lis_cdss/admin.py
 from django.contrib import admin
-from .models import CDSSRecord
+from .models import CDSSResult
 
-admin.site.register(CDSSRecord)
+admin.site.register(CDSSResult)

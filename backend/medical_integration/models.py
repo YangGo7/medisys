@@ -83,9 +83,20 @@ class PatientMapping(models.Model):
             api = OpenMRSAPI()
             patient_info = api.get_patient(openmrs_patient_uuid)
 
-            display = patient_info.get('display') or patient_identifier
-            birthdate = patient_info.get('person', {}).get('birthdate')
-            gender = patient_info.get('person', {}).get('gender')
+            person = patient_info.get('person', {})
+            preferred_name = person.get('preferredName', {})
+            given = preferred_name.get('givenName', '').strip()
+            family = preferred_name.get('familyName', '').strip()
+            full_name = f"{given} {family}".strip()
+
+            if not full_name:
+                full_name = patient_identifier  # fallback
+
+            gender = person.get('gender')
+            birthdate_str = person.get('birthdate')
+            birthdate = None
+            if birthdate_str:
+                birthdate = datetime.strptime(birthdate_str.split('T')[0], '%Y-%m-%d').date()
 
             mapping = cls.objects.create(
                 orthanc_patient_id=orthanc_patient_id,
@@ -94,7 +105,7 @@ class PatientMapping(models.Model):
                 mapping_type="IDENTIFIER_BASED",
                 sync_status="PENDING",
                 is_active=True,
-                display=display,
+                display=full_name,  # ✅ 핵심: display가 무조건 fallback까지 포함하도록 보장
                 gender=gender,
                 birthdate=birthdate
             )
@@ -102,6 +113,8 @@ class PatientMapping(models.Model):
         except Exception as e:
             logger.error(f"[IDENTIFIER_BASED] 매핑 생성 실패: {e}")
             return None
+
+
 
 
 class Person(models.Model):

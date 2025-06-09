@@ -6,7 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from openmrs_models.views import openmrs_vitals, openmrs_encounters
-
+# from . import views
 # 기본 헬스체크 뷰 추가
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -38,6 +38,7 @@ urlpatterns = [
     # OpenMRS 직접 연결 (호환성 유지)
     path('api/openmrs-vitals/', openmrs_vitals, name='openmrs_vitals'),
     path('api/openmrs-encounters/', openmrs_encounters, name='openmrs_encounters'),
+    # path('api/openmrs-patients/', views.get_all_openmrs_patients),
     
 
 ]

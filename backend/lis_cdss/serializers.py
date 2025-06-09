@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import CDSSRecord
+from .models import CDSSResult
 
-class CDSSRecordSerializer(serializers.ModelSerializer):
+class CDSSResultSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CDSSRecord
+        model = CDSSResult
         fields = '__all__'

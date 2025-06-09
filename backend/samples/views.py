@@ -152,4 +152,5 @@ def delete_sample(requlest, sample_id):
     except Sample.DoesNotExist:
         return Response({'error': '해당 샘플이 존재하지 않습니다.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        print("샘플 삭제 에러:", str(e))
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

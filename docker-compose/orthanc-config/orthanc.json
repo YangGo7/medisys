@@ -1,39 +1,52 @@
 {
-  "Name": "Medical System Orthanc",
+  "Name": "Medical Platform Orthanc",
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "IndexDirectory": "/var/lib/orthanc/db",
+  
+  "PostgreSQL": {
+    "EnableIndex": true,
+    "EnableStorage": false,
+    "Host": "orthanc-postgres",
+    "Port": 5432,
+    "Database": "orthanc",
+    "Username": "orthanc",
+    "Password": "orthanc"
+  },
+  
   "HttpPort": 8042,
-  "DicomPort": 4242,
+  "HttpServerEnabled": true,
+  "HttpDescribeErrors": true,
+  "HttpCompressionEnabled": true,
   "RemoteAccessAllowed": true,
+  
+  "DicomServerEnabled": true,
+  "DicomPort": 4242,
+  "DicomAet": "ORTHANC",
+  
   "AuthenticationEnabled": true,
   "RegisteredUsers": {
-    "orthanc": "orthanc",
-    "admin": "admin"
+    "orthanc": "orthanc"
   },
   
-  "DicomServerEnabled": false,
-  "DicomServer": {
-    "Host": "0.0.0.0",
-    "Port": 4242,
-    "Timeout": 30,
-    "AssociationTimeout": 30
-  },
-  
-  "HttpServer": {
-    "Host": "0.0.0.0",
-    "Port": 8042,
-    "Timeout": 60,
-    "KeepAlive": true
-  },
+  "Plugins": [
+     "/usr/share/orthanc/plugins"
+  ],
   
   "DicomWeb": {
     "Enable": true,
     "Root": "/dicom-web/",
-    "EnableMetadata": true,
-    "Host": "0.0.0.0",
-    "Port": 8042,  
-    "Ssl": false,
     "EnableWado": true,
     "WadoRoot": "/wado",
-    "QidoRoot": "/qido"
+    "Host": "0.0.0.0",
+    "Port": 8042,
+    "Ssl": false,
+    "QidoSupportsIncludeField": false,
+    "StudiesMetadata": "MainDicomTags",
+    "SeriesMetadata": "Full"
+  },
+  
+  "StoneWebViewer": {
+    "Enable": false
   },
   
   "HttpHeaders": {
@@ -44,57 +57,14 @@
     "Access-Control-Allow-Credentials": "true"
   },
   
-  "PostgreSQL": {
-    "EnableIndex": true,
-    "EnableStorage": true,
-    "Host": "orthanc-postgres",
-    "Port": 5432,
-    "Database": "orthanc",
-    "Username": "orthanc",
-    "Password": "orthanc",
-    "MaximumConnectionRetries": 10,
-    "ConnectionRetryInterval": 5
-  },
-  
-  "Plugins": [
-    "/usr/share/orthanc/plugins",
-    "/etc/orthanc/plugins"
-  ],
-  
-  "DicomAssociationCloseDelay": 5,
-  "DicomScuTimeout": 30,
-  "DicomScpTimeout": 60,
-  "StrictAet": false,
-  "DefaultEncoding": "UTF8",
-  "AcceptedTransferSyntaxes": [
-    "1.2.840.10008.1.2",
-    "1.2.840.10008.1.2.1",
-    "1.2.840.10008.1.2.2"
-  ],
-  
   "VerboseEnabled": true,
+  "VerboseStartup": true,
+  "LogExportedResources": true,
   "LogLevel": "INFO",
-  "TraceDicomQueries": true,
   
-  "ConcurrentJobs": 2,
-  "JobsHistorySize": 10,
-  "SaveJobs": true,
-  "OverwriteInstances": false,
-  "StableAge": 60,
-  "StoreMD5ForAttachments": true,
-  
-  "SslEnabled": false,
-  "DicomTlsEnabled": false,
-  
-  "StorageDirectory": "/var/lib/orthanc/db",
+  "ConcurrentJobs": 4,
+  "HttpRequestTimeout": 60,
+  "DicomThreadsCount": 4,
   "MaximumStorageSize": 0,
-  "MaximumPatientCount": 0,
-  
-  "ExecuteLuaEnabled": true,
-  "LuaScripts": [],
-  "UserMetadata": {},
-  "DefaultPrivateCreator": "",
-  "CheckRevisions": false,
-  "DicomModalities": {},
-  "OrthancPeers": {}
+  "MaximumPatientCount": 0
 }

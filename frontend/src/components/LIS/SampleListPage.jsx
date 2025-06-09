@@ -18,6 +18,10 @@ const SampleListPage = () => {
         setSamples(sorted);
       } catch (err) {
         console.error('샘플 목록 불러오기 실패:', err);
+
+        if (err.response?.data) {
+         console.log("💡 백엔드 오류 응답 내용:", err.response.data);
+        }
       }
     };
 
@@ -28,6 +32,10 @@ const SampleListPage = () => {
         setCdssSampleIds(ids);
       } catch (err) {
         console.error('CDSS 결과 불러오기 실패:', err);
+
+        if (err.response?.data) {
+         console.log("💡 백엔드 오류 응답 내용:", err.response.data);
+        }
       }
     };
 
@@ -74,9 +82,9 @@ const SampleListPage = () => {
       console.log("✅ 로그 저장 성공");
     } catch (err) {
       console.error("❌ 로그 저장 실패:", err.response?.data || err.message);
+    } finally {
+      navigate(`/lis/result/new/${sample.id}`);
     }
-
-    navigate(`/result/new/${sample.id}`);
   };
 
  
@@ -136,11 +144,16 @@ const SampleListPage = () => {
                 <td className="border px-4 py-2">{sample.collection_date}</td>
                 <td className="border px-4 py-2">{sample.sample_status}</td>
                 <td className="border px-4 py-2">
-                  <span className={
-                    isRegistered
-                      ? "bg-green-200 text-green-800 px-2 py-1 rounded text-sm"
-                      : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm"
-                  }>
+                  <span 
+                    style={{
+                      backgroundColor: isRegistered ? '#d4edda' : '#fff3cd',
+                      color: isRegistered ? '#155724' : '#856404',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
                     {isRegistered ? '검사 완료' : '검사 중'}
                   </span>
                 </td>
@@ -148,11 +161,15 @@ const SampleListPage = () => {
                   <button
                     onClick={() => handleResultClick(sample)}
                     disabled={isRegistered}
-                    className={`px-3 py-1 rounded ${
-                      isRegistered
-                        ? 'bg-gray-300 cursor-not-allowed'
-                        : 'bg-blue-500 text-white hover:bg-blue-600'
-                    }`}
+                    style={{
+                      backgroundColor: isRegistered ? '#d6d8db' : '#007bff',
+                      color: isRegistered ? '#6c757d' : '#fff',
+                      cursor: isRegistered ? 'not-allowed' : 'pointer',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem',
+                      border: 'none',
+                    }}
                   >
                     {isRegistered ? '등록 완료' : '결과 등록'}
                   </button>

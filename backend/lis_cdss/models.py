@@ -1,7 +1,8 @@
 from django.db import models
+from samples.models import Sample
 
-class CDSSRecord(models.Model):
-    sample_id = models.IntegerField()
+class CDSSResult(models.Model):
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE)
     test_type = models.CharField(max_length=100)
     component_name = models.CharField(max_length=50)
     value = models.CharField(max_length=50)
@@ -13,4 +14,4 @@ class CDSSRecord(models.Model):
         return f"{self.sample_id} - {self.test_type} - {self.component_name}"
 
     class Meta:
-        db_table = "lis_cdss_cdssrecord"  # 원하는 테이블 이름으로 지정
+        db_table = "lis_cdss_cdssresult"  # 원하는 테이블 이름 지정 (실제 테이블명이 이걸로 생김)

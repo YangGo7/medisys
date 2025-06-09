@@ -11,12 +11,16 @@ import logging
 
 logger = logging.getLogger('medical_integration')
 
-# Orthanc 설정
+# 🔥 포트별 명확한 분리
 ORTHANC_HOST = "35.225.63.41"
-ORTHANC_PORT = "8042"
+ORTHANC_HTTP_PORT = "8042"  # HTTP/DICOMweb 전용
+ORTHANC_DICOM_PORT = "4242"  # DICOM 네트워크 전용
 ORTHANC_USER = "orthanc"
 ORTHANC_PASSWORD = "orthanc"
-ORTHANC_BASE_URL = f"http://{ORTHANC_HOST}:{ORTHANC_PORT}"
+
+# 🔥 프로토콜별 URL 분리
+ORTHANC_HTTP_BASE = f"http://{ORTHANC_HOST}:{ORTHANC_HTTP_PORT}"
+ORTHANC_DICOM_BASE = f"dicom://{ORTHANC_HOST}:{ORTHANC_DICOM_PORT}"
 
 def add_cors_headers(response):
     """CORS 헤더 추가"""
@@ -29,7 +33,7 @@ def add_cors_headers(response):
 @csrf_exempt
 @require_http_methods(["GET", "OPTIONS"])
 def ohif_config(request):
-    """OHIF 설정 제공"""
+    """OHIF 설정 제공 - 명확한 포트 분리"""
     if request.method == 'OPTIONS':
         response = HttpResponse()
         return add_cors_headers(response)
@@ -51,24 +55,25 @@ def ohif_config(request):
             "configuration": {
                 "friendlyName": "Medical Platform Orthanc",
                 "name": "orthanc",
+                # 🔥 HTTP 포트만 사용 - DICOM 포트 절대 사용 금지
                 "wadoUriRoot": f"http://35.225.63.41:8000/api/ohif/wado",
                 "qidoRoot": f"http://35.225.63.41:8000/api/ohif/dicom-web",
                 "wadoRoot": f"http://35.225.63.41:8000/api/ohif/dicom-web",
                 "qidoSupportsIncludeField": False,
-                "supportsReject": False,
-                "imageRendering": "wadors",
-                "thumbnailRendering": "wadors",
-                "enableStudyLazyLoad": True,
+                "supportsInstanceMetadata": True,
                 "supportsFuzzyMatching": False,
-                "supportsWildcard": True,
-                "staticWado": True,
-                "singlepart": "bulkdata,video",
+                "wadoUriRootProxy": f"http://35.225.63.41:8000/api/ohif/wado-proxy",
+                "acceptHeader": "application/dicom+json",
                 "requestOptions": {
-                    "requestCredentials": "omit"
+                    "auth": None,
+                    "logRequests": True,
+                    "logResponses": False
                 }
             }
         }],
-        "defaultDataSourceName": "dicomweb"
+        "hotkeys": [],
+        "cornerstoneExtensionConfig": {},
+        "showWarningMessageForCrossOrigin": False
     }
     
     response = JsonResponse(config)
@@ -76,19 +81,20 @@ def ohif_config(request):
 
 @csrf_exempt
 def orthanc_proxy(request, path=""):
-    """Orthanc API 프록시"""
+    """Orthanc HTTP API 프록시 - HTTP 포트만 사용"""
     if request.method == 'OPTIONS':
         response = HttpResponse()
         return add_cors_headers(response)
     
     try:
-        # Orthanc URL 구성
-        orthanc_url = f"{ORTHANC_BASE_URL}/{path}"
+        # 🔥 오직 HTTP 포트만 사용
+        orthanc_url = f"{ORTHANC_HTTP_BASE}/{path}"
+        
         if request.GET:
             query_string = request.GET.urlencode()
             orthanc_url = f"{orthanc_url}?{query_string}"
         
-        logger.info(f"Orthanc 프록시 요청: {request.method} {orthanc_url}")
+        logger.info(f"🌐 HTTP 프록시 요청: {request.method} {orthanc_url}")
         
         # 요청 헤더 준비
         headers = {
@@ -100,7 +106,7 @@ def orthanc_proxy(request, path=""):
         if request.META.get('CONTENT_TYPE'):
             headers['Content-Type'] = request.META['CONTENT_TYPE']
         
-        # Orthanc 요청
+        # 🔥 HTTP 인증만 사용
         auth = HTTPBasicAuth(ORTHANC_USER, ORTHANC_PASSWORD)
         
         if request.method == 'GET':
@@ -123,41 +129,41 @@ def orthanc_proxy(request, path=""):
             else:
                 django_response = HttpResponse(response.content, content_type=content_type)
         else:
-            logger.error(f"Orthanc 오류: {response.status_code} - {response.text}")
+            logger.error(f"❌ HTTP 요청 실패: {response.status_code} - {response.text}")
             django_response = JsonResponse({
-                'error': f'Orthanc request failed: {response.status_code}',
+                'error': f'HTTP request failed: {response.status_code}',
                 'details': response.text
             }, status=response.status_code)
         
         return add_cors_headers(django_response)
         
     except requests.exceptions.RequestException as e:
-        logger.error(f"Orthanc 연결 실패: {e}")
+        logger.error(f"❌ HTTP 연결 실패: {e}")
         django_response = JsonResponse({
-            'error': 'Orthanc connection failed',
+            'error': 'HTTP connection failed',
             'details': str(e)
         }, status=503)
         return add_cors_headers(django_response)
 
 @csrf_exempt
 def dicom_web_proxy(request, path=""):
-    """DICOMweb API 프록시 (QIDO-RS/WADO-RS)"""
+    """DICOMweb API 프록시 - HTTP 포트 경유"""
     if request.method == 'OPTIONS':
         response = HttpResponse()
         return add_cors_headers(response)
     
     try:
-        # DICOMweb 경로가 있으면 직접 사용, 없으면 일반 Orthanc API로
-        if 'dicom-web' in path:
-            orthanc_url = f"{ORTHANC_BASE_URL}/{path}"
-        else:
-            orthanc_url = f"{ORTHANC_BASE_URL}/dicom-web/{path}"
+        # 🔥 DICOMweb은 HTTP 포트의 /dicom-web/ 경로 사용
+        if not path.startswith('dicom-web'):
+            path = f"dicom-web/{path.lstrip('/')}"
+            
+        orthanc_url = f"{ORTHANC_HTTP_BASE}/{path}"
         
         if request.GET:
             query_string = request.GET.urlencode()
             orthanc_url = f"{orthanc_url}?{query_string}"
         
-        logger.info(f"DICOMweb 프록시 요청: {request.method} {orthanc_url}")
+        logger.info(f"🏥 DICOMweb 프록시 요청: {request.method} {orthanc_url}")
         
         headers = {
             'Accept': request.META.get('HTTP_ACCEPT', 'application/dicom+json'),
@@ -182,7 +188,7 @@ def dicom_web_proxy(request, path=""):
             else:
                 django_response = HttpResponse(response.content, content_type=content_type)
         else:
-            logger.error(f"DICOMweb 오류: {response.status_code} - {response.text}")
+            logger.error(f"❌ DICOMweb 오류: {response.status_code} - {response.text}")
             django_response = JsonResponse({
                 'error': f'DICOMweb request failed: {response.status_code}',
                 'details': response.text
@@ -191,7 +197,7 @@ def dicom_web_proxy(request, path=""):
         return add_cors_headers(django_response)
         
     except Exception as e:
-        logger.error(f"DICOMweb 프록시 오류: {e}")
+        logger.error(f"❌ DICOMweb 프록시 오류: {e}")
         django_response = JsonResponse({
             'error': 'DICOMweb proxy failed',
             'details': str(e)
@@ -200,17 +206,17 @@ def dicom_web_proxy(request, path=""):
 
 @csrf_exempt
 def wado_proxy(request):
-    """WADO-URI 프록시"""
+    """WADO-URI 프록시 - HTTP 포트 사용"""
     if request.method == 'OPTIONS':
         response = HttpResponse()
         return add_cors_headers(response)
     
     try:
-        # WADO 파라미터 추출
+        # 🔥 WADO는 HTTP 포트의 /wado 경로 사용
         query_string = request.GET.urlencode()
-        orthanc_url = f"{ORTHANC_BASE_URL}/wado?{query_string}"
+        orthanc_url = f"{ORTHANC_HTTP_BASE}/wado?{query_string}"
         
-        logger.info(f"WADO 프록시 요청: {orthanc_url}")
+        logger.info(f"🖼️ WADO 프록시 요청: {orthanc_url}")
         
         headers = {
             'Accept': request.META.get('HTTP_ACCEPT', 'image/*'),
@@ -224,7 +230,7 @@ def wado_proxy(request):
             content_type = response.headers.get('content-type', 'application/octet-stream')
             django_response = HttpResponse(response.content, content_type=content_type)
         else:
-            logger.error(f"WADO 오류: {response.status_code}")
+            logger.error(f"❌ WADO 오류: {response.status_code}")
             django_response = JsonResponse({
                 'error': f'WADO request failed: {response.status_code}'
             }, status=response.status_code)
@@ -232,7 +238,7 @@ def wado_proxy(request):
         return add_cors_headers(django_response)
         
     except Exception as e:
-        logger.error(f"WADO 프록시 오류: {e}")
+        logger.error(f"❌ WADO 프록시 오류: {e}")
         django_response = JsonResponse({
             'error': 'WADO proxy failed',
             'details': str(e)
@@ -241,26 +247,28 @@ def wado_proxy(request):
 
 @csrf_exempt
 def ohif_studies_list(request):
-    """OHIF용 Study 목록 조회"""
+    """OHIF용 Study 목록 조회 - HTTP API 사용"""
     if request.method == 'OPTIONS':
         response = HttpResponse()
         return add_cors_headers(response)
     
     try:
-        # Orthanc에서 모든 Study 조회
+        # 🔥 HTTP API로 Study 목록 조회
         auth = HTTPBasicAuth(ORTHANC_USER, ORTHANC_PASSWORD)
-        response = requests.get(f"{ORTHANC_BASE_URL}/studies", auth=auth, timeout=30)
+        response = requests.get(f"{ORTHANC_HTTP_BASE}/studies", auth=auth, timeout=30)
         
         if response.status_code != 200:
-            raise Exception(f"Orthanc studies request failed: {response.status_code}")
+            raise Exception(f"Studies request failed: {response.status_code}")
         
         study_ids = response.json()
         studies = []
         
-        # 각 Study의 상세 정보 조회
+        logger.info(f"📋 총 {len(study_ids)}개 Study 발견")
+        
+        # 각 Study의 상세 정보 조회 (HTTP API 사용)
         for study_id in study_ids[:20]:  # 최대 20개로 제한
             try:
-                study_response = requests.get(f"{ORTHANC_BASE_URL}/studies/{study_id}", 
+                study_response = requests.get(f"{ORTHANC_HTTP_BASE}/studies/{study_id}", 
                                             auth=auth, timeout=10)
                 if study_response.status_code == 200:
                     study_data = study_response.json()
@@ -274,29 +282,73 @@ def ohif_studies_list(request):
                         "00080050": {"Value": [main_tags.get('AccessionNumber', '')]},
                         "00080061": {"Value": [main_tags.get('ModalitiesInStudy', '')]},
                         "00080090": {"Value": [main_tags.get('ReferringPhysicianName', '')]},
+                        "00081030": {"Value": [main_tags.get('StudyDescription', '')]},
                         "00100010": {"Value": [patient_tags.get('PatientName', '')]},
                         "00100020": {"Value": [patient_tags.get('PatientID', '')]},
                         "00100030": {"Value": [patient_tags.get('PatientBirthDate', '')]},
                         "00100040": {"Value": [patient_tags.get('PatientSex', '')]},
                         "0020000D": {"Value": [main_tags.get('StudyInstanceUID', '')]},
-                        "00081030": {"Value": [main_tags.get('StudyDescription', '')]},
                         "00200010": {"Value": [main_tags.get('StudyID', '')]},
-                        "00080052": {"Value": ["STUDY"]},
                         "00201206": {"Value": [len(study_data.get('Series', []))]},
-                        "00201208": {"Value": [study_data.get('NumberOfInstances', 0)]}
+                        "00201208": {"Value": [study_data.get('Instances', {}).get('length', 0)]}
                     }
                     studies.append(ohif_study)
+                    
             except Exception as e:
-                logger.warning(f"Study {study_id} 조회 실패: {e}")
+                logger.warning(f"⚠️ Study {study_id} 정보 조회 실패: {e}")
                 continue
         
+        logger.info(f"✅ {len(studies)}개 Study 정보 조회 완료")
         django_response = JsonResponse(studies, safe=False)
         return add_cors_headers(django_response)
         
     except Exception as e:
-        logger.error(f"Studies 목록 조회 실패: {e}")
+        logger.error(f"❌ Study 목록 조회 실패: {e}")
         django_response = JsonResponse({
-            'error': 'Failed to fetch studies',
+            'error': 'Studies list request failed',
             'details': str(e)
         }, status=503)
         return add_cors_headers(django_response)
+
+# 🔥 연결 테스트 함수 추가
+@csrf_exempt
+def test_connections(request):
+    """Orthanc 연결 상태 테스트"""
+    if request.method == 'OPTIONS':
+        response = HttpResponse()
+        return add_cors_headers(response)
+    
+    results = {
+        'http_connection': False,
+        'dicom_web_enabled': False,
+        'system_info': None,
+        'error_messages': []
+    }
+    
+    try:
+        # HTTP 연결 테스트
+        auth = HTTPBasicAuth(ORTHANC_USER, ORTHANC_PASSWORD)
+        response = requests.get(f"{ORTHANC_HTTP_BASE}/system", auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            results['http_connection'] = True
+            results['system_info'] = response.json()
+            logger.info("✅ Orthanc HTTP 연결 성공")
+        else:
+            results['error_messages'].append(f"HTTP connection failed: {response.status_code}")
+            
+        # DICOMweb 플러그인 테스트
+        dicomweb_response = requests.get(f"{ORTHANC_HTTP_BASE}/dicom-web/studies", 
+                                       auth=auth, timeout=10)
+        if dicomweb_response.status_code in [200, 204]:
+            results['dicom_web_enabled'] = True
+            logger.info("✅ DICOMweb 플러그인 활성화됨")
+        else:
+            results['error_messages'].append(f"DICOMweb not available: {dicomweb_response.status_code}")
+            
+    except Exception as e:
+        results['error_messages'].append(str(e))
+        logger.error(f"❌ 연결 테스트 실패: {e}")
+    
+    django_response = JsonResponse(results)
+    return add_cors_headers(django_response)

@@ -1,38 +1,131 @@
-import React from 'react';
-import { LucideIcon, AlertCircle } from 'lucide-react';
+// src/components/EMR/home/UrgentWidget.jsx
+import React, { useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
-const UrgentWidget = ({ marquee, withTabs, showActionButtons }) => {
-  const items = [
-    'SpO₂ ≤85%: 3명',
-    '검사 지연: 혈액검사 2건',
-    'AI 오류: 1건'
-  ];
+const UrgentWidget = ({
+  urgentEvents = [
+    // 기본 예시 데이터
+    { id: 1, type: 'SPO2', patient: '김철수', patient_id: '1234', value: 82, unit: '%', at: '09:12', severity: 'high', recommended: '산소 투여' },
+    { id: 2, type: 'BP', patient: '박영희', patient_id: '5678', value: '180/110', unit: '', at: '09:18', severity: 'medium', recommended: '혈압약 투여' },
+    { id: 3, type: 'AI_ERROR', patient: '이영희', patient_id: '9012', value: null, unit: '', at: '09:21', severity: 'low', recommended: '재시도' },
+  ],
+  showActionButtons = true,
+  onShowDetail = () => {},
+}) => {
+  const [loadingId, setLoadingId] = useState(null);
+
+  const severityBadge = {
+    high:   { label: '🔴', color: '#ffebee', border: '#e57373' },
+    medium: { label: '🟠', color: '#fff3e0', border: '#ffb74d' },
+    low:    { label: '🟡', color: '#fffde7', border: '#fff176' },
+  };
+
+  const handleDetailClick = async (event) => {
+    setLoadingId(event.id);
+    try {
+      await onShowDetail(event);
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   return (
-    <div style={{
-      background: '#ffebee',
-      borderRadius: 8,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-      padding: 12,
-      height: '100%',
-      overflowY: 'auto'
-    }}>
-      <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#c62828' }}>
-        <AlertCircle size={20} /> 긴급 처리
+    <div
+      className="urgent-widget"
+      style={{
+        background: '#ffebee',
+        borderRadius: 8,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+        padding: 12,
+        height: '100%',
+        overflowY: 'auto',
+      }}
+    >
+      <h3
+        className="card-header"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          color: '#c62828',
+          margin: 0,
+          marginBottom: 12,
+        }}
+      >
+        <AlertCircle size={20} />
+        긴급 처리 <span style={{ opacity: 0.7 }}>({urgentEvents.length})</span>
       </h3>
-      <ul style={{ paddingLeft: 16 }}>
-        {items.map(i => <li key={i} style={{ marginBottom: 6 }}>{i}</li>)}
+
+      <ul
+        className="card-list"
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        {urgentEvents.map(ev => {
+          const { label, color, border } = severityBadge[ev.severity] || severityBadge.low;
+          return (
+            <li
+              key={ev.id}
+              className="card-list-item"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: color,
+                border: `2px solid ${border}`,
+                borderRadius: 6,
+                padding: '8px 12px',
+              }}
+            >
+              <span style={{ marginRight: 12, fontSize: '1.2rem' }}>{label}</span>
+              <div style={{ flex: 1, lineHeight: 1.3 }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                  {ev.patient} (ID {ev.patient_id})
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#444' }}>
+                  {ev.type === 'SPO2'
+                    ? `SpO₂ ${ev.value}${ev.unit}`
+                    : ev.type === 'BP'
+                    ? `혈압 ${ev.value}`
+                    : ev.type === 'AI_ERROR'
+                    ? 'AI 판독 오류'
+                    : ev.value !== null
+                    ? `${ev.value}${ev.unit}`
+                    : ev.type}{' '}
+                  · {ev.at}
+                </div>
+              </div>
+              {showActionButtons && (
+                <button
+                  onClick={() => handleDetailClick(ev)}
+                  disabled={loadingId === ev.id}
+                  style={{
+                    marginLeft: 12,
+                    padding: '6px 10px',
+                    fontSize: '0.85rem',
+                    borderRadius: 4,
+                    border: 'none',
+                    background: '#ffcdd2',
+                    cursor: loadingId === ev.id ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  {loadingId === ev.id
+                    ? <Loader2 size={16} className="spin" />
+                    : '상세 보기'}
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ul>
-      {showActionButtons && (
-        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-          <button style={{ flex: 1, padding: 8, borderRadius: 4, background: '#ffcdd2', border: 'none', cursor: 'pointer' }}>
-            🔍 상세 보기
-          </button>
-          <button style={{ flex: 1, padding: 8, borderRadius: 4, background: '#ffcdd2', border: 'none', cursor: 'pointer' }}>
-            📞 호출
-          </button>
-        </div>
-      )}
     </div>
   );
 };
