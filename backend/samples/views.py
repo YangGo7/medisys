@@ -107,7 +107,7 @@ def list_samples_by_order(request, order_id):
 
 @api_view(['GET'])
 def list_all_samples(request):  # 전체 샘플 조회
-    samples = Sample.objects.all()
+    samples = Sample.objects.filter(is_deleted=False)
     serializer = SampleSerializer(samples, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 

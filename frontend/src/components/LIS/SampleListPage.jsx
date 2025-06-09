@@ -11,9 +11,8 @@ const SampleListPage = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // 오늘 날짜
 
-  useEffect(() => {
-    const fetchSamples = async () => {
-      try {
+  const fetchSamples = async () => {
+    try {
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/`);
         const sorted = res.data.sort((a, b) => new Date(b.collection_date) - new Date(a.collection_date));
         setSamples(sorted);
@@ -22,9 +21,9 @@ const SampleListPage = () => {
       }
     };
 
-    const fetchCdssResults = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/cdss/results/`);
+  const fetchCdssResults = async () => {
+    try {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
         const ids = res.data.map(r => r.sample_id);
         setCdssSampleIds(ids);
       } catch (err) {
@@ -32,9 +31,7 @@ const SampleListPage = () => {
       }
     };
 
-    fetchSamples();
-    fetchCdssResults();
-  }, []);
+    
 
   const handleDelete = async (sampleId) => {
     if (!window.confirm(`샘플 ID ${sampleId}을(를) 삭제하시겠습니까?`)) return;
@@ -42,12 +39,18 @@ const SampleListPage = () => {
       await axios.delete(`${process.env.REACT_APP_API_BASE_URL}samples/delete/${sampleId}`);
       setSamples(prev => prev.filter(s => s.id !== sampleId));
       alert('샘플이 삭제되었습니다.');
+      fetchSamples();
     } catch (err) {
       console.error('삭제 실패:', err);
       alert('샘플 삭제에 실패했습니다.');
     }
   };
-  
+
+  useEffect(() => {
+    fetchSamples();
+    fetchCdssResults();
+  }, []);
+
   // [OCS] 추가된 handleResultClick 함수 
   const handleResultClick = async (sample) => {
     try {
@@ -105,7 +108,7 @@ const SampleListPage = () => {
         />
       </div>
       <div className="overflow-x-auto overflow-y-auto h-[400px]">
-        <table className="table-auto w-full border-collapse border border-gray-300">
+        <table className="table-fixed w-full border-collapse border border-gray-300">
           <thead className="sticky top-0 bg-white z-10">
             <tr className="bg-gray-100">
               <th className="border px-4 py-2">샘플 ID</th>

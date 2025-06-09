@@ -4,17 +4,13 @@ import axios from 'axios';
 
 const NotificationModal = ({ onClose, onMark }) => {
   const [alerts, setAlerts] = useState([]);
-  const [loadingMap, setLoadingMap] = useState({});
-
-  useEffect(() => {
-    // 모달 열 때 최신 알림 로드
-    fetchAlerts();
-  }, []);
+  const [loadingMap, setLoadingMap] = useState({});  // ← 여기에 추가
 
   const fetchAlerts = async () => {
+    const base = process.env.REACT_APP_API_URL.replace(/\/$/, '');
     try {
       const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/integration/alerts/urgent/`
+        `${base}/integration/alerts/urgent/`
       );
       setAlerts(res.data);
     } catch (err) {
@@ -22,16 +18,20 @@ const NotificationModal = ({ onClose, onMark }) => {
     }
   };
 
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
+
   const markRead = async (id) => {
     setLoadingMap(prev => ({ ...prev, [id]: true }));
+    const base = process.env.REACT_APP_API_URL.replace(/\/$/, '');
     try {
       await axios.patch(
-        `${process.env.REACT_APP_API_URL}/api/integration/alerts/${id}/mark-read/`,
+        `${base}/integration/alerts/${id}/mark-read/`,
         { is_read: true }
       );
-      // 읽음 처리된 알림 제거
       setAlerts(prev => prev.filter(a => a.id !== id));
-      onMark(); // 벨 카운트 갱신
+      onMark();
     } catch (err) {
       console.error('읽음 처리 실패', err);
       alert('읽음 처리 중 오류가 발생했습니다.');

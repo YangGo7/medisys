@@ -41,7 +41,9 @@ class PatientMapping(models.Model):
     created_by = models.CharField(max_length=100, null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     assigned_room = models.IntegerField(null=True, blank=True, help_text="진료실 번호")
-
+    display = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.CharField(max_length=1, null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True)
     class Meta:
         db_table = 'patient_mapping'
         unique_together = [('orthanc_patient_id', 'openmrs_patient_uuid')]

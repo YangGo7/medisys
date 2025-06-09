@@ -9,6 +9,7 @@ import OrderForm from './components/LIS/OrderForm';
 import OrderListPage from './components/LIS/OrderListPage';
 import SampleListPage from './components/LIS/SampleListPage';
 import ResultInputForm from './components/LIS/ResultInputForm';
+import ResultCdss from './components/LIS/ResultCdss';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
 // import VitalAlertBanner from './components/EMR/VitalAlert'; // VitalAlertBanner는 Routes 내에 직접 사용되지 않는 것 같아 주석 처리 (필요시 해제)
@@ -40,16 +41,19 @@ function App() {
           <Route path="/emr/Settings" element={<SettingsPage />} />
 
           {/* LIS 관련 페이지 */}
-          <Route path="/lis" element={<LisHome />} />
-          <Route path="/order/new" element={<OrderForm />} />
-          <Route path="/orders" element={<OrderListPage />} />
-          <Route path="/sample/new" element={<SampleForm />} />
-          <Route path="/sample/new/:orderId" element={<SampleForm />} />
-          <Route path="/samples" element={<SampleListPage />} />
-          <Route path="/result/new" element={<ResultInputForm />} />
-          <Route path="/result/new/:sampleId" element={<ResultInputForm />} />
+          <Route path="/lis" element={<LisHome />}>
+            <Route path="orders" element={<OrderListPage />} />
+            <Route path="samples" element={<SampleListPage />} />
+            <Route path="order/new" element={<OrderForm />} />
+            <Route path="sample/new" element={<SampleForm />} />
+            <Route path="sample/new/:orderId" element={<SampleForm />} />
+            <Route path="result/new" element={<ResultInputForm />} />
+            <Route path="result/new/:sampleId" element={<ResultInputForm />} />
+            <Route path="result-list" element={<ResultCdss />} />
+          </Route>
           <Route path="/tests" element={<OpenMRSPatientList />} />
           <Route path="/ocs/log" element={<OCSLogPage />} />
+
           
           {/* 기존 환자 목록 페이지 (이 페이지가 새로운 데스크의 환자 목록과 기능적으로 겹치는지 확인 필요) */}
           <Route path="/patients" element={<PatientList />} /> 

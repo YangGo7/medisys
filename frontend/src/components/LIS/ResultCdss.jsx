@@ -89,7 +89,7 @@ const CdssResultTable = () => {
       </div>
 
       <div className="overflow-x-auto overflow-y-auto h-[400px]">
-        <table className="table-auto w-full border-collapse border border-gray-300">
+        <table className="table-fixed w-full border-collapse border border-gray-300">
           <thead className="sticky top-0 bg-white z-10">
             <tr className="bg-gray-200">
               <th className="border px-4 py-2">Sample ID</th>

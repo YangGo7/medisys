@@ -30,7 +30,10 @@ const ResultInputForm = () => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/`)
-      .then(res => setSampleList(res.data))
+      .then(res => {
+        const validSamples = res.data.filter(sample => sample.sample_status !== 'deleted'); // 또는 sample.is_deleted === false
+        setSampleList(validSamples);
+      })
       .catch(err => console.error('샘플 목록 불러오기 실패:', err));
   }, []);
 
@@ -140,7 +143,7 @@ const ResultInputForm = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-2">샘플 선택</h2>
+      <h2 className="text-xl font-bold mb-2">결과 입력</h2>
       <select
         value={sampleId}
         onChange={(e) => setSampleId(e.target.value)}

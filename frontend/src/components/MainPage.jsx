@@ -9,6 +9,7 @@ import LoginPage from './login/LoginPage';
 import Calendar from 'react-calendar';
 import PatientsList from './patientsList'; // ✅ 컴포넌트 이름을 PascalCase로
 import Medicalemployee from './Medicalemployee';
+import OHIFViewer from './OHIF/OHIFViewer'
 import 'react-calendar/dist/Calendar.css';
 import './MainPage.css';
 
@@ -20,7 +21,7 @@ export default function MainPage() {
     switch (currentTab) {
       case 'order': return <OrderForm />;
       case 'sample': return <SampleForm />;
-      case 'dicom': return <DicomViewer />;
+      case 'dicom': return <OHIFViewer />;
       case 'lis': return <LisHome />;
       case 'logs': return <OCSLogPage />;
       case 'logins': return <LoginPage />;

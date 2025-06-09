@@ -116,7 +116,7 @@ const SampleForm = () => {
       }); // 
 
 
-      navigate('/');
+      navigate('/lis/samples');
     } catch (error) {
       console.error('❌ 샘플 등록 실패:', error);
       alert('샘플 등록 중 오류가 발생했습니다.');

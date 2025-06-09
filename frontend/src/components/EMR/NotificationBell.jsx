@@ -2,15 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const POLL_INTERVAL = 10000; // 10초
+const POLL_INTERVAL = 10000;
 
 const NotificationBell = ({ onClick }) => {
   const [count, setCount] = useState(0);
 
   const fetchCount = async () => {
+    const base = process.env.REACT_APP_API_URL.replace(/\/$/, '');
     try {
       const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/integration/alerts/urgent/count/`
+        `${base}/integration/alerts/urgent/count/`
       );
       setCount(res.data.count);
     } catch {
@@ -33,14 +34,9 @@ const NotificationBell = ({ onClick }) => {
       <span style={{ fontSize: '1.5rem' }}>🔔</span>
       {count > 0 && (
         <span style={{
-          position: 'absolute',
-          top: -4,
-          right: -4,
-          background: 'red',
-          color: 'white',
-          borderRadius: '50%',
-          padding: '2px 6px',
-          fontSize: '0.75rem'
+          position: 'absolute', top: -4, right: -4,
+          background: 'red', color: 'white',
+          borderRadius: '50%', padding: '2px 6px', fontSize: '0.75rem'
         }}>
           {count}
         </span>

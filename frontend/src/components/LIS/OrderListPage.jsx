@@ -7,7 +7,9 @@ const OrderListPage = () => {
   const [orders, setOrders] = useState([]);
   const [samples, setSamples] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+    ).toISOString().split('T')[0]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -58,7 +60,7 @@ const OrderListPage = () => {
         />
       </div>
       <div className="overflow-x-auto overflow-y-auto h-[400px]">
-      <table className="table-auto w-full border-collapse border border-gray-300">
+      <table className="table-fixed w-full border-collapse border border-gray-300">
         <thead className="bg-gray-100">
           <tr>
             <th className="border px-4 py-2">오더 ID</th>
@@ -79,7 +81,7 @@ const OrderListPage = () => {
               <td className="border px-4 py-2">{order.patient_id}</td>
               <td className="border px-4 py-2">{order.doctor_id}</td>
               <td className="border px-4 py-2">{order.test_type}</td>
-              <td className="border px-4 py-2">{order.created_at?.slice(0, 10)}</td>
+              <td className="border px-4 py-2">{order.order_date?.slice(0, 10)}</td>
               <td className="border px-4 py-2">
                <span className={
                   hasSample
@@ -91,7 +93,7 @@ const OrderListPage = () => {
               </td>
               <td className="border px-4 py-2">
                 <button
-                    onClick={() => navigate(`/sample/new/${order.id}`)}
+                    onClick={() => navigate(`/lis/sample/new/${order.id}`)}
                     className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                   >
                     샘플 등록
@@ -102,7 +104,7 @@ const OrderListPage = () => {
             })}
             {displayedOrders.length === 0 && (
               <tr>
-                <td colSpan="6" className="text-gray-500 py-4 text-center">표시할 오더가 없습니다.</td>
+                <td colSpan="7" className="text-gray-500 py-4 text-center">표시할 오더가 없습니다.</td>
               </tr>
             )}
         </tbody>
