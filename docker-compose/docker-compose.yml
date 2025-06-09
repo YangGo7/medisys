@@ -184,6 +184,27 @@ services:
     restart: unless-stopped
     command: sh -c "sleep 10 && tini -- /docker-entrypoint.sh mongo-express"
 
+  ohif-viewer:
+      image: ohif/app:latest
+      container_name: ohif-viewer
+      ports:
+        - "3001:80"
+      volumes:
+        - ./config/app-config.js:/usr/share/nginx/html/app-config.js:ro
+      depends_on:
+        - orthanc
+      networks:
+        - medical-network
+      restart: unless-stopped
+      environment:
+        - NGINX_ENTRYPOINT_QUIET_LOGS=1
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:80"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+
+
 networks:
   medical-network:
     driver: bridge

@@ -1,5 +1,5 @@
 {
-  "Name": "Medical Platform Orthanc",
+  "Name": "Medical System Orthanc",
   "HttpPort": 8042,
   "DicomPort": 4242,
   "RemoteAccessAllowed": true,
@@ -8,19 +8,42 @@
     "orthanc": "orthanc",
     "admin": "admin"
   },
-
+  
+  "DicomServerEnabled": false,
+  "DicomServer": {
+    "Host": "0.0.0.0",
+    "Port": 4242,
+    "Timeout": 30,
+    "AssociationTimeout": 30
+  },
+  
+  "HttpServer": {
+    "Host": "0.0.0.0",
+    "Port": 8042,
+    "Timeout": 60,
+    "KeepAlive": true
+  },
+  
   "DicomWeb": {
     "Enable": true,
     "Root": "/dicom-web/",
     "EnableMetadata": true,
-    "PublicRoot": "/dicom-web/"
+    "Host": "0.0.0.0",
+    "Port": 8042,  
+    "Ssl": false,
+    "EnableWado": true,
+    "WadoRoot": "/wado",
+    "QidoRoot": "/qido"
   },
-
-  "Wado": {
-    "Enable": true,
-    "Root": "/wado"
+  
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin",
+    "Access-Control-Max-Age": "86400",
+    "Access-Control-Allow-Credentials": "true"
   },
-
+  
   "PostgreSQL": {
     "EnableIndex": true,
     "EnableStorage": true,
@@ -32,20 +55,46 @@
     "MaximumConnectionRetries": 10,
     "ConnectionRetryInterval": 5
   },
-
-  "HttpHeaders": {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin",
-    "Access-Control-Max-Age": "86400"
-  },
-
+  
+  "Plugins": [
+    "/usr/share/orthanc/plugins",
+    "/etc/orthanc/plugins"
+  ],
+  
+  "DicomAssociationCloseDelay": 5,
+  "DicomScuTimeout": 30,
+  "DicomScpTimeout": 60,
+  "StrictAet": false,
+  "DefaultEncoding": "UTF8",
+  "AcceptedTransferSyntaxes": [
+    "1.2.840.10008.1.2",
+    "1.2.840.10008.1.2.1",
+    "1.2.840.10008.1.2.2"
+  ],
+  
   "VerboseEnabled": true,
   "LogLevel": "INFO",
-  "StoreDicom": true,
+  "TraceDicomQueries": true,
+  
+  "ConcurrentJobs": 2,
+  "JobsHistorySize": 10,
+  "SaveJobs": true,
   "OverwriteInstances": false,
-  "DicomAlwaysAllowEcho": true,
-  "DicomAlwaysAllowFind": true,
-  "DicomAlwaysAllowMove": true,
-  "DicomAlwaysAllowStore": true
+  "StableAge": 60,
+  "StoreMD5ForAttachments": true,
+  
+  "SslEnabled": false,
+  "DicomTlsEnabled": false,
+  
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  
+  "ExecuteLuaEnabled": true,
+  "LuaScripts": [],
+  "UserMetadata": {},
+  "DefaultPrivateCreator": "",
+  "CheckRevisions": false,
+  "DicomModalities": {},
+  "OrthancPeers": {}
 }
