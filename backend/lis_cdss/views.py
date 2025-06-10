@@ -27,11 +27,14 @@ def receive_test_result(request):
 @api_view(['DELETE'])
 def delete_cdss_result(request, sample_id):
     try:
-        results = CDSSResult.objects.filter(sample_id=sample_id)
+        print(f"🔍 삭제 요청 sample_id: {sample_id}")
+        results = CDSSResult.objects.filter(sample__id=sample_id)
+        print(f"🔍 찾은 개수: {results.count()}")
         if results.exists():
             results.delete()
             return Response({'message': 'CDSS 결과 삭제 완료'}, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({'error': '해당 샘플의 결과가 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        print("❌ CDSS 삭제 오류:", str(e))
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

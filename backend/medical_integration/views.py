@@ -1335,7 +1335,7 @@ def get_all_openmrs_patients(request):
 def proxy_openmrs_providers(request):
     """OpenMRS의 /ws/rest/v1/provider 데이터 프록시"""
     try:
-        OPENMRS_HOST = 'http://localhost:8082/openmrs'  # 또는 35.225.63.41:8082/openmrs
+        OPENMRS_HOST = 'http://35.225.63.41:8082/openmrs'  # 또는 localhost:8082/openmrs
         username = 'admin'
         password = 'Admin123'
 

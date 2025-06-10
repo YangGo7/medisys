@@ -3,12 +3,12 @@ import axios from 'axios';
 
 const CdssResultTable = () => {
   const [allResults, setAllResults] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
   const [sampleOptions, setSampleOptions] = useState([]);
   const [selectedSampleId, setSelectedSampleId] = useState('');
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [error, setError] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [expandedSamples, setExpandedSamples] = useState({}); 
 
   const fetchCdssResults = useCallback(async () => {
     try {
@@ -29,43 +29,52 @@ const CdssResultTable = () => {
     fetchCdssResults();
   }, [selectedDate, fetchCdssResults]);
 
-  useEffect(() => {
-    let filtered = allResults.filter(
-      r => r.verified_date?.slice(0, 10) === selectedDate
-    );
+  const filteredResults = allResults.filter(r =>
+    (!selectedDate || r.verified_date?.slice(0, 10) === selectedDate) &&
+    (!selectedSampleId || String(r.sample) === String(selectedSampleId)) &&
+    (!searchKeyword || String(r.sample).includes(searchKeyword))
+  );
 
-    // 샘플ID select
-    if (selectedSampleId) {
-      filtered = filtered.filter(r => String(r.sample_id) === String(selectedSampleId));
-    }
-    // 검색
-    if (searchKeyword) {
-      filtered = filtered.filter(r => String(r.sample_id).includes(searchKeyword));
-    }
+  // 3. 샘플ID별 그룹핑
+  const grouped = filteredResults.reduce((acc, curr) => {
+    acc[curr.sample] = acc[curr.sample] || [];
+    acc[curr.sample].push(curr);
+    return acc;
+  }, {});
 
-    setFilteredResults(filtered);
 
     // 샘플 ID 목록 옵션
+  useEffect(() => {
     const uniqueIds = [...new Set(
       allResults
         .filter(r => r.verified_date?.slice(0, 10) === selectedDate)
-        .map(r => r.sample_id)
+        .map(r => r.sample)
     )];
     setSampleOptions(uniqueIds);
-  }, [allResults, selectedDate, selectedSampleId, searchKeyword]);
+  }, [allResults, selectedDate]);
 
 
-  const handleDeleteResult = async (sampleId) => {
-    if (!window.confirm(`샘플 ID ${sampleId}의 결과를 삭제하시겠습니까?`)) return;
+  const handleDeleteSample = async (sampleId) => {
+    console.log("삭제 요청 sampleId:", sampleId); 
+    if (!window.confirm(`샘플 ID ${sampleId}의 결과 전체를 삭제하시겠습니까?`)) return;
     try {
       await axios.delete(`${process.env.REACT_APP_API_BASE_URL}cdss/delete/${sampleId}`);
-      alert('✅ 결과가 삭제되었습니다.');
-      // 상태 업데이트 (삭제 후 새로 불러오기)
-      fetchCdssResults(); 
-    } catch (error) {
-      console.error('❌ 삭제 실패:', error);
-      alert('결과 삭제에 실패했습니다.');
+      alert('✅ 해당 샘플 결과 전체가 삭제되었습니다.');
+      fetchCdssResults();
+    } catch (err) {
+      console.error('❌ 삭제 실패(에러 객체):', err);
+      if (err.response) {
+        console.error('❌ 삭제 실패(응답 data):', err.response.data); // <-- 응답 본문 에러 메시지
+      }
+      alert('삭제 실패');
     }
+  };
+
+  const handleToggleSample = (sampleId) => {
+    setExpandedSamples(prev => ({
+      ...prev,
+      [sampleId]: !prev[sampleId],
+    }));
   };
 
   return (
@@ -125,33 +134,55 @@ const CdssResultTable = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredResults.length > 0 ? (
-              filteredResults.map((result, index) => (
-              <tr key={index} className="text-center">
-                <td className="border px-4 py-2">{result.sample_id}</td>
-                <td className="border px-4 py-2">{result.test_type}</td>
-                <td className="border px-4 py-2">{result.component_name}</td>
-                <td className="border px-4 py-2">{result.value}</td>
-                <td className="border px-4 py-2">{result.unit}</td>
-                <td className="border px-4 py-2">{result.verified_by}</td>
-                <td className="border px-4 py-2">{new Date(result.verified_date).toLocaleString()}</td>
-                <td className="border px-4 py-2">
-                  <button 
-                    onClick={() => handleDeleteResult(result.sample_id)}
-                    className="text-red-600 hover:underline">삭제</button>
+            {Object.keys(grouped).length === 0 && (
+              <tr>
+                <td colSpan="8" className="text-gray-500 py-4 text-center">
+                  해당 샘플 ID에 대한 결과가 없습니다.
                 </td>
               </tr>
-            ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-gray-500 py-4 text-center">해당 샘플 ID에 대한 결과가 없습니다.</td>
-              </tr>
             )}
+            {/* 샘플별 그룹핑 렌더 */}
+            {Object.keys(grouped).map((sample) => (
+              <React.Fragment key={sample}>
+                {/* 접힘/펼침 row */}
+                <tr className="bg-blue-50 font-bold">
+                  <td className="border px-4 py-2 text-left" colSpan={8}>
+                    <button
+                      className="mr-2 px-2 text-blue-700 hover:underline"
+                      onClick={() => handleToggleSample(sample)}
+                    >
+                      {expandedSamples[sample] ? '▼' : '▶'} 샘플 ID: {sample}
+                    </button>
+                    <button
+                      className="ml-4 text-red-600 hover:underline"
+                      onClick={() => handleDeleteSample(sample)}
+                    >
+                      전체 삭제
+                    </button>
+                  </td>
+                </tr>
+                {/* 실제 결과 row (펼쳐져 있을 때만) */}
+                {expandedSamples[sample] &&
+                  grouped[sample].map((result, idx) => (
+                    <tr key={result.id || idx} className="text-center bg-white">
+                      <td className="border px-4 py-2">{result.sample}</td>
+                      <td className="border px-4 py-2">{result.test_type}</td>
+                      <td className="border px-4 py-2">{result.component_name}</td>
+                      <td className="border px-4 py-2">{result.value}</td>
+                      <td className="border px-4 py-2">{result.unit}</td>
+                      <td className="border px-4 py-2">{result.verified_by}</td>
+                      <td className="border px-4 py-2">{new Date(result.verified_date).toLocaleString()}</td>
+                      <td className="border px-4 py-2">
+                        {/* 개별 삭제 필요시 버튼 추가 (선택) */}
+                      </td> 
+                    </tr>
+                  ))}
+              </React.Fragment>
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   );
 };
-
 export default CdssResultTable;

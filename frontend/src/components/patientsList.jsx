@@ -1,3 +1,4 @@
+// fronted > src > components > parientsList.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 

@@ -70,7 +70,7 @@ const ResultInputForm = () => {
     try {
       // 중복 제출 방지를 위한 검사
       const allCdssResults = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
-      const exists = allCdssResults.data.some(r => r.sample_id === sampleId);
+      const exists = allCdssResults.data.some(r => String(r.sample) === String(sampleId));
       if (exists) {
         alert('⚠ 이미 CDSS로 전송된 샘플입니다. 결과를 다시 등록할 수 없습니다.');
         return;
@@ -114,7 +114,7 @@ const ResultInputForm = () => {
         const allLogs = await axios.get(`${process.env.REACT_APP_API_BASE_URL}logs/`);
         const matched = allLogs.data.find(
           log =>
-            log.sample_id?.toString() === sampleId?.toString() &&
+            log.sample_status?.toString() === sampleId?.toString() &&
             log.step === 'sample'
         );
 
@@ -128,7 +128,7 @@ const ResultInputForm = () => {
         await saveLog({
           patient_id,
           doctor_id,
-          sample_id: sampleId,
+          sample: sampleId,
           step: 'result',
           result_detail: resultText
         });

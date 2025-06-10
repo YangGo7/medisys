@@ -15,35 +15,75 @@ const OCSLogPage = () => {
   const [endDate, setEndDate] = useState('');
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [patientMappings, setPatientMappings] = useState({});
+  const [doctorMappings, setDoctorMappings] = useState({});
   const logsPerPage = 10;
 
+  // 1️⃣ 기존 로그 가져오는 useEffect (그대로 둠)
   useEffect(() => {
     const fetchLogs = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/logs/combined/`);
-        setLogs(res.data);
-        setFilteredLogs(res.data);
-        setError('');
-      } catch (err) {
-        console.error(err);
-        setLogs([]);
-        setFilteredLogs([]);
-        setError('OCS 로그를 불러오지 못했습니다.');
-      }
+      const res = await axios.get(`${API_BASE_URL}/logs/combined/`);
+      setLogs(res.data);
+      setFilteredLogs(res.data);
     };
     fetchLogs();
   }, []);
 
+  // 2️⃣ 새로운 환자 이름 매핑용 useEffect (추가!)
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/integration/openmrs/patients/`);
+        const mapping = {};
+        res.data.forEach((p) => {
+          mapping[p.uuid] = {
+            id: p.identifier,
+            name: p.display,
+          };
+        });
+        setPatientMappings(mapping);
+      } catch (err) {
+        console.error("❌ 환자 매핑 실패:", err);
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  // 3️⃣ 의사 정보 받아오는 useEffect 추가
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/integration/openmrs/providers/`);
+        const mapping = {};
+        res.data.results?.forEach((d) => {
+          if (d.uuid && d.display) { // .toLowerCase().includes("doctor")) { // 의사만 필터링
+            mapping[d.uuid] = d.display;
+          }
+        });
+        setDoctorMappings(mapping);
+      } catch (err) {
+        console.error("❌ 의사 매핑 실패:", err);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
+
   const handleSearch = () => {
     const filtered = logs.filter((log) => {
       const patientMatch = patientQuery
-        ? (log.patient_id?.toLowerCase().includes(patientQuery.toLowerCase()) ||
-           log.patient_name?.toLowerCase().includes(patientQuery.toLowerCase()))
+        ? (
+            (log.patient_id?.toLowerCase().includes(patientQuery.toLowerCase())) ||
+            (patientMappings[log.patient_id]?.name?.toLowerCase().includes(patientQuery.toLowerCase()))
+          )
         : true;
 
       const doctorMatch = doctorQuery
-        ? (log.doctor_id?.toLowerCase().includes(doctorQuery.toLowerCase()) ||
-           log.doctor_name?.toLowerCase().includes(doctorQuery.toLowerCase()))
+        ? (
+            (log.doctor_id?.toLowerCase().includes(doctorQuery.toLowerCase())) ||
+            (log.doctor_name?.toLowerCase().includes(doctorQuery.toLowerCase())) ||
+            (doctorMappings[log.doctor_id]?.toLowerCase().includes(doctorQuery.toLowerCase()))
+          )
         : true;
 
       const dateMatch = (() => {
@@ -101,7 +141,7 @@ const OCSLogPage = () => {
           <table className="ocs-table">
             <thead>
               <tr>
-                <th>구분</th>
+                <th>NO</th>
                 <th>환자</th>
                 <th>의사</th>
                 <th>요청 종류</th>
@@ -114,8 +154,8 @@ const OCSLogPage = () => {
               {currentLogs.map((log, idx) => (
                 <tr key={idx}>
                   <td>{(currentPage - 1) * logsPerPage + idx + 1}</td>
-                  <td>{log.patient_id || '-'} {log.patient_name ? `(${log.patient_name})` : ''}</td>
-                  <td>{log.doctor_id || '-'} {log.doctor_name ? `(${log.doctor_name})` : ''}</td>
+                  <td>{log.patient_id || '-'}{' '}{patientMappings[log.patient_id]?.name ? `(${patientMappings[log.patient_id].name})` : ''}</td>
+                  <td>{log.doctor_id || '-'}{' '}{doctorMappings[log.doctor_id] ? `(${doctorMappings[log.doctor_id]})` : ''}</td>
                   <td>{log.request_type || '-'}</td>
                   {/* 새로운 필드명과 스타일 적용 */}
                   <td style={{ whiteSpace: 'pre-wrap' }}>{log.request_and_result || '-'}</td>

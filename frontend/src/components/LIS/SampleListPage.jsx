@@ -28,7 +28,7 @@ const SampleListPage = () => {
   const fetchCdssResults = async () => {
     try {
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
-        const ids = res.data.map(r => r.sample_id);
+        const ids = res.data.map(r => r.sample);
         setCdssSampleIds(ids);
       } catch (err) {
         console.error('CDSS 결과 불러오기 실패:', err);

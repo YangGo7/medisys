@@ -138,15 +138,17 @@ def delete_sample(requlest, sample_id):
     try:
         sample = Sample.objects.get(id=sample_id)
         order = sample.order
+        
+        # CDSS 결과 먼저 삭제
+        CDSSResult.objects.filter(sample__id=sample_id).delete()
+        
+        # 샘플 삭제
         sample.delete()
         
         # 연결된 샘플이 더 이상 없다면 상태를 False로 변경
-        if not order.sample_set.exists():
+        if order and not order.sample_set.exists():
             order.has_sample = False
             order.save()
-        
-        # CDSS 결과도 함께 삭제
-        CDSSRecord.objects.filter(sample_id=sample_id).delete()
         
         return Response({'message': '삭제 성공'}, status=status.HTTP_204_NO_CONTENT)
     except Sample.DoesNotExist:

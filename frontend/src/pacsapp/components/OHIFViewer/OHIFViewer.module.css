@@ -1,0 +1,241 @@
+/* src/components/OHIFViewer/OHIFViewer.module.css */
+@import '../../styles/variables.css';
+
+.ohifViewerContainer {
+  display: flex;
+  height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 뷰어 영역 (왼쪽) */
+.viewerSection {
+  flex: 2;
+  position: relative;
+  min-width: 0; /* flex 오버플로우 방지 */
+}
+
+/* 분석 패널 (오른쪽) */
+.panelSection {
+  flex: 1;
+  min-width: var(--sidebar-width);
+  max-width: 400px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-primary);
+  overflow: hidden;
+}
+
+/* 🔥 스터디 연동 알림 메시지 */
+.studySyncNotification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-md);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  max-width: 500px;
+  text-align: center;
+  animation: slideInFromTop 0.3s ease-out, fadeInScale 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 🔥 성공 메시지 스타일 */
+.studySyncNotification:has-text("✅") {
+  background: linear-gradient(135deg, var(--color-success), #16a34a);
+}
+
+/* 🔥 경고 메시지 스타일 */
+.studySyncNotification:has-text("⚠️") {
+  background: linear-gradient(135deg, var(--color-warning), #d97706);
+}
+
+/* 🔥 에러 메시지 스타일 */
+.studySyncNotification:has-text("❌") {
+  background: linear-gradient(135deg, var(--color-danger), #dc2626);
+}
+
+/* 🔥 알림 애니메이션 */
+@keyframes slideInFromTop {
+  0% {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .ohifViewerContainer {
+    flex-direction: column;
+  }
+  
+  .viewerSection {
+    flex: 1;
+    height: 60vh;
+  }
+  
+  .panelSection {
+    flex: 1;
+    height: 40vh;
+    max-width: none;
+    border-left: none;
+    border-top: 1px solid var(--border-primary);
+  }
+
+  /* 🔥 모바일에서 알림 위치 조정 */
+  .studySyncNotification {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    max-width: none;
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .viewerSection {
+    height: 50vh;
+  }
+  
+  .panelSection {
+    height: 50vh;
+  }
+}
+
+/* 전체화면 모드 */
+.ohifViewerContainer.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+}
+
+.ohifViewerContainer.fullscreen .panelSection {
+  display: none;
+}
+
+.ohifViewerContainer.fullscreen .viewerSection {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* 🔥 전체화면 모드에서 알림 위치 조정 */
+.ohifViewerContainer.fullscreen .studySyncNotification {
+  z-index: 10000; /* 전체화면보다 위에 표시 */
+}
+
+/* 스크롤바 스타일링 (OHIF 테마에 맞게) */
+.panelSection::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panelSection::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.panelSection::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+.panelSection::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* 로딩 상태 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-lg);
+  font-weight: bold;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--border-primary);
+  border-top: 5px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: var(--spacing-lg);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 에러 상태 */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--bg-primary);
+  color: var(--color-danger);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.errorTitle {
+  font-size: var(--font-xxl);
+  font-weight: bold;
+  margin-bottom: var(--spacing-lg);
+}
+
+.errorMessage {
+  font-size: var(--font-lg);
+  margin-bottom: var(--spacing-xl);
+  max-width: 600px;
+}
+
+.errorRetryButton {
+  background: var(--color-primary);
+  color: var(--text-primary);
+  border: none;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--font-md);
+  font-weight: bold;
+  transition: background-color var(--transition-normal);
+}
+
+.errorRetryButton:hover {
+  background: var(--color-primary-dark);
+}

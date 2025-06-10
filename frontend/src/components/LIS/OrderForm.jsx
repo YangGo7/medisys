@@ -71,7 +71,7 @@ const OrderForm = () => {
         request_detail: `검사: ${selectedAlias}, 날짜: ${orderDate}`
       }); //
 
-      navigate('/');
+      navigate('/lis/orders');
     } catch (err) {
       alert('❌ 주문 생성 실패');
       console.error(err);

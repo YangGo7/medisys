@@ -2,69 +2,45 @@
   "Name": "Medical Platform Orthanc",
   "StorageDirectory": "/var/lib/orthanc/db",
   "IndexDirectory": "/var/lib/orthanc/db",
-  
-  "PostgreSQL": {
-    "EnableIndex": true,
-    "EnableStorage": false,
-    "Host": "orthanc-postgres",
-    "Port": 5432,
-    "Database": "orthanc",
-    "Username": "orthanc",
-    "Password": "orthanc"
-  },
-  
-  "HttpPort": 8042,
+
   "HttpServerEnabled": true,
-  "HttpDescribeErrors": true,
-  "HttpCompressionEnabled": true,
-  "RemoteAccessAllowed": true,
-  
+  "HttpPort": 8042,
   "DicomServerEnabled": true,
   "DicomPort": 4242,
-  "DicomAet": "ORTHANC",
-  
-  "AuthenticationEnabled": true,
-  "RegisteredUsers": {
-    "orthanc": "orthanc"
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": false,
+
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Origin, Content-Type, Accept, Authorization",
+    "Access-Control-Allow-Credentials": "true"
   },
-  
-  "Plugins": [
-     "/usr/share/orthanc/plugins"
-  ],
-  
+
   "DicomWeb": {
     "Enable": true,
     "Root": "/dicom-web/",
     "EnableWado": true,
-    "WadoRoot": "/wado",
-    "Host": "0.0.0.0",
-    "Port": 8042,
-    "Ssl": false,
-    "QidoSupportsIncludeField": false,
-    "StudiesMetadata": "MainDicomTags",
-    "SeriesMetadata": "Full"
+    "EnableQido": true,
+    "EnableStow": true,
+    "EnableWadoRs": true,
+    "QidoSupportsIncludeField": true
   },
-  
-  "StoneWebViewer": {
-    "Enable": false
+
+  "Plugins": ["/usr/local/share/orthanc/plugins"],
+  "LoadPrivatePlugins": true,
+
+  "PostgreSQL": {
+    "EnableIndex": true,
+    "EnableStorage": true,
+    "Host": "orthanc-postgres",
+    "Port": 5432,
+    "Database": "orthanc",
+    "Username": "orthanc",
+    "Password": "orthanc",
+    "IndexConnectionsCount": 5
   },
-  
-  "HttpHeaders": {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin",
-    "Access-Control-Max-Age": "86400",
-    "Access-Control-Allow-Credentials": "true"
-  },
-  
+
   "VerboseEnabled": true,
-  "VerboseStartup": true,
-  "LogExportedResources": true,
-  "LogLevel": "INFO",
-  
-  "ConcurrentJobs": 4,
-  "HttpRequestTimeout": 60,
-  "DicomThreadsCount": 4,
-  "MaximumStorageSize": 0,
-  "MaximumPatientCount": 0
+  "LogLevel": "INFO"
 }

@@ -27,7 +27,7 @@ urlpatterns = [
     path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
     path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/', views.get_all_patients_simple, name='get_all_patients'),
-    # path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
+    
     
     # Orthanc 환자 관리
     path('orthanc/studies/', views.get_orthanc_studies, name='get_orthanc_studies'),

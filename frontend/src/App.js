@@ -17,6 +17,7 @@ import MainPage from './components/MainPage';
 import EmrMainPage from './components/EMR/EmrMainPage';
 import PatientList from './components/patientsList'; // 기존 환자 목록 (경로 확인 필요)
 import SettingsPage from './components/EMR/SettingsPage';
+import RISPage from './pacsapp/App.js';
 // ---------------------------
 
 
@@ -53,6 +54,7 @@ function App() {
           </Route>
           <Route path="/tests" element={<OpenMRSPatientList />} />
           <Route path="/ocs/log" element={<OCSLogPage />} />
+          <Route path="/RISPage" element={<RISPage />} />
 
           
           {/* 기존 환자 목록 페이지 (이 페이지가 새로운 데스크의 환자 목록과 기능적으로 겹치는지 확인 필요) */}
