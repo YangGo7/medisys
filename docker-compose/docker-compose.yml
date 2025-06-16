@@ -42,7 +42,7 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # MariaDB (메인 애플리케이션용)
+  # MariaDB (main application)
   mariadb:
     image: mariadb:10.11
     container_name: mariadb-server
@@ -60,7 +60,7 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # PostgreSQL (Orthanc용)
+  # PostgreSQL for Orthanc
   orthanc-postgres:
     image: postgres:14
     container_name: orthanc-postgres
@@ -77,12 +77,11 @@ services:
       - medical-network
     restart: unless-stopped
 
-  # Orthanc + PostgreSQL + DICOMWeb
-  # jodogne/orthanc-prugin:1.12.6
+  # Orthanc + AI Plugin
   orthanc:
     build:
-      context: .  # 현재 폴더 기준 (필요시 경로 조정)
-      dockerfile: Dockerfile  # 실제 파일 이름
+      context: .
+      dockerfile: Dockerfile
     image: orthanc-custom:latest
     container_name: orthanc
     hostname: orthanc-server
@@ -92,12 +91,32 @@ services:
       - "8042:8042"
       - "4242:4242"
     volumes:
-      - ../backend/db:/home/medical_system/backend/db
+      - orthanc_data:/var/lib/orthanc/db
+      - orthanc_storage:/etc/orthanc/OrthancStorage
       - ./scripts:/scripts
-      - ./ai_models:/models
+      - ./lua-scripts:/etc/orthanc/lua-scripts
+      - ./models:/models
     networks:
       - medical-network
     restart: unless-stopped
+
+  # Flask AI 분석 서버
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai
+    container_name: ai-service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./scripts:/scripts
+      - ./models:/models
+    deploy: # <--- 이 부분을 추가합니다.
+      resources:
+        limits:
+          memory: 4G # 예시: 4GB 메모리 할당 (필요에 따라 더 늘릴 수 있음)
+    networks:
+      - medical-network
 
   # OHIF Viewer
   ohif-viewer:
@@ -160,7 +179,7 @@ services:
     networks:
       - medical-network
     restart: unless-stopped
-
+ 
   # Mongo Express
   mongo-express:
     image: mongo-express:latest
@@ -211,3 +230,5 @@ volumes:
   orthanc_postgres_data:
   orthanc_data:
   mongodb_data:
+  orthanc_storage:
+

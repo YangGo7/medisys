@@ -12,17 +12,19 @@ import ResultInputForm from './components/LIS/ResultInputForm';
 import ResultCdss from './components/LIS/ResultCdss';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
-// import VitalAlertBanner from './components/EMR/VitalAlert'; // VitalAlertBanner는 Routes 내에 직접 사용되지 않는 것 같아 주석 처리 (필요시 해제)
 import MainPage from './components/MainPage';
 import EmrMainPage from './components/EMR/EmrMainPage';
-import PatientList from './components/patientsList'; // 기존 환자 목록 (경로 확인 필요)
+import PatientList from './components/patientsList';
 import SettingsPage from './components/EMR/SettingsPage';
 import RISPage from './pacsapp/';
-// ---------------------------
+import ReceptionPanel from './components/EMR/ReceptionPanel';
+import PatientWaitingList from './components/EMR/PatientWaitingList';
+import PatientStatusBoard from './components/EMR/PatientStatusBoard'; 
+import CompletedPatients from './components/EMR/CompletedPatients'; 
 
-
-// ✅ ThemeContext 추가
+// ThemeContext, ReceptionContext 추가
 import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
+import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
 
 import './App.css';
 
@@ -31,41 +33,44 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          {/* 기존 메인 페이지 */}
-          <Route path="/" element={<Navigate to="/main" />} />
-          <Route path="/main" element={<MainPage />} />
+      <ReceptionProvider>
+        <Router>
+          <Routes>
+            {/* 기존 메인 페이지 */}
+            <Route path="/" element={<Navigate to="/main" />} />
+            <Route path="/main" element={<MainPage />} />
 
-          {/* EMR 페이지 */}
-          <Route path="/emr" element={<EmrMainPage />} />
-          <Route path="/emr/Settings" element={<SettingsPage />} />
+            {/* EMR 페이지 */}
+            <Route path="/emr" element={<EmrMainPage />} />
+            <Route path="/emr/Settings" element={<SettingsPage />} />
+            <Route path="/emr/reception" element={<ReceptionPanel />} />
+            <Route path="/emr/waiting" element={<PatientWaitingList />} />
+            <Route path="/emr/patient-status" element={<PatientStatusBoard />} /> {/* ✅ 추가 */}
+            <Route path="/emr/completed-patients" element={<CompletedPatients />} /> {/* ✅ 추가 */}
 
-          {/* LIS 관련 페이지 */}
-          <Route path="/lis" element={<LisHome />}>
-            <Route path="orders" element={<OrderListPage />} />
-            <Route path="samples" element={<SampleListPage />} />
-            <Route path="order/new" element={<OrderForm />} />
-            <Route path="sample/new" element={<SampleForm />} />
-            <Route path="sample/new/:orderId" element={<SampleForm />} />
-            <Route path="result/new" element={<ResultInputForm />} />
-            <Route path="result/new/:sampleId" element={<ResultInputForm />} />
-            <Route path="result-list" element={<ResultCdss />} />
-          </Route>
-          <Route path="/tests" element={<OpenMRSPatientList />} />
-          <Route path="/ocs/log" element={<OCSLogPage />} />
-          <Route path="/RISPage" element={<RISPage />} />
+            {/* LIS 관련 페이지 */}
+            <Route path="/lis" element={<LisHome />}>
+              <Route path="orders" element={<OrderListPage />} />
+              <Route path="samples" element={<SampleListPage />} />
+              <Route path="order/new" element={<OrderForm />} />
+              <Route path="sample/new" element={<SampleForm />} />
+              <Route path="sample/new/:orderId" element={<SampleForm />} />
+              <Route path="result/new" element={<ResultInputForm />} />
+              <Route path="result/new/:sampleId" element={<ResultInputForm />} />
+              <Route path="result-list" element={<ResultCdss />} />
+            </Route>
+            <Route path="/tests" element={<OpenMRSPatientList />} />
+            <Route path="/ocs/log" element={<OCSLogPage />} />
+            <Route path="/RISPage" element={<RISPage />} />
 
-          
-          {/* 기존 환자 목록 페이지 (이 페이지가 새로운 데스크의 환자 목록과 기능적으로 겹치는지 확인 필요) */}
-          <Route path="/patients" element={<PatientList />} /> 
+            {/* 기존 환자 목록 페이지 */}
+            <Route path="/patients" element={<PatientList />} /> 
 
- 
-
-          {/* 예외 경로는 메인으로 */}
-          <Route path="*" element={<Navigate to="/main" />} />
-        </Routes>
-      </Router>
+            {/* 예외 경로는 메인으로 */}
+            <Route path="*" element={<Navigate to="/main" />} />
+          </Routes>
+        </Router>
+      </ReceptionProvider>
     </ThemeProvider>
   );
 }

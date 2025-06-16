@@ -12,8 +12,8 @@ from rest_framework import status
 from datetime import datetime, timedelta
 import json
 import logging
-from orders.models import TestOrder
-from orders.serializers import TestOrderSerializer
+from .models import Order
+from .serializers import OrderSerializer
 
 # 로깅 설정
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def order_list_create(request):
     if request.method == 'GET':
         try:
             # 🔥 실제 DB에서 주문 목록 조회
-            orders = TestOrder.objects.all().order_by('-id')
+            orders = Order.objects.all().order_by('-order_id')
             
             # 쿼리 파라미터 처리
             page = int(request.GET.get('page', 1))
@@ -53,7 +53,7 @@ def order_list_create(request):
                 orders = orders.filter(patient_id__icontains=patient_id)
             
             # 시리얼라이저로 데이터 변환
-            serializer = TestOrderSerializer(orders, many=True)
+            serializer = OrderSerializer(orders, many=True)
             orders_data = serializer.data
             
             # 날짜 필드 추가 (호환성을 위해)
@@ -101,24 +101,25 @@ def order_list_create(request):
             
             # 🔥 실제 DB에 저장할 데이터 준비
             order_data = {
-                'order_id': f"EMR_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                 'patient_id': data.get('patient_id'),
                 'doctor_id': data.get('doctor_id', 'system_user'),
-                'test_type': data.get('test_type'),
-                'order_date': datetime.now()
+                'panel': data.get('test_type'),
+                'tests': PANEL_COMPONENTS[test_type],
+                'order_date': datetime.now().date(),  # DateField
+                'status': 'CREATED'
             }
             
             # 🔥 실제 DB에 저장
-            serializer = TestOrderSerializer(data=order_data)
+            serializer = OrderSerializer(data=order_data)
             if serializer.is_valid():
                 saved_order = serializer.save()
                 
                 # 응답 데이터 구성 (기존 형식 유지)
                 response_data = {
-                    'id': saved_order.id,
+                    'id': saved_order.order_id,
                     'patient_id': saved_order.patient_id,
                     'patient_name': data.get('patient_name'),  # TestOrder 모델에 없는 필드
-                    'test_type': saved_order.test_type,
+                    'test_type': saved_order.panel,
                     'test_list': data.get('test_list', ', '.join(PANEL_COMPONENTS[test_type])),
                     'doctor_id': saved_order.doctor_id,
                     'doctor_name': data.get('doctor_name', 'System User'),
@@ -131,7 +132,7 @@ def order_list_create(request):
                     'updated_at': saved_order.order_date.isoformat()
                 }
                 
-                logger.info(f"✅ LIS 주문 DB 저장 성공: Order ID {saved_order.id}")
+                logger.info(f"✅ LIS 주문 DB 저장 성공: Order ID {saved_order.order_id}")
                 
                 return Response({
                     'status': 'success',

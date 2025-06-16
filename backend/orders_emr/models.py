@@ -3,7 +3,7 @@ from django.db import models
 class Order(models.Model):
     order_id    = models.AutoField(primary_key=True)
     patient_id  = models.UUIDField()
-    doctor_id   = models.UUIDField()
+    doctor_id   = models.CharField(max_length=100)  # ✅ UUIDField → CharField
     panel       = models.CharField(max_length=100)
     tests       = models.JSONField()
     order_date  = models.DateField()

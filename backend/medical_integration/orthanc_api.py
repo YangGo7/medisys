@@ -27,7 +27,7 @@ class OrthancAPI:
             response = requests.get(
                 f"{self.base_url}/{endpoint}",
                 auth=self.auth,
-                timeout=30
+                timeout=60
             )
             response.raise_for_status()
             return response.json()
@@ -161,7 +161,7 @@ class OrthancAPI:
             response = requests.get(
                 f"{self.base_url}/instances/{instance_id}/preview",
                 auth=self.auth,
-                timeout=30
+                timeout=60
             )
             response.raise_for_status()
             return response.content
@@ -280,7 +280,7 @@ class OrthancAPI:
             response = requests.delete(
                 f"{self.base_url}/patients/{patient_id}",
                 auth=self.auth,
-                timeout=30
+                timeout=60
             )
             response.raise_for_status()
             logger.info(f"환자 삭제 성공: {patient_id}")
@@ -295,7 +295,7 @@ class OrthancAPI:
             response = requests.delete(
                 f"{self.base_url}/studies/{study_id}",
                 auth=self.auth,
-                timeout=30
+                timeout=60
             )
             response.raise_for_status()
             logger.info(f"Study 삭제 성공: {study_id}")
@@ -310,7 +310,7 @@ class OrthancAPI:
             response = requests.get(
                 f"{self.base_url}/system",
                 auth=self.auth,
-                timeout=10
+                timeout=40
             )
             response.raise_for_status()
             system_info = response.json()

@@ -1,5 +1,4 @@
 // src/components/EMR/EmrMainPage.jsx
-
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import PatientDetailModal from './PatientDetailModal';
@@ -19,6 +18,10 @@ import ImagingRequestPanel from './ImagingRequestPanel';
 import DiagnosisPanel from './DiagnosisPanel';
 import WaitingBoard from './WaitingBoard';
 import AssignedPatientList from './AssignedPatientList';
+import ReceptionPanel from './ReceptionPanel';
+
+import PatientStatusBoard from './PatientStatusBoard';
+import CompletedPatients from './CompletedPatients';
 
 import { DEFAULT_DOCTOR_ID } from './lisConfig';
 
@@ -28,39 +31,35 @@ import {
   UrgentWidget,
 } from './home';
 
-import ReceptionPanel from './ReceptionPanel'; // ✅ 추가
-
 import './EmrMainPage.css';
 
 const EmrMainPage = () => {
-  const [activeTab, setActiveTab] = useState('홈');
+  const [activeTab, setActiveTab] = useState('의사 대시보드');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [assignedPatients, setAssignedPatients] = useState({ 1: null, 2: null });
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const refreshAssignedData = () => {
-    setRefreshTrigger(prev => prev + 1);
-  };
+  const refreshAssignedData = () => setRefreshTrigger(prev => prev + 1);
 
   const assignToRoom = async (roomNumber) => {
     if (!selectedPatient) return;
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/'}assign-room/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientId: selectedPatient.mapping_id || selectedPatient.id,
-          room: roomNumber
-        })
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result = await response.json();
+      const res = await fetch(
+        `${process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/'}assign-room/`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientId: selectedPatient.mapping_id || selectedPatient.id,
+            room: roomNumber
+          })
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setAssignedPatients(prev => ({ ...prev, [roomNumber]: selectedPatient }));
       refreshAssignedData();
-      setSelectedPatient(null);
       saveLog({
         patient_id: selectedPatient.id || selectedPatient.patient_id || selectedPatient.mapping_id,
         patient_name: selectedPatient.name || selectedPatient.display,
@@ -70,16 +69,17 @@ const EmrMainPage = () => {
         request_detail: `진료실 ${roomNumber}번으로 배정됨`,
       });
       alert(`✅ ${selectedPatient.display || selectedPatient.name}님이 진료실 ${roomNumber}번에 배정되었습니다.`);
-    } catch (error) {
-      console.error('❌ 진료실 배정 실패:', error);
+      setSelectedPatient(null);
+    } catch (err) {
+      console.error('❌ 진료실 배정 실패:', err);
       alert('진료실 배정에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  const openPatientModal = () => selectedPatient && setShowPatientModal(true);
+  const openPatientModal  = () => selectedPatient && setShowPatientModal(true);
   const closePatientModal = () => setShowPatientModal(false);
 
-  // ─── 홈 ─────────────────────────────────────────
+  // ─── 각 탭 렌더링 함수 ───────────────────────────────────
   const renderHome = () => (
     <div className="page-container-full">
       <div className="home-container">
@@ -94,14 +94,14 @@ const EmrMainPage = () => {
     </div>
   );
 
-  // ─── 접수 ────────────────────────────────────────
   const renderReception = () => (
     <div className="page-container-full">
-      <ReceptionPanel />
+      <ReceptionPanel
+        onReceptionSuccess={() => setActiveTab('진료')}
+      />
     </div>
   );
 
-  // ─── 설정 ────────────────────────────────────────
   const renderSettings = () => (
     <div className="page-container-full">
       <h2 className="page-title">⚙️ 설정 페이지</h2>
@@ -113,7 +113,6 @@ const EmrMainPage = () => {
     </div>
   );
 
-  // ─── 대기 목록 ───────────────────────────────────
   const renderWaitingList = () => (
     <div className="page-container-full">
       <div className="card">
@@ -122,14 +121,24 @@ const EmrMainPage = () => {
     </div>
   );
 
-  // ─── 대기 화면 ───────────────────────────────────
   const renderWaitingBoard = () => (
     <div className="page-container-full">
       <WaitingBoard />
     </div>
   );
 
-  // ─── 진료 ────────────────────────────────────────
+  const renderPatientStatus = () => (
+    <div className="page-container-full">
+      <PatientStatusBoard />
+    </div>
+  );
+
+  const renderCompletedPatients = () => (
+    <div className="page-container-full">
+      <CompletedPatients />
+    </div>
+  );
+
   const renderClinical = () => (
     <div className="clinical-container-new">
       <section className="tab-col tab1-new">
@@ -140,7 +149,6 @@ const EmrMainPage = () => {
           refreshTrigger={refreshTrigger}
         />
       </section>
-
       <section className="tab-col tab2">
         <h3 className="section-title">📄 환자 정보</h3>
         {selectedPatient
@@ -154,32 +162,27 @@ const EmrMainPage = () => {
           : <p className="empty-text">배정된 환자를 선택해주세요.</p>
         }
       </section>
-
       <section className="tab-col tab3">
         <h3 className="section-title">🔬 LIS 검사 요청</h3>
         {selectedPatient
-          ? (
-            <LisRequestPanel
-              patient={selectedPatient}
-              doctorId={DEFAULT_DOCTOR_ID}
-            />
-          )
+          ? <LisRequestPanel patient={selectedPatient} doctorId={DEFAULT_DOCTOR_ID} />
           : <p className="empty-text">배정된 환자를 선택해주세요.</p>
         }
       </section>
-
       <section className="tab-col tab4-5">
         <div className="imaging-section">
           <h3 className="section-title">🏥 영상검사 요청</h3>
           {selectedPatient
             ? <ImagingRequestPanel selectedPatient={selectedPatient} />
-            : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
+            : <p className="empty-text">배정된 환자를 선택해주세요.</p>
+          }
         </div>
         <div className="ai-section">
           <h3 className="section-title">🧠 AI 판독</h3>
           {selectedPatient
             ? <DiagnosisPanel patient={selectedPatient} />
-            : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
+            : <p className="empty-text">배정된 환자를 선택해주세요.</p>
+          }
         </div>
       </section>
     </div>
@@ -202,23 +205,20 @@ const EmrMainPage = () => {
           />
         </aside>
         <main className="content-col">
-          {activeTab === '홈'        && renderHome()}
-          {activeTab === '접수'      && renderReception()}
-          {activeTab === '설정'      && renderSettings()}
-          {activeTab === '대기 목록' && renderWaitingList()}
-          {activeTab === '대기 화면' && renderWaitingBoard()}
-          {activeTab === '진료'      && renderClinical()}
+          {activeTab === '의사 대시보드'    && renderHome()}
+          {activeTab === '접수'            && renderReception()}
+          {activeTab === '설정'            && renderSettings()}
+          {activeTab === '대기 목록'       && renderWaitingList()}
+          {activeTab === '대기 화면'       && renderWaitingBoard()}
+          {activeTab === '진료 진행도' && renderPatientStatus()}
+          {activeTab === '완료 환자 목록' && renderCompletedPatients()}
+          {activeTab === '진료'            && renderClinical()}
         </main>
       </div>
 
-      {showNotifModal && (
-        <NotificationModal onClose={() => setShowNotifModal(false)} onMark={() => {}} />
-      )}
-      {showPatientModal && (
-        <PatientDetailModal
-          patient={selectedPatient}
-          onClose={closePatientModal}
-        />
+      {showNotifModal && <NotificationModal onClose={() => setShowNotifModal(false)} />}
+      {showPatientModal && selectedPatient && (
+        <PatientDetailModal patient={selectedPatient} onClose={closePatientModal} />
       )}
     </div>
   );

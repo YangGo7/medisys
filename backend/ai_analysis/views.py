@@ -11,15 +11,22 @@ import io
 from django.conf import settings
 from .utils import ModelManager
 from .pacs_utils import get_patient_info_from_pacs, get_series_info_from_pacs
-from django.views.decorators.csrf import csrf_exempt
-        
+
+from django.utils.decorators import method_decorator        
         
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import AIAnalysisResult
 from .serializers import AIAnalysisResultSerializer
-
+    
+    
+# views.py
+from rest_framework.views import APIView
+from rest_framework import status
+# from .models import AIAnalysisResult # 필요하다면 모델 임포트
+from .serializers import AIAnalysisResultSerializer # 시리얼라이저 임포트
+from .utils import save_analysis_result
 logger = logging.getLogger(__name__)
 
 def get_image_from_orthanc(internal_study_id):
@@ -110,7 +117,7 @@ def analyze_study_now(request):
                         
             
             # 1. YOLO 모델 로드
-            model_path = settings.AI_MODELS_DIR / "yolov8_best.pt"
+            model_path = settings.AI_MODELS_DIR / 'yolov8' / "yolov8_best.pt"
             model = YOLO(str(model_path))
             
             # 2. Orthanc에서 이미지 가져오기
@@ -548,8 +555,8 @@ def clear_results(request, study_uid):
 def model_status(request):
     """모델 상태 확인"""
     try:
-        yolo_path = settings.AI_MODELS_DIR / "yolov8_best.pt"
-        ssd_path = settings.AI_MODELS_DIR / "ssd.pth"
+        yolo_path = settings.AI_MODELS_DIR / 'yolov8' / "yolov8_best.pt" # 'ai_models' 중복 제거!
+        ssd_path = settings.AI_MODELS_DIR / 'ssd' / "ssd.pth"   
         
         return JsonResponse({
             'status': 'success',
@@ -736,14 +743,14 @@ def get_pacs_studies(request):
         orthanc_url = "http://localhost:8042"
         
         # PACS에서 스터디 목록 가져오기
-        response = requests.get(f"{orthanc_url}/studies", timeout=10)
+        response = requests.get(f"{orthanc_url}/studies", timeout=80)
         response.raise_for_status()
         studies = response.json()
         
         study_list = []
         for study_id in studies:
             try:
-                study_response = requests.get(f"{orthanc_url}/studies/{study_id}", timeout=10)
+                study_response = requests.get(f"{orthanc_url}/studies/{study_id}", timeout=80)
                 study_response.raise_for_status()
                 study_data = study_response.json()
                 
@@ -772,12 +779,114 @@ def get_pacs_studies(request):
             'status': 'error',
             'message': str(e)
         }, status=500)
-@csrf_exempt
-@api_view(['POST'])
-def save_analysis_result(request):
-    serializer = AIAnalysisResultSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({'message': '저장 완료'}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import AIAnalysisResult
+from .utils import get_instance_info, get_dicom_file  # 또는 직접 코드 내에 포함
+import pydicom
+import io
+import logging
+logger = logging.getLogger('AIResultAPI')
+class AIAnalysisResultSaveAPIView(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            data = request.data
+
+        # ✅ 디버깅용 로그
+        print("🔍 받은 payload 구조:")
+        print(json.dumps(data, indent=2))
+
+        # ✅ instance_id와 result 확인
+        instance_id = data.get("instance_id")
+        result = data.get("result")
+
+        # 🔁 단일 result 형태일 경우 자동으로 변환
+        if not result and all(k in data for k in ["label", "bbox", "confidence_score"]):
+            print("⚠️ 단일 detection payload 감지 → 자동 변환 수행")
+            result = {
+                "detections": [
+                    {
+                        "class_name": data.get("label", "Unknown"),
+                        "confidence": data.get("confidence_score", 0.0),
+                        "bbox": data.get("bbox", [0, 0, 0, 0]),
+                        "description": data.get("ai_text", "")
+                    }
+                ],
+                "metadata": {
+                    "model_used": data.get("model_name", "unknown"),
+                    "model_version": data.get("model_version", "v1.0")
+                },
+                "processing_time": data.get("processing_time", 0.0)
+            }
+            instance_id = data.get("instance_uid") or data.get("instance_id")
+
+        if not instance_id or not result:
+            return Response({"error": "instance_id 또는 result 누락"}, status=400)
+
+        detections = result.get("detections", [])
+        metadata = result.get("metadata", {})
+        processing_time = result.get("processing_time", 0.0)
+
+        # 🧠 DICOM 정보 조회
+        instance_info = get_instance_info(instance_id)
+        if not instance_info:
+            return Response({"error": f"Instance {instance_id} 정보를 찾을 수 없습니다."}, status=404)
+
+        tags = instance_info.get("MainDicomTags", {})
+        study_uid = tags.get("StudyInstanceUID") or f"MISSING_STUDY_{instance_id}"
+        series_uid = tags.get("SeriesInstanceUID") or f"MISSING_SERIES_{instance_id}"
+        instance_uid = tags.get("SOPInstanceUID", instance_id)
+        instance_number = int(tags.get("InstanceNumber", 1))
+        modality = tags.get("Modality", "UNKNOWN")
+        patient_id = tags.get("PatientID", "UNKNOWN")
+
+        saved_results = []
+
+        for det in detections:
+            box = det.get("bbox", {})
+            bbox = [
+                int(box.get("x", 0)),
+                int(box.get("y", 0)),
+                int(box.get("x", 0) + box.get("width", 0)),
+                int(box.get("y", 0) + box.get("height", 0)),
+            ] if isinstance(box, dict) else list(map(int, box))
+
+            item = {
+                "patient_id": patient_id,
+                "study_uid": study_uid,
+                "series_uid": series_uid,
+                "instance_uid": instance_uid,
+                "instance_number": instance_number,
+                "label": det.get("class_name", "Unknown"),
+                "bbox": bbox,
+                "confidence_score": det.get("confidence", 0.0),
+                "ai_text": det.get("description", ""),
+                "modality": modality,
+                "model_name": metadata.get("model_used", "unknown"),
+                "model_version": metadata.get("model_version", "v1.0"),
+                "image_width": 0,
+                "image_height": 0,
+                "processing_time": processing_time
+            }
+
+            serializer = AIAnalysisResultSerializer(data=item)
+            if serializer.is_valid():
+                serializer.save()
+                saved_results.append(serializer.data)
+            else:
+                print("📛 serializer 오류 발생:")
+                print(serializer.errors)
+
+        return Response({
+            "status": "success",
+            "study_uid": study_uid,
+            "count": len(saved_results),
+            "results": saved_results
+        }, status=200)
