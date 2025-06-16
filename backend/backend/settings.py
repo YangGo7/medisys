@@ -1,3 +1,5 @@
+# backend/backend/settings.py
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -41,6 +43,7 @@ LOCAL_APPS = [
     'worklist',
     'accounts',
     'orders',
+    'django_extensions',
     'orders_emr',
     'samples',
     'tests',
@@ -61,7 +64,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -189,6 +192,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://35.225.63.41:3000",
     "http://35.225.63.41:8000",
+    'http://localhost', 
+    'http://127.0.0.1',
+    'http://35.225.63.41'
 ]
 
 ########################################
@@ -226,7 +232,7 @@ EXTERNAL_SERVICES = {
         'password': 'orthanc',
     },
 }
-# ─── MongoDB 로깅용 설정 ==저에오 OCS───
+# ─── MongoDB 로깅용 설정 
 MONGO_URI = os.getenv(
     'MONGO_URI',
     'mongodb://ocs_user:ocs_pass@127.0.0.1:27017/?authSource=ocslog')

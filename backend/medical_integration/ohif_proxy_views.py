@@ -110,13 +110,13 @@ def orthanc_proxy(request, path=""):
         auth = HTTPBasicAuth(ORTHANC_USER, ORTHANC_PASSWORD)
         
         if request.method == 'GET':
-            response = requests.get(orthanc_url, headers=headers, auth=auth, timeout=30)
+            response = requests.get(orthanc_url, headers=headers, auth=auth, timeout=70)
         elif request.method == 'POST':
             response = requests.post(orthanc_url, 
                                    data=request.body, 
                                    headers=headers, 
                                    auth=auth, 
-                                   timeout=30)
+                                   timeout=70)
         else:
             return JsonResponse({'error': 'Method not allowed'}, status=405)
         
@@ -269,7 +269,7 @@ def ohif_studies_list(request):
         for study_id in study_ids[:20]:  # 최대 20개로 제한
             try:
                 study_response = requests.get(f"{ORTHANC_HTTP_BASE}/studies/{study_id}", 
-                                            auth=auth, timeout=10)
+                                            auth=auth, timeout=70)
                 if study_response.status_code == 200:
                     study_data = study_response.json()
                     main_tags = study_data.get('MainDicomTags', {})

@@ -1,261 +1,3 @@
-# import torch
-# from ultralytics import YOLO
-# from django.conf import settings
-# import logging
-# import torchvision.transforms as transforms
-# import numpy as np
-
-# logger = logging.getLogger(__name__)
-
-# class ModelManager:
-#     """AI 모델 관리 클래스"""
-    
-#     @staticmethod
-#     def load_yolo_model():
-#         """YOLOv8 모델 로드"""
-#         model_path = settings.AI_MODELS_DIR / "yolov8_best.pt"
-#         return YOLO(str(model_path))
-    
-#     @staticmethod
-#     def load_ssd_model():
-#         """SSD 모델 로드 (state_dict 처리)"""
-#         model_path = settings.AI_MODELS_DIR / "ssd.pth"
-        
-#         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#         logger.info(f"SSD 모델 로드 시도: {model_path}, 디바이스: {device}")
-        
-#         try:
-#             # 파일이 존재하는지 확인
-#             if not model_path.exists():
-#                 logger.warning(f"SSD 모델 파일이 없습니다: {model_path}")
-#                 return ModelManager._create_dummy_ssd(), device
-            
-#             # 모델 로드 시도
-#             checkpoint = torch.load(str(model_path), map_location=device)
-#             logger.info(f"체크포인트 타입: {type(checkpoint)}")
-            
-#             if isinstance(checkpoint, dict):
-#                 # OrderedDict나 일반 dict인 경우 (state_dict만 저장됨)
-#                 logger.info("state_dict 형태의 모델 감지")
-                
-#                 # 실제 SSD 모델 구조가 필요하므로 더미 모델 사용
-#                 logger.warning("SSD 모델 아키텍처를 알 수 없어 더미 모델 사용")
-#                 return ModelManager._create_dummy_ssd(), device
-                
-#             else:
-#                 # 전체 모델 객체가 저장된 경우
-#                 logger.info("전체 모델 객체 감지")
-#                 model = checkpoint
-                
-#                 # 모델에 eval() 메서드가 있는지 확인
-#                 if hasattr(model, 'eval'):
-#                     model.eval()
-#                     logger.info("SSD 모델 로드 성공")
-#                     return model, device
-#                 else:
-#                     logger.warning("모델에 eval() 메서드가 없음. 더미 모델 사용")
-#                     return ModelManager._create_dummy_ssd(), device
-                    
-#         except Exception as e:
-#             logger.error(f"SSD 모델 로드 실패: {e}")
-#             logger.info("더미 SSD 모델 사용")
-#             return ModelManager._create_dummy_ssd(), device
-    
-#     @staticmethod
-#     def _create_dummy_ssd():
-#         """더미 SSD 모델 생성"""
-#         class DummySSDModel:
-#             def __init__(self):
-#                 self.device = torch.device('cpu')
-                
-#             def eval(self):
-#                 return self
-                
-#             def to(self, device):
-#                 self.device = device
-#                 return self
-                
-#             def __call__(self, input_tensor):
-#                 # 더미 출력 반환
-#                 batch_size = input_tensor.size(0)
-#                 return torch.randn(batch_size, 100, 6)  # [batch, detections, 6]
-        
-#         return DummySSDModel()
-    
-#     @staticmethod
-#     def run_yolo_inference(model, image):
-#         """YOLO 추론"""
-#         try:
-#             results = model(image)
-#             detections = []
-            
-#             for result in results:
-#                 boxes = result.boxes
-#                 if boxes is not None:
-#                     for box in boxes:
-#                         x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-#                         confidence = float(box.conf[0].cpu().numpy())
-#                         class_id = int(box.cls[0].cpu().numpy())
-#                         class_name = model.names.get(class_id, f"class_{class_id}")
-                        
-#                         detections.append({
-#                             'label': class_name,
-#                             'bbox': [int(x1), int(y1), int(x2), int(y2)],
-#                             'confidence': confidence,
-#                             'model': 'YOLOv8'
-#                         })
-            
-#             logger.info(f"YOLO 검출 결과: {len(detections)}개")
-#             return detections
-            
-#         except Exception as e:
-#             logger.error(f"YOLO 추론 실패: {e}")
-#             return []
-    
-#     @staticmethod
-#     def run_ssd_inference(model, device, image):
-#         """SSD 추론"""
-#         try:
-#             logger.info("SSD 추론 시작")
-            
-#             # 더미 모델인지 확인
-#             if isinstance(model, ModelManager._create_dummy_ssd().__class__):
-#                 logger.info("더미 SSD 모델 사용 - 가상 결과 생성")
-#                 return ModelManager._generate_dummy_ssd_results(image)
-            
-#             # 실제 SSD 모델 추론
-#             # 이미지 전처리
-#             transform = transforms.Compose([
-#                 transforms.Resize((300, 300)),
-#                 transforms.ToTensor(),
-#                 transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-#                                    std=[0.229, 0.224, 0.225])
-#             ])
-            
-#             input_tensor = transform(image).unsqueeze(0).to(device)
-            
-#             # 모델 추론
-#             with torch.no_grad():
-#                 outputs = model(input_tensor)
-            
-#             detections = []
-            
-#             # SSD 출력 파싱
-#             if isinstance(outputs, torch.Tensor):
-#                 # 단일 텐서 출력
-#                 outputs_np = outputs.cpu().numpy()
-                
-#                 # 더미 파싱 (실제 SSD 구조에 따라 수정 필요)
-#                 if outputs_np.shape[-1] >= 6:  # [batch, detections, 6] 형태
-#                     detections_data = outputs_np[0]  # 첫 번째 배치
-                    
-#                     for detection in detections_data:
-#                         if len(detection) >= 6:
-#                             x1, y1, x2, y2, conf, cls = detection[:6]
-                            
-#                             if conf > 0.3:  # 신뢰도 임계값
-#                                 # 좌표를 원본 이미지 크기로 변환
-#                                 orig_w, orig_h = image.size
-#                                 x1 = int(x1 * orig_w)
-#                                 y1 = int(y1 * orig_h)
-#                                 x2 = int(x2 * orig_w)
-#                                 y2 = int(y2 * orig_h)
-                                
-#                                 detections.append({
-#                                     'label': f'ssd_class_{int(cls)}',
-#                                     'bbox': [x1, y1, x2, y2],
-#                                     'confidence': float(conf),
-#                                     'model': 'SSD'
-#                                 })
-                
-#                 else:
-#                     # 파싱할 수 없는 형태면 더미 결과
-#                     logger.warning("SSD 출력 형태를 파싱할 수 없음. 더미 결과 사용")
-#                     return ModelManager._generate_dummy_ssd_results(image)
-            
-#             elif isinstance(outputs, (list, tuple)):
-#                 # 다중 출력 (boxes, scores, labels)
-#                 if len(outputs) >= 3:
-#                     boxes, scores, labels = outputs[0], outputs[1], outputs[2]
-                    
-#                     # 텐서를 numpy로 변환
-#                     if hasattr(boxes, 'cpu'):
-#                         boxes = boxes.cpu().numpy()
-#                         scores = scores.cpu().numpy()
-#                         labels = labels.cpu().numpy()
-                    
-#                     # 배치 차원 제거
-#                     if len(boxes.shape) > 2:
-#                         boxes = boxes[0]
-#                         scores = scores[0]
-#                         labels = labels[0]
-                    
-#                     # 검출 결과 생성
-#                     for i, score in enumerate(scores):
-#                         if score > 0.3 and i < len(boxes):
-#                             box = boxes[i]
-#                             x1, y1, x2, y2 = box[:4]
-                            
-#                             # 좌표 변환
-#                             orig_w, orig_h = image.size
-#                             x1 = int(x1 * orig_w / 300)
-#                             y1 = int(y1 * orig_h / 300)
-#                             x2 = int(x2 * orig_w / 300)
-#                             y2 = int(y2 * orig_h / 300)
-                            
-#                             label_id = int(labels[i]) if i < len(labels) else 0
-                            
-#                             detections.append({
-#                                 'label': f'ssd_detection_{label_id}',
-#                                 'bbox': [x1, y1, x2, y2],
-#                                 'confidence': float(score),
-#                                 'model': 'SSD'
-#                             })
-#                 else:
-#                     logger.warning("SSD 다중 출력 형태가 예상과 다름")
-#                     return ModelManager._generate_dummy_ssd_results(image)
-            
-#             else:
-#                 logger.warning(f"알 수 없는 SSD 출력 타입: {type(outputs)}")
-#                 return ModelManager._generate_dummy_ssd_results(image)
-            
-#             logger.info(f"SSD 검출 결과: {len(detections)}개")
-#             return detections if detections else ModelManager._generate_dummy_ssd_results(image)
-            
-#         except Exception as e:
-#             logger.error(f"SSD 추론 실패: {e}")
-#             logger.info("더미 SSD 결과 반환")
-#             return ModelManager._generate_dummy_ssd_results(image)
-    
-#     @staticmethod
-#     def _generate_dummy_ssd_results(image):
-#         """더미 SSD 결과 생성"""
-#         # 이미지 크기 기반으로 더미 바운딩박스 생성
-#         width, height = image.size
-        
-#         detections = [
-#             {
-#                 'label': 'ssd_pneumonia',
-#                 'bbox': [int(width * 0.1), int(height * 0.2), int(width * 0.4), int(height * 0.6)],
-#                 'confidence': 0.78,
-#                 'model': 'SSD'
-#             },
-#             {
-#                 'label': 'ssd_nodule',
-#                 'bbox': [int(width * 0.6), int(height * 0.3), int(width * 0.85), int(height * 0.55)],
-#                 'confidence': 0.65,
-#                 'model': 'SSD'
-#             },
-#             {
-#                 'label': 'ssd_consolidation',
-#                 'bbox': [int(width * 0.2), int(height * 0.7), int(width * 0.5), int(height * 0.9)],
-#                 'confidence': 0.72,
-#                 'model': 'SSD'
-#             }
-#         ]
-        
-#         logger.info(f"더미 SSD 결과 생성: {len(detections)}개")
-#         return detections
 
 
 import torch
@@ -708,3 +450,126 @@ class ModelManager:
         
         logger.info(f"🎭 {model_name} 더미 결과 생성: {len(detections)}개")
         return detections
+    
+    # your_django_app/utils/analysis_saver.py
+
+import io
+import pydicom
+from .models import AIAnalysisResult
+import logging
+import requests
+
+
+def save_analysis_result(instance_id, result):
+    try:
+        instance_info = get_instance_info(instance_id)
+        main_tags = instance_info.get('MainDicomTags', {})
+
+        dicom_data = get_dicom_file(instance_id)
+        dicom_dataset = pydicom.dcmread(io.BytesIO(dicom_data))
+
+        patient_id = main_tags.get('PatientID', 'UNKNOWN')
+        study_uid = main_tags.get('StudyInstanceUID')
+        series_uid = main_tags.get('SeriesInstanceUID')
+        instance_uid = main_tags.get('SOPInstanceUID')
+        instance_number = int(main_tags.get('InstanceNumber', 0))
+        modality = main_tags.get('Modality', 'UNKNOWN')
+
+        image_height, image_width = dicom_dataset.pixel_array.shape[:2]
+
+        detections = result.get('detections', [])
+        for detection in detections:
+            bbox_orig = detection['bbox']
+            bbox_converted = [
+                bbox_orig['x'],
+                bbox_orig['y'],
+                bbox_orig['x'] + bbox_orig['width'],
+                bbox_orig['y'] + bbox_orig['height']
+            ]
+
+            ai_result = AIAnalysisResult.objects.create(
+                patient_id=patient_id,
+                study_uid=study_uid,
+                series_uid=series_uid,
+                instance_uid=instance_uid,
+                instance_number=instance_number,
+                label=detection['class_name'],
+                bbox=bbox_converted,
+                confidence_score=detection['confidence'],
+                ai_text=detection.get('description', ''),
+                modality=modality,
+                model_name=result.get('metadata', {}).get('model_used', 'unknown'),
+                model_version='v1.0',
+                image_width=image_width,
+                image_height=image_height,
+                processing_time=result.get('processing_time', 0.0)
+            )
+            logger.info(f"✅ DB 저장 성공: {ai_result.id} ({ai_result.label})")
+
+    except Exception as e:
+        logger.error(f"❌ DB 저장 실패: {e}")
+
+# utils.py
+def get_instance_info(instance_id):
+    # 이 함수는 원래 Django의 views.py에서 호출하는 get_instance_info를 대체하는 유틸리티 함수로 보입니다.
+    # 따라서 Orthanc URL을 수정해야 합니다.
+    try:
+        # 기존: url = f"http://orthanc:8042/instances/{instance_id}"
+        # 수정: 'orthanc' 대신 'localhost' 사용
+        url = f"http://localhost:8042/instances/{instance_id}" # <-- 이 부분 수정
+        # 또는
+        # url = f"http://127.0.0.1:8042/instances/{instance_id}"
+
+        response = requests.get(url, auth=('orthanc', 'orthanc'))
+        response.raise_for_status()
+        
+        instance_info = response.json()
+        
+        # simplified-tags 정보 가져오는 URL도 수정
+        # 기존: url_tags = f"http://orthanc:8042/instances/{instance_id}/simplified-tags"
+        # 수정: 'orthanc' 대신 'localhost' 사용
+        url_tags = f"http://localhost:8042/instances/{instance_id}/simplified-tags" # <-- 이 부분도 수정
+        # 또는
+        # url_tags = f"http://127.0.0.1:8042/instances/{instance_id}/simplified-tags"
+        
+        response_tags = requests.get(url_tags, auth=('orthanc', 'orthanc'))
+        response_tags.raise_for_status()
+        tags = response_tags.json()
+        
+        instance_info.setdefault('MainDicomTags', {})
+        for key in ['PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'SOPInstanceUID', 'InstanceNumber', 'Modality']:
+            if key in tags:
+                instance_info['MainDicomTags'][key] = tags[key]
+        
+        return instance_info
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Orthanc 인스턴스 정보 조회 실패: {e}")
+        logger.error(traceback.format_exc())
+        raise 
+    except Exception as e:
+        logger.error(f"알 수 없는 오류로 인스턴스 정보 조회 실패: {e}")
+        logger.error(traceback.format_exc())
+        raise
+
+def get_dicom_file(instance_id):
+    # 이 함수도 Orthanc URL을 수정해야 합니다.
+    try:
+        # 기존: url = f"http://orthanc:8042/instances/{instance_id}/file"
+        # 수정: 'orthanc' 대신 'localhost' 사용
+        url = f"http://localhost:8042/instances/{instance_id}/file" # <-- 이 부분 수정
+        # 또는
+        # url = f"http://127.0.0.1:8042/instances/{instance_id}/file"
+        
+        response = requests.get(url, auth=('orthanc', 'orthanc'))
+        response.raise_for_status()
+        return response.content
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Orthanc DICOM 파일 다운로드 실패: {e}")
+        logger.error(traceback.format_exc())
+        raise 
+    except Exception as e:
+        logger.error(f"알 수 없는 오류로 DICOM 파일 다운로드 실패: {e}")
+        logger.error(traceback.format_exc())
+        raise
+
+# 파일의 나머지 부분 (예: ModelManager 클래스 등)은 그대로 둡니다.

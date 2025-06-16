@@ -26,6 +26,12 @@ class PatientMapping(models.Model):
         ('IDENTIFIER_BASED', 'Patient ID 기반'),
     ]
 
+    STATUS_CHOICES = [
+        ('waiting', '대기 중'),
+        ('in_progress', '진료 중'),
+        ('complete', '진료 완료'),
+    ]
+
     mapping_id = models.AutoField(primary_key=True)
     orthanc_patient_id = models.CharField(max_length=255, db_index=True)
     openmrs_patient_uuid = models.CharField(max_length=38, db_index=True)
@@ -44,6 +50,8 @@ class PatientMapping(models.Model):
     display = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=1, null=True, blank=True)
     birthdate = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')  # ✅ 추가됨
+
     class Meta:
         db_table = 'patient_mapping'
         unique_together = [('orthanc_patient_id', 'openmrs_patient_uuid')]
@@ -113,8 +121,6 @@ class PatientMapping(models.Model):
         except Exception as e:
             logger.error(f"[IDENTIFIER_BASED] 매핑 생성 실패: {e}")
             return None
-
-
 
 
 class Person(models.Model):

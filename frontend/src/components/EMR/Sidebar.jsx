@@ -3,7 +3,19 @@ import React from 'react';
 import NotificationBell from './NotificationBell';
 
 const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
-  const menus = ['홈', '진료', '접수', '대기 목록','대기 화면', '설정'];
+  // 원하는 순서대로 메뉴 배열 재정의
+  const menus = [
+    '의사 대시보드',
+    '접수',
+    '진료',
+    '진료 진행도',
+    '대기 화면',
+    '대기 목록',
+    '완료 환자 목록',
+    '설정',
+  ];
+
+  const isActive = (menu) => activeTab === menu;
 
   return (
     <div
@@ -29,7 +41,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         <h2 style={{ fontSize: '18px', margin: 0, color: '#333' }}>1조 메디컬</h2>
       </div>
 
-      {/* ─── 알림 벨 독립 박스 (배경 제거) ─── */}
+      {/* ─── 알림 벨 ─── */}
       <div
         className="notif-wrapper"
         role="button"
@@ -53,8 +65,8 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
             style={{
               padding: '0.5rem 0.75rem',
               cursor: 'pointer',
-              fontWeight: activeTab === menu ? 'bold' : 'normal',
-              backgroundColor: activeTab === menu ? '#e6f7ff' : 'transparent',
+              fontWeight: isActive(menu) ? 'bold' : 'normal',
+              backgroundColor: isActive(menu) ? '#e6f7ff' : 'transparent',
               borderRadius: '4px',
               marginBottom: '0.25rem',
             }}

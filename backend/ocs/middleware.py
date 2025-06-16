@@ -1,5 +1,3 @@
-# ocs/middleware.py
-
 # backend/ocs/middleware.py
 
 import json

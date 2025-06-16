@@ -1,4 +1,4 @@
-# # backend/openmrs_models/models.py
+# backend/openmrs_models/models.py
 
 from django.db import models
 

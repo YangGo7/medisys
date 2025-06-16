@@ -70,7 +70,7 @@ const OrderListPage = () => {
     }
   };
 
-  const displayedOrders = orders.filter(order => order.id.toString().includes(searchKeyword));
+  const displayedOrders = orders.filter(order => order.order_id.toString().includes(searchKeyword));
 
   return (
     <div className="relative p-6">
@@ -130,14 +130,14 @@ const OrderListPage = () => {
           </thead>
           <tbody>
             {displayedOrders.map(order => {
-                const hasSample = samples.some(sample => Number(sample.order) === Number(order.id));
-                console.log(`🧪 오더 ${order.id}: 샘플 존재 여부 →`, hasSample);
+                const hasSample = samples.some(sample => Number(sample.order) === Number(order.order_id));
+                console.log(`🧪 오더 ${order.order_id}: 샘플 존재 여부 →`, hasSample);
                 return (
-              <tr key={order.id} className="text-center">
-                <td className="border px-4 py-2">{order.id}</td>
+              <tr key={order.order_id} className="text-center">
+                <td className="border px-4 py-2">{order.order_id}</td>
                 <td className="border px-4 py-2">{order.patient_id}</td>
                 <td className="border px-4 py-2">{order.doctor_id}</td>
-                <td className="border px-4 py-2">{order.test_type}</td>
+                <td className="border px-4 py-2">{order.panel}</td>
                 <td className="border px-4 py-2">{order.order_date?.slice(0, 10)}</td>
                 <td className="border px-4 py-2">
                  <span 
@@ -154,7 +154,7 @@ const OrderListPage = () => {
                 </td>
                 <td className="border px-4 py-2">
                   <button
-                      onClick={() => navigate(`/lis/sample/new/${order.id}`)}
+                      onClick={() => navigate(`/lis/sample/new/${order.order_id}`)}
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
                       샘플 등록

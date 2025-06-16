@@ -115,7 +115,6 @@ import axios from 'axios';
 
 export const saveLog = async (payload) => {
   try {
-    // 변경된 POST 엔드포인트로 맞춰주세요
     axios.post('http://35.225.63.41:8000/api/logs/create/', payload);
     console.log('로그 저장 성공');
   } catch (err) {

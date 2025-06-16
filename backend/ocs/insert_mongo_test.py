@@ -1,26 +1,3 @@
-# # backend > ocs > insert_mongo_test.py
-
-# from pymongo import MongoClient
-# from datetime import datetime
-
-# # 인증된 MongoDB 접속 URI
-# client = MongoClient("mongodb://admin:secret123@localhost:27017/?authSource=admin")
-# db = client["ocslog"]
-# collection = db["logs"]
-
-# logs = list(collection.find({}, {"_id": 0}))
-
-# # 테스트용 데이터 삽입
-# collection.insert_one({
-#     "patient_id": "10004M",
-#     "doctor_id": "DOC999",
-#     "request_type": "LIS",
-#     "detail": "CLI 없이 Python으로 삽입!",
-#     "created_at": datetime.utcnow()
-# })
-
-# print(" MongoDB 데이터 삽입 완료")
-
 # backend > ocs > insert_mongo_test.py
 
 from pymongo import MongoClient

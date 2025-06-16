@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import status as http_status
+from medical_integration.models import PatientMapping
 import logging
 from django.conf import settings
 from datetime import datetime
@@ -1291,6 +1293,9 @@ def create_test_mapping(request):
 # from openmrs_models.models import Patient, Person # PatientIdentifier, PersonName, 등 필요에 따라 추가
 from openmrs_models.models import Patient, Person, PatientIdentifier # 변경: PatientIdentifier 임포트 추가 
 
+from base64 import b64encode
+
+
 
 
 @api_view(['GET'])
@@ -1331,29 +1336,75 @@ def get_all_openmrs_patients(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # OCS [20250611]
+# @api_view(['GET'])
+# def list_openmrs_patients_map(request):
+#     """
+#     GET /api/integration/openmrs/patients/map/
+#     → { results: [{ uuid, id, name }, …] }
+#     오류나 매핑 없으면 빈 results:[] 로 200 OK
+#     """
+#     api_url = settings.OPENMRS_URL.rstrip('/') + '/patient'
+#     try:
+#         r = requests.get(api_url, auth=(settings.OPENMRS_USER, settings.OPENMRS_PASS), timeout=10)
+#         r.raise_for_status()
+#         pts = r.json().get('results', [])
+#         out = []
+#         for p in pts:
+#             name = p.get('person',{}).get('display') or p.get('display','')
+#             ids  = p.get('identifiers',[])
+#             num  = ids[0]['identifier'] if ids else None
+#             out.append({'uuid':p['uuid'], 'id':num, 'name':name})
+#         return Response({'results': out}, status=status.HTTP_200_OK)
+#     except Exception:
+#         return Response({'results': []}, status=status.HTTP_200_OK)
+
+# OCS [20250616]
 @api_view(['GET'])
 def list_openmrs_patients_map(request):
     """
-    GET /api/integration/openmrs/patients/map/
+    GET /api/integration/openmrs/patients/map/?q=검색어
     → { results: [{ uuid, id, name }, …] }
-    오류나 매핑 없으면 빈 results:[] 로 200 OK
     """
-    api_url = settings.OPENMRS_URL.rstrip('/') + '/patient'
+    from base64 import b64encode
+    import requests
+
+    # 인증
+    auth = b64encode(b'admin:Admin123').decode()
+    headers = {'Authorization': f'Basic {auth}'}
+
+    # 프론트에서 전달된 검색어 받기 (기본값은 'a')
+    query = request.GET.get('q', 'a')
+    params = {'q': query, 'limit': 20}
+
+    # 요청
+    url = 'http://openmrs:8082/openmrs/ws/rest/v1/patient'
+
     try:
-        r = requests.get(api_url, auth=(settings.OPENMRS_USER, settings.OPENMRS_PASS), timeout=10)
-        r.raise_for_status()
-        pts = r.json().get('results', [])
+        res = requests.get(url, headers=headers, params=params, timeout=10)
+        res.raise_for_status()
+        data = res.json().get('results', [])
+
         out = []
-        for p in pts:
-            name = p.get('person',{}).get('display') or p.get('display','')
-            ids  = p.get('identifiers',[])
-            num  = ids[0]['identifier'] if ids else None
-            out.append({'uuid':p['uuid'], 'id':num, 'name':name})
-        return Response({'results': out}, status=status.HTTP_200_OK)
-    except Exception:
-        return Response({'results': []}, status=status.HTTP_200_OK)
-    
-    
+        for p in data:
+            display = p.get('display', '')
+            parts = display.split(' - ', 1)
+            patient_id = parts[0] if len(parts) > 1 else ''
+            name = parts[1] if len(parts) > 1 else display
+
+            out.append({
+                'uuid': p.get('uuid', ''),
+                'id': patient_id,
+                'name': name
+            })
+
+        return Response({'results': out}, status=200)
+
+    except Exception as e:
+        print(f"❌ OpenMRS 환자 조회 실패: {e}")
+        return Response({'results': []}, status=200)
+
+
+
 
 
 @api_view(['GET'])
@@ -1619,3 +1670,39 @@ def waiting_board_view(request):
         "assigned_recent": assigned_recent
     })
     
+@api_view(['POST'])
+def update_patient_status(request):
+    mapping_id = request.data.get('mapping_id')
+    new_status = request.data.get('status')
+
+    if not mapping_id or not new_status:
+        return Response({'error': 'mapping_id와 status는 필수입니다.'}, status=http_status.HTTP_400_BAD_REQUEST)
+
+    try:
+        patient = PatientMapping.objects.get(mapping_id=mapping_id)
+        patient.status = new_status
+        patient.save()
+        return Response({'message': f'상태가 {new_status}로 변경되었습니다.'})
+    except PatientMapping.DoesNotExist:
+        return Response({'error': '해당 환자를 찾을 수 없습니다.'}, status=http_status.HTTP_404_NOT_FOUND)
+    
+    
+
+@api_view(['GET'])
+def completed_patients_list(request):
+    completed_patients = PatientMapping.objects.filter(status='COMPLETE').order_by('-last_sync')
+    
+    data = []
+    for p in completed_patients:
+        data.append({
+            "mapping_id": p.mapping_id,
+            "name": p.display,
+            "patient_identifier": p.patient_identifier,
+            "gender": p.gender,
+            "birthdate": p.birthdate,
+            "last_sync": p.last_sync,
+            "assigned_room": p.assigned_room,
+            "status": p.status,
+        })
+
+    return Response(data)

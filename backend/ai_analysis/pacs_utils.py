@@ -17,14 +17,14 @@ def get_patient_info_from_pacs(study_uid):
     
     try:
         # 1. 모든 스터디 목록 가져오기
-        studies_response = requests.get(f"{pacs_url}/studies", timeout=10)
+        studies_response = requests.get(f"{pacs_url}/studies", timeout=70)
         studies_response.raise_for_status()
         studies = studies_response.json()
         
         # 2. 각 스터디를 확인해서 해당 Study UID 찾기
         for study_id in studies:
             try:
-                study_response = requests.get(f"{pacs_url}/studies/{study_id}", timeout=10)
+                study_response = requests.get(f"{pacs_url}/studies/{study_id}", timeout=70)
                 study_response.raise_for_status()
                 study_data = study_response.json()
                 
@@ -87,7 +87,7 @@ def get_series_info_from_pacs(study_uid):
         pacs_study_id = patient_info['pacs_study_id']
         
         # 스터디 상세 정보에서 시리즈 목록 가져오기
-        study_response = requests.get(f"{pacs_url}/studies/{pacs_study_id}", timeout=10)
+        study_response = requests.get(f"{pacs_url}/studies/{pacs_study_id}", timeout=70)
         study_response.raise_for_status()
         study_data = study_response.json()
         
@@ -96,7 +96,7 @@ def get_series_info_from_pacs(study_uid):
         
         for series_id in series_list:
             try:
-                series_response = requests.get(f"{pacs_url}/series/{series_id}", timeout=10)
+                series_response = requests.get(f"{pacs_url}/series/{series_id}", timeout=80)
                 series_response.raise_for_status()
                 series_data = series_response.json()
                 
@@ -125,7 +125,7 @@ def get_series_info_from_pacs(study_uid):
 def test_pacs_connection():
     """PACS 연결 테스트"""
     try:
-        response = requests.get("http://localhost:8042/studies", timeout=5)
+        response = requests.get("http://localhost:8042/studies", timeout=70)
         response.raise_for_status()
         studies = response.json()
         print(f"✅ PACS 연결 성공! 스터디 수: {len(studies)}")

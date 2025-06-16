@@ -1,3 +1,5 @@
+
+
 function OnStoredInstance(instanceId, tags, metadata, origin)
     -- 새로운 DICOM 인스턴스가 저장될 때마다 자동 실행
     print("=== 새 DICOM 인스턴스 저장됨 ===")
