@@ -82,7 +82,7 @@ const OHIFViewer = ({
     loadSavedResults,
     clearResults,
     checkAIModelStatus,
-    toggleOverlays,
+    toggleOverlayMode,
     recalculateOverlays,
     setAnalysisStatus
   } = aiHook;
@@ -155,6 +155,10 @@ const OHIFViewer = ({
       if (aiHook.showSSDOverlays) {
         console.log('🤖 SSD 오버레이 숨김');
         aiHook.toggleSSDOverlays();
+      }
+      if (aiHook.showbothOverlays) {
+        console.log('🤖 모든 오버레이 숨김');
+        aiHook.togglebothOverlays();
       }
       
       console.log('📂 PACS 상태 동기화 중...');
@@ -254,10 +258,10 @@ const OHIFViewer = ({
     return await analyzeSSD(...args);
   };
 
-  const handleToggleOverlays = () => {
+  const handleToggleOverlaysMode = () => {
     setActiveLayer('ai');
     console.log('👁️ AI 오버레이 토글 - AI 레이어 활성화');
-    toggleOverlays();
+    toggleOverlayMode();
   };
 
   const handleOpenReportModal = (...args) => {
@@ -303,8 +307,10 @@ const OHIFViewer = ({
     showYOLOOverlays: aiHook.showYOLOOverlays,
     showSSDOverlays: aiHook.showSSDOverlays,
     showDeleteModal: aiHook.showDeleteModal,
+    showbothOverlays: aiHook.showbothOverlays,
     onToggleYOLOOverlays: aiHook.toggleYOLOOverlays,
     onToggleSSDOverlays: aiHook.toggleSSDOverlays,
+    onTogglebothOverlays: aiHook.togglebothOverlays,
     onRequestDeleteResult: aiHook.requestDeleteResult,
     onHandleDeleteConfirm: aiHook.handleDeleteConfirm,
     onHandleDeleteCancel: aiHook.handleDeleteCancel,
@@ -314,7 +320,7 @@ const OHIFViewer = ({
     onLoadSavedResults: loadSavedResults,
     onClearResults: clearResults,
     onCheckModelStatus: checkAIModelStatus,
-    onToggleOverlays: handleToggleOverlays,
+    onToggleOverlayMode: toggleOverlayMode,  
     onRecalculateOverlays: recalculateOverlays,
     currentStudyUID,
     availableStudies,

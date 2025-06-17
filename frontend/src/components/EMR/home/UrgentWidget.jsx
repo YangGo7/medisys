@@ -1,12 +1,13 @@
 // src/components/EMR/home/UrgentWidget.jsx
+
 import React, { useState } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 const UrgentWidget = ({
   urgentEvents = [
-    // 기본 예시 데이터
+    // 여전히 예시 데이터는 남겨두되, 컬러는 모두 오렌지로 통일됩니다.
     { id: 1, type: 'SPO2', patient: '김철수', patient_id: '1234', value: 82, unit: '%', at: '09:12', severity: 'high', recommended: '산소 투여' },
-    { id: 2, type: 'BP', patient: '박영희', patient_id: '5678', value: '180/110', unit: '', at: '09:18', severity: 'medium', recommended: '혈압약 투여' },
+    { id: 2, type: 'BP',   patient: '박영희', patient_id: '5678', value: '180/110', unit: '', at: '09:18', severity: 'medium', recommended: '혈압약 투여' },
     { id: 3, type: 'AI_ERROR', patient: '이영희', patient_id: '9012', value: null, unit: '', at: '09:21', severity: 'low', recommended: '재시도' },
   ],
   showActionButtons = true,
@@ -14,10 +15,11 @@ const UrgentWidget = ({
 }) => {
   const [loadingId, setLoadingId] = useState(null);
 
-  const severityBadge = {
-    high:   { label: '🔴', color: '#ffebee', border: '#e57373' },
-    medium: { label: '🟠', color: '#fff3e0', border: '#ffb74d' },
-    low:    { label: '🟡', color: '#fffde7', border: '#fff176' },
+  // 모두 같은 오렌지 배지로 통일
+  const orangeBadge = {
+    label: '🟠',
+    color: '#fff3e0',
+    border: '#ffb74d'
   };
 
   const handleDetailClick = async (event) => {
@@ -33,7 +35,7 @@ const UrgentWidget = ({
     <div
       className="urgent-widget"
       style={{
-        background: '#ffebee',
+        background: orangeBadge.color,
         borderRadius: 8,
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         padding: 12,
@@ -47,7 +49,7 @@ const UrgentWidget = ({
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          color: '#c62828',
+          color: '#e65100',
           margin: 0,
           marginBottom: 12,
         }}
@@ -68,7 +70,7 @@ const UrgentWidget = ({
         }}
       >
         {urgentEvents.map(ev => {
-          const { label, color, border } = severityBadge[ev.severity] || severityBadge.low;
+          const { label, color, border } = orangeBadge;
           return (
             <li
               key={ev.id}
@@ -110,7 +112,7 @@ const UrgentWidget = ({
                     fontSize: '0.85rem',
                     borderRadius: 4,
                     border: 'none',
-                    background: '#ffcdd2',
+                    background: '#ffe0b2',
                     cursor: loadingId === ev.id ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',

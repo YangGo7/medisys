@@ -24,6 +24,50 @@ from django.utils import timezone
 from datetime import timedelta
 
 logger = logging.getLogger('medical_integration')
+@api_view(['GET'])
+def reception_list_view(request):
+    """
+    오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
+    mapping_id, patient_identifier, display, status, created_at,
+    gender, birthdate 필드와 함께 반환
+    """
+    from django.utils import timezone
+
+    today = timezone.now().date()
+    mappings = PatientMapping.objects.filter(
+        created_date__date=today,
+        mapping_type='IDENTIFIER_BASED',
+        is_active=True
+    ).order_by('-created_date')
+
+    api = OpenMRSAPI()
+    data = []
+    for m in mappings:
+        # OpenMRS에서 환자 상세 정보 가져오기
+        try:
+            patient   = api.get_patient(m.openmrs_patient_uuid)
+            gender_raw    = patient.get('person', {}).get('gender', '-')
+            bd_raw        = patient.get('person', {}).get('birthdate', '')
+            # "YYYY-MM-DDT..." → "YYYY-MM-DD"
+            birthdate     = bd_raw.split('T')[0] if bd_raw else '-'
+            gender        = gender_raw or '-'
+        except Exception:
+            gender, birthdate = '-', '-'
+
+        data.append({
+            'mapping_id':         m.mapping_id,
+            'patient_identifier': m.patient_identifier,
+            'display':            m.display or m.patient_identifier,
+            'status':             m.status,
+            'created_at':         m.created_date.isoformat(),
+            'gender':             gender,
+            'birthdate':          birthdate,
+        })
+
+    return Response(data)
+
+
+
 
 @api_view(['GET'])
 def health_check(request):
@@ -1293,10 +1337,6 @@ def create_test_mapping(request):
 # from openmrs_models.models import Patient, Person # PatientIdentifier, PersonName, 등 필요에 따라 추가
 from openmrs_models.models import Patient, Person, PatientIdentifier # 변경: PatientIdentifier 임포트 추가 
 
-from base64 import b64encode
-
-
-
 
 @api_view(['GET'])
 def get_all_openmrs_patients(request):
@@ -1334,29 +1374,6 @@ def get_all_openmrs_patients(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# OCS [20250611]
-# @api_view(['GET'])
-# def list_openmrs_patients_map(request):
-#     """
-#     GET /api/integration/openmrs/patients/map/
-#     → { results: [{ uuid, id, name }, …] }
-#     오류나 매핑 없으면 빈 results:[] 로 200 OK
-#     """
-#     api_url = settings.OPENMRS_URL.rstrip('/') + '/patient'
-#     try:
-#         r = requests.get(api_url, auth=(settings.OPENMRS_USER, settings.OPENMRS_PASS), timeout=10)
-#         r.raise_for_status()
-#         pts = r.json().get('results', [])
-#         out = []
-#         for p in pts:
-#             name = p.get('person',{}).get('display') or p.get('display','')
-#             ids  = p.get('identifiers',[])
-#             num  = ids[0]['identifier'] if ids else None
-#             out.append({'uuid':p['uuid'], 'id':num, 'name':name})
-#         return Response({'results': out}, status=status.HTTP_200_OK)
-#     except Exception:
-#         return Response({'results': []}, status=status.HTTP_200_OK)
 
 # OCS [20250616]
 @api_view(['GET'])
@@ -1690,7 +1707,7 @@ def update_patient_status(request):
 
 @api_view(['GET'])
 def completed_patients_list(request):
-    completed_patients = PatientMapping.objects.filter(status='COMPLETE').order_by('-last_sync')
+    completed_patients = PatientMapping.objects.filter(status='COMPLETED').order_by('-last_sync')
     
     data = []
     for p in completed_patients:
@@ -1699,7 +1716,7 @@ def completed_patients_list(request):
             "name": p.display,
             "patient_identifier": p.patient_identifier,
             "gender": p.gender,
-            "birthdate": p.birthdate,
+            "birthdate": p.birthdate.isoformat() if p.birthdate else None,
             "last_sync": p.last_sync,
             "assigned_room": p.assigned_room,
             "status": p.status,

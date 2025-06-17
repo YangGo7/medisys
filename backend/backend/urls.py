@@ -28,6 +28,8 @@ urlpatterns = [
     # 각 앱별 prefix로 충돌 방지
     path('api/integration/', include('medical_integration.urls')),
     path('api/orders/',      include('orders_emr.urls')),
+    # path('api/orders/',     include('orders.urls')),
+    path('api/orders_emr/', include('orders_emr.urls')),
     path('api/worklist/', include('worklist.urls')),
     path('api/samples/', include('samples.urls')),
     path('api/tests/', include('tests.urls')),
@@ -38,12 +40,13 @@ urlpatterns = [
     # OpenMRS 직접 연결 (호환성 유지)
     path('api/openmrs-vitals/', openmrs_vitals, name='openmrs_vitals'),
     path('api/openmrs-encounters/', openmrs_encounters, name='openmrs_encounters'),
-    # path('api/openmrs-patients/', views.get_all_openmrs_patients),
     # RIS 기능
     path('webhook/', include('webhook_handler.urls')),
     path('api/ai/', include('ai_analysis.urls')),
     path('api/annotations/', include('dr_annotations.urls')),
     path('api/reports/', include('dr_reports.urls')),
+    # stt
+    path('api/stt/', include('stt_service.urls')),
     
 
 ]

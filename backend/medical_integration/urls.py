@@ -1,4 +1,4 @@
-# backend/medical_integration/urls.py (최종 업데이트)
+# backend/medical_integration/urls.py
 
 from django.urls import path
 from . import views
@@ -7,13 +7,14 @@ from .views import (
     proxy_openmrs_providers,
     identifier_based_waiting_list,
     create_identifier_based_mapping,
+    reception_list_view,            # ✅ 추가
     UrgentAlertList,
     UrgentAlertCount,
     AlertMarkRead,
     unassign_room,
     get_patient_mapping,
     assign_room,
-    completed_patients_list  # ✅ 완료 환자 리스트 view 추가
+    completed_patients_list         # ✅ 완료 환자 리스트 view
 )
 from .views import update_patient_status  # ✅ 진료 상태 업데이트 API
 
@@ -66,6 +67,7 @@ urlpatterns = [
     path('openmrs/providers/', proxy_openmrs_providers, name='openmrs_providers'),
     path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
     path('identifier-waiting/', identifier_based_waiting_list, name='identifier_based_waiting'),
+    path('reception-list/', reception_list_view, name='reception_list'),             # ✅ 오늘 접수 리스트
     path('identifier-based/', create_identifier_based_mapping, name='create_identifier_based_mapping'),
 
     # 알림 API
@@ -73,7 +75,7 @@ urlpatterns = [
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
     path('alerts/<int:pk>/mark-read/', AlertMarkRead.as_view(), name='alert_mark_read'),
 
-    # 환자 목록 
+    # 환자 배정
     path('assign-room/', assign_room, name='assign_room'),
     path('unassign-room/', unassign_room, name='unassign-room'),
     path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),

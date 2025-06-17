@@ -398,9 +398,6 @@ const useAIAnalysis = (currentStudyUID) => {
     /**
      * 오버레이 표시를 토글하는 함수
      */
-    const toggleOverlays = useCallback(() => {
-        setShowOverlays(prev => !prev);
-    }, []);
     
     /**
      * 오버레이를 수동으로 재계산하는 함수 (디버깅용)
@@ -499,22 +496,28 @@ const useAIAnalysis = (currentStudyUID) => {
 
     // 모델별 오버레이 표시 상태
     const [showYOLOOverlays, setShowYOLOOverlays] = useState(true);
-    const [showSSDOverlays, setShowSSDOverlays] = useState(true);
-    
-    // 삭제 확인 모달 상태
-    // const [showDeleteModal, setShowDeleteModal] = useState(false);
-    // const [deleteTargetId, setDeleteTargetId] = useState(null);
+    const [showSSDOverlays, setShowSSDOverlays] = useState(false);
 
-    // 🔥 새로운 함수들 추가
-    const toggleYOLOOverlays = useCallback(() => {
-        console.log('👉 YOLO 오버레이 토글됨');
-        setShowYOLOOverlays(prev => !prev);
-    }, []);
+    const toggleOverlayMode = () => {
+    if (showYOLOOverlays && !showSSDOverlays) {
+        // 현재: YOLO만 → 다음: SSD만
+        setShowYOLOOverlays(false);
+        setShowSSDOverlays(true);
+    } else if (!showYOLOOverlays && showSSDOverlays) {
+        // 현재: SSD만 → 다음: 둘 다
+        setShowYOLOOverlays(true);
+        setShowSSDOverlays(true);
+    } else if (showYOLOOverlays && showSSDOverlays) {
+        // 현재: 둘 다 → 다음: 모두 끄기
+        setShowYOLOOverlays(false);
+        setShowSSDOverlays(false);
+    } else {
+        // 현재: 모두 꺼짐 → 다음: YOLO만
+        setShowYOLOOverlays(true);
+        setShowSSDOverlays(false);
+    }
+    };
 
-    const toggleSSDOverlays = useCallback(() => {
-        console.log('👉 SSD 오버레이 토글됨');
-        setShowSSDOverlays(prev => !prev);
-    }, []);
 
     const deleteIndividualResult = useCallback(async (resultId) => {
         try {
@@ -588,41 +591,36 @@ const useAIAnalysis = (currentStudyUID) => {
     //     setShowDeleteModal(false);
     //     setDeleteTargetId(null);
     // }, []);
+    const toggleYOLOOverlays = useCallback(() => {
+        setShowYOLOOverlays(prev => !prev);
+        }, []);
+
+    const toggleSSDOverlays = useCallback(() => {
+        setShowSSDOverlays(prev => !prev);
+        }, []);
 
     const getVisibleOverlays = useCallback(() => {
         if (!overlays || overlays.length === 0) return [];
 
+        const showbothOverlays = showYOLOOverlays && showSSDOverlays;
+
         console.log('🧪 필터링 전 전체 오버레이:', overlays.length, '개');
         console.log('🎛️ YOLO 표시 상태:', showYOLOOverlays);
         console.log('🎛️ SSD 표시 상태:', showSSDOverlays);
+        console.log('🎛️ 모두 표시 상태:', showbothOverlays);
 
         const filteredOverlays = overlays.filter((overlay, idx) => {
             const model = overlay.model || '';
-            
-            console.log(`🔍 [${idx}] ID: ${overlay.id}, 모델: "${model}"`);
-            
-            // 🔥 부분 문자열 매칭으로 변경
-            if (model.includes('YOLO')) {  // ✅ "YOLOv8"도 매칭됨
-                const shouldShow = showYOLOOverlays;
-                console.log(`🎯 [${idx}] YOLO 계열 모델 - showYOLOOverlays: ${showYOLOOverlays} → ${shouldShow ? '표시' : '숨김'}`);
-                return shouldShow;
-            }
-            
-            if (model.includes('SSD')) {   // ✅ "SSD"와 모든 SSD 변형 매칭
-                const shouldShow = showSSDOverlays;
-                console.log(`🎯 [${idx}] SSD 계열 모델 - showSSDOverlays: ${showSSDOverlays} → ${shouldShow ? '표시' : '숨김'}`);
-                return shouldShow;
-            }
-            
-            console.log(`❌ [${idx}] 알 수 없는 모델: "${model}" → 숨김`);
+            if (model.includes('YOLO')) return showYOLOOverlays;
+            if (model.includes('SSD')) return showSSDOverlays;
             return false;
         });
-        
+
         console.log(`🎯 최종 결과: ${filteredOverlays.length}/${overlays.length} 표시됨`);
-        console.log('🎯 필터링된 오버레이 ID들:', filteredOverlays.map(o => o.id));
-        
         return filteredOverlays;
     }, [overlays, showYOLOOverlays, showSSDOverlays]);
+    
+    
     
     // =============================================================================
     // 반환값
@@ -638,6 +636,7 @@ const useAIAnalysis = (currentStudyUID) => {
         modelStatus,
         showYOLOOverlays,
         showSSDOverlays,
+        toggleOverlayMode,
         // showDeleteModal,
         // deleteTargetId,
         
@@ -662,7 +661,7 @@ const useAIAnalysis = (currentStudyUID) => {
         isModelAvailable,
         
         // 오버레이 관리
-        toggleOverlays,
+        toggleOverlayMode,
         recalculateOverlays,
         getFilteredOverlays,
         getOverlaysByConfidence,

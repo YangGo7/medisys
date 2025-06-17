@@ -12,6 +12,7 @@ from rest_framework import status
 from datetime import datetime, timedelta
 import json
 import logging
+from datetime import datetime
 from .models import Order
 from .serializers import OrderSerializer
 
@@ -113,6 +114,7 @@ def order_list_create(request):
             serializer = OrderSerializer(data=order_data)
             if serializer.is_valid():
                 saved_order = serializer.save()
+                now = datetime.now()
                 
                 # 응답 데이터 구성 (기존 형식 유지)
                 response_data = {
@@ -124,7 +126,7 @@ def order_list_create(request):
                     'doctor_id': saved_order.doctor_id,
                     'doctor_name': data.get('doctor_name', 'System User'),
                     'order_date': saved_order.order_date.strftime('%Y-%m-%d'),
-                    'order_time': saved_order.order_date.strftime('%H:%M:%S'),
+                    'order_time': now.strftime('%H:%M:%S'),
                     'status': 'pending',
                     'notes': data.get('notes', ''),
                     'requesting_system': data.get('requesting_system', 'CDSS-EMR'),
@@ -556,3 +558,50 @@ def create_integration_log(request):
             'status': 'error',
             'message': f'로그 생성 실패: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#### 20250616 ocs 로그 저장 관련 코드 ####
+from django.db.models import Q
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Order
+from .serializers import OrderSerializer
+
+@api_view(['GET'])
+def orders_log_view(request):
+    qs = Order.objects.all()
+
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    patient_id = request.GET.get('patient_id')
+    doctor_id = request.GET.get('doctor_id')
+    
+    if start_date:
+        qs = qs.filter(created_at__date__gte=start_date)
+    if end_date:
+        qs = qs.filter(created_at__date__lte=end_date)
+    if patient_id:
+        qs = qs.filter(patient_id=patient_id)
+    if doctor_id:
+        qs = qs.filter(doctor_id=doctor_id)
+    
+    try:
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 20))
+    except (ValueError, TypeError):
+        page = 1
+        page_size = 20
+        
+    total = qs.count()
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+
+    subset = qs.order_by('-created_at')[start_idx:end_idx]
+    serializer = OrderSerializer(subset, many=True)
+
+    return Response({
+        'status': 'success',
+        'data': serializer.data,
+        'total': total,
+        'page': page,
+        'page_size': page_size,
+    })

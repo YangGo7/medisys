@@ -60,7 +60,7 @@ function App() {
               <Route path="result-list" element={<ResultCdss />} />
             </Route>
             <Route path="/tests" element={<OpenMRSPatientList />} />
-            <Route path="/ocs/log" element={<OCSLogPage />} />
+            <Route path="/logs" element={<OCSLogPage />} />
             <Route path="/RISPage" element={<RISPage />} />
 
             {/* 기존 환자 목록 페이지 */}

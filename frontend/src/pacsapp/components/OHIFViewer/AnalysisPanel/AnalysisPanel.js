@@ -20,7 +20,7 @@ const AnalysisPanel = ({
   showYOLOOverlays,
   onToggleSSDOverlays,
   showSSDOverlays,
-  
+  onToggleOverlayMode,
   // PACS 관련
   currentStudyUID,
   availableStudies,
@@ -240,28 +240,18 @@ const AnalysisPanel = ({
             
             {/* 모델별 오버레이 토글 */}
             <div className={styles.overlayControls}>
-              <button 
-                onClick={() => {
-                  console.log('👆 YOLO 토글 클릭됨');
-                  onToggleYOLOOverlays();
-                }}
-                className={`${styles.overlayToggleBtn} ${showYOLOOverlays ? styles.active : ''}`}
+              <button
+                onClick={onToggleOverlayMode}
+                className={`${styles.overlayToggleBtn} ${(showYOLOOverlays || showSSDOverlays) ? styles.active : ''}`}
                 disabled={isStudyTransitioning}
               >
-                {showYOLOOverlays ? '👁️' : '🙈'} YOLO 표시
-              </button>
-
-              <button 
-                onClick={() => {
-                  console.log('👆 SSD 토글 클릭됨');
-                  onToggleSSDOverlays();
-                }}
-                className={`${styles.overlayToggleBtn} ${showSSDOverlays ? styles.active : ''}`}
-                disabled={isStudyTransitioning}
-              >
-                {showSSDOverlays ? '👁️' : '🙈'} SSD 표시
+                {showYOLOOverlays && showSSDOverlays && '👁️ YOLO + SSD 표시'}
+                {!showYOLOOverlays && showSSDOverlays && '👁️ SSD만 표시'}
+                {showYOLOOverlays && !showSSDOverlays && '👁️ YOLO만 표시'}
+                {!showYOLOOverlays && !showSSDOverlays && '🙈 모두 숨김'}
               </button>
             </div>
+
             
             {/* 기존 개요 정보 */}
             {analysisResults.detections !== undefined && (

@@ -13,7 +13,7 @@ const AnnotationOverlay = ({
   // 🔥 모델별 표시 여부 prop 추가 (useAIAnalysis에서 전달 받아야 함)
   showYOLOOverlays, // YOLO 박스 표시 여부
   showSSDOverlays,  // SSD 박스 표시 여부
-
+  showbothOverlays, // 모든 박스 표시여부 
   overlayRef,
   
   // 마우스 이벤트 핸들러
@@ -71,8 +71,8 @@ const AnnotationOverlay = ({
     const confidence = box.confidence_score || box.confidence || 0; // 백엔드에서 'confidence_score' 또는 'confidence'로 옴
     
     // AI 박스는 신뢰도 0.01 이상일 때만 표시 (너무 낮은 값은 제외)
-    const minDisplayConfidence = 0.01; 
-
+    const minDisplayConfidence = 0.3; 
+     
     if (modelName.includes('YOLO')) {
         // YOLO 계열 모델이고, YOLO 표시 토글이 켜져 있으면 표시
         return showYOLOOverlays && (confidence >= minDisplayConfidence);
