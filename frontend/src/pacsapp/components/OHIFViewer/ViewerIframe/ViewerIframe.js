@@ -561,13 +561,13 @@ const ViewerIframe = ({
   showDebugInfo = false,
   isLoading = false,
   error = null
-}) => {
-  console.log('📺 ViewerIframe 렌더링:', {
-    overlays: overlays?.length || 0,
-    showOverlays,
-    currentStudyUID,
-    ohifUrl
-  });
+}) => { // ViewerIframe 랜더링 로그 
+  // console.log('📺 ViewerIframe 렌더링:', {
+  //   overlays: overlays?.length || 0,
+  //   showOverlays,
+  //   currentStudyUID,
+  //   ohifUrl
+  // });
 
   const iframeRef = useRef(null);
   const [resizeTimer, setResizeTimer] = useState(null);
@@ -688,13 +688,13 @@ const ViewerIframe = ({
   };
 
   // 오버레이 강제 표시 함수
-  const forceShowOverlays = () => {
-    console.log('🔥 오버레이 강제 표시');
-    setIsWindowFocused(true);
-    if (onRecalculateOverlays) {
-      onRecalculateOverlays();
-    }
-  };
+  // const forceShowOverlays = () => {
+  //   console.log('🔥 오버레이 강제 표시');
+  //   setIsWindowFocused(true);
+  //   if (onRecalculateOverlays) {
+  //     onRecalculateOverlays();
+  //   }
+  // };
 
   return (
     <div
@@ -741,13 +741,13 @@ const ViewerIframe = ({
       />
 
       {/* 🔥 AI 오버레이 - 강제 표시 모드 */}
-      {console.log('🔥 오버레이 렌더링 체크:', {
+      {/* {console.log('🔥 오버레이 렌더링 체크:', {
         showOverlays,
         overlaysLength: overlays?.length || 0,
         isWindowFocused,
         overlaysData: overlays
       })}
-      
+       */}
       {/* 🚨 임시: showOverlays 조건 무시하고 강제 표시 */}
       {overlays && overlays.length > 0 && (
         <div
@@ -830,7 +830,7 @@ const ViewerIframe = ({
       )}
 
       {/* 디버그 정보 및 오버레이 강제 표시 버튼 */}
-      {showDebugInfo && (
+      {/* {showDebugInfo && (
         <div className={styles.debugInfo}>
           <div><strong>🐛 디버그 정보</strong></div>
           <div><strong>📂 현재 스터디:</strong> {currentStudyUID || 'none'}</div>
@@ -853,7 +853,7 @@ const ViewerIframe = ({
             🔥 오버레이 강제 표시
           </button>
         </div>
-      )}
+      )} */}
 
       {/* 임시 오버레이 테스트 (개발용) */}
       {showDebugInfo && (

@@ -3,6 +3,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
+from .views import orders_log_view
 
 # DRF Router 설정
 router = DefaultRouter()
@@ -31,6 +32,6 @@ urlpatterns = [
     path('bulk-update/', views.bulk_update_status, name='bulk_update_status'),  # POST: 대량 상태 업데이트
     
     # 통합 로그
-    path('logs/', views.integration_logs, name='integration_logs'),  # GET: 통합 로그 조회
+    path('logs/', orders_log_view, name='integration_logs'),  # GET: 통합 로그 조회
     path('logs/create/', views.create_integration_log, name='create_integration_log'),  # POST: 로그 생성
 ]

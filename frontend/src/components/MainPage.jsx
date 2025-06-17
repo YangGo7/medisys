@@ -49,7 +49,7 @@ export default function MainPage() {
           <button onClick={() => setCurrentTab('sample')}>🧪 검체</button>
           <button onClick={() => setCurrentTab('dicom')}>🖼️ DICOM</button>
           {/* LIS 이동 버튼 */}
-          <Link to="/lis"><button>🏠 LIS</button></Link>
+          <Link to="/lis"><button>🏠 LIS 이동</button></Link>
           <button onClick={() => setCurrentTab('logs')}>📄 로그</button>
           <button onClick={() => setCurrentTab('logins')}>🔐 로그인</button>
           <button onClick={() => setCurrentTab('patientsList')}>🧑‍🤝‍🧑 환자 목록</button>

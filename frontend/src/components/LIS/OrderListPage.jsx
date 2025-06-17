@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './OrderListPage.css'; 
 
 const OrderListPage = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [samples, setSamples] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [showDebug, setShowDebug] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
     ).toISOString().split('T')[0]);
@@ -72,109 +74,101 @@ const OrderListPage = () => {
 
   const displayedOrders = orders.filter(order => order.order_id.toString().includes(searchKeyword));
 
-  return (
-    <div className="relative p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">🗂 오더 목록</h2>
-        {/* 🔥 ADD: 새로고침 버튼 */}
-        <button 
-          onClick={handleRefresh}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          🔄 새로고침
-        </button>
+return (
+    <div className="order-page-container">
+      <div className="order-header">
+        <h2>🗂 오더 목록</h2>
+        <button onClick={handleRefresh}>🔄 새로고침</button>
       </div>
 
-      <div className="absolute top-5 right-5">
-        <label className="mr-2">날짜 선택:</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="border rounded px-2 py-1"
-        />
+      <div className="order-controls">
+        <label>
+          날짜 선택:
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </label>
+        <label>
+          🔍 Order ID 검색:
+          <input
+            type="text"
+            placeholder="오더 ID 입력"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+          />
+        </label>
       </div>
 
-      <div className="mb-4">
-        <label className="mr-2 font-semibold">🔍 Order ID 검색:</label>
-        <input
-          type="text"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          placeholder="오더 ID 입력"
-          className="border px-2 py-1 rounded"
-        />
+      <div className="debug-toggle">
+        <span onClick={() => setShowDebug(!showDebug)} className="debug-icon">
+          <span style={{ fontSize: '18px', marginRight: '6px' }}>ℹ️</span>
+          디버그 정보 {showDebug ? '숨기기' : '보기'}
+        </span>
       </div>
 
-      {/* 🔥 ADD: 디버그 정보 표시 */}
-      <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
-        <strong>🔧 디버그 정보:</strong><br/>
-        API URL: {process.env.REACT_APP_API_BASE_URL}orders/<br/>
-        선택된 날짜: {selectedDate}<br/>
-        전체 주문 수: {orders.length}<br/>
-        표시된 주문 수: {displayedOrders.length}
-      </div>
+      {showDebug && (
+        <div className="order-debug">
+          <div>API URL: {process.env.REACT_APP_API_BASE_URL}orders/</div>
+          <div>선택된 날짜: {selectedDate}</div>
+          <div>전체 주문 수: {orders.length}</div>
+          <div>표시된 주문 수: {displayedOrders.length}</div>
+        </div>
+      )}
 
-      <div className="overflow-x-auto overflow-y-auto h-[400px]">
-        <table className="table-fixed w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
+      <div className="order-table-wrapper">
+        <table className="order-table">
+          <thead>
             <tr>
-              <th className="border px-4 py-2">오더 ID</th>
-              <th className="border px-4 py-2">환자 ID</th>
-              <th className="border px-4 py-2">의사 ID</th>
-              <th className="border px-4 py-2">검사 타입</th>
-              <th className="border px-4 py-2">오더 날짜</th>
-              <th className="border px-4 py-2">상태</th>
-              <th className="border px-4 py-2">샘플 등록</th>
+              <th>오더 ID</th>
+              <th>환자 ID</th>
+              <th>의사 ID</th>
+              <th>검사 타입</th>
+              <th>오더 날짜</th>
+              <th>상태</th>
+              <th>샘플 등록</th>
             </tr>
           </thead>
           <tbody>
-            {displayedOrders.map(order => {
-                const hasSample = samples.some(sample => Number(sample.order) === Number(order.order_id));
-                console.log(`🧪 오더 ${order.order_id}: 샘플 존재 여부 →`, hasSample);
-                return (
-              <tr key={order.order_id} className="text-center">
-                <td className="border px-4 py-2">{order.order_id}</td>
-                <td className="border px-4 py-2">{order.patient_id}</td>
-                <td className="border px-4 py-2">{order.doctor_id}</td>
-                <td className="border px-4 py-2">{order.panel}</td>
-                <td className="border px-4 py-2">{order.order_date?.slice(0, 10)}</td>
-                <td className="border px-4 py-2">
-                 <span 
-                  style={{
-                    backgroundColor: hasSample ? '#cce5ff' : '#e2e3e5',
-                    color: hasSample ? '#004085' : '#383d41',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem',
-                  }}
-                 >
-                  {hasSample ? '샘플 등록됨' : '샘플 미등록'}
-                  </span>
-                </td>
-                <td className="border px-4 py-2">
-                  <button
+            {displayedOrders.map((order) => {
+              const hasSample = samples.some(
+                (sample) => Number(sample.order) === Number(order.order_id)
+              );
+              return (
+                <tr key={order.order_id}>
+                  <td>{order.order_id}</td>
+                  <td>{order.patient_id}</td>
+                  <td>{order.doctor_id}</td>
+                  <td>{order.panel}</td>
+                  <td>{order.order_date?.slice(0, 10)}</td>
+                  <td>
+                    <span className={hasSample ? "status-chip registered" : "status-chip pending"}>
+                      {hasSample ? '샘플 등록됨' : '샘플 미등록'}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      className="sample-button"
                       onClick={() => navigate(`/lis/sample/new/${order.order_id}`)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
-                      샘플 등록
+                      ➕ 샘플 등록
                     </button>
                   </td>
                 </tr>
-                );
-              })}
-              {displayedOrders.length === 0 && (
-                <tr>
-                  <td colSpan="7" className="text-gray-500 py-4 text-center">
-                    표시할 오더가 없습니다. (전체: {orders.length}개)
-                  </td>
-                </tr>
-              )}
+              );
+            })}
+            {displayedOrders.length === 0 && (
+              <tr>
+                <td colSpan="7" className="no-orders">표시할 오더가 없습니다.</td>
+              </tr>
+            )}
           </tbody>
         </table>
-       </div>
+      </div>
     </div>
   );
 };
+
 
 export default OrderListPage;

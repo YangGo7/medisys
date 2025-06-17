@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { saveLog } from '../utils/saveLog';
+import './ResultInputForm.css';
 
 const panelComponents = {
   CBC: ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets'],
@@ -147,13 +148,58 @@ const ResultInputForm = () => {
     }
   };
 
+//   return (
+//     <div className="p-4">
+//       <h2 className="text-xl font-bold mb-2">결과 입력</h2>
+//       <select
+//         value={sampleId}
+//         onChange={(e) => setSampleId(e.target.value)}
+//         className="mb-4 border px-2 py-1 rounded w-60"
+//       >
+//         <option value="">샘플을 선택하세요</option>
+//         {sampleList.map((sample) => (
+//           <option key={sample.id} value={sample.id}>
+//             {`ID ${sample.id} - ${sample.test_type}`}
+//           </option>
+//         ))}
+//       </select>
+
+//       {selectedPanel && (
+//         <div>
+//           <h3 className="font-semibold mb-2">{selectedPanel} 항목 입력</h3>
+//           <div className="space-y-2">
+//             {panelComponents[selectedPanel].map((component) => (
+//               <div key={component} className="flex gap-2 items-center">
+//                 <label className="w-48">{component} ({componentUnits[component] || '-'})</label>
+//                 <input
+//                   type="text"
+//                   value={results[component] || ''}
+//                   onChange={(e) => handleChange(component, e.target.value)}
+//                   className="border px-2 py-1 rounded w-40"
+//                   placeholder="값 입력"
+//                   required 
+//                 />
+//               </div>
+//             ))}
+//             <button onClick={handleSubmit} className="mt-4 px-4 py-2 bg-green-500 text-white rounded">
+//               결과 등록
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-2">결과 입력</h2>
+    <div className="result-form-container">
+      <h2>🧪 결과 입력</h2>
+
+      <label className="sample-select-label">샘플 선택</label>
       <select
         value={sampleId}
         onChange={(e) => setSampleId(e.target.value)}
-        className="mb-4 border px-2 py-1 rounded w-60"
+        className="sample-select"
       >
         <option value="">샘플을 선택하세요</option>
         {sampleList.map((sample) => (
@@ -164,27 +210,25 @@ const ResultInputForm = () => {
       </select>
 
       {selectedPanel && (
-        <div>
-          <h3 className="font-semibold mb-2">{selectedPanel} 항목 입력</h3>
-          <div className="space-y-2">
-            {panelComponents[selectedPanel].map((component) => (
-              <div key={component} className="flex gap-2 items-center">
-                <label className="w-48">{component} ({componentUnits[component] || '-'})</label>
-                <input
-                  type="text"
-                  value={results[component] || ''}
-                  onChange={(e) => handleChange(component, e.target.value)}
-                  className="border px-2 py-1 rounded w-40"
-                  placeholder="값 입력"
-                  required 
-                />
-              </div>
-            ))}
-            <button onClick={handleSubmit} className="mt-4 px-4 py-2 bg-green-500 text-white rounded">
-              결과 등록
-            </button>
-          </div>
-        </div>
+        <>
+          <h3 className="panel-title">{selectedPanel} 항목 입력</h3>
+          {panelComponents[selectedPanel].map((component) => (
+            <div className="result-row" key={component}>
+              <label className="result-label">
+                {component} ({componentUnits[component] || '-'})
+              </label>
+              <input
+                type="text"
+                value={results[component] || ''}
+                onChange={(e) => handleChange(component, e.target.value)}
+                className="result-input"
+                placeholder="값 입력"
+                required
+              />
+            </div>
+          ))}
+          <button onClick={handleSubmit} className="submit-button">결과 등록</button>
+        </>
       )}
     </div>
   );

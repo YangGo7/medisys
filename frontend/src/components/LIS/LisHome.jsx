@@ -1,25 +1,36 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import LISSidebar from './LISSidebar';
 
 const LisHome = () => {
-  const navigate = useNavigate();
-
   return (
-    <div style={{ display: 'flex' }}>
-      <div style={{ width: '200px', padding: '1rem', borderRight: '1px solid #ccc' }}>
-        <h3>🧪 Lab Information System</h3>
-        <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-          <li><button onClick={() => navigate('/lis/order/new')}>📄 오더 생성하기</button></li>
-          <li><button onClick={() => navigate('/lis/orders')}>📋 오더 목록 확인</button></li>
-          <li><button onClick={() => navigate('/lis/sample/new')}>🧫 샘플 생성하기</button></li>
-          <li><button onClick={() => navigate('/lis/samples')}>📂 샘플 목록 확인</button></li>
-          <li><button onClick={() => navigate('/lis/result/new')}>🧾 결과 기록하기</button></li>
-          <li><button onClick={() => navigate('/lis/result-list')}>📑 결과 목록 확인</button></li>
-        </ul>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      {/* 상단 헤더 */}
+      <div
+        style={{
+          width: '100%',
+          padding: '1rem 2rem',
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #ddd',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontWeight: 'bold',
+          fontSize: '18px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        }}>
+         <span role="img" aria-label="flask" style={{ marginRight: '0.5rem' }}>
+            🧪 LIS 시스템
+         </span>
+        
       </div>
 
-      <div style={{ flex: 1, padding: '1rem' }}>
-        <Outlet /> {/* 이 영역이 페이지별로 바뀜 */}
+      {/* 콘텐츠 영역 */}
+      <div style={{ display: 'flex', flex: 1 }}>
+        <LISSidebar />
+        <div style={{ flex: 1, padding: '2rem' }}>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

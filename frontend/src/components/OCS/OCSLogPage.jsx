@@ -1,201 +1,209 @@
-// OCSLogPage.jsx 파일 (전체 코드)
+// src/components/OCS/OCSLogPage.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './OCSLogPage.css';
 
-const API_BASE_URL = process.env.REACT_APP_INTEGRATION_API?.replace(/\/$/, '');
+export default function OCSLogPage() {
+  const [logs, setLogs] = useState([]);
+  const [patientFilter, setPatientFilter] = useState('');
+  const [doctorFilter, setDoctorFilter] = useState('');
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return weekAgo.toISOString().slice(0, 10);
+  });
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-const OCSLogPage = () => {
-  const [logs] = useState([]);
-  const [filteredLogs, setFilteredLogs] = useState([]);
-  const [patientQuery, setPatientQuery] = useState('');
-  const [doctorQuery, setDoctorQuery] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [error] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [patientMappings, setPatientMappings] = useState({});
-  const [doctorMappings, setDoctorMappings] = useState({});
-  const logsPerPage = 10;
+  const API = process.env.REACT_APP_API_BASE_URL.replace(/\/$/, '');
 
-  // // 1️⃣ 기존 로그 가져오는 useEffect
-  // useEffect(() => {
-  //   const fetchLogs = async () => {
-  //     try {
-  //       const res = await axios.get(`${API_BASE_URL}/logs/combined/`);
-  //       setLogs(res.data);
-  //       setFilteredLogs(res.data);
-  //       setError('');
-  //     } catch (err) { 
-  //       console.error("❌ 오류 발생:", err); 
-  //       setError('로그 데이터를 불러오는데 실패했습니다.');
-  //     }
-  //   };
-  //   fetchLogs();
-  // }, []);
+  const fetchLogs = useCallback(async (isSearch = false) => {
+    if (isSearch) setPage(1);
+    setLoading(true);
+    setError(null);
 
-  // 2️⃣ 새로운 환자 이름 매핑용 useEffect
+    try {
+      const params = {
+        page: isSearch ? 1 : page,
+        page_size: pageSize,
+        start_date: startDate,
+        end_date: endDate,
+      };
+      if (patientFilter) params.patient_id = patientFilter;
+      if (doctorFilter) params.doctor_id = doctorFilter;
+
+      const res = await axios.get(`${API}/orders_emr/logs/`, { params });
+
+      setLogs(res.data.data);
+      setTotalCount(res.data.total);
+    } catch (err) {
+      console.error('로그 조회 실패:', err);
+      setError('로그를 불러오는 데 실패했습니다.');
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, patientFilter, doctorFilter, startDate, endDate, API]);
+
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/openmrs/patients/`);
-        const mapping = {};
-        res.data.forEach((p) => {
-          mapping[p.uuid] = {
-            id: p.identifier,
-            name: p.display,
-          };
-        });
-        setPatientMappings(mapping);
-      } catch (err) {
-        console.error("❌ 환자 매핑 실패:", err);
-      }
-    };
-    fetchPatients();
-  }, []);
+    fetchLogs();
+  }, [page, pageSize]);
 
-  // 3️⃣ 의사 정보 받아오는 useEffect
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/openmrs/providers/`);
-        const mapping = {};
-        res.data.results?.forEach((d) => {
-          if (d.uuid && d.display) { // .toLowerCase().includes("doctor")) { // 의사만 필터링
-            mapping[d.uuid] = d.display;
-          }
-        });
-        setDoctorMappings(mapping);
-      } catch (err) {
-        console.error("❌ 의사 매핑 실패:", err);
-      }
-    };
-    fetchDoctors();
-  }, []);
-
-
-  const handleSearch = () => {
-    const filtered = logs.filter((log) => {
-      const patientMatch = patientQuery
-        ? (
-            (log.patient_id?.toLowerCase().includes(patientQuery.toLowerCase())) ||
-            (patientMappings[log.patient_id]?.name?.toLowerCase().includes(patientQuery.toLowerCase()))
-          )
-        : true;
-
-      const doctorMatch = doctorQuery
-        ? (
-            (log.doctor_id?.toLowerCase().includes(doctorQuery.toLowerCase())) ||
-            (log.doctor_name?.toLowerCase().includes(doctorQuery.toLowerCase())) ||
-            (doctorMappings[log.doctor_id]?.toLowerCase().includes(doctorQuery.toLowerCase()))
-          )
-        : true;
-
-      const dateMatch = (() => {
-        if (!startDate && !endDate) return true;
-
-        // 'request_and_return_time' 필드에서 첫 번째 시간 (오더한 시간)을 기준으로 필터링
-        const orderTimeStr = log.request_and_return_time?.split('\n')[0]; 
-        
-        if (!orderTimeStr) return false;
-
-        const logDate = new Date(orderTimeStr);
-        
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
-
-        return (!start || logDate >= start) && (!end || logDate <= end);
-      })();
-
-      return patientMatch && doctorMatch && dateMatch;
-    });
-    setFilteredLogs(filtered);
-    setCurrentPage(1);
-  };
+  const handleSearch = () => fetchLogs(true);
 
   const handleReset = () => {
-    setPatientQuery('');
-    setDoctorQuery('');
-    setStartDate('');
-    setEndDate('');
-    setFilteredLogs(logs);
-    setCurrentPage(1);
+    setPatientFilter('');
+    setDoctorFilter('');
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    setStartDate(weekAgo.toISOString().slice(0, 10));
+    setEndDate(today.toISOString().slice(0, 10));
+    if (page !== 1) setPage(1);
+    else fetchLogs(true);
   };
 
-  const currentLogs = filteredLogs.slice((currentPage - 1) * logsPerPage, currentPage * logsPerPage);
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+  const handlePrev = () => page > 1 && setPage(p => p - 1);
+  const handleNext = () => {
+    const maxPage = Math.ceil(totalCount / pageSize);
+    page < maxPage && setPage(p => p + 1);
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('ko-KR', {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const getStatusClassName = (status) => {
+    const statusLower = status?.toLowerCase() || 'unknown';
+    return `status-badge status-${statusLower}`;
+  };
 
   return (
-    <div className="ocs-body">
-      <h1 className="ocs-title">로그 조회</h1>
+    <div className="ocs-log-container">
+      <h2 className="ocs-log-title">
+        <span role="img" aria-label="log-icon" style={{ marginRight: '10px' }}>📋</span>
+        오더 로그 조회
+      </h2>
 
-      <div className="ocs-controls">
-        <input 
-          className="ocs-controls-input" 
-          placeholder="환자 ID 또는 이름" 
-          value={patientQuery} 
-          onChange={(e) => setPatientQuery(e.target.value)} />
-        <input 
-          className="ocs-controls-input" 
-          placeholder="의사 ID 또는 이름" 
-          value={doctorQuery} 
-          onChange={(e) => setDoctorQuery(e.target.value)} />
-          
-        <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-        <button className="ocs-controls-button" onClick={handleSearch}>검색</button>
-        <button className="ocs-controls-button reset" onClick={handleReset}>초기화</button>
+      <div className="ocs-filter-box">
+        <div className="filter-group">
+          <div className="filter-item">
+            <label htmlFor="start-date">시작 날짜</label>
+            <input id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+          </div>
+          <div className="filter-item">
+            <label htmlFor="end-date">마지막 날짜</label>
+            <input id="end-date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+          </div>
+        </div>
+        <div className="filter-group">
+          <div className="filter-item">
+            <label htmlFor="patient-id">환자 ID</label>
+            <input id="patient-id" type="text" placeholder="환자 UUID 입력" value={patientFilter} onChange={e => setPatientFilter(e.target.value)} />
+          </div>
+          <div className="filter-item">
+            <label htmlFor="doctor-id">의사 ID</label>
+            <input id="doctor-id" type="text" placeholder="의사 ID 입력" value={doctorFilter} onChange={e => setDoctorFilter(e.target.value)} />
+          </div>
+        </div>
+        <div className="filter-actions">
+          <button className="btn-primary" onClick={handleSearch} disabled={loading}>🔍 검색</button>
+          <button className="btn-secondary" onClick={handleReset} disabled={loading}>🔄 초기화</button>
+        </div>
       </div>
 
-      {error && <p className="ocs-error-message">{error}</p>}
-      {filteredLogs.length === 0 ? (
-        <p className="ocs-empty-message">저장된 로그가 없습니다.</p>
-      ) : (
-        <div className="ocs-table-container">
-          <table className="ocs-table">
-            <thead>
-              <tr>
-                <th>NO</th>
-                <th>환자</th>
-                <th>의사</th>
-                <th>요청 종류</th>
-                <th>요청/결과</th> {/* 필드명 변경 */}
-                <th>진단 상세</th> {/* 필드명 변경 */}
-                <th>요청/결과 시간</th> {/* 필드명 변경 */}
-              </tr>
-            </thead>
-            <tbody>
-              {currentLogs.map((log, idx) => (
-                <tr key={idx}>
-                  <td>{(currentPage - 1) * logsPerPage + idx + 1}</td>
-                  <td>{log.patient_id || '-'}{' '}{patientMappings[log.patient_id]?.name ? `(${patientMappings[log.patient_id].name})` : ''}</td>
-                  <td>{log.doctor_id || '-'}{' '}{doctorMappings[log.doctor_id] ? `(${doctorMappings[log.doctor_id]})` : ''}</td>
-                  <td>{log.request_type || '-'}</td>
-                  {/* 새로운 필드명과 스타일 적용 */}
-                  <td style={{ whiteSpace: 'pre-wrap' }}>{log.request_and_result || '-'}</td>
-                  {/* 새로운 필드명 */}
-                  <td style={{ whiteSpace: 'pre-wrap' }}>{log.diagnosis_detail || '-'}</td> 
-                  {/* 새로운 필드명과 스타일 적용 */}
-                  <td style={{ whiteSpace: 'pre-wrap' }}>{log.request_and_return_time || '-'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="ocs-table-container">
+        <table className="ocs-log-table">
+          <thead>
+            <tr>
+              <th style={{ width: '6%' }}>Order ID</th>
+              <th style={{ width: '16%' }}>환자 ID</th>
+              <th style={{ width: '10%' }}>의사 ID</th>
+              <th style={{ width: '10%' }}>검사 타입</th>
+              <th style={{ width: '22%' }}>검사 항목</th>
+              <th style={{ width: '12%' }}>오더 날짜</th>
+              <th style={{ width: '10%' }}>상태</th>
+              <th style={{ width: '14%' }}>생성 시각</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="8" className="message-cell">로딩 중...</td></tr>
+            ) : error ? (
+              <tr><td colSpan="8" className="message-cell error">{error}</td></tr>
+            ) : logs.length === 0 ? (
+              <tr><td colSpan="8" className="message-cell">결과가 없습니다.</td></tr>
+            ) : (
+              logs
+                .slice()
+                .sort((a, b) => a.order_id - b.order_id)
+                .map((log) => (
+                  <tr key={log.order_id}>
+                    <td>{log.order_id}</td>
+                    <td className="id-cell">{log.patient_id}</td>
+                    <td>{log.doctor_id}</td>
+                    <td>{log.panel}</td>
+                    <td className="tests-cell">
+                      {Array.isArray(log.tests) ? (
+                        log.tests.map((item, index) => (
+                          <React.Fragment key={index}>
+                            {item}
+                            {index !== log.tests.length - 1 && (
+                              <>
+                                ,{(index + 1) % 3 === 0 && <br />}{" "}
+                              </>
+                            )}
+                          </React.Fragment>
+                        ))
+                      ) : log.tests}
+                    </td>
+                    <td>{log.order_date}</td>
+                    <td>
+                      <span className={getStatusClassName(log.status)}>
+                        {log.status}
+                      </span>
+                    </td>
+                    <td>{formatDateTime(log.created_at)}</td>
+                  </tr>
+                ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {totalPages > 1 && (
+      {logs.length > 0 && (
         <div className="ocs-pagination">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i} className={`ocs-page-button ${i + 1 === currentPage ? 'active' : ''}`} onClick={() => setCurrentPage(i + 1)}>
-              {i + 1}
-            </button>
-          ))}
+          <button onClick={handlePrev} disabled={page === 1 || loading}>
+            이전
+          </button>
+          <span>
+            Page {page} / {Math.ceil(totalCount / pageSize)}
+          </span>
+          <button onClick={handleNext} disabled={page >= Math.ceil(totalCount / pageSize) || loading}>
+            다음
+          </button>
         </div>
       )}
     </div>
   );
-};
+}
 
-export default OCSLogPage;

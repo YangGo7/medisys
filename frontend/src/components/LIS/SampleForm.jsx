@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import './SampleForm.css'; 
 
 // log 
 import { saveLog } from '../utils/saveLog';
@@ -127,61 +128,80 @@ const SampleForm = () => {
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
-      <h2>💉 샘플 등록</h2>
 
-      <label>🧾 오더 ID</label><br />
-      <input
-        type="text"
-        value={orderId}
-        onChange={e => setOrderId(e.target.value)}
-        placeholder="Order ID"
-        required
-      /><br />
+return (
+  <div className="form-page-wrapper">
+    <div className="form-card">
+      <h2 className="form-title">💉 샘플 등록</h2>
 
-      <label>📅 채취일시</label><br />
-      <input
-        type="datetime-local"
-        value={collectionDate}
-        onChange={e => setCollectionDate(e.target.value)}
-        required
-      /><br />
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>🧾 오더 ID</label>
+          <input
+            type="text"
+            value={orderId}
+            onChange={e => setOrderId(e.target.value)}
+            placeholder="Order ID"
+            required
+          />
+        </div>
 
-      <label>🧪 검체 종류</label><br />
-      <select value={sampleType} onChange={e => {
-        setSampleType(e.target.value);
-        setSelectedAlias(''); // sampleType 바꾸면 alias 초기화
-      }} required>
-        <option value="">Sample Type 선택</option>
-        {Object.keys(aliasMappings).map(type => (
-          <option key={type} value={type}>{type}</option>
-        ))}
-      </select><br/>
+        <div className="form-group">
+          <label>📅 채취일시</label>
+          <input
+            type="datetime-local"
+            value={collectionDate}
+            onChange={e => setCollectionDate(e.target.value)}
+            required
+          />
+        </div>
 
-      <label>📁 검사 종류</label><br />
-      <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
-        <option value="">Test Type 선택</option>
-        {sampleType &&
-          Object.keys(aliasMappings[sampleType] || {}).map(alias => (
-            <option key={alias} value={alias}>{alias}</option>
-          ))}
-      </select><br/>
+        <div className="form-group">
+          <label>🧪 검체 종류</label>
+          <select value={sampleType} onChange={e => {
+            setSampleType(e.target.value);
+            setSelectedAlias('');
+          }} required>
+            <option value="">Sample Type 선택</option>
+            {Object.keys(aliasMappings).map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
 
-      <label>📂 세부 검사</label><br />
-      <select value={selectedTestType} onChange={e => setSelectedTestType(e.target.value)} required>
-        <option value="">Detail Type 선택</option>
-        {testTypeOptions.map((tt, idx) => (
-          <option key={idx} value={tt}>{tt}</option>
-        ))}
-      </select><br/>
+        <div className="form-group">
+          <label>📁 검사 종류</label>
+          <select value={selectedAlias} onChange={e => setSelectedAlias(e.target.value)} required>
+            <option value="">Test Type 선택</option>
+            {sampleType &&
+              Object.keys(aliasMappings[sampleType] || {}).map(alias => (
+                <option key={alias} value={alias}>{alias}</option>
+              ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>📂 세부 검사</label>
+          <select value={selectedTestType} onChange={e => setSelectedTestType(e.target.value)} required>
+            <option value="">Detail Type 선택</option>
+            {testTypeOptions.map((tt, idx) => (
+              <option key={idx} value={tt}>{tt}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-loinc">
+          🔍 자동 매핑된 LOINC 코드: <strong>{loincCode || '없음'}</strong>
+        </div>
+
+        <div className="form-footer">
+          <button type="submit">샘플 등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+)};
 
 
-      <p>🔎 자동 매핑된 LOINC 코드: <strong>{loincCode || '없음'}</strong></p>
-
-      <button type="submit">샘플 등록</button>
-    </form>
-  );
-};
 
 export default SampleForm;

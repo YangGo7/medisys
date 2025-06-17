@@ -176,6 +176,8 @@ class SSDAnalyzer:
             logger.error(traceback.format_exc())
             return None, None
     
+    
+    ## 아래 부분 삭제 가능 ----------------------------------------------------------------------------- ##
     def _enhance_medical_image(self, image):
         """의료 영상에 특화된 이미지 향상"""
         try:
@@ -217,6 +219,9 @@ class SSDAnalyzer:
             logger.warning(f"이미지 향상 처리 실패: {str(e)}")
             logger.warning(traceback.format_exc())
             return image
+
+    ## ---------------------------------------------------------------------------------------------- ##
+
     
     def _preprocess_image(self, image):
         """SSD300 입력을 위한 이미지 전처리"""
