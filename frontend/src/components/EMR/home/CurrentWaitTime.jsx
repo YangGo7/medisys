@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './CurrentWaitTime.css';
 
 const CurrentWaitTime = () => {
   const [avgWait, setAvgWait] = useState(null);
-  const API_BASE = process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/';
+  const API_BASE =
+    process.env.REACT_APP_INTEGRATION_API ||
+    'http://35.225.63.41:8000/api/integration/';
 
   useEffect(() => {
     const fetchWaitList = async () => {
@@ -19,7 +22,6 @@ const CurrentWaitTime = () => {
         }
 
         const now = new Date();
-        // 각 환자의 대기 시작 시간(created_at)을 ISO 문자열로 넘겨준다고 가정
         const diffs = list.map(p => {
           const created = new Date(p.created_at || p.timestamp);
           return (now - created) / 60000; // 분 단위
@@ -35,16 +37,14 @@ const CurrentWaitTime = () => {
     };
 
     fetchWaitList();
-
-    // 1분마다 갱신
     const interval = setInterval(fetchWaitList, 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="dashboard-card">
-      <h3>⏱️ 현재 평균 대기 시간</h3>
-      <p style={{ fontSize: '1.5rem', margin: 0 }}>
+    <div className="current-waittime">
+      <h3 className="cwt-title">⏱️ 현재 평균 대기 시간</h3>
+      <p className="cwt-value">
         {avgWait === null
           ? '로딩 중...'
           : avgWait === 0

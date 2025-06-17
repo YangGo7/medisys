@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import './ResultCdss.css';
 
 const CdssResultTable = () => {
   const [allResults, setAllResults] = useState([]);
