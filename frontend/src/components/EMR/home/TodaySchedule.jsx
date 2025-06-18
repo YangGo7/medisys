@@ -1,8 +1,8 @@
 // src/components/home/TodaySchedule.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import './TodaySchedule.css'; // 아래 CSS 참조
+import './TodaySchedule.css';
 
 const TodaySchedule = ({ refreshTrigger }) => {
   const [slots, setSlots] = useState([]);       // [{ time: '08:00', patients: [] }, …]
@@ -22,47 +22,45 @@ const TodaySchedule = ({ refreshTrigger }) => {
     setSlots(times.map(t => ({ time: t, patients: [] })));
   }, []);
 
-  // 2) slots 준비 후, 그리고 refreshTrigger가 바뀔 때마다 한 번씩 fetch하여 누적
-  useEffect(() => {
+  // 2) 스케줄 fetch 함수
+  const fetchSchedule = useCallback(async () => {
     if (!slots.length) return;
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}identifier-waiting/`);
+      const data = res.data;
 
-    const fetchSchedule = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API}identifier-waiting/`);
-        const data = res.data;
+      setSlots(prevSlots => {
+        const arrivalsByTime = data.reduce((acc, p) => {
+          const dt = new Date(p.created_at);
+          const hh = String(dt.getHours()).padStart(2, '0');
+          const mm = dt.getMinutes() < 30 ? '00' : '30';
+          const key = `${hh}:${mm}`;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(p.display);
+          return acc;
+        }, {});
 
-        setSlots(prevSlots => {
-          // API 결과를 시간별로 묶어둡니다.
-          const arrivalsByTime = data.reduce((acc, p) => {
-            const dt = new Date(p.created_at);
-            const hh = String(dt.getHours()).padStart(2, '0');
-            const mm = dt.getMinutes() < 30 ? '00' : '30';
-            const key = `${hh}:${mm}`;
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(p.display);
-            return acc;
-          }, {});
-
-          // 이전 slots에서 patients를 유지하면서, 신규만 추가
-          return prevSlots.map(slot => {
-            const newArrivals = arrivalsByTime[slot.time] || [];
-            const uniqueNew = newArrivals.filter(name => !slot.patients.includes(name));
-            return {
-              ...slot,
-              patients: [...slot.patients, ...uniqueNew]
-            };
-          });
+        return prevSlots.map(slot => {
+          const newArrivals = arrivalsByTime[slot.time] || [];
+          const uniqueNew = newArrivals.filter(name => !slot.patients.includes(name));
+          return {
+            ...slot,
+            patients: [...slot.patients, ...uniqueNew]
+          };
         });
-      } catch (err) {
-        console.error('일정 불러오기 실패', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      });
+    } catch (err) {
+      console.error('일정 불러오기 실패', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [API, slots.length]);
 
+  // 3) mount 시와 refreshTrigger 변경 시 스케줄 재조회
+  useEffect(() => {
     fetchSchedule();
-  }, [refreshTrigger, slots.length]);
+  }, [fetchSchedule, refreshTrigger]);
 
   if (loading) return <p>일정 로딩 중…</p>;
 

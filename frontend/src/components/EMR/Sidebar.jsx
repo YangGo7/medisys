@@ -5,9 +5,9 @@ import NotificationBell from './NotificationBell';
 const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
   // 원하는 순서대로 메뉴 배열 재정의
   const menus = [
-    '의사 대시보드',
+    '홈',
     '접수',
-    '진료',
+    '의사 대시보드',
     '진료 진행도',
     '대기 화면',
     '대기 목록',

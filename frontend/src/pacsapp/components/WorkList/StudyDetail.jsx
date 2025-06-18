@@ -10,7 +10,7 @@ const StudyDetail = ({ studyId, onBack }) => {
   const [reportText, setReportText] = useState('');
   const [isReporting, setIsReporting] = useState(false);
 
-  const API_BASE_URL = 'http://localhost:8000/api';
+  const API_BASE_URL = 'http://localhost:35.225.63.41/api';
 
   useEffect(() => {
     fetchStudyDetail();

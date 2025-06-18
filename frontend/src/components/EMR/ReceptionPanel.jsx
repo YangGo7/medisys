@@ -3,39 +3,67 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './EmrMainPage.css'; // 공통 테이블 스타일 로드
+import PatientRegistrationForm from './PatientRegistrationForm'; // PatientRegistrationForm 임포트 추가
+import { Plus } from 'lucide-react';
+
 
 const OPENMRS_API_MASTER = 'http://35.225.63.41:8000/api/integration/openmrs-patients/';
 const RECEPTION_API = 'http://35.225.63.41:8000/api/integration/reception-list/';
-const MAPPING_API        = 'http://35.225.63.41:8000/api/integration/identifier-based/';
+const MAPPING_API          = 'http://35.225.63.41:8000/api/integration/identifier-based/';
 
 const ReceptionPanel = () => {
-  const [query, setQuery]                   = useState('');
+  const [query, setQuery]              = useState('');
   const [patientsMaster, setPatientsMaster] = useState([]);
-  const [suggestions, setSuggestions]       = useState([]);
+  const [suggestions, setSuggestions]        = useState([]);
   const [receptionList, setReceptionList]   = useState([]);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false); // 새로운 상태: 등록 폼 모달 표시 여부
 
-  // 1) 전체 환자 & 이미 접수된 환자 목록
-  useEffect(() => {
-    axios.get(OPENMRS_API_MASTER)
-      .then(res => setPatientsMaster(res.data))
-      .catch(err => console.error('환자 목록 불러오기 실패', err));
+  // 1) 전체 환자 & 이미 접수된 환자 목록 불러오기 (초기 및 갱신 시)
+  const fetchPatientData = async () => {
+    try {
+      // 전체 OpenMRS 환자 목록
+      const masterRes = await axios.get(OPENMRS_API_MASTER);
+      setPatientsMaster(masterRes.data);
 
-    axios.get(RECEPTION_API)
-      .then(res => {
-        // 서버 원본에 status, created_at 있다고 가정
-        const list = res.data.map(item => ({
+      // 오늘 접수된 환자 목록
+      const receptionRes = await axios.get(RECEPTION_API);
+      const list = receptionRes.data.map(item => {
+        let displayStatus = item.status; // 기본적으로 백엔드 status 사용
+
+        // 이 switch-case 로직 수정함.
+        // PatientMapping 모델의 status_choices와 assigned_room을 활용합니다.
+        switch (item.status) {
+          case 'waiting':
+            // 'waiting' 상태일 때 assigned_room 값에 따라 '대기 중' 또는 '진료실 배정'으로 구분
+            displayStatus = item.assigned_room ? `🧍 진료실 ${item.assigned_room}번 배정` : '⏳ 대기중';
+            break;
+          case 'in_progress':
+            displayStatus = '💉 진료 중';
+            break;
+          case 'complete':
+            displayStatus = '✅ 진료 완료';
+            break;
+          default:
+            // 예상치 못한 상태 값일 경우
+            displayStatus = `❓ ${item.status || '알 수 없음'}`;
+        }
+
+        return {
           ...item,
-          status: 
-            item.status === 'PENDING'     ? '대기 중' :
-            item.status === 'ASSIGNED'    ? '배정 완료' :
-            item.status === 'IN_PROGRESS' ? '진료 중' :
-            item.status === 'COMPLETED'   ? '진료 완료' :
-            item.status,
-          timestamp: item.created_at
-        }));
-        setReceptionList(list);
-      })
-      .catch(err => console.error('접수 목록 불러오기 실패', err));
+          status: displayStatus, // 변환된 한글 상태 값
+          timestamp: item.created_at, // created_at을 timestamp로 사용
+        };
+      });
+      setReceptionList(list);
+    } catch (err) {
+      console.error('환자/접수 목록 불러오기 실패', err);
+      // 필요에 따라 setError 상태 설정
+    }
+  };
+
+  useEffect(() => {
+    fetchPatientData();
+    // 주기적인 갱신이 필요하다면 여기에 setInterval 추가
   }, []);
 
   // 2) 자동완성 제안
@@ -51,7 +79,7 @@ const ReceptionPanel = () => {
     );
   }, [query, patientsMaster]);
 
-  // 3) 접수 처리
+  // 3) 접수 처리 (기존 로직 유지)
   const handleReception = async (patientRow = null) => {
     const patient = patientRow || patientsMaster.find(p => p.display === query.trim());
     if (!patient) {
@@ -72,26 +100,69 @@ const ReceptionPanel = () => {
       setReceptionList(prev => [
         ...prev,
         {
-          ...res.data,           // mapping_id 등 원본 필드
-          display: patient.display,
+          mapping_id: res.data.mapping_id, // 새로 생성된 매핑 ID
           patient_identifier: id,
-          status: '대기 중',
+          display: patient.display,
+          status: '대기 중', // 초기 접수 상태
           timestamp: new Date().toISOString()
         }
       ]);
       setQuery('');
       setSuggestions([]);
       alert(`✅ ${patient.display} 환자가 대기 목록에 추가되었습니다.`);
+      // onReceptionSuccess가 있다면 여기서 호출
     } catch (err) {
       console.error('접수 실패', err);
       alert(`접수 실패: ${err.message}`);
     }
   };
 
+  // 4) 신규 환자 등록 폼에서 환자 생성 성공 시 호출될 콜백 함수
+  const handleNewPatientCreated = (newPatient) => {
+    // 폼에서 등록된 새 환자 정보를 받아서 처리
+    // 1. patientsMaster에 새 환자 추가 (검색/대기 등록 테이블에 나타나도록)
+    setPatientsMaster(prev => [...prev, newPatient]);
+
+    // 2. 새로 등록된 환자를 바로 접수 목록에 추가 (handleReception 재활용)
+    // 이때, handleReception은 이미 중복 체크를 하므로, 신규 환자는 문제 없이 추가됨.
+    handleReception(newPatient); // <-- 중요: 새로 등록된 환자를 바로 접수 처리
+  };
+
+
   return (
     <div className="page-container-full">
       <div className="card">
         <h2 style={{ marginBottom: '1rem' }}>📝 환자 접수</h2>
+
+        {/* 신규 환자 등록 버튼 */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '1.5rem'
+          }}
+        >
+          <button
+            onClick={() => setShowRegistrationForm(true)}
+            style={{
+              padding: '0.6rem 1.2rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: '#1890ff',
+              color: '#fff', // 텍스트 색상 (아이콘에도 적용되어야 함)
+              cursor: 'pointer',
+              fontSize: '1rem', // 글씨 크기
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              display: 'flex', // 아이콘과 텍스트를 나란히 정렬하기 위해 추가
+              alignItems: 'center', // 아이콘과 텍스트를 세로 중앙 정렬하기 위해 추가
+              gap: '0.5rem', // 아이콘과 텍스트 사이 간격
+            }}
+          >
+            <Plus size={20} color="white" /> {/* 이모티콘 대신 Plus 아이콘 컴포넌트 사용 */}
+            신규 환자 등록
+          </button>
+        </div>
+
 
         {/* 검색 & 접수 */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -103,12 +174,13 @@ const ReceptionPanel = () => {
             onChange={e => setQuery(e.target.value)}
           />
           <button
-            onClick={handleReception}
+            onClick={() => handleReception()} // 검색창 접수 버튼 클릭 시 인자 없이 호출
             style={{
               padding: '0.5rem 1rem',
               borderRadius: '4px',
               border: '1px solid #1890ff',
               background: '#fff',
+              color: '#1890ff', // 색상 통일
               cursor: 'pointer'
             }}
           >
@@ -124,7 +196,9 @@ const ReceptionPanel = () => {
             margin: '0 0 1.5rem',
             padding: 0,
             listStyle: 'none',
-            background: '#fff'
+            background: '#fff',
+            maxHeight: '200px', // 스크롤바 추가
+            overflowY: 'auto'
           }}>
             {suggestions.map(p => (
               <li
@@ -144,7 +218,7 @@ const ReceptionPanel = () => {
           <table className="order-table">
             <thead>
               <tr>
-                <th>식별자</th>
+                <th>환자 식별자</th>
                 <th>이름</th>
                 <th>성별</th>
                 <th>생년월일</th>
@@ -218,6 +292,14 @@ const ReceptionPanel = () => {
         </div>
 
       </div>
+
+      {/* PatientRegistrationForm 모달 조건부 렌더링 */}
+      {showRegistrationForm && (
+        <PatientRegistrationForm
+          onClose={() => setShowRegistrationForm(false)} // 모달 닫기 함수
+          onPatientCreated={handleNewPatientCreated}     // 환자 생성 성공 시 콜백
+        />
+      )}
     </div>
   );
 };

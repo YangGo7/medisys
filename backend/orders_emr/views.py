@@ -71,6 +71,8 @@ def order_list_create(request):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
             logger.error(f"주문 목록 조회 오류: {str(e)}")
             return Response({
                 'status': 'error',
@@ -145,7 +147,8 @@ def order_list_create(request):
                 logger.error(f"❌ DB 저장 실패: {serializer.errors}")
                 return Response({
                     'status': 'error',
-                    'message': f'데이터 검증 실패: {serializer.errors}'
+                    'message': f'데이터 검증 실패: {serializer.errors}',
+                    'trace': error_trace
                 }, status=status.HTTP_400_BAD_REQUEST)
             
         except json.JSONDecodeError:
@@ -560,6 +563,7 @@ def create_integration_log(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #### 20250616 ocs 로그 저장 관련 코드 ####
+
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -568,34 +572,45 @@ from .serializers import OrderSerializer
 
 @api_view(['GET'])
 def orders_log_view(request):
+    # --- 디버깅을 위한 코드 추가 ---
+    print("========================================")
+    print("프론트엔드에서 받은 요청 파라미터:")
+    print(request.GET)
+    print("========================================")
     qs = Order.objects.all()
 
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     patient_id = request.GET.get('patient_id')
     doctor_id = request.GET.get('doctor_id')
+    test_type = request.GET.get('test_type')
     
+    # --- 필터링 로직 수정 ---
     if start_date:
         qs = qs.filter(created_at__date__gte=start_date)
     if end_date:
         qs = qs.filter(created_at__date__lte=end_date)
     if patient_id:
-        qs = qs.filter(patient_id=patient_id)
+        qs = qs.filter(patient_id__icontains=patient_id)
     if doctor_id:
-        qs = qs.filter(doctor_id=doctor_id)
+        qs = qs.filter(doctor_id__icontains=doctor_id)
+    if test_type:
+        qs = qs.filter(panel__icontains=test_type)
     
+    # 페이징 처리
     try:
         page = int(request.GET.get('page', 1))
-        page_size = int(request.GET.get('page_size', 20))
+        page_size = int(request.GET.get('page_size', 5))
     except (ValueError, TypeError):
         page = 1
-        page_size = 20
+        page_size = 5
         
     total = qs.count()
     start_idx = (page - 1) * page_size
     end_idx = start_idx + page_size
 
-    subset = qs.order_by('-created_at')[start_idx:end_idx]
+    # 정렬 기준 order_id 오름차순으로 유지.
+    subset = qs.order_by('order_id')[start_idx:end_idx]
     serializer = OrderSerializer(subset, many=True)
 
     return Response({

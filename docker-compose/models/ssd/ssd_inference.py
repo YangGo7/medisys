@@ -43,7 +43,7 @@ class SSDAnalyzer:
         self.model_path = model_path
         self.model = None
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.confidence_threshold = 0.3
+        self.confidence_threshold = 0.4
         self.input_size = 300  # SSD300 입력 크기
         
         # ai_service의 MEDICAL_CLASSES와 동일하게 14개 클래스 (배경 제외, ID 0부터 13까지)

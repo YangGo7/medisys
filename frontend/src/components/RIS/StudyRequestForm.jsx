@@ -50,6 +50,18 @@ const StudyRequestForm = () => {
       
       if (response.ok) {
         alert("검사 요청이 성공적으로 등록되었습니다!");
+
+        // ✅ BroadcastChannel을 통해 로그 갱신 알림 전송
+        const bc = new BroadcastChannel("order_channel");
+        bc.postMessage({
+          type: "newOrderCreated",
+          data: {
+            patient_id: form.patient_id,
+            modality: form.modality,
+            body_part: form.body_part,
+            timestamp: new Date().toISOString()
+          }
+        }); // ✅
         
         // 폼 리셋
         setForm({

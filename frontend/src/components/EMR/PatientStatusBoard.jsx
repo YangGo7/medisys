@@ -1,77 +1,63 @@
-// src/components/EMR/PatientStatusBoard.jsx
+// src/components/EMR/PatientStatusBoard.jsx (수정된 전체 코드)
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Stethoscope } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom'; // navigate는 더 이상 사용되지 않으므로 제거합니다.
 import './EmrMainPage.css'; // 공통 테이블 / 버튼 스타일
 
-const RECEPTION_API      = 'http://35.225.63.41:8000/api/integration/reception-list/';
-const UPDATE_STATUS_API  = 'http://35.225.63.41:8000/api/integration/patient-mappings/update-status/';
+const RECEPTION_API = 'http://35.225.63.41:8000/api/integration/reception-list/';
 
 const PatientStatusBoard = () => {
   const [patients, setPatients] = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState(null);
-  const navigate = useNavigate();
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState(null);
+  // const navigate = useNavigate(); // updateStatus 함수 제거로 navigate도 제거합니다.
 
-  // 1) 접수 리스트 가져오기
+  // 1) 환자 목록 가져오기 및 주기적 갱신
   const fetchPatients = async () => {
     try {
       const res = await axios.get(RECEPTION_API);
       setPatients(res.data);
     } catch (err) {
-      console.error('진료 상태 목록 조회 실패', err);
-      setError('진료 상태 목록 조회 실패');
+      console.error('진료 진행도 목록 조회 실패', err);
+      setError('진료 진행도 목록 조회 실패');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPatients();
-  }, []);
+    fetchPatients(); // 컴포넌트 마운트 시 최초 로드
 
-  // 2) 상태 업데이트
-  const updateStatus = async (mapping_id, newStatus) => {
-    try {
-      await axios.post(UPDATE_STATUS_API, { mapping_id, status: newStatus });
-      if (newStatus === 'COMPLETED') {
-        navigate('/emr/completed-patients');
-      } else {
-        fetchPatients();
-      }
-    } catch (err) {
-      console.error('상태 변경 실패:', err);
-      alert('상태 변경에 실패했습니다.');
-    }
-  };
+    // 5초마다 데이터를 갱신하여 진료 상태 변화를 반영
+    const interval = setInterval(fetchPatients, 5000);
+    return () => clearInterval(interval); // 컴포넌트 언마운트 시 인터벌 해제
+  }, []); // 빈 의존성 배열로 마운트 시 한 번만 설정되도록
 
-  // 3) 상태 렌더링
+  // 2) 상태 업데이트 (이전의 "재설정" 버튼과 관련된 로직이므로 여기서는 제거됩니다.)
+  // const updateStatus = async (mapping_id, newStatus) => { ... };
+
+  // 3) 진료 상태 텍스트 렌더링
   const renderStatus = (p) => {
+    // PatientMapping 모델의 status 필드 값 (waiting, in_progress, complete)에 따라 렌더링
+    // assigned_room 정보가 있다면 'waiting' 상태를 더 세분화할 수 있습니다.
     switch (p.status) {
-      case 'IN_PROGRESS':
+      case 'in_progress':
         return '💉 진료 중';
-      case 'ASSIGNED':
-        return p.assigned_room ? '🧍 진료실 배정' : '🧍 배정 대기';
-      case 'PENDING':
-        return '⏳ 대기중';
-      case 'COMPLETED':
+      case 'waiting':
+        // assigned_room이 null이 아니면 '진료실 배정', 그렇지 않으면 '대기중'
+        return p.assigned_room ? `🧍 진료실 ${p.assigned_room}번 배정` : '⏳ 대기중';
+      case 'complete':
         return '✅ 진료 완료';
       default:
-        return '⏳ 대기중';
+        // 백엔드에서 예상치 못한 status 값을 보낼 경우
+        return `❓ ${p.status || '알 수 없음'}`;
     }
   };
 
-  // 4) 다음 상태 계산
-  const getNextStatus = (st) => {
-    switch (st) {
-      case 'PENDING':     return 'ASSIGNED';
-      case 'ASSIGNED':    return 'IN_PROGRESS';
-      case 'IN_PROGRESS': return 'COMPLETED';
-      default:            return 'COMPLETED';
-    }
-  };
+  // 4) 다음 상태 계산 (이전의 "작업" 버튼 관련 로직이므로 제거됩니다.)
+  // const getNextStatus = (st) => { ... };
 
   return (
     <div className="page-container-full">
@@ -99,24 +85,17 @@ const PatientStatusBoard = () => {
                 <tr><td colSpan={6} style={{ color: '#666' }}>데이터가 없습니다.</td></tr>
               ) : (
                 patients.map(p => {
-                  const current = p.status || 'PENDING';
+                  // p.status를 직접 사용하므로 current 변수 정의 불필요
                   return (
                     <tr key={p.mapping_id}>
                       <td>{p.display}</td>
                       <td>{p.patient_identifier}</td>
                       <td>{p.birthdate || '-'}</td>
                       <td>{p.gender === 'M' ? '남성' : p.gender === 'F' ? '여성' : '-'}</td>
-                      <td>{renderStatus(p)}</td>
+                      <td>{renderStatus(p)}</td> {/* renderStatus 함수 호출 */}
                       <td style={{ textAlign: 'center' }}>
-                        {['PENDING','ASSIGNED','IN_PROGRESS'].includes(current) && (
-                          <button
-                            className="status-next-btn"
-                            onClick={() => updateStatus(p.mapping_id, getNextStatus(current))}
-                            title="다음 단계로"
-                          >
-                            ➡️
-                          </button>
-                        )}
+                        {/* '작업' 칸은 기능 제거로 인해 비어있습니다. 필요에 따라 아이콘 등을 표시할 수 있습니다. */}
+                        -
                       </td>
                     </tr>
                   );

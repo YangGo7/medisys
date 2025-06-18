@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // ✅ react-router-dom에서 Link를 가져옵니다.
 import OrderForm from './LIS/OrderForm';
 import SampleForm from './LIS/SampleForm';
-import DicomViewer2 from './RIS/DicomViewer';
+// import DicomViewer2 from './RIS/DicomViewer';
 import LisHome from './LIS/LisHome';
 import OCSLogPage from './OCS/OCSLogPage';
 import LoginPage from './login/LoginPage';
@@ -38,15 +38,15 @@ export default function MainPage() {
       {/* 상단 Chart Header */}
       <header className="chart-header">
         <div className="search-bar">
-          🔍 환자 검색: <input type="text" placeholder="환자 이름/번호 입력" />
+          {/* 🔍 환자 검색: <input type="text" placeholder="환자 이름/번호 입력" /> */}
         </div>
       </header>
 
       <div className="content-body">
         {/* 좌측 사이드바 */}
         <aside className="sidebar">
-          <button onClick={() => setCurrentTab('order')}>💊 처방</button>
-          <button onClick={() => setCurrentTab('sample')}>🧪 검체</button>
+          {/* <button onClick={() => setCurrentTab('order')}>💊 처방</button> */}
+          {/* <button onClick={() => setCurrentTab('sample')}>🧪 검체</button> */}
           <button onClick={() => setCurrentTab('dicom')}>🖼️ DICOM</button>
           {/* LIS 이동 버튼 */}
           <Link to="/lis"><button>🏠 LIS 이동</button></Link>

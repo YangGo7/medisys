@@ -9,7 +9,6 @@ urlpatterns = [
     path('auto-login/', auto_login_view, name='auto_login'),
     path('notice/update/', update_notice, name='update_notice'),
     # path('notice/', get_notice, name='get_notice'),  # ✅ FIXED: Add GET notice endpoint
-    # path('api/openmrs-patients/', views.get_all_openmrs_patients),
 ]
 
 # 개발 환경에서 정적/미디어 파일 서빙

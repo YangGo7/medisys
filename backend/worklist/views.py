@@ -8,6 +8,9 @@ from .models import StudyRequest
 from .serializers import StudyRequestSerializer
 from datetime import datetime
 
+#**🔥**
+from orders.models import TestOrder 
+# from ocs.utils.save_log import save_log
 
 #영상 검사 요청
 class StudyRequestViewSet(viewsets.ModelViewSet):
@@ -100,6 +103,36 @@ def create_from_emr(request):
             study_request = serializer.save()
             
             print(f"✅ StudyRequest 생성 성공: ID {study_request.id}")
+            
+            #**🔥**
+            try:
+                print("🛠 TestOrder 저장 시도 중...")
+                
+                study_description = serializer.validated_data.get("study_description", "")
+                
+                test_order = TestOrder.objects.create(
+                    patient_id=study_request.patient_id,
+                    doctor_id=study_request.requesting_physician,
+                    test_type=study_request.modality,
+                    tests=[study_description],  # RIS는 문자열을 배열로 감쌈
+                    order_date=study_request.request_datetime.date(),
+                    status='CREATED'
+                )
+                print(f"✅ [TestOrder 저장 완료] → ID: {test_order.id}")
+                
+                # # 👉 RIS 로그 저장 호출
+                # from ocs.utils.save_log import save_log  # 위치에 따라 조정 필요
+                # save_log(
+                #     patient_id=study_request.patient_id,
+                #     doctor_id=study_request.requesting_physician,
+                #     order_type='RIS',
+                #     message=f"{study_request.modality} {study_request.body_part} 검사 요청",
+                #     result="등록 완료"
+                # )
+                
+            except Exception as e:
+                print(f"❌ [TestOrder 저장 실패]: {e.__class__.__name__} - {e}")
+            #**🔥**
             
             # ImagingRequestPanel이 기대하는 응답 형식으로 반환
             return Response({

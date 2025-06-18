@@ -3,37 +3,30 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const AssignedPatientList = ({ onPatientSelect, selectedPatient, refreshTrigger }) => {
+// searchTerm prop을 받도록 수정
+const AssignedPatientList = ({ onPatientSelect, selectedPatient, refreshTrigger, searchTerm }) => {
   const [assignedPatients, setAssignedPatients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // const [searchTerm, setSearchTerm] = useState(''); // 이 줄은 제거하거나 주석 처리!
+  const API_BASE = process.env.REACT_APP_INTEGRATION_API;
 
-  const API_BASE =
-    process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/';
-
-  // 1) 배정된 환자 목록 가져오기 (identifier-waiting)
-  const fetchAssignedPatients = async () => {
+  const fetchAssigned = async () => {
     setLoading(true);
-    setError(null);
     try {
       const res = await axios.get(`${API_BASE}identifier-waiting/`);
-      let list = Array.isArray(res.data) ? res.data : [];
-
-      // assigned_room 이 있는 환자만 필터링
-      list = list.filter(p => p.assigned_room);
-
-      // 중복 제거 (openmrs_patient_uuid 또는 uuid 기준)
-      const unique = list.reduce((acc, p) => {
-        const key = p.openmrs_patient_uuid || p.uuid;
-        if (!acc.find(x => (x.openmrs_patient_uuid || x.uuid) === key)) {
-          acc.push(p);
-        }
-        return acc;
-      }, []);
-
+      const unique = res.data
+        .filter(p => p.assigned_room) // 이미 배정된 환자만 필터링
+        .reduce((acc, p) => {
+          const key = p.openmrs_patient_uuid || p.uuid;
+          if (!acc.find(x => (x.openmrs_patient_uuid || x.uuid) === key)) {
+            acc.push(p);
+          }
+          return acc;
+        }, []);
       setAssignedPatients(unique);
+      setError(null);
     } catch (err) {
-      console.error('❌ 배정된 환자 목록 조회 실패:', err);
       setError('배정된 환자 목록을 불러오는 중 오류가 발생했습니다.');
       setAssignedPatients([]);
     } finally {
@@ -41,202 +34,147 @@ const AssignedPatientList = ({ onPatientSelect, selectedPatient, refreshTrigger 
     }
   };
 
-  // 최초 호출 및 주기적 새로고침
   useEffect(() => {
-    fetchAssignedPatients();
-    const intervalId = setInterval(fetchAssignedPatients, 10000);
-    return () => clearInterval(intervalId);
+    fetchAssigned();
   }, []);
 
-  // 외부 트리거(refreshTrigger)에도 새로고침
   useEffect(() => {
     if (refreshTrigger > 0) {
-      fetchAssignedPatients();
+      fetchAssigned();
     }
   }, [refreshTrigger]);
 
-  // 2) 카드 클릭 시 부모로 포맷된 환자 정보 전달
-  const handlePatientClick = p => {
+  const handleUnassign = async (p) => {
+    try {
+      await axios.post(`${API_BASE}unassign-room/`, {
+        patient_id: p.mapping_id || p.id,
+        room: p.assigned_room
+      });
+      fetchAssigned(); // 해제 후 목록 새로고침
+    } catch (err) {
+      console.error('배정 해제 실패:', err);
+      alert('배정 해제에 실패했습니다.');
+    }
+  };
+
+  const handleClick = (p) => {
+    const uuid = p.openmrs_patient_uuid || p.uuid;
     const formatted = {
-      uuid: p.openmrs_patient_uuid || p.uuid,
+      uuid,
       mapping_id: p.mapping_id,
-      patient_identifier: p.patient_identifier,
       display: p.display || p.name,
       assigned_room: p.assigned_room,
-      person: {
-        age: p.age,
-        gender: p.gender,
-        birthdate: p.birthdate,
-      },
+      person: { age: p.age, gender: p.gender, birthdate: p.birthdate },
       identifiers: [{
         identifier: p.patient_identifier,
         identifierType: 'OpenMRS ID',
-        preferred: true,
+        preferred: true
       }],
-      ...p,
+      ...p
     };
     onPatientSelect(formatted);
   };
 
-  // ─── 스타일 정의 ─────────────────────────────────────────────────
-  const containerStyle = {
-    padding: '0.5rem',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#f8f9fa',
-  };
-  const headerStyle = {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    marginBottom: '8px',
-    color: '#333',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '8px',
-    backgroundColor: '#fff',
-    borderRadius: '4px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-  };
-  const refreshButtonStyle = {
-    padding: '6px 10px',
-    fontSize: '11px',
-    backgroundColor: '#2196f3',
-    color: 'white',
-    border: 'none',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  };
-  const listContainerStyle = {
-    flex: 1,
-    overflowY: 'auto',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '6px',
-    padding: '4px',
-  };
-  const emptyStateStyle = {
-    gridColumn: '1 / -1',
-    textAlign: 'center',
-    padding: '40px 20px',
-    color: '#999',
-  };
-  const errorStyle = {
-    padding: '10px',
-    backgroundColor: '#ffebee',
-    color: '#c62828',
-    border: '1px solid #ffcdd2',
-    borderRadius: '4px',
-    fontSize: '12px',
-    marginBottom: '12px',
-  };
-  const patientCardStyle = isSelected => ({
-    backgroundColor: isSelected ? '#e3f2fd' : '#fff',
-    border: isSelected ? '2px solid #2196f3' : '1px solid #ddd',
-    borderRadius: '4px',
-    padding: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: isSelected
-      ? '0 2px 8px rgba(33,150,243,0.3)'
-      : '0 1px 3px rgba(0,0,0,0.1)',
-    position: 'relative',
-    minHeight: '80px',
+  // prop으로 받은 searchTerm을 사용하여 필터링
+  const filteredPatients = assignedPatients.filter(patient => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const matchesName = (patient.display || patient.name || '').toLowerCase().includes(lowerCaseSearchTerm);
+    const matchesId = (patient.patient_identifier || '').toLowerCase().includes(lowerCaseSearchTerm);
+    return matchesName || matchesId;
   });
-  const roomBadgeStyle = roomNumber => ({
-    position: 'absolute',
-    top: '4px',
-    right: '4px',
-    padding: '2px 4px',
-    borderRadius: '8px',
-    fontSize: '9px',
-    fontWeight: 'bold',
-    color: '#fff',
-    backgroundColor: roomNumber === 1 ? '#4caf50' : '#2196f3',
-  });
-  const patientNameStyle = {
-    fontSize: '12px',
-    fontWeight: 'bold',
-    marginBottom: '4px',
-    color: '#333',
-    lineHeight: '1.2',
-  };
-  const patientInfoStyle = {
-    fontSize: '10px',
-    color: '#666',
-    marginBottom: '2px',
-    lineHeight: '1.1',
-  };
-  // ────────────────────────────────────────────────────────────────────
 
   if (loading && assignedPatients.length === 0) {
-    return (
-      <div style={containerStyle}>
-        <div style={{ ...headerStyle, justifyContent: 'center' }}>
-          🔄 배정된 환자 목록을 불러오는 중...
-        </div>
-      </div>
-    );
+    return <div style={{ padding: 16 }}>배정된 환자 목록을 불러오는 중...</div>;
   }
 
   return (
-    <div style={containerStyle}>
-      {/* 헤더 + 새로고침 버튼 */}
-      <div style={headerStyle}>
-        <span>🧑‍⚕️ 진료실 배정된 환자 ({assignedPatients.length}명)</span>
-        <button
-          onClick={fetchAssignedPatients}
-          style={refreshButtonStyle}
-          disabled={loading}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#1976d2')}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#2196f3')}
-        >
-          {loading ? '⏳' : '🔄'}
-        </button>
-      </div>
+    <div style={{ padding: 8, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {error && <div style={{ color: 'red', marginBottom: 8 }}>⚠️ {error}</div>}
 
-      {/* 에러 메시지 */}
-      {error && <div style={errorStyle}>⚠️ {error}</div>}
+      {/* 검색 입력 필드는 EmrMainPage.jsx로 이동했으므로 이 부분 제거 */}
+      {/* <input
+        type="text"
+        placeholder="이름 또는 ID로 검색..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          marginBottom: '12px',
+          padding: '8px',
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          fontSize: '14px',
+        }}
+      /> */}
 
-      {/* 환자 카드 그리드 */}
-      <div style={listContainerStyle}>
-        {assignedPatients.length === 0 ? (
-          <div key="empty-state" style={emptyStateStyle}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🏥</div>
-            <div style={{ fontSize: '16px', marginBottom: '6px' }}>
-              현재 배정된 환자가 없습니다
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(180px,1fr))',
+          gap: 8,
+          border: '1px solid #eee', // 전체 검색과 구분되도록 테두리 추가
+          borderRadius: '8px',
+          padding: '8px',
+          minHeight: '200px' // 최소 높이 설정
+        }}
+      >
+        {filteredPatients.length === 0
+          ? <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#666', padding: '20px' }}>
+              {searchTerm ? '검색 결과가 없습니다.' : '현재 배정된 환자가 없습니다.'}
             </div>
-            <div style={{ fontSize: '12px', color: '#ccc' }}>
-              대기 목록에서 환자를 진료실에 배정해주세요
-            </div>
-          </div>
-        ) : (
-          assignedPatients.map(p => {
-            const uuid = p.openmrs_patient_uuid || p.uuid;
-            const isSel = selectedPatient?.uuid === uuid;
-            return (
-              <div
-                key={uuid}
-                onClick={() => handlePatientClick(p)}
-                style={patientCardStyle(isSel)}
-              >
-                <div style={roomBadgeStyle(p.assigned_room)}>
-                  {p.assigned_room}번
+          : filteredPatients.map(p => {
+              const uuid = p.openmrs_patient_uuid || p.uuid;
+              const isSel = selectedPatient?.uuid === uuid;
+              return (
+                <div
+                  key={uuid}
+                  onClick={() => handleClick(p)}
+                  style={{
+                    border: isSel ? '2px solid #1976d2' : '1px solid #ccc',
+                    borderRadius: 4,
+                    padding: 8,
+                    cursor: 'pointer',
+                    background: isSel ? '#e3f2fd' : '#fff',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    fontSize: 10,
+                    background: '#1976d2',
+                    color: '#fff',
+                    borderRadius: 4,
+                    padding: '2px 4px'
+                  }}>
+                    {p.assigned_room}번
+                  </div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>👤 {p.display || p.name}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>🆔 {p.patient_identifier}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>
+                    👥 {p.gender === 'M' ? '남성' : '여성'} | 🎂 {p.age}세
+                  </div>
+                  <button
+                    onClick={e => { e.stopPropagation(); handleUnassign(p); }}
+                    style={{
+                      marginTop: 8,
+                      padding: '4px 6px',
+                      background: '#f44336',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      fontSize: 12,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ❌ 해제
+                  </button>
                 </div>
-                <div style={patientNameStyle}>
-                  👤 {p.display || p.name || p.patient_identifier}
-                </div>
-                <div style={patientInfoStyle}>🆔 {p.patient_identifier}</div>
-                <div style={patientInfoStyle}>
-                  👥 {p.gender === 'M' ? '남성' : p.gender === 'F' ? '여성' : '-'} | 🎂{' '}
-                  {p.age || '-'}세
-                </div>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+        }
       </div>
     </div>
   );
