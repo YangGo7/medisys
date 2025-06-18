@@ -1,5 +1,3 @@
-# backend/medical_integration/urls.py
-
 from django.urls import path
 from . import views
 from .views import (
@@ -7,16 +5,16 @@ from .views import (
     proxy_openmrs_providers,
     identifier_based_waiting_list,
     create_identifier_based_mapping,
-    reception_list_view,            # ✅ 추가
+    reception_list_view,             # ✅ 추가
     UrgentAlertList,
     UrgentAlertCount,
     AlertMarkRead,
     unassign_room,
     get_patient_mapping,
     assign_room,
-    completed_patients_list         # ✅ 완료 환자 리스트 view
+    completed_patients_list          # ✅ 완료 환자 리스트 view
 )
-from .views import update_patient_status  # ✅ 진료 상태 업데이트 API
+# from .views import update_patient_status  # ✅ 진료 상태 업데이트 API <-- 이 줄을 삭제합니다.
 
 app_name = 'medical_integration'
 
@@ -26,8 +24,8 @@ urlpatterns = [
     path('test-connections/', views.test_all_connections, name='test_connections'),
 
     # OCS 매핑관련
-    path('openmrs/patients/map/',   views.list_openmrs_patients_map,    name='list_openmrs_patients_map'),
-    path('openmrs/providers/map/',  views.list_openmrs_providers_map,   name='list_openmrs_providers_map'),
+    path('openmrs/patients/map/',   views.list_openmrs_patients_map,     name='list_openmrs_patients_map'),
+    path('openmrs/providers/map/',  views.list_openmrs_providers_map,    name='list_openmrs_providers_map'),
 
     # OpenMRS 환자 관리
     path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
@@ -67,7 +65,7 @@ urlpatterns = [
     path('openmrs/providers/', proxy_openmrs_providers, name='openmrs_providers'),
     path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
     path('identifier-waiting/', identifier_based_waiting_list, name='identifier_based_waiting'),
-    path('reception-list/', reception_list_view, name='reception_list'),             # ✅ 오늘 접수 리스트
+    path('reception-list/', reception_list_view, name='reception_list'),                 # ✅ 오늘 접수 리스트
     path('identifier-based/', create_identifier_based_mapping, name='create_identifier_based_mapping'),
 
     # 알림 API
@@ -81,9 +79,12 @@ urlpatterns = [
     path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),
     path('waiting-board/', views.waiting_board_view, name='waiting_board'),
 
-    # 진료 상태 업데이트
-    path('patient-mappings/update-status/', update_patient_status, name='update_patient_status'),
+    # 진료 상태 업데이트 <-- 이 섹션 전체를 삭제합니다.
+    # path('patient-mappings/update-status/', update_patient_status, name='update_patient_status'),
 
     # 완료된 환자 리스트 조회
     path('completed-patients/', completed_patients_list, name='completed_patients_list'),
+    
+    path('daily-summary-stats/', views.get_daily_summary_stats, name='daily_summary_stats'),
+
 ]

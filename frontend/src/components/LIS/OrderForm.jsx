@@ -12,7 +12,7 @@ const OrderForm = () => {
   const [patientId, setPatientId] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [collectionDate, setCollectionDate] = useState('');
-  const [orderDate, setOrderDate] = useState(new Date().toISOString().slice(0, 16));
+  const [orderDate] = useState(new Date().toISOString().slice(0, 16));
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/alias-mapping/`)

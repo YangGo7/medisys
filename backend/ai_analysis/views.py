@@ -495,16 +495,71 @@ def analyze_with_ssd(request):
     
     return JsonResponse({'status': 'error', 'message': 'POST only'}, status=405)
 
+# def get_analysis_results(request, study_uid):
+#     """저장된 AI 분석 결과 조회 - 해상도 정보 포함"""
+#     try:
+#         from .models import AIAnalysisResult
+#         results = AIAnalysisResult.objects.filter(study_uid=study_uid).order_by('-created_at')
+        
+#         data = []
+#         for result in results:
+#             # 🔥 저장된 결과는 원본 해상도로 반환 (DB에 저장된 값)
+#             data.append({
+#                 'id': result.id,
+#                 'label': result.label,
+#                 'bbox': result.bbox,
+#                 'confidence': result.confidence_score,
+#                 'description': result.ai_text,
+#                 'model': result.model_name,
+#                 'patient_id': result.patient_id,
+#                 'image_width': result.image_width,    # DB 저장된 원본 해상도
+#                 'image_height': result.image_height,  # DB 저장된 원본 해상도
+#                 'created_at': result.created_at.isoformat()
+#             })
+        
+#         return JsonResponse({
+#             'status': 'success',
+#             'study_uid': study_uid,
+#             'count': len(data),
+#             'results': data
+#         })
+        
+#     except Exception as e:
+#         logger.error(f"결과 조회 실패: {e}")
+#         return JsonResponse({
+#             'status': 'error', 
+#             'message': str(e)
+#         }, status=500)
+
 def get_analysis_results(request, study_uid):
-    """저장된 AI 분석 결과 조회 - 해상도 정보 포함"""
+    """저장된 AI 분석 결과 조회 - 모델별 구분"""
     try:
         from .models import AIAnalysisResult
-        results = AIAnalysisResult.objects.filter(study_uid=study_uid).order_by('-created_at')
         
-        data = []
+        # 🔥 쿼리 파라미터로 모델 타입 필터링 가능
+        model_type = request.GET.get('model_type', None)
+        
+        if model_type:
+            # 특정 모델 결과만 조회
+            model_name_mapping = {
+                'yolo': 'YOLOv8',
+                'ssd': 'SSD'
+            }
+            model_name = model_name_mapping.get(model_type.lower(), model_type)
+            results = AIAnalysisResult.objects.filter(
+                study_uid=study_uid, 
+                model_name=model_name
+            ).order_by('-created_at')
+        else:
+            # 모든 모델 결과 조회
+            results = AIAnalysisResult.objects.filter(study_uid=study_uid).order_by('model_name', '-created_at')
+
+        # 🔥 모델별로 그룹화
+        grouped_data = {}
+        all_data = []
+        
         for result in results:
-            # 🔥 저장된 결과는 원본 해상도로 반환 (DB에 저장된 값)
-            data.append({
+            result_data = {
                 'id': result.id,
                 'label': result.label,
                 'bbox': result.bbox,
@@ -512,16 +567,25 @@ def get_analysis_results(request, study_uid):
                 'description': result.ai_text,
                 'model': result.model_name,
                 'patient_id': result.patient_id,
-                'image_width': result.image_width,    # DB 저장된 원본 해상도
-                'image_height': result.image_height,  # DB 저장된 원본 해상도
+                'image_width': result.image_width,
+                'image_height': result.image_height,
                 'created_at': result.created_at.isoformat()
-            })
-        
+            }
+            
+            all_data.append(result_data)
+            
+            # 모델별 그룹화
+            if result.model_name not in grouped_data:
+                grouped_data[result.model_name] = []
+            grouped_data[result.model_name].append(result_data)
+
         return JsonResponse({
             'status': 'success',
             'study_uid': study_uid,
-            'count': len(data),
-            'results': data
+            'total_count': len(all_data),
+            'models': list(grouped_data.keys()),
+            'grouped_by_model': grouped_data,  # 🔥 모델별로 그룹화된 결과
+            'results': all_data  # 기존 호환성을 위한 전체 결과
         })
         
     except Exception as e:
@@ -530,6 +594,7 @@ def get_analysis_results(request, study_uid):
             'status': 'error', 
             'message': str(e)
         }, status=500)
+
 
 @csrf_exempt
 def clear_results(request, study_uid):

@@ -22,43 +22,48 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from django.utils import timezone
 from datetime import timedelta
+from medical_integration.models import PatientMapping, Alert
 
 logger = logging.getLogger('medical_integration')
+
 @api_view(['GET'])
 def reception_list_view(request):
     """
     오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
     mapping_id, patient_identifier, display, status, created_at,
-    gender, birthdate 필드와 함께 반환
+    gender, birthdate, assigned_room 필드와 함께 반환
+    (진료 진행도 페이지에서 사용)
     """
     from django.utils import timezone
 
     today = timezone.now().date()
+    
+    # 💡 중요: '진료 진행도' 페이지가 '오늘 생성된 환자'만 보여주는 것이 아니라,
+    # '현재 진행 중인 모든 환자'를 보여줘야 한다면, 아래 filter 조건을 확장해야 합니다.
+    # 예: PatientMapping.objects.filter(is_active=True).exclude(status='complete')
+    # 현재는 요청하신 대로 '오늘 생성된' 필터 조건을 유지하면서 필요한 필드를 추가합니다.
     mappings = PatientMapping.objects.filter(
-        created_date__date=today,
+        created_date__date=today, # <-- 이 필터로 인해 '오늘 생성된' 환자만 나옴
         mapping_type='IDENTIFIER_BASED',
         is_active=True
     ).order_by('-created_date')
 
-    api = OpenMRSAPI()
+    # PatientMapping 모델에 이미 gender, birthdate, status, assigned_room 필드가 존재하므로,
+    # OpenMRSAPI를 다시 호출하여 정보를 가져올 필요 없이, 모델에서 직접 가져옵니다.
+    # 이렇게 하면 API 호출 수를 줄이고 성능을 개선할 수 있습니다.
+    
     data = []
     for m in mappings:
-        # OpenMRS에서 환자 상세 정보 가져오기
-        try:
-            patient   = api.get_patient(m.openmrs_patient_uuid)
-            gender_raw    = patient.get('person', {}).get('gender', '-')
-            bd_raw        = patient.get('person', {}).get('birthdate', '')
-            # "YYYY-MM-DDT..." → "YYYY-MM-DD"
-            birthdate     = bd_raw.split('T')[0] if bd_raw else '-'
-            gender        = gender_raw or '-'
-        except Exception:
-            gender, birthdate = '-', '-'
+        # PatientMapping 모델의 필드들을 직접 사용
+        gender = m.gender if m.gender else '-'
+        birthdate = str(m.birthdate) if m.birthdate else '-' # DateField는 직접 str() 변환 필요
 
         data.append({
             'mapping_id':         m.mapping_id,
             'patient_identifier': m.patient_identifier,
             'display':            m.display or m.patient_identifier,
-            'status':             m.status,
+            'status':             m.status,             # PatientMapping 모델의 status 필드
+            'assigned_room':      m.assigned_room,      # PatientMapping 모델의 assigned_room 필드
             'created_at':         m.created_date.isoformat(),
             'gender':             gender,
             'birthdate':          birthdate,
@@ -1583,22 +1588,36 @@ def unassign_room(request):
     """
     room = request.data.get('room')
     if room not in [1, 2]:
+        logger.warning(f"Unassign room failed: Invalid room number {room}")
         return Response({'error': '유효하지 않은 진료실 번호입니다.'}, status=400)
 
-    # 해당 진료실에 배정된 환자 찾기
     try:
-        patient = PatientMapping.objects.get(assigned_room=room)
-    except PatientMapping.DoesNotExist:
-        return Response({'message': f'{room}번 진료실에는 배정된 환자가 없습니다.'}, status=200)
+        # 해당 진료실에 배정된 환자 찾기
+        qs = PatientMapping.objects.filter(assigned_room=room, is_active=True)
+        
+        if not qs.exists():
+            logger.info(f"Room {room} has no assigned patients to unassign.")
+            return Response({'message': f'{room}번 진료실에는 배정된 환자가 없습니다.'}, status=200)
 
-    # 진료실 해제 처리
-    patient.assigned_room = None
-    patient.just_assigned = False
-    patient.save()
+        # 진료실 해제 처리 (assigned_room 필드만 업데이트)
+        qs.update(assigned_room=None) # ✅ 수정: 'just_assigned' 필드 업데이트 제거
 
-    return Response({'success': True, 'message': f'{room}번 진료실 배정이 해제되었습니다.'})
+        logger.info(f"✅ Room {room} unassigned successfully. Affected patients count: {qs.count()}")
+        return Response({'success': True, 'message': f'{room}번 진료실 배정이 해제되었습니다.'})
+
+    except Exception as e:
+        # 오류 발생 시 로그를 남기고 500 에러를 반환
+        logger.error(f"Error unassigning room {room}: {e}", exc_info=True) # exc_info=True로 트레이스백 포함
+        return Response({'success': False, 'error': f'서버 내부 오류: {str(e)}'}, status=500)
+
 @api_view(['GET'])
 def identifier_based_waiting_list(request):
+    """
+    오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
+    mapping_id, patient_identifier, display, status, created_at,
+    gender, birthdate, assigned_room, age 필드와 함께 반환합니다.
+    (진료 진행도 페이지 및 환자 정보 패널에서 사용)
+    """
     today = timezone.now().date()
     mappings = PatientMapping.objects.filter(
         created_date__date=today,
@@ -1608,22 +1627,28 @@ def identifier_based_waiting_list(request):
 
     result = []
     for m in mappings:
-        try:
-            result.append({
-                'mapping_id': m.mapping_id,
-                'patient_identifier': m.patient_identifier,
-                'name': m.display or m.patient_identifier or '이름 없음',
-                'display': m.display or m.patient_identifier,
-                'gender': m.gender or '-',
-                'birthdate': str(m.birthdate) if m.birthdate else '-',
-                'waitTime': m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
-                'assigned_room': m.assigned_room,
-            })
+        # PatientMapping 모델에 저장된 필드들을 직접 사용
+        gender = m.gender if m.gender else '-'
+        birthdate_str = str(m.birthdate) if m.birthdate else '-' # DateField는 str() 변환 필요
+        
+        # 나이 계산 및 결과에 포함
+        age = calculate_age_from_birthdate(birthdate_str) # 계산된 나이
+        
+        result.append({
+            'mapping_id':         m.mapping_id,
+            'patient_identifier': m.patient_identifier,
+            'name':               m.display or m.patient_identifier or '이름 없음',
+            'display':            m.display or m.patient_identifier,
+            'gender':             gender,
+            'birthdate':          birthdate_str,
+            'age':                age, # <-- 'age' 필드를 결과에 추가
+            'waitTime':           m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
+            'assigned_room':      m.assigned_room,
+            'created_at':         m.created_date.isoformat(),
+            'status':             m.status,
+        })
 
-        except Exception as e:
-            logger.warning(f"[대기목록] 매핑 {m.mapping_id} 처리 실패: {e}")
     return Response(result)
-
 
 
 @api_view(['GET'])
@@ -1687,23 +1712,6 @@ def waiting_board_view(request):
         "assigned_recent": assigned_recent
     })
     
-@api_view(['POST'])
-def update_patient_status(request):
-    mapping_id = request.data.get('mapping_id')
-    new_status = request.data.get('status')
-
-    if not mapping_id or not new_status:
-        return Response({'error': 'mapping_id와 status는 필수입니다.'}, status=http_status.HTTP_400_BAD_REQUEST)
-
-    try:
-        patient = PatientMapping.objects.get(mapping_id=mapping_id)
-        patient.status = new_status
-        patient.save()
-        return Response({'message': f'상태가 {new_status}로 변경되었습니다.'})
-    except PatientMapping.DoesNotExist:
-        return Response({'error': '해당 환자를 찾을 수 없습니다.'}, status=http_status.HTTP_404_NOT_FOUND)
-    
-    
 
 @api_view(['GET'])
 def completed_patients_list(request):
@@ -1723,3 +1731,41 @@ def completed_patients_list(request):
         })
 
     return Response(data)
+
+
+@api_view(['GET'])
+def get_daily_summary_stats(request):
+    """
+    오늘의 진료 요약 통계 (총 진료 건수, AI 분석 건수, 영상 검사 수)를 반환합니다.
+    """
+    today = timezone.now().date() # 오늘 날짜를 가져옵니다.
+    
+    # 1. 총 진료 건수 계산 (오늘 접수된 환자 중 진료 중이거나 완료된 환자 수)
+    total_consultations_count = PatientMapping.objects.filter(
+        created_date__date=today, # 오늘 생성된 환자만
+        is_active=True,           # 활성화된 환자만
+        status__in=['in_progress', 'complete'] # '진료 중'이거나 '진료 완료' 상태인 환자만
+    ).count()
+
+    # 2. AI 분석 건수 계산 (오늘 발생한 AI 오류 알림 수로 임시로 사용)
+    # 실제 AI 분석 '건수'는 더 복잡할 수 있으나, 현재 모델을 기준으로 가장 가까운 데이터를 사용합니다.
+    ai_analysis_count = Alert.objects.filter(
+        created_at__date=today,   # 오늘 생성된 알림만
+        type__in=['AI_ERR']       # AI 오류 타입만 카운트 (실제 AI 활용도와는 다를 수 있음)
+    ).count()
+
+    # 3. 영상 검사 수 계산 (오늘 생성된 환자 중 Orthanc ID가 있는 매핑 수)
+    # 이것도 임시 계산 방식이며, 실제 Orthanc 연동 방식에 따라 더 정확한 집계가 필요할 수 있습니다.
+    imaging_exam_count = PatientMapping.objects.filter(
+        created_date__date=today,         # 오늘 생성된 환자 매핑만
+        is_active=True,                   # 활성화된 매핑만
+        orthanc_patient_id__isnull=False  # Orthanc ID가 있는 매핑만
+    ).count()
+    
+    # 계산된 숫자들을 웹으로 보낼 준비를 합니다.
+    return Response({
+        "success": True, # 성공했다고 알려줍니다.
+        "total_consultations": total_consultations_count, # 총 진료 건수
+        "ai_analysis_count": ai_analysis_count,       # AI 분석 건수
+        "imaging_exam_count": imaging_exam_count,     # 영상 검사 수
+    })

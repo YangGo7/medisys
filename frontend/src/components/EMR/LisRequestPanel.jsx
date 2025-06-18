@@ -95,8 +95,9 @@ const LisRequestPanel = ({ patient }) => {
     console.error(`${context} API 에러:`, error);
     
     if (error.response) {
-      const status = error.response.status;
+      const status = error?.response?.status || 'No Response';
       const message = error.response.data?.message || error.response.data?.detail || error.message;
+      const trace = error?.response?.data?.trace || null;
       
       switch (status) {
         case 400:
@@ -212,6 +213,9 @@ const LisRequestPanel = ({ patient }) => {
       
     } catch (err) {
       console.error('❌ LIS 검사 주문 실패:', err);
+      console.error('📛 에러 응답:', err.response?.data);
+      console.error('📛 서버 메시지:', err.response?.data?.message);
+      console.error('📛 서버 traceback:', err.response?.data?.trace);
       
       // 에러 로그 저장 (orderData가 null이 아닐 때만)
       if (orderData) {

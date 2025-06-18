@@ -52,7 +52,7 @@
 
 .result-table thead {
   background-color: #bbdefb; /* 아이보리 섞인 하늘색 */
-  color: #0d47a1;
+  color: #000000;
 }
 
 .result-table th,
@@ -77,7 +77,7 @@
 .group-header {
   background-color: #e1f5fe;
   font-weight: 600;
-  color: #01579b;
+  color: #e3f2fd;
 }
 
 .group-header td {

@@ -10,7 +10,7 @@ const LogViewer = () => {
   const [showTable, setShowTable] = useState(false);
 
   return (
-    <section style={{ marginBottom: '2rem' }}>
+    <section style={{ marginBottom: '2rem', paddingLeft: '50px' }}>
       <h3>◉ 요청 로그 확인</h3>
       <button onClick={() => setShowTable((prev) => !prev)} style={btnStyle}>
         {showTable ? '닫기' : '로그 테이블 보기'}
@@ -45,6 +45,7 @@ const LogViewer = () => {
     </section>
   );
 };
+
 
 const btnStyle = {
   marginTop: '0.5rem',

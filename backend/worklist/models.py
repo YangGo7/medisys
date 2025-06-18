@@ -8,7 +8,7 @@ class StudyRequest(models.Model):
     
     # 2-5. 환자 정보 (React에서 입력)
     patient_id = models.CharField(max_length=20)        
-    patient_name = models.CharField(max_length=100)     
+    patient_name = models.CharField(max_length=100) 
     birth_date = models.DateField()                     
     sex = models.CharField(max_length=1, choices=[('M', '남성'), ('F', '여성')])  
     
@@ -25,6 +25,9 @@ class StudyRequest(models.Model):
         ('XA', 'XA (Angiography)'),
         ('MG', 'MG (Mammography)'),
     ])
+    
+    # 🔥 추가!
+    study_description = models.CharField(max_length=200, blank=True, null=True)
     
     # 8. 요청 일시 (버튼 누르는 시간 자동 생성)
     request_datetime = models.DateTimeField(auto_now_add=True)  

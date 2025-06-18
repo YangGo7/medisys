@@ -1,18 +1,28 @@
 // src/components/EMR/ImagingRequestPanel.jsx
 import React, { useState, useEffect } from 'react';
+// **🔥**
+const logEventEmitter = require('../utils/logEventEmitter');
 
-const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess }) => {
+const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, onUpdateLog }) => {
   const [formData, setFormData] = useState({
     modality: '',
     body_part: '',
     study_description: '',
     clinical_info: '',
     priority: 'routine',
-    requesting_physician: '' // 🔥 의사 정보 자동 채우기
+    requesting_physician: '' // 의사 정보 자동 채우기
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [autoFilledData, setAutoFilledData] = useState(null); // 🔥 자동 채워진 환자 정보
+  const [autoFilledData, setAutoFilledData] = useState(null); // 자동 채워진 환자 정보
+
+  // 디버깅용: 이 컴포넌트가 사용하는 방송국 ID를 콘솔에 출력합니다.
+  useEffect(() => {
+    console.log('--- [2] EMR 페이지가 방송국에 접속합니다. ---');
+    if (logEventEmitter && typeof logEventEmitter.getId === 'function') {
+      console.log('--- [3]🖥️ ImagingRequestPanel 방송국 ID:', logEventEmitter.getId());
+    }
+  }, []);
 
   const modalityOptions = [
     { value: 'CR', label: 'Chest X-ray (흉부 X선)' },
@@ -197,43 +207,50 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess }) => {
       selectedPatient
     });
 
-    try {
-      // 🔥 완전히 자동화된 요청 데이터 구성
-      const requestData = {
-        // 🔥 자동으로 채워지는 필드들
-        patient_id: autoFilledData.patient_id,
-        patient_name: autoFilledData.patient_name,
-        birth_date: autoFilledData.birth_date,
-        sex: autoFilledData.sex,
-        
-        // 🔥 사용자가 입력하는 필드들
-        modality: formData.modality,
-        body_part: formData.body_part,
-        requesting_physician: formData.requesting_physician,
-        
-        // 선택적 필드들
-        study_description: formData.study_description || `${formData.modality} - ${formData.body_part}`,
-        clinical_info: formData.clinical_info || '진료 의뢰',
-        priority: formData.priority,
-        
-        // 메타데이터
-        created_by: 'emr_user',
-        request_source: 'EMR_SYSTEM',
-        patient_room: autoFilledData.assigned_room || null
-      };
+    // 🔥 완전히 자동화된 요청 데이터 구성
+    const requestData = {
+      // 🔥 자동으로 채워지는 필드들
+      patient_id: autoFilledData.patient_id,
+      patient_name: autoFilledData.patient_name,
+      birth_date: autoFilledData.birth_date,
+      sex: autoFilledData.sex,
+      
+      // 🔥 사용자가 입력하는 필드들
+      modality: formData.modality,
+      body_part: formData.body_part,
+      requesting_physician: formData.requesting_physician,
+      
+      // 선택적 필드들
+      study_description: formData.study_description || `${formData.modality} - ${formData.body_part}`,
+      clinical_info: formData.clinical_info || '진료 의뢰',
+      priority: formData.priority,
+      
+      // 메타데이터
+      created_by: 'emr_user',
+      request_source: 'EMR_SYSTEM',
+      patient_room: autoFilledData.assigned_room || null
+    };
 
-      console.log('📤 최종 전송 데이터:', requestData);
+    // 🔥 fetch를 호출하기 전에 로그 객체 만들기
+    const newLog = {
+      timestamp: new Date().toISOString(), // 현재 시간 기록
+      status: 'pending',                  // 상태는 '요청 중'
+      request: requestData,               // 방금 만든 요청 데이터를 저장
+      response: null,                     // 응답은 아직 없으므로 null
+    };
+
+    console.log('📤 최종 전송 데이터:', requestData);
+    
+    try {
+      if (onNewRequest) onNewRequest(newLog);
 
       // 백엔드 API 호출
       const response = await fetch('http://35.225.63.41:8000/api/worklist/create-from-emr/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
       });
 
       console.log('📥 응답 상태:', response.status);
+
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -242,10 +259,13 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess }) => {
       }
 
       const result = await response.json();
+      // **** 서버 응답이 성공하면, 결과를 JSON으로 파싱
+      if (onUpdateLog) onUpdateLog({ ...newLog, status: 'success', response: result });
       console.log('✅ 성공 응답:', result);
 
       // 성공 처리
-      if (result.success) {
+      if (result.success) { 
+        
         // 🔥 폼 초기화 (환자 정보는 유지)
         setFormData(prev => ({
           modality: '',
@@ -259,9 +279,16 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess }) => {
         // 성공 알림
         alert(`✅ 영상검사 요청이 성공적으로 등록되었습니다!\n\n환자: ${autoFilledData.patient_name}\n검사: ${formData.modality} - ${formData.body_part}`);
 
-        if (onRequestSuccess) {
-          onRequestSuccess(result);
+        try {
+          const channel = new BroadcastChannel('order_channel');
+          channel.postMessage('newOrderCreated');
+          channel.close(); // 신호를 보낸 후에는 채널을 닫아주는 것이 좋습니다.
+          console.log('✅ BroadcastChannel로 "newOrderCreated" 신호를 보냈습니다.');
+        } catch (bcError) {
+          console.error('BroadcastChannel 신호 보내기 실패:', bcError);
         }
+
+        if (onRequestSuccess) onRequestSuccess(result);
       } else {
         throw new Error(result.error || '요청 처리 중 오류가 발생했습니다.');
       }
@@ -269,6 +296,9 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess }) => {
     } catch (error) {
       console.error('❌ 영상검사 요청 실패:', error);
       setError(`요청 실패: ${error.message}`);
+
+      // 부모에게 "실패" 보고
+      if (onUpdateLog) onUpdateLog({ ...newLog, status: 'error', response: error.message });
     } finally {
       setLoading(false);
     }

@@ -1,14 +1,12 @@
-
-
+// frontend/src/pacsapp/components/WorkList/WorkList.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const WorkList = ({ onStudySelect }) => {
   const [workList, setWorkList] = useState([]);
   const [filteredWorkList, setFilteredWorkList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // 필터 상태
   const [filters, setFilters] = useState({
     patientId: '',
     patientName: '',
@@ -19,7 +17,8 @@ const WorkList = ({ onStudySelect }) => {
     reportStatus: ''
   });
 
-  const API_BASE_URL = 'http://localhost:8000/api';
+  const navigate = useNavigate();
+  const API_BASE_URL = 'http://35.225.63.41:8000/api';
 
   useEffect(() => {
     fetchWorkList();
@@ -30,6 +29,7 @@ const WorkList = ({ onStudySelect }) => {
       setLoading(true);
       setError(null);
       
+      // 🔥 수정: 올바른 엔드포인트 사용
       const response = await fetch(`${API_BASE_URL}/worklist/work-list/`);
       
       if (!response.ok) {
@@ -39,7 +39,7 @@ const WorkList = ({ onStudySelect }) => {
       const result = await response.json();
       console.log('받은 데이터:', result);
       
-      // Django work_list 함수의 응답 구조에 맞게 처리
+      // 🔥 수정: Django work_list 함수의 응답 구조에 맞게 처리
       if (result.status === 'success' && result.data && Array.isArray(result.data)) {
         setWorkList(result.data);
         setFilteredWorkList(result.data);
@@ -57,37 +57,65 @@ const WorkList = ({ onStudySelect }) => {
     }
   };
 
-  // const fetchWorkList = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError(null);
+  // 🔥 분석 버튼 클릭 핸들러 - OHIF + AI 분석 페이지로 이동
+  const handleAnalyzeStudy = async (studyItem) => {
+    try {
+      console.log('🚀 분석 시작:', studyItem);
       
-  //     const response = await fetch(`${API_BASE_URL}/study-requests/`);
+      // 1. WorkList ID를 기반으로 매핑된 DICOM Studies 조회
+      const patientMappingResponse = await fetch(
+        `${API_BASE_URL}/integration/worklist/${studyItem.id}/mapped-studies/`
+      );
       
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  //     }
+      if (!patientMappingResponse.ok) {
+        alert('환자의 DICOM 데이터를 찾을 수 없습니다.');
+        return;
+      }
       
-  //     const result = await response.json();
-  //     console.log('받은 데이터:', result);
+      const mappingData = await patientMappingResponse.json();
       
-  //     setWorkList(result);
-  //     setFilteredWorkList(result);
+      if (!mappingData.success || !mappingData.studies || mappingData.studies.length === 0) {
+        alert('해당 환자의 DICOM 영상이 없습니다. 먼저 DICOM 파일을 업로드해주세요.');
+        return;
+      }
       
-  //   } catch (err) {
-  //     console.error('API 호출 에러:', err);
-  //     setError(err.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      // 2. 가장 최근 Study 선택
+      const latestStudy = mappingData.studies[0];
+      const studyUID = latestStudy.study_instance_uid;
+      
+      if (!studyUID) {
+        alert('Study UID를 찾을 수 없습니다.');
+        return;
+      }
+      
+      // 3. AI 분석 페이지로 이동 (studyUID와 환자 정보 전달)
+      navigate('/analysis', {
+        state: {
+          studyUID: studyUID,
+          patientInfo: {
+            patient_id: studyItem.patient_id,
+            patient_name: studyItem.patient_name,
+            modality: studyItem.modality,
+            body_part: studyItem.body_part,
+            request_id: studyItem.id
+          },
+          dicomStudies: mappingData.studies,
+          worklistItem: studyItem
+        }
+      });
+      
+    } catch (error) {
+      console.error('분석 시작 실패:', error);
+      alert('분석을 시작할 수 없습니다: ' + error.message);
+    }
+  };
 
   // 필터 적용 함수
   const applyFilters = () => {
-    let filtered = workList.filter(item => {
+    const filtered = workList.filter(item => {
       return (
-        (filters.patientId === '' || item.patient_id?.toLowerCase().includes(filters.patientId.toLowerCase())) &&
-        (filters.patientName === '' || item.patient_name?.toLowerCase().includes(filters.patientName.toLowerCase())) &&
+        (filters.patientId === '' || item.patient_id.includes(filters.patientId)) &&
+        (filters.patientName === '' || item.patient_name.toLowerCase().includes(filters.patientName.toLowerCase())) &&
         (filters.modality === '' || item.modality === filters.modality) &&
         (filters.bodyPart === '' || item.body_part?.toLowerCase().includes(filters.bodyPart.toLowerCase())) &&
         (filters.requestingPhysician === '' || item.requesting_physician?.toLowerCase().includes(filters.requestingPhysician.toLowerCase())) &&
@@ -162,28 +190,26 @@ const WorkList = ({ onStudySelect }) => {
 
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <div style={{ fontSize: '18px', color: '#6c757d' }}>데이터를 불러오는 중...</div>
+      <div style={{ textAlign: 'center', padding: '60px', color: '#6c757d' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+        <p style={{ fontSize: '18px' }}>워크리스트를 불러오는 중...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h3 style={{ color: '#e74c3c', marginBottom: '10px' }}>에러가 발생했습니다</h3>
-        <p style={{ color: '#6c757d', marginBottom: '20px' }}>{error}</p>
-        <button 
-          onClick={fetchWorkList} 
-          style={{
-            backgroundColor: '#3498db',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
+      <div style={{ textAlign: 'center', padding: '60px', color: '#e74c3c' }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
+        <p style={{ fontSize: '18px', marginBottom: '20px' }}>오류: {error}</p>
+        <button onClick={fetchWorkList} style={{
+          padding: '10px 20px',
+          backgroundColor: '#3498db',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
           다시 시도
         </button>
       </div>
@@ -191,356 +217,144 @@ const WorkList = ({ onStudySelect }) => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      {/* 헤더 섹션 */}
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 15px 0', fontSize: '28px', color: '#2c3e50' }}>
-          검사 요청 목록 (Work List)
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      {/* 헤더 */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '30px',
+        borderBottom: '2px solid #3498db',
+        paddingBottom: '15px'
+      }}>
+        <h2 style={{ margin: 0, color: '#2c3e50', fontSize: '28px', fontWeight: 'bold' }}>
+          📋 워크리스트 관리
         </h2>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '15px'
-        }}>
-          <p style={{ margin: 0, fontSize: '16px', color: '#6c757d' }}>
-            총 {workList.length}건 중 {filteredWorkList.length}건 표시
-          </p>
-          <button 
-            onClick={fetchWorkList} 
-            style={{
-              backgroundColor: '#3498db',
-              color: '#fff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
-          >
-            🔄 새로고침
-          </button>
-        </div>
-
-        {/* 통계 정보 */}
-        <div style={{ 
-          padding: '15px', 
-          backgroundColor: '#f8f9fa', 
-          borderRadius: '8px',
-          border: '1px solid #dee2e6'
-        }}>
-          <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '15px',
-            textAlign: 'center'
-          }}>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
-                {workList.length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>총 검사 요청</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#3498db' }}>
-                {filteredWorkList.length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>현재 표시</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f39c12' }}>
-                {filteredWorkList.filter(item => item.study_status === 'requested').length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>요청 상태</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#27ae60' }}>
-                {filteredWorkList.filter(item => item.study_status === 'completed').length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>완료 상태</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#e74c3c' }}>
-                {filteredWorkList.filter(item => !item.interpreting_physician).length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>대기 중인 판독</div>
-            </div>
-          </div>
-        </div>
+        <button 
+          onClick={fetchWorkList}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#27ae60',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            transition: 'all 0.3s'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#219a52'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#27ae60'}
+        >
+          🔄 새로고침
+        </button>
       </div>
 
       {/* 필터 섹션 */}
-      <div style={{ 
-        marginBottom: '20px', 
-        padding: '20px', 
-        backgroundColor: '#ffffff', 
-        borderRadius: '10px',
-        border: '2px solid #e9ecef',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+      <div style={{
+        backgroundColor: '#f8f9fa',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        border: '1px solid #dee2e6'
       }}>
-        <h4 style={{ 
-          marginTop: '0', 
-          marginBottom: '20px', 
-          color: '#2c3e50',
-          fontSize: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
-          🔍 검색 필터
-        </h4>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '20px',
-          marginBottom: '20px'
-        }}>
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              환자번호
-            </label>
-            <input
-              type="text"
-              value={filters.patientId}
-              onChange={(e) => setFilters({...filters, patientId: e.target.value})}
-              placeholder="환자번호 검색..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#3498db'}
-              onBlur={(e) => e.target.style.borderColor = '#ced4da'}
-            />
-          </div>
-          
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              환자명
-            </label>
-            <input
-              type="text"
-              value={filters.patientName}
-              onChange={(e) => setFilters({...filters, patientName: e.target.value})}
-              placeholder="환자명 검색..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#3498db'}
-              onBlur={(e) => e.target.style.borderColor = '#ced4da'}
-            />
-          </div>
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              Modality
-            </label>
-            <select
-              value={filters.modality}
-              onChange={(e) => setFilters({...filters, modality: e.target.value})}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                backgroundColor: '#fff',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">전체</option>
-              {uniqueModalities.map(modality => (
-                <option key={modality} value={modality}>{modality}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              검사부위
-            </label>
-            <input
-              type="text"
-              value={filters.bodyPart}
-              onChange={(e) => setFilters({...filters, bodyPart: e.target.value})}
-              placeholder="검사부위 검색..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#3498db'}
-              onBlur={(e) => e.target.style.borderColor = '#ced4da'}
-            />
-          </div>
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              요청의사
-            </label>
-            <input
-              type="text"
-              value={filters.requestingPhysician}
-              onChange={(e) => setFilters({...filters, requestingPhysician: e.target.value})}
-              placeholder="요청의사 검색..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                transition: 'border-color 0.3s',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#3498db'}
-              onBlur={(e) => e.target.style.borderColor = '#ced4da'}
-            />
-          </div>
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              검사상태
-            </label>
-            <select
-              value={filters.studyStatus}
-              onChange={(e) => setFilters({...filters, studyStatus: e.target.value})}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                backgroundColor: '#fff',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">전체</option>
-              {uniqueStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              color: '#495057'
-            }}>
-              리포트상태
-            </label>
-            <select
-              value={filters.reportStatus}
-              onChange={(e) => setFilters({...filters, reportStatus: e.target.value})}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '14px',
-                backgroundColor: '#fff',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">전체</option>
-              {uniqueReportStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        <h4 style={{ margin: '0 0 15px 0', color: '#495057' }}>🔍 검색 필터</h4>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+          <input
+            type="text"
+            placeholder="환자 ID"
+            value={filters.patientId}
+            onChange={(e) => setFilters({ ...filters, patientId: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          />
+          <input
+            type="text"
+            placeholder="환자 이름"
+            value={filters.patientName}
+            onChange={(e) => setFilters({ ...filters, patientName: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          />
+          <select
+            value={filters.modality}
+            onChange={(e) => setFilters({ ...filters, modality: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          >
+            <option value="">모든 모달리티</option>
+            {uniqueModalities.map(modality => (
+              <option key={modality} value={modality}>{modality}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="검사 부위"
+            value={filters.bodyPart}
+            onChange={(e) => setFilters({ ...filters, bodyPart: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          />
+          <input
+            type="text"
+            placeholder="요청 의사"
+            value={filters.requestingPhysician}
+            onChange={(e) => setFilters({ ...filters, requestingPhysician: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          />
+          <select
+            value={filters.studyStatus}
+            onChange={(e) => setFilters({ ...filters, studyStatus: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          >
+            <option value="">모든 검사 상태</option>
+            {uniqueStatuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+          <select
+            value={filters.reportStatus}
+            onChange={(e) => setFilters({ ...filters, reportStatus: e.target.value })}
+            style={{ padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
+          >
+            <option value="">모든 리포트 상태</option>
+            {uniqueReportStatuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
           <button
             onClick={clearFilters}
             style={{
+              padding: '8px 16px',
               backgroundColor: '#6c757d',
-              color: '#fff',
+              color: 'white',
               border: 'none',
-              padding: '12px 24px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              transition: 'background-color 0.3s'
+              borderRadius: '4px',
+              cursor: 'pointer'
             }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#5a6268'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#6c757d'}
           >
             🗑️ 필터 초기화
           </button>
-          <span style={{ 
-            padding: '12px 20px', 
-            backgroundColor: '#e9ecef', 
-            borderRadius: '6px',
-            fontSize: '14px',
-            color: '#495057',
-            fontWeight: 'bold'
-          }}>
-            📊 검색 결과: {filteredWorkList.length}건
-          </span>
         </div>
       </div>
 
-      {/* 테이블 섹션 */}
+      {/* 통계 정보 */}
+      <div style={{
+        display: 'flex',
+        gap: '15px',
+        marginBottom: '20px'
+      }}>
+        <div style={{
+          backgroundColor: '#e3f2fd',
+          padding: '15px',
+          borderRadius: '8px',
+          textAlign: 'center',
+          flex: 1
+        }}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1976d2' }}>
+            {filteredWorkList.length}
+          </div>
+          <div style={{ fontSize: '14px', color: '#666' }}>총 검사 건수</div>
+        </div>
+      </div>
+
+      {/* 테이블 */}
       {filteredWorkList.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
@@ -555,41 +369,38 @@ const WorkList = ({ onStudySelect }) => {
           </p>
         </div>
       ) : (
-        <div style={{ 
-          overflowX: 'auto',
-          borderRadius: '10px',
-          border: '2px solid #dee2e6',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-        }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: '#fff'
+        <div style={{ overflowX: 'auto', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+          <table style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse', 
+            backgroundColor: 'white',
+            fontSize: '13px'
           }}>
-            <thead>
-              <tr style={{ backgroundColor: '#2c3e50', color: '#fff' }}>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>ID</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>환자번호</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>환자명</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>생년월일</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>성별</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>검사부위</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>Modality</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>요청의사</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>요청일시</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>검사일시</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>판독의사</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>Study UID</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>Accession Number</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>검사상태</th>
-                <th style={{ padding: '15px 10px', border: '1px solid #34495e', fontSize: '14px', fontWeight: 'bold' }}>리포트상태</th>
+            <thead style={{ backgroundColor: '#495057', color: 'white' }}>
+              <tr>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '60px' }}>ID</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '100px' }}>환자번호</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '120px' }}>환자명</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '100px' }}>생년월일</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '60px' }}>성별</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '80px' }}>검사부위</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '80px' }}>모달리티</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '120px' }}>요청의사</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '180px' }}>요청일시</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '180px' }}>검사일시</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '120px' }}>판독의사</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '200px' }}>Study UID</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '150px' }}>Accession Number</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '100px' }}>검사상태</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '100px' }}>리포트상태</th>
+                <th style={{ padding: '12px 8px', border: '1px solid #34495e', minWidth: '120px' }}>🔬 AI 분석</th>
               </tr>
             </thead>
             <tbody>
               {filteredWorkList.map((item, index) => (
-                <tr 
+                <tr
                   key={item.id}
-                  style={{ 
+                  style={{
                     backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#fff',
                     transition: 'background-color 0.2s',
                     cursor: 'pointer'
@@ -614,6 +425,31 @@ const WorkList = ({ onStudySelect }) => {
                   <td style={{ padding: '12px 10px', border: '1px solid #dee2e6', textAlign: 'center' }}>{item.accession_number || '-'}</td>
                   <td style={{ padding: '12px 10px', border: '1px solid #dee2e6', textAlign: 'center' }}>{getStatusBadge(item.study_status)}</td>
                   <td style={{ padding: '12px 10px', border: '1px solid #dee2e6', textAlign: 'center' }}>{getStatusBadge(item.report_status)}</td>
+                  <td style={{ padding: '12px 10px', border: '1px solid #dee2e6', textAlign: 'center' }}>
+                    {/* 🔥 AI 분석 버튼 */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // 행 클릭 이벤트 방지
+                        handleAnalyzeStudy(item);
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: '#17a2b8',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        transition: 'all 0.3s'
+                      }}
+                      onMouseOver={(e) => e.target.style.backgroundColor = '#138496'}
+                      onMouseOut={(e) => e.target.style.backgroundColor = '#17a2b8'}
+                      title="AI 분석 시작"
+                    >
+                      🔬 분석
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

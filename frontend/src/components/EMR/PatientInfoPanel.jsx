@@ -1,74 +1,36 @@
-// src/components/PatientInfoPanel.jsx
-import React, { useEffect, useState } from 'react';
+// src/components/EMR/PatientInfoPanel.jsx
+
+import React from 'react';
+// LisRequestPanel import는 여기서도 필요하지 않으므로 제거합니다 (만약 있다면).
+// import LisRequestPanel from './LisRequestPanel'; // 이전에 PatientDetailModal과 함께 있었을 수 있음
 
 const PatientInfoPanel = ({ patient, onOpenDetailModal }) => {
-  const [vitals, setVitals] = useState(null);
+  if (!patient || !patient.person) {
+    return <p className="empty-text">환자 정보가 없습니다.</p>;
+  }
 
-  useEffect(() => {
-    const fetchVitals = async () => {
-      if (!patient) return;
-      try {
-        const res = await fetch(`/api/openmrs-vitals?uuid=${patient.uuid}`);
-        const data = await res.json();
-        setVitals(data); // 체온, 혈압, SpO2 등 들어있는 객체
-      } catch (err) {
-        console.error('바이탈 불러오기 실패:', err);
-      }
-    };
-    fetchVitals();
-  }, [patient]);
-
-  if (!patient) return <div style={{ padding: '1rem' }}>환자를 선택하세요.</div>;
-
-  const { display, person } = patient;
-  const name = display;
-  const age = person.age;
-  const gender = person.gender;
-  const birthdate = person.birthdate;
+  const { display, person, uuid, mapping_id } = patient; // mapping_id도 가져와서 필요하면 활용
 
   return (
-    <div
-      style={{
-        padding: '1rem',
-        border: '1px solid #ccc',
-        minWidth: '250px',
-        position: 'relative',
-      }}
-    >
-      <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        🩺 환자 정보
+    <div style={{ padding: '0.5rem 0' }}>
+      <h3 style={{ marginTop: '0', marginBottom: '1rem' }}>
+        {/* '환자 정보' 대신 '환자 정보'와 '상세 정보 보기' 버튼을 나란히 */}
+        환자 정보
         <button
           onClick={onOpenDetailModal}
-          style={{
-            padding: '4px 8px',
-            fontSize: '12px',
-            backgroundColor: '#1976d2',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          style={{ marginLeft: '1rem', padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #1890ff', background: 'white', color: '#1890ff', cursor: 'pointer' }}
         >
           상세 정보 보기
         </button>
       </h3>
-
-      <p><strong>이름:</strong> {name}</p>
-      <p><strong>성별:</strong> {gender === 'M' ? '남' : '여'}</p>
-      <p><strong>나이:</strong> {age}세</p>
-      <p><strong>생년월일:</strong> {birthdate}</p>
-
-      <h4 style={{ marginTop: '1rem' }}>📊 바이탈 사인</h4>
-      {vitals ? (
-        <ul>
-          <li>체온: {vitals.temp ?? '측정 없음'} °C</li>
-          <li>혈압: {vitals.bp ?? '측정 없음'}</li>
-          <li>SpO2: {vitals.spo2 ?? '측정 없음'}%</li>
-          <li>호흡수: {vitals.resp ?? '측정 없음'}회/분</li>
-        </ul>
-      ) : (
-        <p>바이탈 정보를 불러오는 중...</p>
-      )}
+      <p><strong>이름:</strong> {display}</p>
+      <p><strong>성별:</strong> {person.gender === 'M' ? '남' : '여'}</p>
+      {/* 나이 표시 부분: person.age가 이제 백엔드에서 오므로 올바르게 표시될 것입니다. */}
+      <p><strong>나이:</strong> {person.age !== null && person.age !== undefined ? `${person.age}세` : '-'}</p>
+      <p><strong>생년월일:</strong> {person.birthdate}</p>
+      {/* 필요하다면 UUID나 매핑 ID도 추가 */}
+      {/* <p><strong>UUID:</strong> {uuid}</p> */}
+      {/* <p><strong>매핑 ID:</strong> {mapping_id || '-'}</p> */}
     </div>
   );
 };
