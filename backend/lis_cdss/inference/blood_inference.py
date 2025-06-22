@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import joblib
 from django.conf import settings  # BASE_DIR 접근 가능
 
@@ -7,7 +8,7 @@ MODEL_PATHS = {
 }
 
 PANEL_ORDER = {
-    "LFT": ["ALT", "AST", "ALP", "GGT", "Total Bilirubin", "Direct Bilirubin", "Albumin", "Total Protein"]
+    "LFT": ["ALT", "AST", "ALP", "Total Bilirubin", "Direct Bilirubin", "Albumin"]
 }
 
 MODELS = {name: joblib.load(path) for name, path in MODEL_PATHS.items()}
@@ -19,6 +20,8 @@ def run_blood_model(test_type, input_dict):
     try:
         model = MODELS[test_type]
         input_vector = [float(input_dict.get(comp, 0)) for comp in PANEL_ORDER[test_type]]
-        return str(model.predict([input_vector])[0])
+        
+        df = pd.DataFrame([input_vector], columns=PANEL_ORDER[test_type])
+        return str(model.predict(df)[0])
     except Exception as e:
         return f"오류: {e}"

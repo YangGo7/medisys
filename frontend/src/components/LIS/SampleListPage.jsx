@@ -85,7 +85,7 @@ const SampleListPage = () => {
       };
 
       console.log("보내는 로그:", payload); // 확인용
-      await axios.post(`${API_BASE_URL}logs/create/`, payload);
+      // await axios.post(`${API_BASE_URL}logs/create/`, payload);
       console.log("✅ 로그 저장 성공");
       setSelectedSampleId(sample.id);
       setShowResultPanel(true);

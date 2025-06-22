@@ -6,7 +6,7 @@ import './ResultInputForm.css';
 
 const panelComponents = {
   CBC: ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets'],
-  LFT: ['ALT', 'AST', 'ALP', 'GGT', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin', 'Total Protein'],
+  LFT: ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin'],
   RFT: ['BUN', 'Creatinine', 'eGFR', 'Uric Acid', 'Sodium', 'Potassium', 'Chloride'],
   'Lipid Panel': ['Total Cholesterol', 'HDL Cholesterol', 'LDL Cholesterol', 'Triglycerides'],
   'Electrolyte Panel': ['Sodium', 'Potassium', 'Chloride', 'Bicarbonate'],
@@ -17,7 +17,7 @@ const panelComponents = {
 
 const componentUnits = {
   WBC: '10^3/uL', RBC: '10^6/uL', Hemoglobin: 'g/dL', Hematocrit: '%', MCV: 'fL', MCH: 'pg', MCHC: 'g/dL', Platelets: '10^3/uL',
-  ALT: 'U/L', AST: 'U/L', ALP: 'U/L', GGT: 'U/L', 'Total Bilirubin': 'mg/dL', 'Direct Bilirubin': 'mg/dL', Albumin: 'g/dL', 'Total Protein': 'g/dL',
+  ALT: 'U/L', AST: 'U/L', ALP: 'U/L', 'Total Bilirubin': 'mg/dL', 'Direct Bilirubin': 'mg/dL', Albumin: 'g/dL',
   BUN: 'mg/dL', Creatinine: 'mg/dL', eGFR: 'mL/min/1.73m^2', 'Uric Acid': 'mg/dL', Sodium: 'mmol/L', Potassium: 'mmol/L', Chloride: 'mmol/L',
   'Total Cholesterol': 'mg/dL', 'HDL Cholesterol': 'mg/dL', 'LDL Cholesterol': 'mg/dL', Triglycerides: 'mg/dL',
   Bicarbonate: 'mmol/L', TSH: 'uIU/mL', 'Free T4': 'ng/dL', T3: 'ng/dL', PT: 'sec', INR: '', aPTT: 'sec', Fibrinogen: 'mg/dL',
@@ -41,7 +41,14 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   }, []);
 
   useEffect(() => {
+    if (propSampleId) {
+      setSampleId(propSampleId);
+    }
+  }, [propSampleId]);
+
+  useEffect(() => {
     if (!sampleId) return;
+
     axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/get/${sampleId}`)
       .then((res) => {
         const alias = res.data.test_type;
@@ -104,8 +111,8 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
             verified_by: 1,
            verified_date: new Date().toISOString()
           }; 
-          console.log("CDSS 전송 payload 확인:",);
-          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/receive/`, payload)
+          console.log("CDSS 전송 payload 확인:", payload);
+          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/predict/`, payload)
           .catch(err => {
             console.log('CDSS POST error:', err?.response?.data);
             throw err;
@@ -141,6 +148,7 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
       } //
 
       alert('모든 결과가 성공적으로 등록 및 CDSS 전송되었습니다.');
+      navigate('/lis/result-list');
     } catch (error) {
       console.error('등록 또는 전송 실패:', error);
       alert('일부 또는 전체 결과 등록 실패');

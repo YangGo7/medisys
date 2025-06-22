@@ -40,7 +40,7 @@ export default function MainPage() {
     { id: 'logins', icon: '🔐', label: '로그인' },
     { id: 'patientsList', icon: '🧑‍🤝‍🧑', label: '환자 목록' },
     { id: 'Medicalemployee', icon: '👨‍⚕️', label: '의료인 정보' },
-    { id: 'lis', icon: '🧪', label: 'LIS 홈' },
+    { id: 'lis', icon: '🧪', label: 'LIS' },
     { id: 'RISPage', icon: '📋', label: 'RIS' }
   ];
 
