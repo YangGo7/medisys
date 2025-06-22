@@ -1,36 +1,47 @@
-/* MainPage.css - 기존 구조 유지 + 현대적 스타일 */
+/* MainPage.css - 사이드바 완전 좌측 고정 + 메인 콘텐츠 자동 조절 */
 
 .main-container {
   min-height: 100vh;
-  display: flex;
-  flex-direction: row;
   background: linear-gradient(135deg, #fefefe 0%, #f8f8f6 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  position: relative;
 }
 
-/* 사이드바 스타일 개선 */
+/* 사이드바 스타일 - 완전 좌측 고정 */
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
   width: 220px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100vh;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  padding: 0;
-  overflow: hidden;
-  flex-shrink: 0;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
   border-right: 1px solid rgba(230, 230, 228, 0.8);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1000;
+  transform: translateX(0); /* 기본 상태에서 보임 */
 }
 
+/* 사이드바 열림 상태 */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* 사이드바 닫힘 상태 */
 .sidebar.closed {
-  width: 0;
-  padding: 0;
-  border: none;
+  transform: translateX(-220px); /* 완전히 좌측으로 숨김 */
 }
 
+/* 사이드바 헤더 */
 .sidebar-header {
   padding: 1.5rem;
   border-bottom: 1px solid rgba(230, 230, 228, 0.5);
   background: rgba(255, 255, 255, 0.8);
+  min-height: 120px;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -45,6 +56,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
 }
 
 .sidebar-toggle-inline {
@@ -57,6 +69,7 @@
   transition: all 0.3s ease;
   color: #3498db;
   font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle-inline:hover {
@@ -68,14 +81,18 @@
   color: #7f8c8d;
   font-size: 0.95rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
-/* 네비게이션 스타일 */
+/* 네비게이션 */
 .sidebar nav {
   padding: 1rem 0;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
-.sidebar nav button {
+.sidebar nav button,
+.sidebar nav a button {
   width: 100%;
   display: flex;
   align-items: center;
@@ -89,38 +106,71 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
-  border-radius: 0;
   margin: 0.2rem 0.75rem;
   border-radius: 10px;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.sidebar nav button:hover {
+.sidebar nav button:hover,
+.sidebar nav a button:hover {
   background: rgba(52, 152, 219, 0.08);
   color: #3498db;
   transform: translateX(4px);
 }
 
-.sidebar nav button:active,
+.sidebar nav button.active,
 .sidebar nav button:focus {
   background: rgba(52, 152, 219, 0.15);
   color: #3498db;
   font-weight: 600;
 }
 
-/* 메인 패널 */
-.main-panel {
+.nav-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.nav-label {
   flex: 1;
-  padding: 0;
+  overflow: hidden;
+}
+
+.emr-link {
+  text-decoration: none;
+}
+
+.emr-link button {
+  background: rgba(155, 89, 182, 0.1) !important;
+  border: 1px solid rgba(155, 89, 182, 0.2) !important;
+  color: #9b59b6 !important;
+}
+
+.emr-link button:hover {
+  background: rgba(155, 89, 182, 0.2) !important;
+}
+
+/* 메인 패널 - 사이드바 상태에 따라 자동 조절 */
+.main-panel {
+  min-height: 100vh;
   background: transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
+  margin-left: 220px; /* 기본적으로 사이드바 너비만큼 여백 */
 }
 
-.main-panel.ivory {
-  background: transparent;
+/* 사이드바가 열려있을 때 */
+.main-panel.with-sidebar {
+  margin-left: 220px; /* 사이드바 너비만큼 여백 */
 }
 
-/* 플로팅 토글 버튼 */
+/* 사이드바가 닫혀있을 때 */
+.main-panel.full-width {
+  margin-left: 0; /* 전체 너비 사용 */
+}
+
+/* 플로팅 토글 버튼 - 사이드바가 닫혔을 때만 표시 */
 .sidebar-toggle-floating {
   position: fixed;
   top: 2rem;
@@ -136,7 +186,7 @@
   font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
+  z-index: 1001;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,6 +201,7 @@
 /* 탭 콘텐츠 */
 .tab-content {
   min-height: 100vh;
+  width: 100%;
 }
 
 /* 차트 헤더 (기존 유지) */
@@ -201,46 +252,45 @@
 }
 
 /* 스크롤바 커스터마이징 */
-.main-panel::-webkit-scrollbar {
+.main-panel::-webkit-scrollbar,
+.sidebar nav::-webkit-scrollbar {
   width: 6px;
 }
 
-.main-panel::-webkit-scrollbar-track {
+.main-panel::-webkit-scrollbar-track,
+.sidebar nav::-webkit-scrollbar-track {
   background: rgba(230, 230, 228, 0.3);
   border-radius: 3px;
 }
 
-.main-panel::-webkit-scrollbar-thumb {
+.main-panel::-webkit-scrollbar-thumb,
+.sidebar nav::-webkit-scrollbar-thumb {
   background: rgba(52, 152, 219, 0.3);
   border-radius: 3px;
   transition: all 0.3s ease;
 }
 
-.main-panel::-webkit-scrollbar-thumb:hover {
+.main-panel::-webkit-scrollbar-thumb:hover,
+.sidebar nav::-webkit-scrollbar-thumb:hover {
   background: rgba(52, 152, 219, 0.5);
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-  }
-  
-  .sidebar.open {
-    transform: translateX(0);
+  .sidebar.closed {
+    transform: translateX(-220px);
   }
   
   .main-panel {
     margin-left: 0;
   }
   
-  .sidebar-toggle-floating {
-    display: flex;
+  .main-panel.with-sidebar {
+    margin-left: 0;
+  }
+  
+  .main-panel.full-width {
+    margin-left: 0;
   }
 }
 
@@ -248,6 +298,10 @@
   .sidebar {
     width: 100%;
     max-width: 280px;
+  }
+  
+  .sidebar.closed {
+    transform: translateX(-100%);
   }
   
   .sidebar-toggle-floating {
@@ -259,6 +313,14 @@
   
   .calendar-container {
     width: 100%;
+  }
+  
+  .main-panel {
+    margin-left: 0;
+  }
+  
+  .main-panel.with-sidebar {
+    margin-left: 0;
   }
 }
 
