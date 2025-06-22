@@ -1,7 +1,7 @@
 .main-container {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background-color: #f8f9fa;
 }
 
@@ -23,20 +23,39 @@
   flex: 1;
 }
 
+
+/* 사이드바 기본값 */
 .sidebar {
-  width: 200px;
+  width: 220px;
+  transition: all 0.3s ease-in-out;
   background-color: #f1f3f5;
   padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.sidebar button, .sidebar a button {
-  padding: 0.5rem;
-  text-align: left;
-  font-size: 0.95rem;
+/* 사이드바 닫힘 상태일 때 완전 제거 */
+.sidebar.closed {
+  width: 0;
+  padding: 0;
+  border: none;
 }
+
+/* 컨테이너도 flex로 수평 배치 유지 */
+.main-container {
+  display: flex;
+  flex-direction: row; /* 이미 적용되었다면 생략 가능 */
+  min-height: 100vh;
+}
+
+/* 콘텐츠가 남은 공간 100% 차지 */
+.main-panel {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  transition: all 0.3s ease-in-out;
+}
+
 
 .main-panel {
   flex: 1;

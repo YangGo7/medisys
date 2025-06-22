@@ -1,7 +1,5 @@
-// src/components/EMR/ImagingRequestPanel.jsx
+// frontend/src/components/EMR/ImagingRequestPanel.jsx
 import React, { useState, useEffect } from 'react';
-// **🔥**
-const logEventEmitter = require('../utils/logEventEmitter');
 
 const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, onUpdateLog }) => {
   const [formData, setFormData] = useState({
@@ -15,14 +13,6 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [autoFilledData, setAutoFilledData] = useState(null); // 자동 채워진 환자 정보
-
-  // 디버깅용: 이 컴포넌트가 사용하는 방송국 ID를 콘솔에 출력합니다.
-  useEffect(() => {
-    console.log('--- [2] EMR 페이지가 방송국에 접속합니다. ---');
-    if (logEventEmitter && typeof logEventEmitter.getId === 'function') {
-      console.log('--- [3]🖥️ ImagingRequestPanel 방송국 ID:', logEventEmitter.getId());
-    }
-  }, []);
 
   const modalityOptions = [
     { value: 'CR', label: 'Chest X-ray (흉부 X선)' },
@@ -232,12 +222,8 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     };
 
     // 🔥 fetch를 호출하기 전에 로그 객체 만들기
-    const newLog = {
-      timestamp: new Date().toISOString(), // 현재 시간 기록
-      status: 'pending',                  // 상태는 '요청 중'
-      request: requestData,               // 방금 만든 요청 데이터를 저장
-      response: null,                     // 응답은 아직 없으므로 null
-    };
+    const newLog = { timestamp: new Date().toISOString(), status: 'pending', request: requestData, response: null };
+
 
     console.log('📤 최종 전송 데이터:', requestData);
     
@@ -245,7 +231,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
       if (onNewRequest) onNewRequest(newLog);
 
       // 백엔드 API 호출
-      const response = await fetch('http://35.225.63.41:8000/api/worklist/create-from-emr/', {
+      const response = await fetch('http://meddocai.p-e.kr:8000/api/worklist/create-from-emr/', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
       });
 
@@ -255,39 +241,31 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ 응답 오류:', errorText);
+        if (onUpdateLog) onUpdateLog({ ...newLog, status: 'error', response: errorText });
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
+      // if (!response.ok) {
+      //   const errorText = await response.text();
+      //   console.error('❌ 응답 오류:', errorText);
+      //   throw new Error(`HTTP ${response.status}: ${errorText}`);
+      // }
 
       const result = await response.json();
-      // **** 서버 응답이 성공하면, 결과를 JSON으로 파싱
       if (onUpdateLog) onUpdateLog({ ...newLog, status: 'success', response: result });
       console.log('✅ 성공 응답:', result);
 
-      // 성공 처리
-      if (result.success) { 
+      if (result.success) {
+        setFormData(prev => ({ modality: '', body_part: '', study_description: '', clinical_info: '', priority: 'routine', requesting_physician: prev.requesting_physician }));
+        alert(`✅ 영상검사 요청이 성공적으로 등록되었습니다!`);
         
-        // 🔥 폼 초기화 (환자 정보는 유지)
-        setFormData(prev => ({
-          modality: '',
-          body_part: '',
-          study_description: '',
-          clinical_info: '',
-          priority: 'routine',
-          requesting_physician: prev.requesting_physician // 의사명은 유지
-        }));
-
-        // 성공 알림
-        alert(`✅ 영상검사 요청이 성공적으로 등록되었습니다!\n\n환자: ${autoFilledData.patient_name}\n검사: ${formData.modality} - ${formData.body_part}`);
-
         try {
           const channel = new BroadcastChannel('order_channel');
           channel.postMessage('newOrderCreated');
-          channel.close(); // 신호를 보낸 후에는 채널을 닫아주는 것이 좋습니다.
-          console.log('✅ BroadcastChannel로 "newOrderCreated" 신호를 보냈습니다.');
+          channel.close();
         } catch (bcError) {
           console.error('BroadcastChannel 신호 보내기 실패:', bcError);
         }
-
+        
         if (onRequestSuccess) onRequestSuccess(result);
       } else {
         throw new Error(result.error || '요청 처리 중 오류가 발생했습니다.');

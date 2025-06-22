@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './OrderListPage.css'; 
+import SlidePanel from './LisSlidePanel';
+import SampleForm from './SampleForm';
 
 const OrderListPage = () => {
   const navigate = useNavigate();
@@ -9,6 +11,8 @@ const OrderListPage = () => {
   const [samples, setSamples] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showDebug, setShowDebug] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [showSamplePanel, setShowSamplePanel] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
     ).toISOString().split('T')[0]);
@@ -150,14 +154,17 @@ return (
                   <td>
                     <button
                       className="sample-button"
-                      onClick={() => navigate(`/lis/sample/new/${order.order_id}`)}
+                      onClick={() => {
+                        setSelectedOrderId(order.order_id);
+                        setShowSamplePanel(true);
+                      }}
                     >
                       ➕ 샘플 등록
                     </button>
                   </td>
                 </tr>
-              );
-            })}
+                );
+              })}
             {displayedOrders.length === 0 && (
               <tr>
                 <td colSpan="7" className="no-orders">표시할 오더가 없습니다.</td>
@@ -166,6 +173,10 @@ return (
           </tbody>
         </table>
       </div>
+
+      <SlidePanel isOpen={showSamplePanel} onClose={() => setShowSamplePanel(false)}>
+        <SampleForm orderId={selectedOrderId} />
+      </SlidePanel>
     </div>
   );
 };

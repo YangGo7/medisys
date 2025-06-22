@@ -10,6 +10,7 @@ import OrderListPage from './components/LIS/OrderListPage';
 import SampleListPage from './components/LIS/SampleListPage';
 import ResultInputForm from './components/LIS/ResultInputForm';
 import ResultCdss from './components/LIS/ResultCdss';
+import LISModelResultPage from './components/LIS/LisModelResult';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
 import MainPage from './components/MainPage';
@@ -58,6 +59,8 @@ function App() {
               <Route path="result/new" element={<ResultInputForm />} />
               <Route path="result/new/:sampleId" element={<ResultInputForm />} />
               <Route path="result-list" element={<ResultCdss />} />
+              <Route path="cdss/results/:sampleId" element={<LISModelResultPage />} />
+
             </Route>
             <Route path="/tests" element={<OpenMRSPatientList />} />
             <Route path="/logs" element={<OCSLogPage />} />

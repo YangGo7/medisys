@@ -20,9 +20,10 @@ RUN pip install --no-cache-dir \
     pydicom \
     opencv-python-headless \
     flask \
+    flask_cors \
     requests \
-    ultralytics \
-    gunicorn 
+    ultralytics
+
 
 # PyTorch 패키지 설치 (CPU 버전)
 RUN pip install --no-cache-dir \
@@ -31,11 +32,10 @@ RUN pip install --no-cache-dir \
     torchaudio \
     --index-url https://download.pytorch.org/whl/cpu
 
-# 작업 디렉토리 설정: /app (Gunicorn이 여기서 시작)
+
 WORKDIR /app
 
 # Python 모듈 검색 경로에 현재 작업 디렉토리(/app)와 /models 추가
-# Gunicorn이 'scripts.entry'를 찾을 수 있도록 합니다.
 # /app이 sys.path에 자동으로 추가되므로, /app/scripts는 scripts로 인식됩니다.
 ENV PYTHONPATH=/app:/models 
 
@@ -52,4 +52,5 @@ EXPOSE 5000
 
 # Flask 앱을 Gunicorn을 통해 실행합니다. (Shell form으로 변경)
 # Shell form은 명령어 전체를 하나의 문자열로 작성합니다.
-CMD gunicorn -w 2 -b 0.0.0.0:5000 --timeout 300 scripts.entry:app
+CMD ["python", "scripts/entry.py"]
+

@@ -1,8 +1,11 @@
+// NotificationBar.jsx
 import React from 'react';
 
 function NotificationBar({ message }) {
+  if (!message) return null;
+  
   return (
-    <div style={{ background: '#eee', padding: '10px', textAlign: 'center' }}>
+    <div className="medisys-notification">
       {message}
     </div>
   );

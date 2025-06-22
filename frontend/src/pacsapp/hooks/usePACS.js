@@ -1,13 +1,6 @@
-// src/hooks/usePACS.js
 import { useState, useEffect, useCallback } from 'react';
 
-/**
- * PACS 연동 및 스터디 관리 관련 상태와 로직을 관리하는 커스텀 훅
- * @param {Function} setAnalysisStatus - 분석 상태 메시지 설정 함수 (선택사항)
- * @returns {Object} PACS 관련 상태와 함수들
- */
 const usePACS = (setAnalysisStatus) => {
-    // 상태 관리
     const [currentStudyUID, setCurrentStudyUID] = useState(null);
     const [availableStudies, setAvailableStudies] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +8,6 @@ const usePACS = (setAnalysisStatus) => {
     const [connectionError, setConnectionError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
 
-    // PACS에서 스터디 목록 가져오기
     const fetchAvailableStudies = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -38,14 +30,15 @@ const usePACS = (setAnalysisStatus) => {
             }
 
             const studies = await response.json();
+            console.log('📦 Orthanc API로부터 받은 원본 studies 데이터:', studies); 
+
             const parsedStudies = studies.map((entry) => ({
-                pacs_id: entry.ID || entry['0020000D']?.Value?.[0] || '',
-                studyUID: entry['0020000D']?.Value?.[0] || '',
+                pacs_id: entry.ID || '', 
+                studyUID: entry.ID || '',
+                dicomStudyInstanceUID: entry.StudyInstanceUID || entry['0020000D']?.Value?.[0] || '',
+
                 patientId: entry['00100020']?.Value?.[0] || '',
-                patientName:
-                    entry['00100010']?.Value?.[0]?.Alphabetic ||
-                    entry['00100010']?.Value?.[0] ||
-                    '',
+                patientName: entry['00100010']?.Value?.[0]?.Alphabetic || entry['00100010']?.Value?.[0] || '',
                 studyDate: entry['00080020']?.Value?.[0] || '',
                 studyTime: entry['00080030']?.Value?.[0] || '',
                 modality: entry['00080061']?.Value?.[0] || '',
@@ -54,12 +47,15 @@ const usePACS = (setAnalysisStatus) => {
                 instanceCount: entry['00201208']?.Value?.[0] || 0,
             }));
 
+            console.log('✨ 파싱된 parsedStudies 데이터:', parsedStudies); 
+
             setAvailableStudies(parsedStudies);
             setIsConnected(true);
             setLastUpdated(new Date());
 
             if (parsedStudies.length > 0 && !currentStudyUID) {
-                setCurrentStudyUID(parsedStudies[0].studyUID);
+                setCurrentStudyUID(parsedStudies[0].dicomStudyInstanceUID || parsedStudies[0].studyUID);
+                console.log('✅ currentStudyUID 설정됨:', parsedStudies[0].dicomStudyInstanceUID); 
                 setAnalysisStatus?.(`✅ 스터디 감지: ${parsedStudies[0].patientName} (${parsedStudies[0].patientId})`);
             } else if (parsedStudies.length === 0) {
                 setAnalysisStatus?.('⚠️ PACS에 스터디가 없습니다');
@@ -82,28 +78,32 @@ const usePACS = (setAnalysisStatus) => {
 
     const getCurrentStudyUID = useCallback(() => {
         if (currentStudyUID) return currentStudyUID;
-        if (availableStudies.length > 0) return availableStudies[0].studyUID;
+        if (availableStudies.length > 0) return availableStudies[0].dicomStudyInstanceUID;
         return null;
     }, [currentStudyUID, availableStudies]);
 
     const selectStudy = useCallback((studyUID) => {
-        const study = availableStudies.find(s => s.studyUID === studyUID);
+        const study = availableStudies.find(s =>
+            s.dicomStudyInstanceUID === studyUID || s.studyUID === studyUID
+        );
         if (study) {
-            setCurrentStudyUID(studyUID);
+            setCurrentStudyUID(study.dicomStudyInstanceUID || study.studyUID);
             setAnalysisStatus?.(`📂 스터디 선택: ${study.patientName} (${study.patientId}) - ${study.studyDate}`);
         }
     }, [availableStudies, setAnalysisStatus]);
 
     const getCurrentStudyInfo = useCallback(() => {
         const studyUID = getCurrentStudyUID();
-        const currentStudy = availableStudies.find(s => s.studyUID === studyUID);
+        const currentStudy = availableStudies.find(s =>
+            s.dicomStudyInstanceUID === studyUID || s.studyUID === studyUID
+        );
         if (currentStudy) {
             return {
                 patient_name: currentStudy.patientName,
                 patient_id: currentStudy.patientId,
                 study_date: currentStudy.studyDate,
                 study_time: currentStudy.studyTime,
-                study_uid: currentStudy.studyUID,
+                study_uid: currentStudy.dicomStudyInstanceUID, 
                 modality: currentStudy.modality,
                 study_description: currentStudy.studyDescription,
                 series_count: currentStudy.seriesCount,
@@ -114,7 +114,7 @@ const usePACS = (setAnalysisStatus) => {
             patient_name: 'Unknown',
             patient_id: 'Unknown',
             study_date: 'Unknown',
-            study_uid: studyUID
+            study_uid: studyUID 
         };
     }, [getCurrentStudyUID, availableStudies]);
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import './ResultCdss.css';
+import CdssResultModal from './ResultModal';
+
 
 const CdssResultTable = () => {
   const [allResults, setAllResults] = useState([]);
@@ -10,6 +12,8 @@ const CdssResultTable = () => {
   const [error, setError] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [expandedSamples, setExpandedSamples] = useState({}); 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
   const fetchCdssResults = useCallback(async () => {
     try {
@@ -68,6 +72,16 @@ const CdssResultTable = () => {
         console.error('❌ 삭제 실패(응답 data):', err.response.data); // <-- 응답 본문 에러 메시지
       }
       alert('삭제 실패');
+    }
+  };
+
+  const openResultModal = async (sampleId) => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/${sampleId}/`);
+      setModalData(res.data);
+      setModalOpen(true);
+    } catch (err) {
+      console.error("모달 결과 불러오기 실패:", err);
     }
   };
 
@@ -135,7 +149,7 @@ const CdssResultTable = () => {
               <th>Unit</th>
               <th>Verified By</th>
               <th>Verified Date</th>
-              <th>삭제</th>
+              <th>Prediction</th>
             </tr>
           </thead>
           <tbody>
@@ -156,6 +170,13 @@ const CdssResultTable = () => {
                       >
                         {expandedSamples[sample] ? '▼' : '▶'} 샘플 ID: {sample}
                       </span>
+                      {/* ✅ 결과 보기 버튼 추가 */}
+                      <button
+                        className="view-result-btn"
+                        onClick={() => openResultModal(sample)}
+                      >
+                        분석 결과 보기
+                      </button>
                       <span
                         className="group-delete-btn"
                         onClick={() => handleDeleteSample(sample)}
@@ -184,6 +205,9 @@ const CdssResultTable = () => {
           </tbody>
         </table>
       </div>
+      {modalOpen && modalData && (
+      <CdssResultModal data={modalData} onClose={() => setModalOpen(false)} />
+    )}
     </div>
   );
 };
