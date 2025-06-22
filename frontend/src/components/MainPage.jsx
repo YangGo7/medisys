@@ -10,6 +10,7 @@ import Medicalemployee from './Medicalemployee';
 import DicomViewer from './OHIF/OHIFViewer';
 import RISPage from '../pacsapp';
 import TitlePage from './Main_page/TitlePage';
+import './MainPage.css'; // CSS 파일 import 추가
 
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('TitlePage');
@@ -34,8 +35,6 @@ export default function MainPage() {
 
   const menuItems = [
     { id: 'TitlePage', icon: '🏠', label: '홈' },
-    { id: 'order', icon: '💊', label: '처방' },
-    { id: 'sample', icon: '🧪', label: '검체' },
     { id: 'dicom', icon: '🖼️', label: 'DICOM' },
     { id: 'logs', icon: '📄', label: '로그' },
     { id: 'logins', icon: '🔐', label: '로그인' },
@@ -76,7 +75,7 @@ export default function MainPage() {
           ))}
           
           <Link to="/emr">
-            <button className="emr-link">
+            <button className="emr-link-btn">
               <span className="nav-icon">📁</span>
               <span className="nav-label">EMR 이동</span>
             </button>

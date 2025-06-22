@@ -8,21 +8,26 @@ export default function TitlePage({ setCurrentTab }) {
   const navigate = useNavigate();
 
   const handleQuickAction = (action) => {
+    console.log('Quick action clicked:', action); // 디버깅용
     switch(action) {
       case 'RIS':
+        console.log('Switching to RIS');
         setCurrentTab('RISPage');
         break;
       case 'LIS':
+        console.log('Switching to LIS');
         setCurrentTab('lis');
         break;
       case 'EMR':
+        console.log('Navigating to EMR');
         navigate('/emr');
         break;
       case '설정':
-        // 설정 페이지로 이동 (추후 구현)
         console.log('설정 페이지로 이동');
+        // 설정 페이지로 이동 (추후 구현)
         break;
       default:
+        console.log('Unknown action:', action);
         break;
     }
   };
