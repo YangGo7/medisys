@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './SampleListPage.css';
+import SlidePanel from './LisSlidePanel';
+import ResultInputFrom from './ResultInputForm';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -11,6 +13,8 @@ const SampleListPage = () => {
   const [cdssSampleIds, setCdssSampleIds] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // 오늘 날짜
+  const [showResultPanel, setShowResultPanel] = useState(false);
+  const [selectedSampleId, setSelectedSampleId] = useState(null);
 
   // 삭제 모달 상태
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -67,15 +71,14 @@ const SampleListPage = () => {
   const handleResultClick = async (sample) => {
     try {
       // 1. 오더 정보 조회
-      const orderId = sample.order;
-      const orderRes = await axios.get(`${API_BASE_URL}orders/${orderId}/`);
-      const orderInfo = orderRes.data;
-
+      const patient_id = sample.order?.patient_id || 'UNKNOWN';
+      const doctor_id = sample.order?.doctor_id || 'UNKNOWN';
+      
       // 2. 로그 전송 payload 구성
       const payload = {
-        patient_id: orderInfo.patient_id || 'UNKNOWN',
-        doctor_id: orderInfo.doctor_id || 'UNKNOWN',
-        order_id: sample.order,
+        patient_id,
+        doctor_id,
+        order_id: sample.order?.order_id || sample.order,
         sample_id: sample.id,
         step: 'result',
         result_detail: `${sample.test_type || '기타'} 결과 등록`
@@ -84,11 +87,11 @@ const SampleListPage = () => {
       console.log("보내는 로그:", payload); // 확인용
       await axios.post(`${API_BASE_URL}logs/create/`, payload);
       console.log("✅ 로그 저장 성공");
+      setSelectedSampleId(sample.id);
+      setShowResultPanel(true);
     } catch (err) {
       console.error("❌ 로그 저장 실패:", err.response?.data || err.message);
-    } finally {
-      navigate(`/lis/result/new/${sample.id}`);
-    }
+    } 
   };
 
   const requestDelete = (sampleId) => {
@@ -216,6 +219,9 @@ return (
           </div>
         </div>
       )}
+      <SlidePanel isOpen={showResultPanel} onClose={() => setShowResultPanel(false)}>
+        <ResultInputFrom sampleId={selectedSampleId} onClose={() => setShowResultPanel(false)} />      
+      </SlidePanel>
     </div>
   );
 };

@@ -24,7 +24,7 @@ const componentUnits = {
   'Fasting Blood Glucose': 'mg/dL', HbA1c: '%'
 };
 
-const ResultInputForm = () => {
+const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   const navigate = useNavigate();
   const [selectedPanel, setSelectedPanel] = useState('');
   const [results, setResults] = useState({});
@@ -141,7 +141,6 @@ const ResultInputForm = () => {
       } //
 
       alert('모든 결과가 성공적으로 등록 및 CDSS 전송되었습니다.');
-      navigate('/lis/result-list');
     } catch (error) {
       console.error('등록 또는 전송 실패:', error);
       alert('일부 또는 전체 결과 등록 실패');
@@ -196,6 +195,7 @@ const ResultInputForm = () => {
       <h2>🧪 결과 입력</h2>
 
       <label className="sample-select-label">샘플 선택</label>
+      {!propSampleId && (
       <select
         value={sampleId}
         onChange={(e) => setSampleId(e.target.value)}
@@ -208,6 +208,7 @@ const ResultInputForm = () => {
           </option>
         ))}
       </select>
+      )}
 
       {selectedPanel && (
         <>

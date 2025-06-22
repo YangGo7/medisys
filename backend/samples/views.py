@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Sample, LOINCCode, AliasMapping
-#from orders.models import TestOrder
 from .serializers import SampleSerializer
 from tests.serializers import TestResultSerializer
 from django.core.exceptions import ValidationError

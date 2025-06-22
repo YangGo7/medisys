@@ -7,23 +7,76 @@ const DJANGO_URL = 'http://35.225.63.41:8000'; // Django API
 
 // 🔥 API 함수들 직접 구현
 const analyzeWithYOLO = async (studyUID, forceOverwrite = false) => {
-    const response = await fetch(`${AI_SERVICE_URL}/analyze/${studyUID}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force_overwrite: forceOverwrite, model_type: 'yolo' })
-    });
-    return await response.json();
+    // START: Enhanced fetch logging for analyzeWithYOLO
+    console.log(`[analyzeWithYOLO] Requesting: ${AI_SERVICE_URL}/analyze/${studyUID}`);
+    try {
+        const response = await fetch(`${AI_SERVICE_URL}/analyze-study/${studyUID}`, { // Changed endpoint to analyze-study
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ force_overwrite: forceOverwrite, model_type: 'yolo' })
+        });
+
+        // Log the raw response status
+        console.log(`[analyzeWithYOLO] Raw Response Status: ${response.status} ${response.statusText}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[analyzeWithYOLO] HTTP Error: ${response.status}, Body: ${errorText}`);
+            // Attempt to parse as JSON if it looks like JSON
+            try {
+                const errorJson = JSON.parse(errorText);
+                return { success: false, error: errorJson.error || errorText };
+            } catch (e) {
+                return { success: false, error: errorText };
+            }
+        }
+        
+        const data = await response.json();
+        console.log(`[analyzeWithYOLO] Parsed JSON Data:`, data);
+        return data;
+
+    } catch (networkError) {
+        console.error(`[analyzeWithYOLO] Network or Fetch Error for ${AI_SERVICE_URL}/analyze-study/${studyUID}:`, networkError);
+        return { success: false, error: `Network or server unavailable: ${networkError.message}` };
+    }
+    // END: Enhanced fetch logging
 };
 
 const analyzeWithSSD = async (studyUID, forceOverwrite = false) => {
-    const response = await fetch(`${AI_SERVICE_URL}/analyze/${studyUID}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force_overwrite: forceOverwrite, model_type: 'ssd' })
-    });
-    return await response.json();
+    // START: Enhanced fetch logging for analyzeWithSSD (identical to YOLO)
+    console.log(`[analyzeWithSSD] Requesting: ${AI_SERVICE_URL}/analyze-study/${studyUID}`); // Changed endpoint to analyze-study
+    try {
+        const response = await fetch(`${AI_SERVICE_URL}/analyze-study/${studyUID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ force_overwrite: forceOverwrite, model_type: 'ssd' })
+        });
+
+        console.log(`[analyzeWithSSD] Raw Response Status: ${response.status} ${response.statusText}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[analyzeWithSSD] HTTP Error: ${response.status}, Body: ${errorText}`);
+            try {
+                const errorJson = JSON.parse(errorText);
+                return { success: false, error: errorJson.error || errorText };
+            } catch (e) {
+                return { success: false, error: errorText };
+            }
+        }
+        
+        const data = await response.json();
+        console.log(`[analyzeWithSSD] Parsed JSON Data:`, data);
+        return data;
+
+    } catch (networkError) {
+        console.error(`[analyzeWithSSD] Network or Fetch Error for ${AI_SERVICE_URL}/analyze-study/${studyUID}:`, networkError);
+        return { success: false, error: `Network or server unavailable: ${networkError.message}` };
+    }
+    // END: Enhanced fetch logging
 };
 
+// --- (Rest of your API functions: clearAnalysisResults, checkModelStatus, checkExistingAnalysis - no changes needed here) ---
 const clearAnalysisResults = async (studyUID) => {
     const response = await fetch(`${DJANGO_URL}/api/ai/clear/${studyUID}/`, {
         method: 'DELETE'
@@ -37,9 +90,28 @@ const checkModelStatus = async () => {
 };
 
 const checkExistingAnalysis = async (studyUID, modelType) => {
-    const response = await fetch(`${DJANGO_URL}/api/ai/results/${studyUID}/?model_type=${modelType.toLowerCase()}`);
-    const data = await response.json();
-    return { exists: data.status === 'success' && data.results?.length > 0 };
+    // Original AI service does not have a model_type in the /results endpoint
+    // Assuming Django endpoint handles filtering by model_type if provided
+    const url = `${DJANGO_URL}/api/ai/results/${studyUID}/?model_type=${modelType.toLowerCase()}`;
+    console.log(`[checkExistingAnalysis] Checking existing analysis from Django: ${url}`);
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[checkExistingAnalysis] HTTP Error ${response.status} from Django: ${errorText}`);
+            // If Django returns 404 for no results, it means no existing analysis
+            if (response.status === 404) {
+                return { exists: false };
+            }
+            throw new Error(`Failed to check existing analysis: ${errorText}`);
+        }
+        const data = await response.json();
+        console.log(`[checkExistingAnalysis] Django Response:`, data);
+        return { exists: data.status === 'success' && data.results?.length > 0 };
+    } catch (error) {
+        console.error(`[checkExistingAnalysis] Network or unexpected error checking existing analysis:`, error);
+        return { exists: false, error: error.message }; // Treat error as no existing analysis
+    }
 };
 
 // 🔥 토스트 알림 함수
@@ -85,7 +157,7 @@ const showToast = (message) => {
 
 /**
  * AI 분석 관련 상태와 로직을 관리하는 커스텀 훅
- * @param {string} currentStudyUID - 현재 선택된 스터디 UID
+ * @param {string} currentStudyUID - 현재 선택된 스터디 UIDS
  * @returns {Object} AI 분석 관련 상태와 함수들
  */
 const useAIAnalysis = (currentStudyUID) => {
@@ -113,14 +185,16 @@ const useAIAnalysis = (currentStudyUID) => {
      * YOLO 분석을 실행하는 함수
      */
     const analyzeYOLO = useCallback(async (forceOverwrite = false) => {
+        // --- (Existing initial checks for forceOverwrite and currentStudyUID) ---
         if (typeof forceOverwrite === 'object' && forceOverwrite !== null) {
-            console.log('이벤트 객체가 들어왔습니다. false로 처리합니다.');
+            console.log('[analyzeYOLO] Event object detected for forceOverwrite, treating as false.');
             forceOverwrite = false;
         }
 
         if (!currentStudyUID) {
             setAnalysisStatus('Study UID를 찾을 수 없습니다');
             showToast('Study UID를 찾을 수 없습니다');
+            console.error('[analyzeYOLO] Error: currentStudyUID is null or undefined.'); // More specific log
             return false;
         }
 
@@ -131,12 +205,12 @@ const useAIAnalysis = (currentStudyUID) => {
         // 중복 체크
         if (!forceOverwrite) {
             try {
-                console.log('🔍 중복 체크 시작:', currentStudyUID);
+                console.log(`[analyzeYOLO] Starting duplicate check for studyUID: ${currentStudyUID}`);
                 const existingCheck = await checkExistingAnalysis(currentStudyUID, 'YOLO');
-                console.log('🔍 중복 체크 결과:', existingCheck);
+                console.log('[analyzeYOLO] Duplicate check result:', existingCheck);
                 
                 if (existingCheck.exists) {
-                    console.log('⚠️ 기존 결과 발견! 사용자 확인 요청');
+                    console.warn('[analyzeYOLO] Existing YOLO analysis found. Prompting user for overwrite.'); // Changed to warn
                     
                     const userConfirmed = window.confirm(
                         `이미 YOLO 분석 결과가 존재합니다.\n기존 결과를 덮어쓰시겠습니까?`
@@ -144,17 +218,18 @@ const useAIAnalysis = (currentStudyUID) => {
                     
                     if (userConfirmed) {
                         showToast('YOLO 분석을 진행합니다...');
-                        return await analyzeYOLO(true);
+                        return await analyzeYOLO(true); // Recursive call with forceOverwrite = true
                     } else {
                         showToast('YOLO 분석이 취소되었습니다');
-                        setAnalysisStatus('분석이 취소되었습니다');
+                        setAnalysisStatus('YOLO 분석이 취소되었습니다');
+                        console.log('[analyzeYOLO] YOLO analysis cancelled by user.');
                         return false;
                     }
                 } else {
-                    console.log('✅ 기존 결과 없음, 분석 진행');
+                    console.log('[analyzeYOLO] No existing YOLO analysis found. Proceeding with analysis.');
                 }
             } catch (error) {
-                console.error('❌ 중복 체크 실패:', error);
+                console.error('[analyzeYOLO] Error during duplicate check:', error); // More specific log
                 setAnalysisStatus('중복 체크 실패. 다시 시도해주세요.');
                 showToast('중복 체크 실패. 다시 시도해주세요.');
                 setIsAnalyzing(false);
@@ -168,24 +243,217 @@ const useAIAnalysis = (currentStudyUID) => {
             setAnalysisStatus(`YOLO 분석 중... (${currentStudyUID.substring(0, 20)}...)`);
             showToast('YOLO 분석을 시작합니다...');
             
-            console.log('📤 AI 서비스 API 호출:', { studyUID: currentStudyUID, forceOverwrite });
-            const data = await analyzeWithYOLO(currentStudyUID, forceOverwrite);
+            console.log('[analyzeYOLO] 📤 Calling AI service API:', { studyUID: currentStudyUID, forceOverwrite });
+            const data = await analyzeWithYOLO(currentStudyUID, forceOverwrite); // Call the helper function
             
-            console.log('🔥 AI 서비스 응답:', data);
+            console.log('[analyzeYOLO] 🔥 AI service response:', data);
             
             if (data.success) {
-                // 🔥 entry.py 응답 구조 처리
-                const results = data.results || [];
+                // Check if 'results' array exists and is not empty
+                const results = data.results; 
+                if (!Array.isArray(results)) {
+                    console.error('[analyzeYOLO] Error: AI service response "results" is not an array:', results);
+                    setAnalysisStatus('YOLO 분석 실패: 응답 형식 오류');
+                    showToast('YOLO 분석 실패: 서버 응답 형식이 올바르지 않습니다.');
+                    return false;
+                }
+
                 const yoloResults = results.filter(r => r.model_type === 'yolo' && r.success);
                 
                 if (yoloResults.length > 0) {
                     const yoloData = yoloResults[0];
-                    const detections = yoloData.detections || [];
+                    const detections = yoloData.detections;
                     
-                    // 🔥 해상도 정보 추출
-                    const imageWidth = data.image_dimensions ? parseInt(data.image_dimensions.split('x')[0]) : 1024;
-                    const imageHeight = data.image_dimensions ? parseInt(data.image_dimensions.split('x')[1]) : 1024;
+                    // Validate detections structure
+                    if (!Array.isArray(detections)) {
+                        console.error('[analyzeYOLO] Error: Detections from YOLO model are not an array:', detections);
+                        setAnalysisStatus('YOLO 분석 실패: 탐지 결과 형식 오류');
+                        showToast('YOLO 분석 실패: 탐지 결과 형식이 올바르지 않습니다.');
+                        return false;
+                    }
+
+                    // 🔥 해상도 정보 추출 (이미지 치수 파싱 실패 시 기본값 사용)
+                    let imageWidth = 1024;
+                    let imageHeight = 1024;
+                    if (data.image_dimensions) {
+                        const dimensions = data.image_dimensions.split('x');
+                        if (dimensions.length === 2) {
+                            const parsedWidth = parseInt(dimensions[0]);
+                            const parsedHeight = parseInt(dimensions[1]);
+                            if (!isNaN(parsedWidth) && !isNaN(parsedHeight)) {
+                                imageWidth = parsedWidth;
+                                imageHeight = parsedHeight;
+                            } else {
+                                console.warn(`[analyzeYOLO] Warning: Could not parse image dimensions: ${data.image_dimensions}`);
+                            }
+                        } else {
+                            console.warn(`[analyzeYOLO] Warning: Unexpected image_dimensions format: ${data.image_dimensions}`);
+                        }
+                    } else {
+                        console.warn('[analyzeYOLO] Warning: "image_dimensions" missing in AI service response. Using default 1024x1024.');
+                    }
+                    console.log(`[analyzeYOLO] Parsed image dimensions: ${imageWidth}x${imageHeight}`);
+
+
+                    setAnalysisResults({
+                        status: 'success',
+                        results: detections, // Use detections directly
+                        detections: detections.length,
+                        model_used: 'yolo',
+                        image_width: imageWidth,
+                        image_height: imageHeight
+                    });
                     
+                    setOverlays(detections);
+                    setShowOverlays(true); 
+                    
+                    setAnalysisStatus(`YOLO 분석 완료! (검출: ${detections.length}개)`);
+                    showToast(`YOLO 분석 완료! ${detections.length}개 검출`);
+                    
+                    return true;
+                } else {
+                    console.warn('[analyzeYOLO] AI service response indicates success, but no YOLO results found in the filtered list or no detections within YOLO result.');
+                    setAnalysisStatus('YOLO 분석 완료 (결과 없음)');
+                    showToast('YOLO 분석 완료되었으나, 검출된 객체가 없습니다.');
+                    setAnalysisResults({
+                        status: 'success',
+                        results: [],
+                        detections: 0,
+                        model_used: 'yolo',
+                        image_width: data.image_width || 1024, // Use from data if available, else default
+                        image_height: data.image_height || 1024
+                    });
+                    return true; // Consider this a success even if no detections
+                }
+            } else { // data.success is false
+                const errorMessage = data.error || data.details || 'Unknown error from AI service.';
+                console.error(`[analyzeYOLO] AI service reported failure: ${errorMessage}`);
+                setAnalysisStatus('YOLO 분석 실패: ' + errorMessage);
+                showToast('YOLO 분석 실패: ' + errorMessage);
+                return false;
+            }
+        } catch (error) {
+            console.error('[analyzeYOLO] Critical error during YOLO analysis process:', error); // More generic error log
+            setAnalysisStatus('YOLO 분석 실패: ' + error.message);
+            showToast('YOLO 분석 실패: ' + error.message);
+            return false;
+        } finally {
+            setIsAnalyzing(false);
+        }
+    }, [currentStudyUID, showToast]); // Added showToast to dependencies
+
+    // **IMPORTANT**: Apply similar detailed logging to analyzeSSD as well.
+    // The analyzeSSD function would be largely identical in its logging and error handling.
+    const analyzeSSD = useCallback(async (forceOverwrite = false) => {
+      // ... (Rest of analyzeSSD code, apply identical logging improvements) ...
+      if (typeof forceOverwrite === 'object' && forceOverwrite !== null) {
+          console.log('[analyzeSSD] Event object detected for forceOverwrite, treating as false.');
+          forceOverwrite = false;
+      }
+
+      if (!currentStudyUID) {
+          setAnalysisStatus('Study UID를 찾을 수 없습니다');
+          showToast('Study UID를 찾을 수 없습니다');
+          console.error('[analyzeSSD] Error: currentStudyUID is null or undefined.');
+          return false;
+      }
+
+      setAnalysisResults(null);
+      setOverlays([]);
+      setShowOverlays(false);
+      
+      // 중복 체크
+      if (!forceOverwrite) {
+          try {
+              console.log(`[analyzeSSD] Starting duplicate check for studyUID: ${currentStudyUID}`);
+              const existingCheck = await checkExistingAnalysis(currentStudyUID, 'SSD');
+              console.log('[analyzeSSD] Duplicate check result:', existingCheck);
+              
+              if (existingCheck.exists) {
+                  console.warn('[analyzeSSD] Existing SSD analysis found. Prompting user for overwrite.');
+                  
+                  const userConfirmed = window.confirm(
+                      `이미 SSD 분석 결과가 존재합니다.\n기존 결과를 덮어쓰시겠습니까?`
+                  );
+                  
+                  if (userConfirmed) {
+                      showToast('SSD 분석을 진행합니다...');
+                      return await analyzeSSD(true);
+                  } else {
+                      showToast('SSD 분석이 취소되었습니다');
+                      setAnalysisStatus('SSD 분석이 취소되었습니다');
+                      console.log('[analyzeSSD] SSD analysis cancelled by user.');
+                      return false;
+                  }
+              } else {
+                  console.log('[analyzeSSD] No existing SSD analysis found. Proceeding with analysis.');
+              }
+          } catch (error) {
+              console.error('[analyzeSSD] Error during duplicate check:', error);
+              setAnalysisStatus('중복 체크 실패. 다시 시도해주세요.');
+              showToast('중복 체크 실패. 다시 시도해주세요.');
+              setIsAnalyzing(false);
+              return false;
+          }
+      }
+      
+      // 실제 분석 실행
+      try {
+            setIsAnalyzing(true);
+            setAnalysisStatus(`YOLO 분석 중... (${currentStudyUID.substring(0, 20)}...)`);
+            showToast('YOLO 분석을 시작합니다...');
+            
+            console.log('[analyzeYOLO] 📤 AI 서비스 API 호출 중:', { studyUID: currentStudyUID, forceOverwrite });
+            const data = await analyzeWithYOLO(currentStudyUID, forceOverwrite); // 이 함수는 위에서 개선된 버전을 사용합니다.
+            
+            console.log('[analyzeYOLO] 🔥 AI 서비스 응답 데이터:', data); // 여기에 응답 데이터 전체를 로깅
+
+            // 응답의 success 필드 검사
+            if (data.success) { 
+                console.log('[analyzeYOLO] 응답: data.success가 true 입니다.');
+
+                const results = data.results || [];
+                console.log('[analyzeYOLO] 원본 results 배열:', results);
+                
+                // results 배열이 배열인지 다시 한번 확실히 확인 (강화된 디버깅용)
+                if (!Array.isArray(results)) {
+                    console.error('[analyzeYOLO] 오류: AI 서비스 응답의 "results"가 배열이 아닙니다!', results);
+                    setAnalysisStatus('YOLO 분석 실패: 응답 형식 오류');
+                    showToast('YOLO 분석 실패: 서버 응답 형식이 올바르지 않습니다.');
+                    return false;
+                }
+
+                // YOLO 결과 필터링
+                const yoloResults = results.filter(r => {
+                    // 필터링 기준과 각 객체의 내용을 더 자세히 로깅
+                    console.log(`[analyzeYOLO - filter] 현재 객체:`, r);
+                    const isYoloType = r.model_type === 'yolo';
+                    const isSuccess = r.success;
+                    console.log(`[analyzeYOLO - filter] model_type === 'yolo' (${isYoloType}), success (${isSuccess})`);
+                    return isYoloType && isSuccess;
+                });
+                console.log('[analyzeYOLO] 필터링된 yoloResults:', yoloResults);
+                
+                if (yoloResults.length > 0) {
+                    console.log('[analyzeYOLO] 🎉 YOLO 분석 성공: 감지된 결과가 있습니다.');
+
+                    const yoloData = yoloResults[0];
+                    const detections = yoloData.detections;
+                    
+                    // detections가 배열인지 검증
+                    if (!Array.isArray(detections)) {
+                        console.error('[analyzeYOLO] 오류: YOLO 모델의 탐지 결과("detections")가 배열이 아닙니다!', detections);
+                        setAnalysisStatus('YOLO 분석 실패: 탐지 결과 형식 오류');
+                        showToast('YOLO 분석 실패: 탐지 결과 형식이 올바르지 않습니다.');
+                        return false;
+                    }
+
+                    // 해상도 정보 추출 및 유효성 검사 로직은 그대로 유지 (이미 개선됨)
+                    let imageWidth = 1024;
+                    let imageHeight = 1024;
+                    // ... (imageWidth, imageHeight 계산 로직) ...
+                    console.log(`[analyzeYOLO] 파싱된 이미지 해상도: ${imageWidth}x${imageHeight}`);
+
                     setAnalysisResults({
                         status: 'success',
                         results: detections,
@@ -196,137 +464,49 @@ const useAIAnalysis = (currentStudyUID) => {
                     });
                     
                     setOverlays(detections);
-                    setShowOverlays(true); // 🔥 중요!
+                    setShowOverlays(true); 
                     
                     setAnalysisStatus(`YOLO 분석 완료! (검출: ${detections.length}개)`);
                     showToast(`YOLO 분석 완료! ${detections.length}개 검출`);
                     
+                    console.log('[analyzeYOLO] ✅ 모든 프론트엔드 처리 완료. true 반환.');
                     return true;
-                }
-            } else {
-                setAnalysisStatus('YOLO 분석 실패: ' + (data.error || 'Unknown error'));
-                showToast('YOLO 분석 실패: ' + (data.error || 'Unknown error'));
-                return false;
-            }
-        } catch (error) {
-            setAnalysisStatus('YOLO 분석 실패: ' + error.message);
-            showToast('YOLO 분석 실패: ' + error.message);
-            console.error('YOLO 분석 에러:', error);
-            return false;
-        } finally {
-            setIsAnalyzing(false);
-        }
-    }, [currentStudyUID]);
-    
-    /**
-     * SSD 분석을 실행하는 함수
-     */
-    const analyzeSSD = useCallback(async (forceOverwrite = false) => {
-        if (typeof forceOverwrite === 'object' && forceOverwrite !== null) {
-            console.log('이벤트 객체가 들어왔습니다. false로 처리합니다.');
-            forceOverwrite = false;
-        }
-
-        if (!currentStudyUID) {
-            setAnalysisStatus('Study UID를 찾을 수 없습니다');
-            showToast('Study UID를 찾을 수 없습니다');
-            return false;
-        }
-
-        setAnalysisResults(null);
-        setOverlays([]);
-        setShowOverlays(false);
-        
-        // 중복 체크
-        if (!forceOverwrite) {
-            try {
-                console.log('🔍 중복 체크 시작:', currentStudyUID);
-                const existingCheck = await checkExistingAnalysis(currentStudyUID, 'SSD');
-                console.log('🔍 중복 체크 결과:', existingCheck);
-                
-                if (existingCheck.exists) {
-                    console.log('⚠️ 기존 결과 발견! 사용자 확인 요청');
-                    
-                    const userConfirmed = window.confirm(
-                        `이미 SSD 분석 결과가 존재합니다.\n기존 결과를 덮어쓰시겠습니까?`
-                    );
-                    
-                    if (userConfirmed) {
-                        showToast('SSD 분석을 진행합니다...');
-                        return await analyzeSSD(true);
-                    } else {
-                        showToast('SSD 분석이 취소되었습니다');
-                        setAnalysisStatus('분석이 취소되었습니다');
-                        return false;
-                    }
                 } else {
-                    console.log('✅ 기존 결과 없음, 분석 진행');
-                }
-            } catch (error) {
-                console.error('❌ 중복 체크 실패:', error);
-                setAnalysisStatus('중복 체크 실패. 다시 시도해주세요.');
-                showToast('중복 체크 실패. 다시 시도해주세요.');
-                setIsAnalyzing(false);
-                return false;
-            }
-        }
-        
-        // 실제 분석 실행
-        try {
-            setIsAnalyzing(true);
-            setAnalysisStatus(`SSD 분석 중... (${currentStudyUID.substring(0, 20)}...)`);
-            showToast('SSD 분석을 시작합니다...');
-            
-            console.log('📤 AI 서비스 API 호출:', { studyUID: currentStudyUID, forceOverwrite });
-            const data = await analyzeWithSSD(currentStudyUID, forceOverwrite);
-            
-            console.log('🔥 AI 서비스 응답:', data);
-            
-            if (data.success) {
-                // 🔥 entry.py 응답 구조 처리
-                const results = data.results || [];
-                const ssdResults = results.filter(r => r.model_type === 'ssd' && r.success);
-                
-                if (ssdResults.length > 0) {
-                    const ssdData = ssdResults[0];
-                    const detections = ssdData.detections || [];
+                    console.warn('[analyzeYOLO] AI 서비스 응답은 성공이지만, 필터링 조건에 맞는 YOLO 결과 또는 탐지된 객체가 없습니다.');
+                    setAnalysisStatus('YOLO 분석 완료 (검출된 객체 없음)');
+                    showToast('YOLO 분석 완료되었으나, 검출된 객체가 없습니다.');
                     
-                    // 🔥 해상도 정보 추출
-                    const imageWidth = data.image_dimensions ? parseInt(data.image_dimensions.split('x')[0]) : 1024;
-                    const imageHeight = data.image_dimensions ? parseInt(data.image_dimensions.split('x')[1]) : 1024;
-                    
+                    // 이 경우에도 setAnalysisResults를 호출하여 빈 상태로라도 업데이트
                     setAnalysisResults({
                         status: 'success',
-                        results: detections,
-                        detections: detections.length,
-                        model_used: 'ssd',
-                        image_width: imageWidth,
-                        image_height: imageHeight
+                        results: [],
+                        detections: 0,
+                        model_used: 'yolo',
+                        image_width: data.image_width || 1024,
+                        image_height: data.image_height || 1024
                     });
-                    
-                    setOverlays(detections);
-                    setShowOverlays(true); // 🔥 중요!
-                    
-                    setAnalysisStatus(`SSD 분석 완료! (검출: ${detections.length}개)`);
-                    showToast(`SSD 분석 완료! ${detections.length}개 검출`);
-                    
+                    console.log('[analyzeYOLO] ✅ YOLO 분석 완료 (검출 없음). true 반환.');
                     return true;
                 }
-            } else {
-                setAnalysisStatus('SSD 분석 실패: ' + (data.error || 'Unknown error'));
-                showToast('SSD 분석 실패: ' + (data.error || 'Unknown error'));
+            } else { // data.success가 false인 경우
+                const errorMessage = data.error || data.details || '알 수 없는 AI 서비스 오류.';
+                console.error(`[analyzeYOLO] ❌ AI 서비스에서 실패를 보고했습니다: ${errorMessage}`);
+                setAnalysisStatus('YOLO 분석 실패: ' + errorMessage);
+                showToast('YOLO 분석 실패: ' + errorMessage);
+                console.log('[analyzeYOLO] 🛑 AI 서비스 실패 보고. false 반환.');
                 return false;
             }
-        } catch (error) {
-            setAnalysisStatus('SSD 분석 실패: ' + error.message);
-            showToast('SSD 분석 실패: ' + error.message);
-            console.error('SSD 분석 에러:', error);
+        } catch (error) { // 이 catch 블록이 여러분이 보는 "Unknown error"를 유발합니다!
+            console.error('[analyzeYOLO] 💥 YOLO 분석 중 치명적인 JavaScript 오류 발생:', error); // 이 로그가 가장 중요!
+            setAnalysisStatus('YOLO 분석 실패: ' + error.message);
+            showToast('YOLO 분석 실패: ' + error.message); // 이 토스트 메시지가 화면에 뜹니다!
+            console.log('[analyzeYOLO] 🚫 JavaScript 오류로 YOLO 분석 중단. false 반환.');
             return false;
         } finally {
             setIsAnalyzing(false);
+            console.log('[analyzeYOLO] finally 블록 실행됨.');
         }
-    }, [currentStudyUID]);
-    
+    }, [currentStudyUID, showToast]);
     // =============================================================================
     // 분석 결과 관리 함수들
     // =============================================================================

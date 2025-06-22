@@ -8,7 +8,7 @@ import './SampleForm.css';
 // log 
 import { saveLog } from '../utils/saveLog';
 
-const SampleForm = () => {
+const SampleForm = ({ orderId: propOrderId, onClose }) => {
   const navigate = useNavigate();
   const [aliasMappings, setAliasMappings] = useState({});
   const [selectedAlias, setSelectedAlias] = useState('');
@@ -17,7 +17,7 @@ const SampleForm = () => {
   const [testTypeOptions, setTestTypeOptions] = useState([]);
   const [collectionDate, setCollectionDate] = useState('');
   const { orderId: paramOrderId } = useParams();
-  const [orderId, setOrderId] = useState('');
+  const [orderId, setOrderId] = useState(propOrderId || paramOrderId || '');
   const [loincCode, setLoincCode] = useState('');
   const [sampleStatus] = useState('collected');
   

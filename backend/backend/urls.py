@@ -31,7 +31,6 @@ urlpatterns = [
     path('api/worklist/', include('worklist.urls')),
     path('api/samples/', include('samples.urls')),
     path('api/tests/', include('tests.urls')),
-    path('api/logs/', include('ocs.urls')),
     path('api/account/', include('accounts.urls')),
     path('api/cdss/', include('lis_cdss.urls')),
     path('api/ohif/', include('medical_integration.ohif_urls')),

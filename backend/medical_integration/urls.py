@@ -78,6 +78,11 @@ urlpatterns = [
     path('unassign-room/', unassign_room, name='unassign-room'),
     path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),
     path('waiting-board/', views.waiting_board_view, name='waiting_board'),
+    path('patients/create-auto-id/', views.create_patient_auto_id, name='create_patient_auto_id'),
+    path('patients/create/', views.create_patient, name='create_patient'),  # 기존 함수 (자동/수동 모두 지원)
+    
+    # OpenMRS 환자 관리 (기존)
+    path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
 
     # 진료 상태 업데이트 <-- 이 섹션 전체를 삭제합니다.
     # path('patient-mappings/update-status/', update_patient_status, name='update_patient_status'),
@@ -86,5 +91,6 @@ urlpatterns = [
     path('completed-patients/', completed_patients_list, name='completed_patients_list'),
     
     path('daily-summary-stats/', views.get_daily_summary_stats, name='daily_summary_stats'),
-
+    path('debug/openmrs-metadata/', views.debug_openmrs_metadata, name='debug_openmrs_metadata'),
+    path('debug/test-minimal-patient/', views.test_minimal_patient_creation, name='test_minimal_patient'),
 ]

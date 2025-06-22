@@ -42,7 +42,7 @@ CORS(app, origins=["http://35.225.63.41:3000", "*"])  # 개발환경용
 MODELS_PATH = '/models'
 YOLO_MODEL_PATH = os.path.join(MODELS_PATH, 'yolov8', 'yolov8_inference.py')
 SSD_MODEL_PATH = os.path.join(MODELS_PATH, 'ssd', 'ssd_inference.py')
-ORTHANC_URL = os.getenv("ORTHANC_URL", "http://35.225.63.41:8042")
+ORTHANC_URL = os.getenv("ORTHANC_URL", "http://orthanc:8042")
 DJANGO_URL = 'http://35.225.63.41:8000'
 
 ORTHANC_USERNAME = 'orthanc'
@@ -162,6 +162,31 @@ class AIAnalyzer:
 
 ai_analyzer = AIAnalyzer()
 
+def resolve_instance_id(uid_or_id):
+    """
+    내부 UUID 또는 SOPInstanceUID 둘 다 처리
+    """
+    if '-' in uid_or_id:
+        return uid_or_id  # UUID 형식이면 그대로
+    else:
+        try:
+            find_url = f"{ORTHANC_URL}/tools/find"
+            query = {
+                "Level": "Instance",
+                "Query": {
+                    "SOPInstanceUID": uid_or_id
+                }
+            }
+            response = requests.post(find_url, auth=auth_tuple, json=query, timeout=10)
+            response.raise_for_status()
+            matches = response.json()
+            if matches:
+                return matches[0]  # 첫 번째 매칭 ID
+        except Exception as e:
+            logger.warning(f"UID 매핑 실패: {uid_or_id}, 이유: {e}")
+    return None
+
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
@@ -169,36 +194,38 @@ def health_check():
 @app.route('/analyze/<instance_id>', methods=['POST'])
 def analyze_instance(instance_id):
     try:
-        logger.info(f"인스턴스 분석 요청: {instance_id}")
-        instance_info = get_instance_info(instance_id)
-        if not instance_info:
+        # SOPInstanceUID → Orthanc 내부 ID 매핑
+        resolved_id = resolve_instance_id(instance_id)
+        if not resolved_id:
             return jsonify({'error': 'Instance not found'}), 404
 
-        dicom_data = get_dicom_file(instance_id)
+        logger.info(f"인스턴스 분석 요청 (Resolved ID: {resolved_id})")
+
+        # ⛔ 기존 instance_id → ✅ resolved_id 사용
+        instance_info = get_instance_info(resolved_id)
+        if not instance_info:
+            return jsonify({'error': 'Instance info not found'}), 404
+
+        dicom_data = get_dicom_file(resolved_id)
         if not dicom_data:
             return jsonify({'error': 'DICOM download failed'}), 500
 
         modality = instance_info['MainDicomTags'].get('Modality', 'UNKNOWN')
-        
-        # 🔥 개별 모델 분석 결과 받기 (이제 리스트 반환)
-        analysis_results = ai_analyzer.analyze_dicom_data(dicom_data, modality)
-        
-        # 🔥 해상도 정보를 미리 추출
         image_width, image_height = get_image_dimensions_from_data(dicom_data)
-        
-         # 🔥 각 모델 결과를 개별적으로 저장 (해상도 정보 전달)
+
+        analysis_results = ai_analyzer.analyze_dicom_data(dicom_data, modality)
+
         saved_results = []
         for result in analysis_results:
             if result.get('success') and not result.get('skipped'):
-                # 🔥 해상도 정보를 result에 추가
                 result['metadata'] = result.get('metadata', {})
                 result['metadata']['image_width'] = image_width
                 result['metadata']['image_height'] = image_height
-                
+
+                # 여전히 저장은 original instance_id 사용 (UID 저장 목적)
                 save_result = save_analysis_result(instance_id, result, dicom_data)
                 saved_results.append(save_result)
-        
-        # 응답은 모든 모델 결과를 포함
+
         return jsonify({
             'success': True,
             'total_models': len(analysis_results),
@@ -206,7 +233,7 @@ def analyze_instance(instance_id):
             'results': analysis_results,
             'image_dimensions': f"{image_width}x{image_height}"
         })
-        
+
     except Exception as e:
         logger.error(f"분석 실패: {e}")
         logger.error(traceback.format_exc())
@@ -240,9 +267,14 @@ def get_image_dimensions_from_data(dicom_data):
 @app.route('/results/<instance_id>', methods=['GET'])
 def get_analysis_result(instance_id):
     try:
-        instance_info = get_instance_info(instance_id)
-        if not instance_info:
+        # ✅ 먼저 내부 Orthanc ID로 변환 (SOPInstanceUID 지원)
+        resolved_id = resolve_instance_id(instance_id)
+        if not resolved_id:
             return jsonify({'error': 'Instance not found'}), 404
+
+        instance_info = get_instance_info(resolved_id)
+        if not instance_info:
+            return jsonify({'error': 'Instance info not found'}), 404
 
         study_uid = instance_info.get('MainDicomTags', {}).get('StudyInstanceUID')
         if not study_uid:
@@ -265,22 +297,34 @@ def get_analysis_result(instance_id):
 
 def get_instance_info(instance_id):
     try:
+        # ✅ 먼저 instance_id가 SOPInstanceUID인지 확인하고 Orthanc 내부 ID로 변환
+        if '-' not in instance_id:  # SOPInstanceUID는 보통 '-' 없음
+            logger.info(f"🔍 SOPInstanceUID 감지됨, 내부 ID로 매핑 시도: {instance_id}")
+            resolved = resolve_instance_id(instance_id)
+            if not resolved:
+                logger.warning(f"❌ SOPInstanceUID를 내부 Orthanc ID로 매핑 실패: {instance_id}")
+                return None
+            instance_id = resolved  # 매핑 성공 시 내부 ID로 교체
+
+        # 🔍 실제 인스턴스 정보 요청
         r1 = requests.get(f"{ORTHANC_URL}/instances/{instance_id}", auth=auth_tuple, timeout=80)
+        logger.info(f"➡️ GET {ORTHANC_URL}/instances/{instance_id}")
+        logger.info(f"➡️ 응답 코드: {r1.status_code}")
         if r1.status_code != 200:
             logger.warning(f"Orthanc 인스턴스 정보 조회 실패: {instance_id}, Status: {r1.status_code}, Response: {r1.text}")
             return None
         instance_info = r1.json()
 
+        # 🔍 Simplified 태그도 병합
         r2 = requests.get(f"{ORTHANC_URL}/instances/{instance_id}/simplified-tags", auth=auth_tuple, timeout=80)
         if r2.status_code == 200:
             tags = r2.json()
             instance_info.setdefault('MainDicomTags', {})
-            for key in ['PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'SOPInstanceUID', 'InstanceNumber', 'Modality']:
-                # ❗ 존재 여부만 확인, 값 자체는 비어 있어도 저장
+            for key in ['PatientID', 'StudyInstanceUID', 'SeriesInstanceUID', 'instance_id', 'InstanceNumber', 'Modality']:
                 if key in tags:
                     instance_info['MainDicomTags'][key] = tags[key]
 
-        # 필수 UID 값이 누락되면 None 반환하여 분석/저장 중단
+        # ✅ 필수 태그 검증
         required_keys = ['StudyInstanceUID', 'SeriesInstanceUID', 'SOPInstanceUID']
         for key in required_keys:
             if not instance_info['MainDicomTags'].get(key):
@@ -293,6 +337,7 @@ def get_instance_info(instance_id):
         logger.error(f"get_instance_info 실패: {e}")
         logger.error(traceback.format_exc())
         return None
+
 
 
 
@@ -494,222 +539,6 @@ def save_analysis_result(instance_id, result_dict, dicom_data=None):
         return {"status": "error", "message": str(e)}
 
 
-# def save_analysis_result(instance_id, result_dict):
-#     try:
-#         # bbox를 x, y, width, height 형식으로 변환하는 헬퍼 함수
-#         def normalize_bbox(bbox_data):
-#             logger.debug(f"🔍 normalize_bbox 호출: {bbox_data} (type: {type(bbox_data)})")
-#             if isinstance(bbox_data, dict):
-#                 # case 1: {'x':..., 'y':..., 'width':..., 'height':...}
-#                 if all(k in bbox_data for k in ['x', 'y', 'width', 'height']):
-#                     return {
-#                         "x": int(bbox_data.get("x", 0)),
-#                         "y": int(bbox_data.get("y", 0)),
-#                         "width": int(bbox_data.get("width", 0)),
-#                         "height": int(bbox_data.get("height", 0)),
-#                     }
-#                 # case 2: {'x1':..., 'y1':..., 'x2':..., 'y2':...}
-#                 elif all(k in bbox_data for k in ['x1', 'y1', 'x2', 'y2']):
-#                     x1 = bbox_data.get("x1", 0)
-#                     y1 = bbox_data.get("y1", 0)
-#                     x2 = bbox_data.get("x2", 0)
-#                     y2 = bbox_data.get("y2", 0)
-#                     return {
-#                         "x": int(x1),
-#                         "y": int(y1),
-#                         "width": int(x2 - x1),
-#                         "height": int(y2 - y1),
-#                     }
-#             # case 3: [x1, y1, x2, y2] (list/tuple)
-#             elif isinstance(bbox_data, (list, tuple)) and len(bbox_data) == 4:
-#                 x1, y1, x2, y2 = bbox_data
-#                 return {
-#                     "x": int(x1),
-#                     "y": int(y1),
-#                     "width": int(x2 - x1),
-#                     "height": int(y2 - y1),
-#                 }
-#             # Torchvision Tensor (예: torch.Tensor([[x1,y1,x2,y2]]))
-#             elif hasattr(bbox_data, 'tolist') and isinstance(bbox_data.tolist(), list) and len(bbox_data.tolist()) == 4:
-#                 x1, y1, x2, y2 = bbox_data.tolist()
-#                 logger.debug(f"🔍 bbox_data가 torch.Tensor 라이크 객체임: {x1, y1, x2, y2}")
-#                 return {
-#                     "x": int(x1),
-#                     "y": int(y1),
-#                     "width": int(x2 - x1),
-#                     "height": int(y2 - y1),
-#                 }
-            
-#             # 모든 경우에 해당하지 않으면 기본값 반환
-#             logger.warning(f"⚠️ 알 수 없는 bbox 형식: {bbox_data} (type: {type(bbox_data)}). 기본값 사용.")
-#             return {"x": 0, "y": 0, "width": 0, "height": 0}
-
-
-#         detections = []
-#         raw_detections = result_dict.get("detections", [])
-
-#         logger.debug(f"🔍 save_analysis_result 시작. raw_detections 타입: {type(raw_detections)}, 내용: {raw_detections}")
-
-#         # raw_detections가 리스트인지 확인하고, 아니면 빈 리스트로 처리
-#         if not isinstance(raw_detections, list):
-#             # 만약 raw_detections 자체가 문자열 JSON이라면 파싱 시도
-#             if isinstance(raw_detections, str):
-#                 try:
-#                     raw_detections = json.loads(raw_detections)
-#                     logger.debug(f"✅ raw_detections 문자열 → dict 파싱됨: {raw_detections}")
-#                     if not isinstance(raw_detections, list): # 파싱 후에도 리스트가 아니면 오류
-#                          logger.error(f"❌ 'detections' 키의 값이 JSON 파싱 후에도 리스트가 아닙니다. 실제 타입: {type(raw_detections)}")
-#                          raw_detections = []
-#                 except json.JSONDecodeError as e:
-#                     logger.error(f"❌ 'detections' 키의 값이 리스트가 아니며, JSON 파싱 실패: {e} - 원본: '{raw_detections}'")
-#                     raw_detections = [] # 파싱 실패 시 해당 항목 건너뛰기
-#                 except Exception as e:
-#                     logger.error(f"❌ 'detections' 키 알 수 없는 파싱 오류: {e} - 원본: '{raw_detections}'")
-#                     raw_detections = []
-#             else:
-#                 logger.error(f"❌ 'detections' 키의 값이 리스트가 아닙니다. 실제 타입: {type(raw_detections)}. 빈 리스트로 초기화.")
-#                 raw_detections = [] # 안전하게 빈 리스트로 초기화
-
-
-#         for i, item in enumerate(raw_detections):
-#             logger.debug(f"📦 현재 {i}번째 item: {item} (type: {type(item)})")
-
-#             # 문자열일 경우 JSON 파싱 시도 (각 item별로)
-#             if isinstance(item, str):
-#                 try:
-#                     item = json.loads(item)
-#                     logger.debug(f"✅ {i}번째 item 문자열 → dict 파싱됨: {item}")
-#                 except json.JSONDecodeError as e:
-#                     logger.error(f"❌ {i}번째 item JSON 파싱 실패: {e} - 원본 문자열: '{item}'")
-#                     continue # 파싱 실패 시 해당 항목 건너뛰기
-#                 except Exception as e:
-#                     logger.error(f"❌ {i}번째 item 알 수 없는 파싱 오류: {e} - 원본 문자열: '{item}'")
-#                     continue
-#             # Torchvision의 BoxList 같은 객체가 올 수도 있습니다.
-#             # 이 경우 dict처럼 보이지만 실제로는 다릅니다.
-#             elif hasattr(item, 'keys') and callable(getattr(item, 'keys')): # dict처럼 키를 가지고 있는 객체
-#                 logger.debug(f"✅ {i}번째 item은 dict처럼 보입니다. 키 확인: {list(item.keys())}")
-#             elif hasattr(item, 'boxes') and hasattr(item, 'labels') and hasattr(item, 'scores'):
-#                 # SSD나 YOLO의 원시 출력 객체가 직접 넘어오는 경우 (torchvision result object)
-#                 logger.debug(f"✅ {i}번째 item은 모델의 원시 출력 객체 (boxes, labels, scores 포함).")
-#                 boxes = item.boxes.xyxy.cpu().numpy().tolist() if hasattr(item.boxes, 'xyxy') else []
-#                 scores = item.scores.cpu().numpy().tolist() if hasattr(item, 'scores') else []
-#                 labels = item.labels.cpu().numpy().tolist() if hasattr(item, 'labels') else []
-
-#                 # 이 경우 item 자체를 변환하여 사용
-#                 if boxes and scores and labels:
-#                     temp_items = []
-#                     for b, s, l in zip(boxes, scores, labels):
-#                         # SSD/YOLO에서 넘어온 label_id를 ai_service의 class_names에 맞춰 변환 (임시)
-#                         # ai_service.py의 MEDICAL_CLASSES는 0~13까지 있음.
-#                         # 모델에서 넘어오는 label_id와 MEDICAL_CLASSES의 ID가 일치해야 함.
-#                         # 여기서는 SSD/YOLO의 _get_class_names와 ai_service의 MEDICAL_CLASSES가 동일하다고 가정
-#                         class_name = AIAnalyzer.MEDICAL_CLASSES.get(int(l), f'Unknown_class_{int(l)}')
-                        
-#                         temp_items.append({
-#                             'bbox': b, # [x1, y1, x2, y2]
-#                             'confidence': s,
-#                             'label': class_name,
-#                             'confidence_score': s,
-#                             'ai_text': f"{class_name} ({s:.3f})"
-#                         })
-#                     item = temp_items # item이 이제 list of dicts가 됨. for 루프를 다시 돌려야 함.
-#                     logger.debug(f"🔄 원시 출력 객체를 딕셔너리 리스트로 변환. 재처리 필요.")
-#                     # 재귀 호출 또는 이 부분을 반복문으로 처리하는 로직 필요
-#                     # 여기서는 일단 현재 item이 리스트가 되었으므로, 이 루프를 다시 시작해야 함.
-#                     # 가장 간단한 방법은 이 루프를 다시 돌리거나, 이전에 `extend` 대신 `append`를 썼던 로직으로.
-#                     # 현재 구조에서는 이 부분을 처리하기 어려움.
-#                     # 이 문제 해결을 위해, models/ssd/ssd_inference.py와 models/yolov8/yolov8_inference.py 에서
-#                     # analyze 함수가 반드시 'detections' 리스트 안에 dict 형태로 반환하도록 강제해야 합니다.
-#                     # 이것이 현재 ai_service.py에서 직접 처리하기 힘든 부분입니다.
-#                     continue # 임시 방편으로 건너뛰고 경고 메시지 남기기.
-
-#             # 여전히 딕셔너리가 아니면 무시 (재귀적 처리 후 남은 것)
-#             if not isinstance(item, dict):
-#                 logger.warning(f"⚠️ {i}번째 item이 최종적으로 dict가 아님, 무시: {item} (type: {type(item)})")
-#                 continue
-
-#             # bbox 처리 (normalize_bbox 함수 사용)
-#             normalized_bbox = normalize_bbox(item.get("bbox"))
-#             # normalize_bbox 함수에서 이미 기본값을 반환하므로 None 체크는 불필요하지만 유지
-#             if normalized_bbox is None: 
-#                  logger.warning(f"⚠️ {i}번째 item의 bbox 정규화 실패. 기본값 사용.")
-#                  normalized_bbox = {"x": 0, "y": 0, "width": 0, "height": 0}
-
-#             # 클래스 이름, 확신도, 설명 필드 유연하게 처리
-#             class_name = item.get("label") or item.get("class_name", "")
-#             confidence = item.get("confidence_score") or item.get("confidence", 0.0)
-#             description = item.get("ai_text") or item.get("description", "")
-            
-#             # Ensure confidence is float
-#             try:
-#                 confidence = float(confidence)
-#             except (ValueError, TypeError):
-#                 confidence = 0.0
-#                 logger.warning(f"⚠️ {i}번째 item의 confidence 값이 숫자가 아님: {item.get('confidence_score') or item.get('confidence')}. 0.0으로 설정.")
-
-#             detections.append({
-#                 "class_name": class_name, 
-#                 "confidence": confidence,
-#                 "bbox": normalized_bbox,
-#                 "description": description
-#             })
-
-#         payload = {
-#             "instance_id": instance_id,
-#             "result": {
-#                 "detections": detections,
-#                 "metadata": {
-#                     "model_used": result_dict.get("metadata", {}).get("model_used", "unknown"),
-#                     "model_version": result_dict.get("metadata", {}).get("model_version", "v1.0")
-#                 },
-#                 "processing_time": float(result_dict.get("processing_time", 0.0))
-#             }
-#         }
-
-#         url = f"{DJANGO_URL}/api/ai/results/save/"
-#         headers = {'Content-Type': 'application/json'}
-
-#         logger.info(f"📡 Django에 분석 결과 전송: {instance_id}")
-#         resp = requests.post(url, json=payload, headers=headers, timeout=15)
-
-#         if resp.status_code in [200, 201]:
-#             try:
-#                 # 응답이 JSON이 아닐 경우를 대비한 처리
-#                 response_json = resp.json()
-#                 count = response_json.get('count', 0)
-#                 logger.info(f"✅ 분석 결과 저장 완료: {count}건, 응답: {response_json}")
-#             except json.JSONDecodeError:
-#                 logger.info(f"✅ 분석 결과 저장 완료, Django 응답은 JSON 형식이 아님: {resp.text}")
-#         else:
-#             logger.warning(f"⚠️ Django 전송 실패: {resp.status_code} - {resp.text}")
-
-#     except Exception as e:
-#         logger.error(f"🔥 분석 결과 저장 중 예외 발생: {e}")
-#         logger.error(traceback.format_exc())
-
-
-# def analyze_single_instance(instance_id):
-#     instance_info = get_instance_info(instance_id)
-#     if not instance_info:
-#         raise Exception("Instance not found")
-
-#     dicom_data = get_dicom_file(instance_id)
-#     if not dicom_data:
-#         raise Exception("DICOM file download failed")
-
-#     modality = instance_info['MainDicomTags'].get('Modality', 'UNKNOWN')
-#     result = ai_analyzer.analyze_dicom_data(dicom_data, modality)
-    
-#     if not result or not result.get('success'):
-#         raise Exception(f"AI analysis failed: {result.get('error', 'unknown')}")
-
-#     save_analysis_result(instance_id, result)
-#     return result
-
-
-# 수정된 analyze_single_instance 함수
-
 def analyze_single_instance(instance_id):
     instance_info = get_instance_info(instance_id)
     if not instance_info:
@@ -742,3 +571,73 @@ def analyze_single_instance(instance_id):
             raise Exception(f"AI analysis failed: {result.get('error', 'unknown') if result else 'No result'}")
 
     return results[0] if len(results) == 1 else results
+
+
+@app.route('/analyze-study/<study_uid>', methods=['POST'])
+def analyze_study_by_uid(study_uid):
+    """
+    StudyInstanceUID (DICOM UID)로부터 분석 실행 (프론트엔드 대응)
+    """
+    try:
+        logger.info(f"📩 studyUID 분석 요청 도착: {study_uid}")
+        
+        # 1. study_uid → 내부 Orthanc Study ID 조회
+        find_url = f"{ORTHANC_URL}/tools/find"
+        query = {
+            "Level": "Study",
+            "Query": {
+                "StudyInstanceUID": study_uid
+            }
+        }
+        find_response = requests.post(find_url, auth=auth_tuple, json=query, timeout=10)
+        if find_response.status_code != 200 or not find_response.json():
+            logger.error(f"❌ studyUID {study_uid} 에 해당하는 스터디를 찾을 수 없음")
+            return jsonify({"error": "Study UID not found in Orthanc"}), 404
+
+        orthanc_study_id = find_response.json()[0]
+        logger.info(f"✅ studyUID → 내부 Orthanc ID 매핑 성공: {orthanc_study_id}")
+
+        # 2. 해당 스터디의 인스턴스 조회
+        series_list = requests.get(f"{ORTHANC_URL}/studies/{orthanc_study_id}/series", auth=auth_tuple).json()
+        if not series_list:
+            return jsonify({'error': 'No series found in study'}), 404
+
+        instance_ids = []
+        for series in series_list:
+            series_id = series.get("ID")
+            instances = requests.get(f"{ORTHANC_URL}/series/{series_id}/instances", auth=auth_tuple).json()
+            instance_ids.extend([inst["ID"] for inst in instances])
+
+        if not instance_ids:
+            return jsonify({'error': 'No instances found in study'}), 404
+
+        logger.info(f"🔍 총 {len(instance_ids)}개의 인스턴스를 분석합니다")
+
+        # 3. 각 인스턴스를 분석
+        all_results = []
+        for instance_id in instance_ids:
+            try:
+                result = analyze_single_instance(instance_id)
+                all_results.append({
+                    "instance_id": instance_id,
+                    "result": result
+                })
+            except Exception as e:
+                logger.warning(f"⚠️ 인스턴스 분석 실패: {instance_id}, 원인: {e}")
+
+        return jsonify({
+            "study_uid": study_uid,
+            "orthanc_study_id": orthanc_study_id,
+            "analyzed_instances": len(all_results),
+            "results": all_results
+        })
+
+    except Exception as e:
+        logger.error(f"🔥 Study 분석 실패: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    logger.info("🚀 Flask 서버 시작됨 - 포트 5000, 디버깅 모드 비활성화")
+    app.run(host="0.0.0.0", port=5000, debug=False)

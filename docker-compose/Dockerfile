@@ -21,9 +21,10 @@ RUN pip3 install --break-system-packages \
     pydicom \
     opencv-python-headless \
     flask \
+    flask_cors \
     requests \
     ultralytics \
-    gunicorn \
+
     fastapi \
     uvicorn
 

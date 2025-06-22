@@ -248,86 +248,7 @@ def get_patient_by_identifier(request, identifier):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
-@api_view(['POST', 'OPTIONS'])
-def create_patient(request):
-    """🔥 수정: OpenMRS에 새 환자 생성 - patient_identifier 기반"""
-    
-    if request.method == 'OPTIONS':
-        response = Response(status=status.HTTP_200_OK)
-        response['Allow'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        return response
-    
-    api = OpenMRSAPI()
-    
-    try:
-        data = request.data
-        logger.info(f"환자 생성 요청 데이터: {data}")
-        
-        # 필수 필드 검증
-        required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
-        missing_fields = [field for field in required_fields if field not in data or not data[field]]
-        
-        if missing_fields:
-            return Response({
-                'error': f'필수 필드가 누락되었습니다: {", ".join(missing_fields)}'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # 🔥 핵심 수정: patient_identifier 처리
-        patient_identifier = data.get('patient_identifier', '').strip()
-        if patient_identifier:
-            # React에서 입력받은 patient_identifier 사용 (P003, DCM001 등)
-            logger.info(f"React에서 입력받은 Patient Identifier: {patient_identifier}")
-            
-            # 🔥 중복 확인
-            if api.check_identifier_exists(patient_identifier):
-                return Response({
-                    'success': False,
-                    'error': f'Patient Identifier "{patient_identifier}"가 이미 존재합니다. 다른 식별자를 사용해주세요.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            # patient_identifier가 없으면 자동 생성
-            patient_identifier = api.generate_unique_identifier()
-            logger.info(f"자동 생성된 Patient Identifier: {patient_identifier}")
-        
-        # 🔥 수정된 API 호출
-        result = api.create_patient_with_identifier(data, patient_identifier)
-        
-        if result is None:
-            return Response({
-                'success': False,
-                'error': '환자 생성에 실패했습니다.'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        # 🔥 수정된 응답 데이터
-        response_data = {
-            'success': True,
-            'message': '환자가 성공적으로 생성되었습니다',
-            'patient': {
-                'uuid': result.get('uuid'),
-                'display': result.get('display'),
-                'identifiers': result.get('identifiers', []),
-                'patient_identifier': patient_identifier,  # 🔥 핵심: DICOM 매핑용 patient_identifier
-                'internal_id': result.get('uuid')  # OpenMRS 내부 UUID
-            }
-        }
-        
-        logger.info(f"환자 생성 완료 - OpenMRS UUID: {result.get('uuid')}, Patient Identifier: {patient_identifier}")
-        
-        return Response(response_data, status=status.HTTP_201_CREATED)
-        
-    except Exception as e:
-        logger.error(f"환자 생성 실패: {e}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        
-        return Response({
-            'success': False,
-            'error': f'서버 오류: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-# 환자 매핑 관련 API
+
 
 @api_view(['GET'])
 def get_patient_mappings(request):
@@ -1769,3 +1690,289 @@ def get_daily_summary_stats(request):
         "ai_analysis_count": ai_analysis_count,       # AI 분석 건수
         "imaging_exam_count": imaging_exam_count,     # 영상 검사 수
     })
+
+
+@csrf_exempt  
+@api_view(['POST', 'OPTIONS'])
+def create_patient_auto_id(request):
+    """🔥 개선된 자동 ID 환자 생성"""
+    
+    if request.method == 'OPTIONS':
+        response = Response(status=status.HTTP_200_OK)
+        response['Allow'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    try:
+        data = request.data
+        logger.info(f"🔄 환자 생성 요청: {list(data.keys())}")
+        
+        # 🔥 데이터 전처리 및 검증
+        processed_data = {}
+        required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
+        
+        for field in required_fields:
+            value = data.get(field)
+            if not value or str(value).strip() == '':
+                return Response({
+                    'success': False,
+                    'error': f'필수 필드가 비어있습니다: {field}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            processed_data[field] = str(value).strip()
+        
+        # 선택 필드
+        if data.get('middleName'):
+            processed_data['middleName'] = str(data['middleName']).strip()
+        
+        # 생년월일 형식 검증
+        try:
+            datetime.strptime(processed_data['birthdate'], '%Y-%m-%d')
+        except ValueError:
+            return Response({
+                'success': False,
+                'error': '생년월일은 YYYY-MM-DD 형식이어야 합니다'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 성별 검증
+        if processed_data['gender'].upper() not in ['M', 'F']:
+            return Response({
+                'success': False,
+                'error': '성별은 M 또는 F여야 합니다'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        processed_data['gender'] = processed_data['gender'].upper()
+        
+        logger.info(f"🔄 전처리된 데이터: {processed_data}")
+        
+        # OpenMRS API 호출
+        api = OpenMRSAPI()
+        result = api.create_patient_with_auto_openmrs_id(processed_data)
+        
+        if result['success']:
+            logger.info(f"✅ 환자 생성 성공: {result['patient']['patient_identifier']}")
+            
+            # PatientMapping 생성 시도
+            try:
+                from .models import PatientMapping
+                from django.utils import timezone
+                
+                mapping = PatientMapping.create_identifier_based_mapping(
+                    orthanc_patient_id=f"AUTO-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                    openmrs_patient_uuid=result['patient']['uuid'],
+                    patient_identifier=result['patient']['patient_identifier']
+                )
+                
+                if mapping:
+                    result['mapping_created'] = True
+                    result['mapping_id'] = mapping.mapping_id
+                    logger.info(f"✅ PatientMapping 생성 성공: {mapping.mapping_id}")
+                
+            except Exception as mapping_error:
+                logger.warning(f"⚠️ PatientMapping 생성 실패: {mapping_error}")
+                result['mapping_warning'] = str(mapping_error)
+            
+            return Response(result, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"❌ 환자 생성 실패: {result['error']}")
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"❌ 환자 생성 예외: {e}")
+        import traceback
+        logger.error(f"상세 에러: {traceback.format_exc()}")
+        
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# 🔥 기존 create_patient 함수도 수정 (자동/수동 ID 모두 지원)
+# 기존 create_patient 함수를 다음과 같이 수정하세요:
+
+@csrf_exempt
+@api_view(['POST', 'OPTIONS'])
+def create_patient(request):
+    """🔥 개선된 환자 생성 (자동/수동 ID 모두 지원)"""
+    
+    if request.method == 'OPTIONS':
+        response = Response(status=status.HTTP_200_OK)
+        response['Allow'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    try:
+        data = request.data
+        logger.info(f"🔄 환자 생성 요청: {list(data.keys())}")
+        
+        # OpenMRS API 인스턴스 생성
+        api = OpenMRSAPI()
+        
+        # 연결 테스트
+        if not api.test_connection():
+            return Response({
+                'success': False,
+                'error': 'OpenMRS 서버에 연결할 수 없습니다. 네트워크 연결과 서버 상태를 확인해주세요.'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        # 🔥 ID 처리 방식 결정
+        user_identifier = data.get('patient_identifier', '').strip()
+        
+        if user_identifier:
+            logger.info(f"🔖 수동 ID 모드: {user_identifier}")
+            result = api.create_patient_with_manual_id(data, user_identifier)
+        else:
+            logger.info("🔖 자동 ID 모드")
+            result = api.create_patient_with_auto_openmrs_id(data)
+        
+        if result and result.get('success'):
+            logger.info(f"✅ 환자 등록 성공: {result['patient']['patient_identifier']}")
+            
+            # 🔥 PatientMapping 자동 생성 시도
+            try:
+                from .models import PatientMapping
+                from django.utils import timezone
+                
+                mapping = PatientMapping.create_identifier_based_mapping(
+                    orthanc_patient_id=f"REG-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                    openmrs_patient_uuid=result['patient']['uuid'],
+                    patient_identifier=result['patient']['patient_identifier']
+                )
+                
+                if mapping:
+                    logger.info(f"✅ PatientMapping 생성 성공: {mapping.mapping_id}")
+                    result['mapping_created'] = True
+                    result['mapping_id'] = mapping.mapping_id
+                
+            except Exception as mapping_error:
+                logger.error(f"⚠️ PatientMapping 생성 실패: {mapping_error}")
+                result['mapping_warning'] = str(mapping_error)
+            
+            # 🔥 응답 형식 통일
+            response_data = {
+                'success': True,
+                'message': result.get('message', '환자가 성공적으로 생성되었습니다'),
+                'patient': {
+                    'uuid': result['patient']['uuid'],
+                    'display': result['patient']['display'],
+                    'identifiers': result['patient']['identifiers'],
+                    'patient_identifier': result['patient']['patient_identifier'],
+                    'internal_id': result['patient']['uuid']
+                },
+                'auto_generated': result.get('auto_generated', False),
+                'openmrs_idgen_used': result.get('openmrs_idgen_used', False),
+                'mapping_created': result.get('mapping_created', False),
+                'mapping_id': result.get('mapping_id'),
+                'mapping_warning': result.get('mapping_warning')
+            }
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        else:
+            error_msg = result.get('error', '환자 생성에 실패했습니다.') if result else '환자 생성에 실패했습니다.'
+            logger.error(f"❌ 환자 생성 실패: {error_msg}")
+            
+            return Response({
+                'success': False,
+                'error': error_msg
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"❌ 환자 생성 예외: {e}")
+        import traceback
+        logger.error(f"상세 에러: {traceback.format_exc()}")
+        
+        return Response({
+            'success': False,
+            'error': f'서버 오류가 발생했습니다: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+
+@api_view(['GET'])
+def debug_openmrs_metadata(request):
+    """🔥 OpenMRS 메타데이터 상세 디버깅"""
+    try:
+        api = OpenMRSAPI()
+        
+        # 상세 연결 테스트
+        connection_test = api.test_connection_detailed()
+        
+        # 추가 정보 수집
+        debug_info = {
+            'connection_test': connection_test,
+            'api_url': api.api_url,
+            'auth_user': api.auth[0],  # 비밀번호는 노출하지 않음
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # 메타데이터 상세 정보
+        if connection_test['success']:
+            identifier_types = api.get_identifier_types()
+            locations = api.get_locations()
+            
+            debug_info.update({
+                'identifier_types': [
+                    {
+                        'uuid': it.get('uuid'),
+                        'display': it.get('display'),
+                        'required': it.get('required', False)
+                    } for it in identifier_types[:10]  # 처음 10개만
+                ],
+                'locations': [
+                    {
+                        'uuid': loc.get('uuid'),
+                        'display': loc.get('display'),
+                        'description': loc.get('description')
+                    } for loc in locations[:10]  # 처음 10개만
+                ],
+                'default_identifier_type': api.get_default_identifier_type(),
+                'default_location': api.get_default_location()
+            })
+        
+        return Response({
+            'success': True,
+            'debug_info': debug_info
+        })
+        
+    except Exception as e:
+        logger.error(f"디버깅 API 실패: {e}")
+        import traceback
+        return Response({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+
+@api_view(['POST'])
+def test_minimal_patient_creation(request):
+    """🔥 최소한의 데이터로 환자 생성 테스트"""
+    try:
+        logger.info("🧪 최소 환자 생성 테스트 시작")
+        
+        # 최소한의 테스트 데이터
+        test_data = {
+            'givenName': 'Test',
+            'familyName': 'Patient', 
+            'gender': 'M',
+            'birthdate': '1990-01-01'
+        }
+        
+        api = OpenMRSAPI()
+        result = api.create_patient_with_auto_openmrs_id(test_data)
+        
+        return Response({
+            'success': result.get('success', False),
+            'result': result,
+            'test_data': test_data
+        })
+        
+    except Exception as e:
+        logger.error(f"최소 환자 생성 테스트 실패: {e}")
+        import traceback
+        return Response({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
