@@ -141,14 +141,32 @@
   text-decoration: none;
 }
 
+.emr-link-btn,
 .emr-link button {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0.875rem 1.5rem !important;
+  border: none !important;
   background: rgba(155, 89, 182, 0.1) !important;
-  border: 1px solid rgba(155, 89, 182, 0.2) !important;
   color: #9b59b6 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-align: left !important;
+  margin: 0.2rem 0.75rem !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  border: 1px solid rgba(155, 89, 182, 0.2) !important;
 }
 
+.emr-link-btn:hover,
 .emr-link button:hover {
   background: rgba(155, 89, 182, 0.2) !important;
+  transform: translateX(4px) !important;
 }
 
 /* 메인 패널 - 사이드바 상태에 따라 자동 조절 */
