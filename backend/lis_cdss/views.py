@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import CDSSResult
 from .serializers import CDSSResultSerializer
-from lis_cdss.inference.blood_inference import run_blood_model
+from lis_cdss.inference.blood_inference import run_blood_model, MODELS
+from lis_cdss.inference.shap_lis import generate_shap_image
 
 @api_view(['GET'])
 def get_cdss_results(request):
@@ -56,24 +57,51 @@ def delete_cdss_result(request, sample_id):
     
 @api_view(['POST'])
 def receive_model_result(request):
-    serializer = CDSSResultSerializer(data=request.data)
+    data = request.data
+    sample = data.get("sample")
+    test_type = data.get("test_type")
+    component_name = data.get("component_name")
+
+    # 기존 레코드 삭제 또는 갱신
+    existing = CDSSResult.objects.filter(
+        sample=sample,
+        test_type=test_type,
+        component_name=component_name
+    ).first()
+
+    if existing:
+        serializer = CDSSResultSerializer(existing, data=request.data)
+    else:
+        serializer = CDSSResultSerializer(data=request.data)
+
     if serializer.is_valid():
         instance = serializer.save()
 
         try:
-            # 해당 샘플의 전체 결과 가져오기
+            # 반드시 최신 상태로 DB에서 다시 조회
             related = CDSSResult.objects.filter(
-                sample=instance.sample,
-                test_type=instance.test_type
-            )
+                sample=sample,
+                test_type=test_type
+            ).order_by('component_name')
             values = {r.component_name: r.value for r in related}
+            print("🧪 모델 입력값:", values)
+            print("🧮 feature 수:", len(values))
 
-            # 예측 실행
-            prediction = run_blood_model(instance.test_type, values)
-            instance.prediction = prediction
-            instance.save()
+            # SHAP 이미지 생성
+            model = MODELS.get(test_type)
+            shap_image_url = None
+            if model:
+                shap_image_url = generate_shap_image(model, values, instance.sample.id)
+
+            # 응답 구성
+            response_data = CDSSResultSerializer(instance).data
+            response_data['shap_image_url'] = shap_image_url
+
+            return Response(response_data, status=201)
+            
         except Exception as e:
             print("예측 오류:", e)
 
-        return Response(CDSSResultSerializer(instance).data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(CDSSResultSerializer(instance).data, status=201)
+
+    return Response(serializer.errors, status=400)

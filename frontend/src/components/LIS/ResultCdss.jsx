@@ -1,3 +1,5 @@
+// LIS/ResultCdss
+
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import './ResultCdss.css';
@@ -196,7 +198,13 @@ const CdssResultTable = () => {
                         <td>{result.unit}</td>
                         <td>{result.verified_by}</td>
                         <td>{new Date(result.verified_date).toLocaleString()}</td>
-                        <td></td>
+                        <td>
+                          {idx === 0 ? (
+                            result.prediction === 1 ? '🔴 이상' :
+                            result.prediction === 0 ? '🟢 정상' :
+                            result.prediction || '-'
+                          ) : ''}
+                        </td>
                       </tr>
                     ))}
                 </React.Fragment>
