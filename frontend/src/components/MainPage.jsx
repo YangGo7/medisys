@@ -12,7 +12,7 @@ import RISPage from '../pacsapp';
 import TitlePage from './Main_page/TitlePage';
 import './MainPage.css'; // CSS 파일 import 추가
 import StatisticsBoard from './Main_page/StatisticsBoard';
-
+import StatisticsBoard from './Main_page/main_';
 
 
 
@@ -34,6 +34,7 @@ export default function MainPage() {
       case 'Medicalemployee': return <Medicalemployee />;
       case 'RISPage': return <RISPage />;
       case 'StatisticsBoard': return <StatisticsBoard />;
+      
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };

@@ -10,7 +10,7 @@ import OrderListPage from './components/LIS/OrderListPage';
 import SampleListPage from './components/LIS/SampleListPage';
 import ResultInputForm from './components/LIS/ResultInputForm';
 import ResultCdss from './components/LIS/ResultCdss';
-import LISModelResultPage from './components/LIS/LisModelResult';
+import LISModelResultPage from './components/LIS/CdssVisualizationPage';
 import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
 import MainPage from './components/MainPage';
@@ -23,6 +23,7 @@ import PatientWaitingList from './components/EMR/PatientWaitingList';
 import PatientStatusBoard from './components/EMR/PatientStatusBoard'; 
 import CompletedPatients from './components/EMR/CompletedPatients'; 
 import StatisticsBoard from './components/Main_page/StatisticsBoard.jsx';
+import main_page_function from './components/Main_page/main_page_function';
 // ThemeContext, ReceptionContext 추가
 import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
@@ -40,8 +41,8 @@ function App() {
             {/* 기존 메인 페이지 */}
             <Route path="/" element={<Navigate to="/main" />} />
             <Route path="/main" element={<MainPage />} />
-            <Route path="/StatisticsBoard" element={<StatisticsBoard />} />
-            StatisticsBoard
+            <Route path="/Main_page/StatisticsBoard" element={<StatisticsBoard />} />
+            <Route path="/Main_page/main_page_function" element={<main_page_function />} />
 
             {/* EMR 페이지 */}
             <Route path="/emr" element={<EmrMainPage />} />
