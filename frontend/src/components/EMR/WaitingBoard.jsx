@@ -49,7 +49,7 @@ const WaitingBoard = () => {
     };
   }, []);
 
-  // ✅ 환자 이름 추출 함수 간소화 (백엔드에서 실제 이름을 보내주므로)
+  // ✅ 환자 이름 추출 함수
   const getPatientName = (patient) => {
     // 백엔드에서 실제 환자 이름을 보내주므로 간단히 처리
     if (patient.name) return patient.name;
@@ -151,6 +151,7 @@ const WaitingBoard = () => {
     },
   };
 
+  // ✅ return 문이 WaitingBoard 함수 안에 있어야 함
   return (
     <div style={styles.wrapper}>
       {/* ✅ 디버깅 정보 표시 (개발 시에만 사용) */}
@@ -198,7 +199,8 @@ const WaitingBoard = () => {
       <div style={styles.examRooms}>
         {[1, 2].map((room) => {
           const matched = data.assigned_recent?.room === room;
-          const assignedPatientName = matched ? getPatientName(data.assigned_recent) : null;
+          const assignedPatientName = matched ? 
+            getPatientName(data.assigned_recent) : null;
           
           return (
             <div key={room} style={styles.roomBox}>
@@ -228,6 +230,6 @@ const WaitingBoard = () => {
       `}</style>
     </div>
   );
-};
+}; // ✅ WaitingBoard 함수가 여기서 끝남
 
 export default WaitingBoard;

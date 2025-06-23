@@ -521,3 +521,33 @@ def health_check(request):
             'status': 'error',
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def alert_count(request):
+    """긴급 알림 수 조회"""
+    try:
+        # 중요한 공지사항 수 계산
+        urgent_notices = Notice.objects.filter(
+            notice_type='important',
+            is_active=True,
+            start_date__lte=timezone.now()
+        ).filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=timezone.now())
+        ).count()
+        
+        total_alerts = urgent_notices
+        
+        return Response({
+            'status': 'success',
+            'data': {
+                'total_alerts': total_alerts,
+                'urgent_notices': urgent_notices
+            }
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"알림 수 조회 오류: {str(e)}")
+        return Response({
+            'error': f'알림 수 조회 실패: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
