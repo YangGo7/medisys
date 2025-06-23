@@ -596,13 +596,22 @@ class OpenMRSAPI:
             if not provider_uuid:
                 provider_uuid = self.get_default_provider()
             
+            # ✅ OpenMRS가 요구하는 올바른 ISO8601 형식
+            from datetime import datetime
+            import pytz
+            
+            now_utc = datetime.now(pytz.UTC)
+            encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+            
             encounter_data = {
                 "patient": patient_uuid,
                 "encounterType": encounter_type_uuid,
                 "location": location_uuid,
                 "provider": provider_uuid,
-                "encounterDatetime": datetime.now().isoformat()
+                "encounterDatetime": encounter_datetime  # ✅ 올바른 형식
             }
+            
+            print(f"🕐 Encounter 날짜 형식: {encounter_datetime}")  # 디버깅용
             
             response = requests.post(
                 f"{self.api_url}/encounter",
@@ -625,9 +634,13 @@ class OpenMRSAPI:
     def create_observation(self, obs_data):
         """Observation 생성"""
         try:
-            # obsDatetime 기본값 설정
+            # ✅ obsDatetime 올바른 형식으로 설정
             if 'obsDatetime' not in obs_data:
-                obs_data['obsDatetime'] = datetime.now().isoformat()
+                from datetime import datetime
+                import pytz
+                
+                now_utc = datetime.now(pytz.UTC)
+                obs_data['obsDatetime'] = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
             
             response = requests.post(
                 f"{self.api_url}/obs",

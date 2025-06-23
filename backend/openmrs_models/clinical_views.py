@@ -335,17 +335,55 @@ def save_clinical_notes(request, patient_uuid):
         notes = request.data.get('notes', '')
         encounter_uuid = request.data.get('encounter_uuid')
         
-        if not notes or not encounter_uuid:
-            return Response({'error': '노트와 Encounter UUID가 필요합니다.'}, status=400)
+        if not notes:
+            return Response({'error': '노트가 필요합니다.'}, status=400)
 
-        # Clinical Notes Concept으로 Obs 생성
+        # ✅ 새 Encounter 생성 (encounter_uuid가 없는 경우)
+        if not encounter_uuid:
+            # OpenMRS가 요구하는 올바른 ISO8601 형식으로 날짜 생성
+            from datetime import datetime
+            import pytz
+            
+            # UTC 시간으로 생성하고 Z를 붙임
+            now_utc = datetime.now(pytz.UTC)
+            encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+            
+            encounter_data = {
+                'patient': patient_uuid,
+                'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # Consultation
+                'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',      # Default Location
+                'encounterDatetime': encounter_datetime,  # ✅ 올바른 형식
+            }
+
+            print(f"🕐 보내는 날짜 형식: {encounter_datetime}")  # 디버깅용
+
+            response = requests.post(
+                f'{OPENMRS_BASE_URL}/encounter',
+                headers=HEADERS,
+                json=encounter_data,
+                timeout=10
+            )
+
+            if response.status_code != 201:
+                error_msg = f"Encounter 생성 실패: {response.status_code}, {response.text}"
+                print(f"❌ {error_msg}")
+                return Response({'error': error_msg}, status=400)
+
+            encounter_uuid = response.json()['uuid']
+            print(f"✅ Encounter 생성 성공: {encounter_uuid}")
+
+        # ✅ Clinical Notes Obs 생성
+        obs_datetime = datetime.now(pytz.UTC).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        
         obs_data = {
             'person': patient_uuid,
             'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes Concept UUID
             'encounter': encounter_uuid,
-            'obsDatetime': timezone.now().isoformat(),
+            'obsDatetime': obs_datetime,  # ✅ 올바른 형식
             'value': notes
         }
+
+        print(f"🩺 Obs 날짜 형식: {obs_datetime}")  # 디버깅용
 
         response = requests.post(
             f'{OPENMRS_BASE_URL}/obs',
@@ -355,11 +393,19 @@ def save_clinical_notes(request, patient_uuid):
         )
 
         if response.status_code == 201:
-            return Response({'success': True, 'message': '임상 기록이 저장되었습니다.'})
+            return Response({
+                'success': True, 
+                'message': '임상 기록이 저장되었습니다.',
+                'encounter_uuid': encounter_uuid,
+                'obs_uuid': response.json()['uuid']
+            })
         else:
-            return Response({'error': '임상 기록 저장 실패'}, status=400)
+            error_msg = f"Obs 저장 실패: {response.status_code}, {response.text}"
+            print(f"❌ {error_msg}")
+            return Response({'error': error_msg}, status=400)
 
     except Exception as e:
+        print(f"❌ save_clinical_notes 예외: {e}")
         return Response({'error': str(e)}, status=500)
 
 

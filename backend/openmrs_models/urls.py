@@ -79,9 +79,3 @@ urlpatterns = [
     
     
 ]
-
-# backend/backend/urls.py (메인 URL 설정에 추가)
-"""
-기존 urlpatterns에 추가:
-    path('api/', include('openmrs_models.urls')),
-"""
