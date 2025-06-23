@@ -4,7 +4,7 @@ from rest_framework import status
 from .models import CDSSResult
 from .serializers import CDSSResultSerializer
 from lis_cdss.inference.blood_inference import run_blood_model, MODELS
-from lis_cdss.inference.shap_lis import generate_shap_image
+from lis_cdss.inference.shap_lis import generate_shap_values  
 
 @api_view(['GET'])
 def get_cdss_results(request):
@@ -89,13 +89,15 @@ def receive_model_result(request):
 
             # SHAP 이미지 생성
             model = MODELS.get(test_type)
-            shap_image_url = None
-            if model:
-                shap_image_url = generate_shap_image(model, values, instance.sample.id)
-
+            prediction = run_blood_model(test_type, values) if model else None
+            
+            related.update(prediction=prediction)
+            shap_data = generate_shap_values(model, values) if model else None
+                
             # 응답 구성
             response_data = CDSSResultSerializer(instance).data
-            response_data['shap_image_url'] = shap_image_url
+            response_data['shap_data'] = shap_data
+            response_data['prediction'] = prediction
 
             return Response(response_data, status=201)
             
