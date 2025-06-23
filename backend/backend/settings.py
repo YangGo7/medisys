@@ -52,6 +52,9 @@ LOCAL_APPS = [
     'common',
     'dr_annotations',
     'dr_reports',
+    'main_page_function',
+    'statisticsboard',
+    
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

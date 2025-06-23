@@ -13,6 +13,10 @@ const WaitingBoard = () => {
     try {
       const res = await axios.get(`${process.env.REACT_APP_INTEGRATION_API}waiting-board/`);
       const newData = res.data;
+      
+      // ✅ 디버깅을 위한 로그 추가
+      console.log('WaitingBoard API Response:', newData);
+      
       const prev = prevAssignedRef.current;
       const curr = newData.assigned_recent;
 
@@ -45,13 +49,44 @@ const WaitingBoard = () => {
     };
   }, []);
 
+  // ✅ 환자 이름 추출 함수 개선
+  const getPatientName = (patient) => {
+    // 다양한 이름 필드 체크
+    if (patient.name) return patient.name;
+    if (patient.display) return patient.display;
+    if (patient.patient_name) return patient.patient_name;
+    
+    // UUID인지 확인하여 환자 식별자로 대체
+    const identifier = patient.patient_identifier || patient.identifier;
+    if (identifier && identifier !== patient.uuid) {
+      return identifier;
+    }
+    
+    // 마지막으로 UUID의 일부만 표시
+    if (patient.uuid) {
+      return `환자-${patient.uuid.substring(0, 8)}`;
+    }
+    
+    return '이름 없음';
+  };
+
   const maskName = (name) => {
     if (!name || name.length <= 1) return name;
+    
+    // UUID 패턴 체크 (8-4-4-4-12 형식)
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(name)) {
+      return `환자-${name.substring(0, 8)}`;
+    }
+    
+    // 일반적인 이름 마스킹
     return name
       .split(' ')
-      .map(part =>
-        part.length <= 2 ? part[0] + '*' : part[0] + '*'.repeat(part.length - 2) + part[part.length - 1]
-      )
+      .map(part => {
+        if (part.length <= 1) return part;
+        if (part.length === 2) return part[0] + '*';
+        return part[0] + '*'.repeat(part.length - 2) + part[part.length - 1];
+      })
       .join(' ');
   };
 
@@ -113,21 +148,59 @@ const WaitingBoard = () => {
       zIndex: 9999,
       animation: 'fadeInOut 5s ease-in-out',
     },
+    debugInfo: {
+      position: 'fixed',
+      top: '10px',
+      right: '10px',
+      background: '#fff',
+      border: '1px solid #ccc',
+      padding: '10px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      maxWidth: '300px',
+      opacity: 0.8,
+      zIndex: 1000,
+    },
   };
 
   return (
     <div style={styles.wrapper}>
-      {showAlert && <div style={styles.alert}>{alertName}님 진료실로 입장해주세요</div>}
+      {/* ✅ 디버깅 정보 표시 (개발 시에만 사용) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={styles.debugInfo}>
+          <strong>디버그 정보:</strong><br/>
+          대기 환자 수: {data.waiting.length}<br/>
+          최근 배정: {data.assigned_recent ? JSON.stringify(data.assigned_recent) : '없음'}
+        </div>
+      )}
+
+      {showAlert && (
+        <div style={styles.alert}>
+          {maskName(alertName)}님 진료실로 입장해주세요
+        </div>
+      )}
 
       {/* 좌측 - 대기환자 목록 */}
       <div style={styles.waitingArea}>
         <div style={styles.title}>총 대기 인원: {data.waiting.length}명</div>
         {data.waiting.length > 0 ? (
-          data.waiting.map((p, i) => (
-            <div key={i} style={styles.patientBox}>
-              {maskName(p.name)}
-            </div>
-          ))
+          data.waiting.map((p, i) => {
+            // ✅ 환자 이름 추출 및 마스킹
+            const patientName = getPatientName(p);
+            const maskedName = maskName(patientName);
+            
+            return (
+              <div key={i} style={styles.patientBox}>
+                {maskedName}
+                {/* ✅ 개발 환경에서만 원본 데이터 표시 */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+                    원본: {JSON.stringify(p, null, 2)}
+                  </div>
+                )}
+              </div>
+            );
+          })
         ) : (
           <div style={{ color: '#888', textAlign: 'center' }}>대기 중인 환자 없음</div>
         )}
@@ -137,14 +210,34 @@ const WaitingBoard = () => {
       <div style={styles.examRooms}>
         {[1, 2].map((room) => {
           const matched = data.assigned_recent?.room === room;
+          const assignedPatientName = matched ? getPatientName(data.assigned_recent) : null;
+          
           return (
             <div key={room} style={styles.roomBox}>
               <div style={styles.roomTitle}>진료실 {room}</div>
-              <div>{matched ? maskName(data.assigned_recent.name) : '환자 없음'}</div>
+              <div>
+                {assignedPatientName ? maskName(assignedPatientName) : '환자 없음'}
+              </div>
+              {/* ✅ 개발 환경에서만 원본 데이터 표시 */}
+              {process.env.NODE_ENV === 'development' && matched && (
+                <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+                  원본: {JSON.stringify(data.assigned_recent, null, 2)}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      {/* ✅ CSS 애니메이션 추가 */}
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+          10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+      `}</style>
     </div>
   );
 };

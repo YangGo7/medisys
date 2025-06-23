@@ -46,6 +46,7 @@ urlpatterns = [
     # stt
     path('api/stt/', include('stt_service.urls')),
     path('api/statisticsboard/', include('statisticsboard.urls')),
+    path('api/main-page-function/', include('main_page_function.urls')),  # 새로 추가
     
 
 ]
