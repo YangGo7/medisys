@@ -176,201 +176,89 @@ class OpenMRSAPI:
         return identifier_types[0].get('uuid')
     
     def get_default_location(self):
-        """🔥 수정: 실제 존재하는 위치 UUID 반환"""
+        """안전한 기본 위치 선택"""
         locations = self.get_locations()
         if not locations:
-            logger.error("❌ 사용 가능한 위치가 없습니다")
             return None
-        
-        # 🔥 실제 조회된 위치 목록 출력
-        logger.info(f"📍 사용 가능한 위치들:")
-        for i, location in enumerate(locations):
-            uuid = location.get('uuid')
-            display = location.get('display')
-            retired = location.get('retired', False)
-            logger.info(f"  [{i}] {display} (UUID: {uuid}) {'[비활성]' if retired else '[활성]'}")
-        
-        # 🔥 활성화된 위치들만 필터링
-        active_locations = [loc for loc in locations if not loc.get('retired', False)]
-        
-        if not active_locations:
-            logger.warning("⚠️ 활성화된 위치가 없어서 모든 위치 중에서 선택")
-            active_locations = locations
-        
-        # 🔥 우선순위 키워드로 검색 (순서대로)
-        priority_keywords = [
-            'unknown',
-            'amani',  # 1 관련
-            'outpatient',    # 외래 관련
-            'clinic',        # 클리닉
-            'hospital',      # 병원
-        ]
+            
+        # 우선순위: Registration > Unknown > Default > 첫 번째
+        priority_keywords = ['registration', 'unknown', 'default']
         
         for keyword in priority_keywords:
-            for location in active_locations:
+            for location in locations:
                 display = location.get('display', '').lower()
                 if keyword in display:
-                    selected_uuid = location.get('uuid')
-                    logger.info(f"✅ 키워드 '{keyword}' 매칭 위치 선택: {location['display']} (UUID: {selected_uuid})")
-                    return selected_uuid
+                    return location.get('uuid')
         
-        # 🔥 키워드 매칭이 안되면 첫 번째 활성 위치 선택
-        first_location = active_locations[0]
-        selected_uuid = first_location.get('uuid')
-        logger.info(f"✅ 첫 번째 활성 위치 선택: {first_location['display']} (UUID: {selected_uuid})")
-        return selected_uuid
+        return locations[0].get('uuid')
     
-    def get_safe_location(self):
-        """🔥 안전한 위치 선택 - get_default_location과 동일하게 수정"""
-        return self.get_default_location()
-    
-    def get_next_sequential_identifier(self):
-        """🔥 P10000, P10001, P10002... 형식의 순차적 identifier 생성"""
-        try:
-            # 1. 현재 가장 큰 번호 조회
-            response = requests.get(
-                f"{self.api_url}/patient",
-                params={
-                    'q': 'P1',  # P1로 시작하는 identifier 검색
-                    'v': 'default',
-                    'limit': 100
-                },
-                auth=self.auth,
-                headers={'Accept': 'application/json'},
-                timeout=15
-            )
-            
-            max_number = 10000  # 시작 번호
-            
-            if response.status_code == 200:
-                results = response.json().get('results', [])
-                
-                # 기존 P1xxxx 형식의 identifier들에서 최대 번호 찾기
-                for patient in results:
-                    identifiers = patient.get('identifiers', [])
-                    for id_info in identifiers:
-                        identifier = id_info.get('identifier', '')
-                        if identifier.startswith('P1') and len(identifier) >= 6:
-                            try:
-                                # P10000 -> 10000 추출
-                                number_part = identifier[1:]  # P 제거
-                                if number_part.isdigit():
-                                    current_number = int(number_part)
-                                    if current_number >= 10000:  # P1xxxx 형식만
-                                        max_number = max(max_number, current_number)
-                            except ValueError:
-                                continue
-            
-            # 다음 번호 생성
-            next_number = max_number + 1
-            next_identifier = f"P{next_number}"
-            
-            logger.info(f"🔖 순차적 identifier 생성: {next_identifier} (이전 최대: P{max_number})")
-            return next_identifier
-            
-        except Exception as e:
-            logger.error(f"❌ 순차적 identifier 생성 실패: {e}")
-            # 실패시 안전한 fallback
-            import random
-            fallback_number = 10000 + random.randint(1, 9999)
-            fallback_identifier = f"P{fallback_number}"
-            logger.warning(f"⚠️ fallback identifier 사용: {fallback_identifier}")
-            return fallback_identifier
-
-    def verify_identifier_unique(self, identifier, max_attempts=3):
-        """identifier 고유성 확인 및 중복시 새 번호 생성"""
-        for attempt in range(max_attempts):
-            try:
-                # 중복 확인
-                response = requests.get(
-                    f"{self.api_url}/patient",
-                    params={'identifier': identifier},
-                    auth=self.auth,
-                    headers={'Accept': 'application/json'},
-                    timeout=10
-                )
-                
-                if response.status_code == 200:
-                    results = response.json().get('results', [])
-                    
-                    if not results:
-                        # 중복 없음 - 사용 가능
-                        logger.info(f"✅ identifier 고유성 확인: {identifier}")
-                        return identifier
-                    else:
-                        # 중복 발견 - 번호 증가
-                        logger.warning(f"⚠️ identifier 중복: {identifier}")
-                        
-                        # P10001 -> 10001 추출하고 +1
-                        try:
-                            number_part = int(identifier[1:])
-                            new_number = number_part + 1
-                            identifier = f"P{new_number}"
-                            logger.info(f"🔄 새로운 identifier 시도: {identifier}")
-                        except ValueError:
-                            # 파싱 실패시 랜덤
-                            import random
-                            identifier = f"P{10000 + random.randint(1, 9999)}"
-                            logger.warning(f"🎲 랜덤 identifier 시도: {identifier}")
-                else:
-                    logger.error(f"❌ identifier 확인 API 오류: {response.status_code}")
-                    break
-                    
-            except Exception as e:
-                logger.error(f"❌ identifier 확인 실패: {e}")
-                break
-        
-        # 최대 시도 후에도 실패시 타임스탬프 기반으로 생성
-        from datetime import datetime
-        timestamp_suffix = datetime.now().strftime("%m%d%H%M")
-        fallback_identifier = f"P1{timestamp_suffix}"
-        logger.warning(f"🚨 최종 fallback identifier: {fallback_identifier}")
-        return fallback_identifier
-
     def generate_unique_identifier(self):
-        """기존 호환성을 위한 메서드"""
-        return self.get_next_identifier_from_db()
-
-    # 🔥 데이터베이스 기반 순차 번호 관리 (더 안전한 방법)
-    def get_next_identifier_from_db(self):
-        """🔥 Django DB를 이용한 더 안전한 순차 번호 관리"""
+        """🔥 P + 순차 숫자 생성 (중복 없음)"""
         try:
+            # 1. DB에서 현재 최대 P 번호 찾기
             from django.db import transaction
             from .models import PatientMapping
             
             with transaction.atomic():
-                # 가장 큰 P1xxxx 형식의 identifier 찾기
+                # P로 시작하는 identifier 중 가장 큰 번호 찾기
                 latest_mapping = PatientMapping.objects.filter(
-                    patient_identifier__startswith='P1',
-                    patient_identifier__regex=r'^P1[0-9]{4,}$'
-                ).order_by('-patient_identifier').first()
+                    patient_identifier__startswith='P',
+                    patient_identifier__regex=r'^P[0-9]+$',  # P + 숫자만
+                    is_active=True
+                ).extra(
+                    select={'num_part': 'CAST(SUBSTRING(patient_identifier, 2) AS UNSIGNED)'}
+                ).order_by('-num_part').first()
                 
                 if latest_mapping:
                     try:
-                        # P10001 -> 10001 추출
+                        # P123 → 123 추출 → +1
                         current_number = int(latest_mapping.patient_identifier[1:])
                         next_number = current_number + 1
+                        logger.info(f"🔖 현재 최대: {latest_mapping.patient_identifier}, 다음: P{next_number}")
                     except ValueError:
-                        next_number = 10000
+                        next_number = 1
                 else:
-                    next_number = 10000
+                    next_number = 1
+                    logger.info(f"🔖 첫 번째 환자: P{next_number}")
                 
-                next_identifier = f"P{next_number}"
-                logger.info(f"🔖 DB 기반 순차 identifier: {next_identifier}")
-                return next_identifier
+                # 2. 중복 확인 (혹시 모를 상황 대비)
+                max_attempts = 10
+                for attempt in range(max_attempts):
+                    candidate = f"P{next_number + attempt}"
+                    
+                    # DB에서 중복 확인
+                    if not PatientMapping.objects.filter(
+                        patient_identifier=candidate, 
+                        is_active=True
+                    ).exists():
+                        
+                        # OpenMRS API에서도 중복 확인
+                        if not self.check_identifier_exists_simple(candidate):
+                            logger.info(f"✅ 고유 identifier 생성: {candidate}")
+                            return candidate
+                    
+                    logger.warning(f"⚠️ {candidate} 중복, 다음 번호 시도...")
+                
+                # 최대 시도 후에도 실패하면 타임스탬프 기반
+                timestamp = datetime.now().strftime("%m%d%H%M")
+                fallback = f"P{timestamp}"
+                logger.warning(f"🚨 fallback identifier: {fallback}")
+                return fallback
                 
         except Exception as e:
-            logger.error(f"❌ DB 기반 identifier 생성 실패: {e}")
-            # fallback to API 방식
-            return self.get_next_sequential_identifier()
-
-    # 메인 환자 생성 메서드에서 사용
+            logger.error(f"❌ P+숫자 생성 실패: {e}")
+            # 최후의 수단
+            import random
+            emergency = f"P{random.randint(1000, 9999)}"
+            logger.error(f"🆘 긴급 identifier: {emergency}")
+            return emergency
+    
     def create_patient_with_auto_openmrs_id(self, patient_data, custom_identifier=None):
-        """🔥 수정된 환자 생성 메서드 - 에러 수정"""
+        """🔥 안전 모드 환자 생성"""
         try:
-            logger.info(f"🔄 순차적 identifier로 환자 생성 시작...")
+            logger.info(f"🔄 안전 모드 환자 생성 시작...")
             
-            # 연결 테스트
+            # 1. 상세 연결 테스트
             connection_test = self.test_connection_detailed()
             if not connection_test['success']:
                 return {
@@ -378,42 +266,43 @@ class OpenMRSAPI:
                     'error': connection_test['error']
                 }
             
-            # identifier 생성
+            logger.info("✅ 연결 및 메타데이터 테스트 통과")
+            
+            # 2. 환자 데이터 검증
+            required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
+            for field in required_fields:
+                if not patient_data.get(field):
+                    return {
+                        'success': False,
+                        'error': f'필수 필드 누락: {field}'
+                    }
+            
+            # 3. 식별자 처리
             if custom_identifier and custom_identifier.strip():
                 patient_identifier = custom_identifier.strip()
-                logger.info(f"🔖 사용자 지정 identifier: {patient_identifier}")
+                logger.info(f"🔖 사용자 지정 식별자: {patient_identifier}")
             else:
-                # 🔥 DB 기반으로 먼저 시도
-                try:
-                    patient_identifier = self.get_next_identifier_from_db()
-                except Exception as db_error:
-                    logger.warning(f"⚠️ DB 기반 실패, API 기반으로 fallback: {db_error}")
-                    patient_identifier = self.get_next_sequential_identifier()
-                
-                # 🔥 중복 확인 (이제 메서드가 있음)
-                if self.check_identifier_exists(patient_identifier):
-                    logger.warning(f"⚠️ 생성된 identifier 중복, 다시 시도...")
-                    patient_identifier = self.get_next_sequential_identifier()
-                    
-                    # 한 번 더 중복 확인
-                    if self.check_identifier_exists(patient_identifier):
-                        # 최후의 수단: 타임스탬프 추가
-                        from datetime import datetime
-                        timestamp = datetime.now().strftime("%H%M%S")
-                        patient_identifier = f"P1{timestamp}"
-                        logger.warning(f"🚨 최후의 수단 identifier: {patient_identifier}")
+                patient_identifier = self.generate_unique_identifier()
+                logger.info(f"🔖 자동 생성 식별자: {patient_identifier}")
             
-            # 메타데이터 가져오기
+            # 4. 메타데이터 가져오기
             identifier_type = self.get_default_identifier_type()
             location = self.get_default_location()
             
-            if not identifier_type or not location:
+            # 🔥 핵심: 메타데이터 검증
+            if not identifier_type:
                 return {
                     'success': False,
-                    'error': 'OpenMRS 메타데이터 조회 실패'
+                    'error': 'OpenMRS에서 유효한 식별자 타입을 찾을 수 없습니다. OpenMRS 설정을 확인해주세요.'
+                }
+                
+            if not location:
+                return {
+                    'success': False,
+                    'error': 'OpenMRS에서 유효한 위치를 찾을 수 없습니다. OpenMRS 설정을 확인해주세요.'
                 }
             
-            # 환자 데이터 구성
+            # 5. 최소한의 안전한 데이터 구성
             openmrs_patient_data = {
                 'person': {
                     'names': [{
@@ -432,14 +321,13 @@ class OpenMRSAPI:
                 }]
             }
             
-            # middleName 추가
+            # middleName 추가 (있는 경우에만)
             if patient_data.get('middleName'):
                 openmrs_patient_data['person']['names'][0]['middleName'] = str(patient_data['middleName']).strip()
             
-            logger.info(f"📤 최종 전송 데이터: identifier={patient_identifier}")
-            logger.info(f"📤 전송 데이터: {openmrs_patient_data}")
+            logger.info(f"📤 최종 전송 데이터: {openmrs_patient_data}")
             
-            # API 호출
+            # 6. 환자 생성 API 호출
             response = requests.post(
                 f"{self.api_url}/patient",
                 json=openmrs_patient_data,
@@ -455,157 +343,60 @@ class OpenMRSAPI:
             
             if response.status_code in [200, 201]:
                 result = response.json()
-                logger.info(f"✅ 환자 생성 성공: UUID={result.get('uuid')}, ID={patient_identifier}")
+                logger.info(f"✅ 환자 생성 성공: {result.get('uuid')}")
                 
                 return {
                     'success': True,
-                    'message': f'환자 생성 성공 (ID: {patient_identifier})',
+                    'message': '환자가 성공적으로 생성되었습니다',
                     'patient': {
                         'uuid': result.get('uuid'),
                         'display': result.get('display'),
                         'identifiers': result.get('identifiers', []),
                         'patient_identifier': patient_identifier
                     },
-                    'auto_generated': not bool(custom_identifier),
-                    'identifier_format': 'P_sequential'
+                    'auto_generated': not bool(custom_identifier)
                 }
             else:
+                # 🔥 상세 에러 로깅
                 error_content = response.text
                 logger.error(f"❌ 환자 생성 실패: {response.status_code}")
-                logger.error(f"❌ 응답 내용: {error_content[:500]}")
+                logger.error(f"❌ 응답 내용 (처음 1000자): {error_content[:1000]}")
+                
+                # HTML 에러 페이지인 경우 간단한 메시지로 변환
+                if 'Internal Server Error' in error_content:
+                    error_msg = 'OpenMRS 서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.'
+                else:
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get('error', {}).get('message', '알 수 없는 오류')
+                    except:
+                        error_msg = f'OpenMRS API 오류 (코드: {response.status_code})'
                 
                 return {
                     'success': False,
-                    'error': f'OpenMRS API 오류 (코드: {response.status_code})'
+                    'error': error_msg
                 }
                 
+        except requests.exceptions.Timeout:
+            logger.error("❌ OpenMRS API 타임아웃")
+            return {
+                'success': False,
+                'error': 'OpenMRS 서버 응답 시간이 초과되었습니다'
+            }
+        except requests.exceptions.ConnectionError:
+            logger.error("❌ OpenMRS 연결 실패")
+            return {
+                'success': False,
+                'error': 'OpenMRS 서버에 연결할 수 없습니다'
+            }
         except Exception as e:
-            logger.error(f"❌ 환자 생성 예외: {e}")
+            logger.error(f"❌ 예상치 못한 오류: {e}")
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
             return {
                 'success': False,
-                'error': f'환자 생성 중 오류: {str(e)}'
+                'error': f'예상치 못한 오류가 발생했습니다: {str(e)}'
             }
-    def check_identifier_exists(self, identifier):
-        """🔥 추가: identifier 중복 확인 메서드"""
-        try:
-            logger.info(f"🔍 identifier 중복 확인: {identifier}")
-            
-            response = requests.get(
-                f"{self.api_url}/patient",
-                params={
-                    'identifier': identifier,
-                    'v': 'default'
-                },
-                auth=self.auth,
-                headers={'Accept': 'application/json'},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                results = response.json().get('results', [])
-                
-                if results:
-                    logger.warning(f"⚠️ identifier 중복 발견: {identifier}")
-                    for patient in results:
-                        logger.warning(f"   기존 환자: {patient.get('display')} ({patient.get('uuid')})")
-                    return True
-                else:
-                    logger.info(f"✅ identifier 사용 가능: {identifier}")
-                    return False
-            else:
-                logger.warning(f"⚠️ identifier 확인 API 오류: {response.status_code}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"❌ identifier 중복 확인 실패: {e}")
-            # 에러 시 안전하게 중복 없음으로 처리
-            return False
-
-    def get_next_identifier_from_db(self):
-        """🔥 DB 기반 순차 identifier 생성"""
-        try:
-            from django.db import transaction
-            from .models import PatientMapping
-            
-            with transaction.atomic():
-                # P1로 시작하는 identifier 중 가장 큰 번호 찾기
-                latest_mapping = PatientMapping.objects.filter(
-                    patient_identifier__startswith='P1',
-                    patient_identifier__regex=r'^P1[0-9]{4,}$',
-                    is_active=True
-                ).order_by('-patient_identifier').first()
-                
-                if latest_mapping:
-                    try:
-                        # P10001 -> 10001 추출
-                        current_number = int(latest_mapping.patient_identifier[1:])
-                        next_number = current_number + 1
-                        logger.info(f"🔖 현재 최대 번호: P{current_number}, 다음: P{next_number}")
-                    except ValueError:
-                        next_number = 10000
-                        logger.info(f"🔖 번호 파싱 실패, 기본값 사용: P{next_number}")
-                else:
-                    next_number = 10000
-                    logger.info(f"🔖 첫 번째 환자, 시작 번호: P{next_number}")
-                
-                next_identifier = f"P{next_number}"
-                logger.info(f"🎯 DB 기반 생성된 identifier: {next_identifier}")
-                return next_identifier
-                
-        except Exception as e:
-            logger.error(f"❌ DB 기반 identifier 생성 실패: {e}")
-            # fallback: 간단한 방식
-            return "P10000"
-
-    def get_next_sequential_identifier(self):
-        """🔥 API 기반 순차 identifier 생성 (fallback)"""
-        try:
-            logger.info(f"🔄 API 기반 순차 identifier 조회...")
-            
-            response = requests.get(
-                f"{self.api_url}/patient",
-                params={
-                    'q': 'P1',
-                    'v': 'default',
-                    'limit': 50
-                },
-                auth=self.auth,
-                headers={'Accept': 'application/json'},
-                timeout=15
-            )
-            
-            max_number = 10000  # 기본 시작 번호
-            
-            if response.status_code == 200:
-                results = response.json().get('results', [])
-                logger.info(f"🔍 API에서 {len(results)}개 환자 조회됨")
-                
-                for patient in results:
-                    identifiers = patient.get('identifiers', [])
-                    for id_info in identifiers:
-                        identifier = id_info.get('identifier', '')
-                        if identifier.startswith('P1') and len(identifier) >= 6:
-                            try:
-                                number_part = identifier[1:]  # P 제거
-                                if number_part.isdigit():
-                                    current_number = int(number_part)
-                                    if current_number >= 10000:
-                                        max_number = max(max_number, current_number)
-                                        logger.info(f"   발견된 번호: {identifier} -> {current_number}")
-                            except ValueError:
-                                continue
-            
-            next_number = max_number + 1
-            next_identifier = f"P{next_number}"
-            
-            logger.info(f"🎯 API 기반 생성된 identifier: {next_identifier} (이전 최대: P{max_number})")
-            return next_identifier
-            
-        except Exception as e:
-            logger.error(f"❌ API 기반 identifier 생성 실패: {e}")
-            return "P10000"
     
     # 기존 메서드들...
     def create_patient_with_manual_id(self, patient_data, manual_identifier):

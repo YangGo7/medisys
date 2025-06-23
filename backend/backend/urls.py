@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/reports/', include('dr_reports.urls')),
     # stt
     path('api/stt/', include('stt_service.urls')),
+    path('api/statisticsboard/', include('statisticsboard.urls')),
     
 
 ]
