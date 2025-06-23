@@ -22,6 +22,7 @@ import AssignedPatientList from './AssignedPatientList';
 import ReceptionPanel from './ReceptionPanel';
 import PatientStatusBoard from './PatientStatusBoard';
 
+
 import { DEFAULT_DOCTOR_ID } from './lisConfig';
 
 // 홈 대시보드용 컴포넌트
