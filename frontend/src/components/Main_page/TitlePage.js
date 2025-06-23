@@ -223,10 +223,23 @@ export default function TitlePage({ setCurrentTab }) {
         console.log('Switching to Statistics');
         setCurrentTab('statistics');
         break;
+      case '메인페이지기능':
+        console.log('Switching to Main Page Function');
+        setCurrentTab('main_page_function');
+        break;
+      case '공지사항':
+        console.log('Navigating to Notice Board');
+        navigate('/Main_page/notices');
+        break;
       default:
         console.log('Unknown action:', action);
         break;
     }
+  };
+
+  // 공지사항 클릭 핸들러
+  const handleNoticeClick = () => {
+    navigate('/Main_page/notices');
   };
 
   return (
@@ -318,11 +331,31 @@ export default function TitlePage({ setCurrentTab }) {
       {/* 중앙 공지/배너/링크 */}
       <div className="main-middle">
         <div className="notice-card">
-          <h4>📢 시스템 공지사항</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h4>📢 시스템 공지사항</h4>
+            <button
+              onClick={handleNoticeClick}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#3498db',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => e.target.style.background = '#2980b9'}
+              onMouseOut={(e) => e.target.style.background = '#3498db'}
+            >
+              전체 보기
+            </button>
+          </div>
           <ul className="notice-list">
             {mainData.notices.length > 0 ? (
               mainData.notices.map((notice) => (
-                <li key={notice.id}>
+                <li key={notice.id} onClick={handleNoticeClick} style={{ cursor: 'pointer' }}>
                   <span 
                     className="notice-badge"
                     style={{ backgroundColor: getNoticeBadgeColor(notice.notice_type) }}
@@ -401,6 +434,31 @@ export default function TitlePage({ setCurrentTab }) {
           </div>
         </div>
 
+        {/* 새로 추가된 메인페이지 기능 섹션 */}
+        <div className="main-functions">
+          <h4>메인페이지 기능</h4>
+          <div className="quick-grid">
+            <button 
+              className="quick-btn function-btn"
+              onClick={() => handleQuickAction('메인페이지기능')}
+              style={{ borderLeft: '4px solid #e74c3c' }}
+            >
+              <span className="btn-icon">🏥</span>
+              <span className="btn-text">메인 기능</span>
+              <span className="btn-subtitle">시스템 관리</span>
+            </button>
+            <button 
+              className="quick-btn notice-btn"
+              onClick={() => handleQuickAction('공지사항')}
+              style={{ borderLeft: '4px solid #8e44ad' }}
+            >
+              <span className="btn-icon">📢</span>
+              <span className="btn-text">공지사항</span>
+              <span className="btn-subtitle">게시판 관리</span>
+            </button>
+          </div>
+        </div>
+
         {/* 에러 표시 */}
         {error && (
           <div className="error-notice">
@@ -460,6 +518,11 @@ export default function TitlePage({ setCurrentTab }) {
             <div className="status-item">
               <span className="status-dot online"></span>
               <span>LIS 시스템</span>
+              <span className="status-text">정상</span>
+            </div>
+            <div className="status-item">
+              <span className="status-dot online"></span>
+              <span>공지사항 시스템</span>
               <span className="status-text">정상</span>
             </div>
           </div>

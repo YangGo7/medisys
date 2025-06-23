@@ -27,6 +27,7 @@ class Notice(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
     start_date = models.DateTimeField(default=timezone.now, verbose_name='시작일')
     end_date = models.DateTimeField(null=True, blank=True, verbose_name='종료일')
+    views = models.IntegerField(default=0, verbose_name='조회수')  # 조회수 필드 추가
     
     class Meta:
         ordering = ['-is_pinned', '-created_at']
@@ -42,6 +43,11 @@ class Notice(models.Model):
         if self.end_date and now > self.end_date:
             return False
         return self.is_active and now >= self.start_date
+    
+    def increment_views(self):
+        """조회수 증가"""
+        self.views += 1
+        self.save(update_fields=['views'])
 
 
 class DoctorStats(models.Model):
@@ -72,5 +78,3 @@ class DoctorStats(models.Model):
     
     def __str__(self):
         return f"{self.doctor_name} ({self.department}) - {self.today_patients}명"
-
-

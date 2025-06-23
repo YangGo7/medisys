@@ -9,7 +9,7 @@ class NoticeSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'content', 'notice_type', 'is_active', 
             'is_pinned', 'created_by', 'created_at', 'updated_at',
-            'start_date', 'end_date'
+            'start_date', 'end_date', 'views'  # views 필드 추가
         ]
         
     def to_representation(self, instance):
