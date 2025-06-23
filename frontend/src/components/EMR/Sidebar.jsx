@@ -3,15 +3,14 @@ import React from 'react';
 import NotificationBell from './NotificationBell';
 
 const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
-  // 원하는 순서대로 메뉴 배열 재정의
+  // ✅ 대기 목록과 완료 환자 목록 제거, 진료 대시보드 추가
   const menus = [
     '홈',
     '접수',
+    '진료 대시보드',  // ✅ 통합된 환자 상태 관리
     '의사 대시보드',
     '진료 진행도',
     '대기 화면',
-    '대기 목록',
-    '완료 환자 목록',
     '설정',
   ];
 
