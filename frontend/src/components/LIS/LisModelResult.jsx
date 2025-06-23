@@ -1,44 +1,37 @@
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const CdssResultDetailPage = () => {
-  const { sampleId } = useParams();
-  const [data, setData] = useState(null);
+const ShapContributionChart = ({ shapData }) => {
+  if (!shapData || !shapData.features || !shapData.shap_values) {
+    return <p>SHAP 데이터가 없습니다.</p>;
+  }
 
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/predict/${sampleId}`)
-      .then(res => setData(res.data))
-      .catch(err => console.error("분석 결과 로딩 실패:", err));
-  }, [sampleId]);
-
-  if (!data) return <p>⏳ 분석 결과 불러오는 중...</p>;
+  // SHAP 데이터를 차트용으로 변환
+  const chartData = shapData.features.map((feature, i) => ({
+    name: feature,
+    value: shapData.shap_values[i],
+  }));
 
   return (
-    <div className="p-4">
-      <h2>Sample {data.sample} 분석 결과</h2>
-      <p><strong>검사 타입:</strong> {data.test_type}</p>
-      <p><strong>AI 예측:</strong> {data.prediction}</p>
-      <hr />
-
-      <table className="table">
-        <thead>
-          <tr><th>항목</th><th>값</th><th>단위</th></tr>
-        </thead>
-        <tbody>
-          {data.results.map((r, i) => (
-            <tr key={i}>
-              <td>{r.component_name}</td>
-              <td>{r.value}</td>
-              <td>{r.unit}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* 🔽 이후에 그래프, SHAP 그림 등 추가 가능 */}
+    <div style={{ width: '100%', height: 300 }}>
+      <h3 className="text-lg font-semibold mb-2">📊 변수별 예측 기여도 (SHAP)</h3>
+      <ResponsiveContainer>
+        <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
+          <XAxis type="number" />
+          <YAxis dataKey="name" type="category" width={100} />
+          <Tooltip formatter={(value) => value.toFixed(4)} />
+          <Bar dataKey="value">
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.value >= 0 ? '#ff6b6b' : '#3399ff'}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };
 
-export default CdssResultDetailPage;
+export default ShapContributionChart;

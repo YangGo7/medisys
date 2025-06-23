@@ -4,10 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import PatientDetailModal from './PatientDetailModal';
-import PatientWaitingList from './PatientWaitingList';
+import UnifiedPatientStatus from './UnifiedPatientStatus'; // ✅ 통합 컴포넌트 추가
 import ThemeSettings from './Settings/ThemeSettings';
 import LogViewer from './Settings/LogViewer';
-import HelpGuide from './Settings/HelpGuide'; // 경로 확인 완료
+import HelpGuide from './Settings/HelpGuide';
 import NotificationModal from './NotificationModal';
 import { saveLog } from '../utils/saveLog';
 import SettingsPage from './SettingsPage';
@@ -21,27 +21,24 @@ import WaitingBoard from './WaitingBoard';
 import AssignedPatientList from './AssignedPatientList';
 import ReceptionPanel from './ReceptionPanel';
 import PatientStatusBoard from './PatientStatusBoard';
-import CompletedPatients from './CompletedPatients';
 
 import { DEFAULT_DOCTOR_ID } from './lisConfig';
 
 // 홈 대시보드용 컴포넌트
 import WaitingStatsPanel from './home/WaitingStatsPanel';
 import CurrentWaitTime from './home/CurrentWaitTime';
-// import TodaySchedule from './home/TodaySchedule'; // ❌ 캘린더로 대체되므로 주석 처리하거나 삭제
 import DailySummary from './home/DailySummary';
 import { UrgentWidget } from './home';
 
 // ✅ 캘린더 라이브러리 import
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // 캘린더 기본 CSS
-
+import 'react-calendar/dist/Calendar.css';
 
 import './EmrMainPage.css';
 import DiagnosisPrescriptionPanel from './DiagnosisPrescriptionPanel';
 
 const EmrMainPage = () => {
-  const [activeTab, setActiveTab] = useState('홈'); // '의사 대시보드' -> '홈'으로 이미 변경됨
+  const [activeTab, setActiveTab] = useState('홈');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [fullSelectedPatientData, setFullSelectedPatientData] = useState(null);
   const [showPatientModal, setShowPatientModal] = useState(false);
@@ -54,16 +51,15 @@ const EmrMainPage = () => {
   const [completedPatients, setCompletedPatients] = useState([]);
   const [allPatientMappings, setAllPatientMappings] = useState([]);
 
-  // ----- 전체 환자 검색을 위한 새로운 상태 -----
+  // 전체 환자 검색을 위한 상태
   const [searchTerm, setSearchTerm] = useState('');
   const [allSearchResults, setAllSearchResults] = useState([]);
   const [isSearchingAllPatients, setIsSearchingAllPatients] = useState(false);
   const [allSearchError, setAllSearchError] = useState(null);
   const [searchMode, setSearchMode] = useState('assigned');
-  // ----------------------------------------
 
-  // ✅ 캘린더 날짜 상태 추가
-  const [calendarDate, setCalendarDate] = useState(new Date()); // 현재 날짜로 초기화
+  // ✅ 캘린더 날짜 상태
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const API_BASE = process.env.REACT_APP_INTEGRATION_API;
 
@@ -264,23 +260,18 @@ const EmrMainPage = () => {
   const renderHome = () => (
     <div className="page-container-full doctor-dashboard-container">
       <div className="dashboard-card card--schedule">
-        {/* 📅 오늘 일정 제목 제거 및 캘린더 컴포넌트 렌더링 */}
-        {/* <TodaySchedule refreshTrigger={scheduleRefresh} /> 대신 캘린더를 넣습니다. */}
-        <h3 className="section-title" style={{ textAlign: 'center' }}>📅 일정 관리</h3> {/* ✅ style 추가 */}
+        <h3 className="section-title" style={{ textAlign: 'center' }}>📅 일정 관리</h3>
         <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
             <Calendar
-                onChange={setCalendarDate} // 날짜 변경 시 상태 업데이트
-                value={calendarDate}       // 현재 선택된 날짜
-                locale="ko-KR"             // 한국어 로케일 설정
+                onChange={setCalendarDate}
+                value={calendarDate}
+                locale="ko-KR"
             />
         </div>
-        {/* 선택된 날짜의 일정 표시 (선택 사항) */}
         <div style={{ marginTop: '10px', textAlign: 'center' }}>
             {calendarDate && (
                 <p>선택된 날짜: {calendarDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             )}
-            {/* 여기에 선택된 날짜에 대한 실제 일정 데이터를 표시하는 로직 추가 */}
-            {/* 예: <ScheduledEvents date={calendarDate} /> */}
         </div>
       </div>
       <div className="dashboard-card card--stats">
@@ -317,7 +308,7 @@ const EmrMainPage = () => {
     <div className="page-container-full">
       <ReceptionPanel
         onReceptionSuccess={() => {
-          setActiveTab('진료'); // 이 부분도 '의사 대시보드'로 변경될 필요가 있을 수 있음. 현재는 '진료'로 유지.
+          setActiveTab('진료 대시보드');
           setScheduleRefresh(prev => prev + 1);
         }}
       />
@@ -330,11 +321,10 @@ const EmrMainPage = () => {
     </div>
   );
 
-  const renderWaitingList = () => (
+  // ✅ 진료 대시보드 컴포넌트 렌더링
+  const renderClinicalDashboard = () => (
     <div className="page-container-full">
-      <PatientWaitingList
-        waitingList={waitingList}
-        assignedPatients={assignedPatients}
+      <UnifiedPatientStatus 
         onAssignSuccess={handleAssignToRoom}
         onMarkAsComplete={handleMarkAsComplete}
         onUnassignFromRoom={handleUnassignFromRoom}
@@ -351,13 +341,7 @@ const EmrMainPage = () => {
 
   const renderPatientStatus = () => (
     <div className="page-container-full">
-      <PatientStatusBoard onComplete={() => setActiveTab('완료 환자 목록')} />
-    </div>
-  );
-
-  const renderCompletedPatients = () => (
-    <div className="page-container-full">
-      <CompletedPatients completedPatients={completedPatients} />
+      <PatientStatusBoard onComplete={() => setActiveTab('진료 대시보드')} />
     </div>
   );
 
@@ -366,7 +350,6 @@ const EmrMainPage = () => {
     <section className="tab-col tab1-new">
       <h3 className="section-title">
         🧑‍⚕️ 환자 검색
-        {/* 전체 환자 검색으로 전환하는 UI 추가 */}
         <div style={{ display: 'inline-flex', marginLeft: '10px', fontSize: '14px', alignItems: 'center' }}>
           <label style={{ marginRight: '10px', cursor: 'pointer' }}>
             <input
@@ -376,8 +359,8 @@ const EmrMainPage = () => {
               checked={searchMode === 'assigned'}
               onChange={() => {
                   setSearchMode('assigned');
-                  setAllSearchResults([]); // 모드 변경 시 전체 검색 결과 초기화
-                  setSearchTerm(''); // 검색어 초기화 (옵션)
+                  setAllSearchResults([]);
+                  setSearchTerm('');
               }}
               style={{ marginRight: '4px' }}
             />
@@ -391,8 +374,8 @@ const EmrMainPage = () => {
               checked={searchMode === 'all'}
               onChange={() => {
                   setSearchMode('all');
-                  setAllSearchResults([]); // 모드 변경 시 전체 검색 결과 초기화
-                  setSearchTerm(''); // 검색어 초기화 (옵션)
+                  setAllSearchResults([]);
+                  setSearchTerm('');
               }}
               style={{ marginRight: '4px' }}
             />
@@ -400,7 +383,6 @@ const EmrMainPage = () => {
           </label>
         </div>
       </h3>
-      {/* 검색 입력 필드를 EmrMainPage로 이동 */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
         <input
           type="text"
@@ -548,7 +530,6 @@ const EmrMainPage = () => {
         : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
     </section>
 
-    {/* 🔥 진단 패널로 변경 */}
     <section className="tab-col tab4-ai">
       <DiagnosisPrescriptionPanel 
         patient={selectedPatient} 
@@ -556,7 +537,6 @@ const EmrMainPage = () => {
       />
     </section>
 
-    {/* 🔥 처방 패널로 변경 */}
     <section className="tab-col tab5-empty">
       <DiagnosisPrescriptionPanel 
         patient={selectedPatient} 
@@ -570,7 +550,7 @@ const EmrMainPage = () => {
   return (
     <div className="emr-page">
       <header className="emr-header">
-        <div className="logo" onClick={() => setActiveTab('의사 대시보드')}>
+        <div className="logo" onClick={() => setActiveTab('홈')}>
           🏥 EMR 시스템
         </div>
       </header>
@@ -586,10 +566,10 @@ const EmrMainPage = () => {
           {activeTab === '홈' && renderHome()}
           {activeTab === '접수' && renderReception()}
           {activeTab === '설정' && renderSettings()}
-          {activeTab === '대기 목록' && renderWaitingList()}
+          {/* ✅ 진료 대시보드 탭 */}
+          {activeTab === '진료 대시보드' && renderClinicalDashboard()}
           {activeTab === '대기 화면' && renderWaitingBoard()}
           {activeTab === '진료 진행도' && renderPatientStatus()}
-          {activeTab === '완료 환자 목록' && renderCompletedPatients()}
           {activeTab === '의사 대시보드' && renderClinical()}
         </main>
       </div>

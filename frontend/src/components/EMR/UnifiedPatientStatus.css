@@ -1,0 +1,347 @@
+/* frontend/src/components/EMR/UnifiedPatientStatus.css */
+
+.unified-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.unified-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.search-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper svg {
+  position: absolute;
+  left: 12px;
+  color: #6c757d;
+  z-index: 1;
+}
+
+.search-input {
+  padding: 8px 12px 8px 40px;
+  border: 2px solid #ced4da;
+  border-radius: 6px;
+  width: 250px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+}
+
+.view-mode-toggle {
+  display: flex;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.btn-toggle {
+  padding: 8px 16px;
+  border: none;
+  background: white;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.btn-toggle:hover {
+  background: #f8f9fa;
+}
+
+.btn-toggle.active {
+  background: #1890ff;
+  color: white;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tab-btn:hover {
+  color: #1890ff;
+  background: #f8f9fa;
+}
+
+.tab-btn.active {
+  color: #1890ff;
+  border-bottom-color: #1890ff;
+  background: #fff;
+}
+
+.selected-patient-info {
+  background: #e6f4ff;
+  border: 1px solid #91caff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.selected-patient-info h4 {
+  margin: 0 0 8px 0;
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.selected-patient-info p {
+  margin: 0 0 15px 0;
+  color: #595959;
+  font-size: 14px;
+}
+
+.assign-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.assign-buttons .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.assign-buttons .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.assign-buttons .btn-primary {
+  background: #1890ff;
+  color: white;
+}
+
+.assign-buttons .btn-primary:hover:not(:disabled) {
+  background: #40a9ff;
+}
+
+.patient-section {
+  min-height: 400px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #262626;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.patient-card {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.patient-card:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.patient-card.selected {
+  border-color: #1890ff;
+  background: #e6f4ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+.patient-info h4 {
+  margin: 0 0 8px 0;
+  color: #262626;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.patient-id {
+  margin: 0 0 5px 0;
+  color: #1890ff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.patient-details {
+  margin: 0 0 5px 0;
+  color: #595959;
+  font-size: 13px;
+}
+
+.wait-time {
+  margin: 0 0 15px 0;
+  color: #fa8c16;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-assign {
+  padding: 6px 12px;
+  border: 1px solid #1890ff;
+  background: white;
+  color: #1890ff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+
+.btn-assign:hover {
+  background: #1890ff;
+  color: white;
+}
+
+.btn-delete {
+  padding: 6px 12px;
+  border: 1px solid #ff4d4f;
+  background: white;
+  color: #ff4d4f;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+
+.btn-delete:hover {
+  background: #ff4d4f;
+  color: white;
+}
+
+.selected-row {
+  background: #e6f4ff !important;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #1890ff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #40a9ff;
+}
+
+.btn-danger {
+  background: #ff4d4f;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #ff7875;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: #6c757d;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .unified-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .patient-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tab-navigation {
+    flex-wrap: wrap;
+  }
+  
+  .assign-buttons {
+    flex-direction: column;
+  }
+}

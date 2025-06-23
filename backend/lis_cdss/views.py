@@ -141,11 +141,13 @@ def receive_full_sample(request):
 
     # 예측값 저장
     CDSSResult.objects.filter(sample=sample_id, test_type=test_type).update(prediction=prediction)
+    prediction_prob = model.predict_proba(df)[0][1]
 
     return Response({
         "sample": sample_id,
         "test_type": test_type,
         "prediction": prediction,
+        "prediction_prob": prediction_prob,
         "shap_data": shap_data,
         "message": f"{len(components)}개 항목 저장 완료"
     }, status=201)

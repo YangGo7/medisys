@@ -4,7 +4,7 @@ import './StatisticsBoard.css';
 
 // 백엔드 API 서비스 클래스
 class DashboardAPI {
-  static BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/statisticsboard';
+  static BASE_URL = process.env.REACT_APP_API_URL_statistic || 'http://localhost:8000/api/statisticsboard';
 
   // HTTP 요청 헬퍼 함수
   static async request(endpoint, options = {}) {
