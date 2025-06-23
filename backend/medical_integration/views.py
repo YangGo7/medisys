@@ -26,47 +26,108 @@ from medical_integration.models import PatientMapping, Alert
 
 logger = logging.getLogger('medical_integration')
 
+
+def get_patient_full_name(openmrs_uuid, fallback_display=None, fallback_identifier=None):
+    """
+    OpenMRS UUID로 실제 환자 이름 가져오기
+    """
+    try:
+        if not openmrs_uuid:
+            return fallback_display or fallback_identifier or '이름 없음'
+        
+        # OpenMRS API로 환자 정보 조회
+        api = OpenMRSAPI()
+        patient_data = api.get_patient(openmrs_uuid)
+        
+        if patient_data and patient_data.get('person'):
+            person = patient_data['person']
+            
+            # preferredName에서 이름 추출
+            preferred_name = person.get('preferredName', {})
+            if preferred_name:
+                given_name = preferred_name.get('givenName', '')
+                family_name = preferred_name.get('familyName', '')
+                middle_name = preferred_name.get('middleName', '')
+                
+                # 한국식 이름 조합 (성 + 이름)
+                if family_name and given_name:
+                    full_name = f"{family_name}{given_name}"
+                    if middle_name:
+                        full_name = f"{family_name}{given_name} {middle_name}"
+                    return full_name
+                elif given_name:
+                    return given_name
+                elif family_name:
+                    return family_name
+            
+            # names 배열에서 이름 찾기
+            names = person.get('names', [])
+            for name in names:
+                if name.get('preferred', False):
+                    given_name = name.get('givenName', '')
+                    family_name = name.get('familyName', '')
+                    if family_name and given_name:
+                        return f"{family_name}{given_name}"
+            
+            # 첫 번째 이름 사용
+            if names and len(names) > 0:
+                first_name = names[0]
+                given_name = first_name.get('givenName', '')
+                family_name = first_name.get('familyName', '')
+                if family_name and given_name:
+                    return f"{family_name}{given_name}"
+        
+        # display에서 이름 추출 시도
+        if patient_data and patient_data.get('display'):
+            display = patient_data['display']
+            # "ID - Name" 형식에서 이름 부분 추출
+            if ' - ' in display:
+                name_part = display.split(' - ', 1)[1]
+                return name_part
+            return display
+        
+        logger.warning(f"환자 이름을 찾을 수 없음: UUID {openmrs_uuid}")
+        return fallback_display or fallback_identifier or '이름 없음'
+        
+    except Exception as e:
+        logger.error(f"환자 이름 조회 실패 (UUID: {openmrs_uuid}): {e}")
+        return fallback_display or fallback_identifier or '이름 없음'
+
+
 @api_view(['GET'])
 def reception_list_view(request):
     """
     오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
-    mapping_id, patient_identifier, display, status, created_at,
-    gender, birthdate, assigned_room 필드와 함께 반환
-    (진료 진행도 페이지에서 사용)
+    실제 환자 이름과 함께 반환 (진료 진행도 페이지에서 사용)
     """
     from django.utils import timezone
 
     today = timezone.now().date()
     
-    # 💡 중요: '진료 진행도' 페이지가 '오늘 생성된 환자'만 보여주는 것이 아니라,
-    # '현재 진행 중인 모든 환자'를 보여줘야 한다면, 아래 filter 조건을 확장해야 합니다.
-    # 예: PatientMapping.objects.filter(is_active=True).exclude(status='complete')
-    # 현재는 요청하신 대로 '오늘 생성된' 필터 조건을 유지하면서 필요한 필드를 추가합니다.
     mappings = PatientMapping.objects.filter(
-        created_date__date=today, # <-- 이 필터로 인해 '오늘 생성된' 환자만 나옴
+        created_date__date=today,
         mapping_type='IDENTIFIER_BASED',
         is_active=True
     ).order_by('-created_date')
 
-    # PatientMapping 모델에 이미 gender, birthdate, status, assigned_room 필드가 존재하므로,
-    # OpenMRSAPI를 다시 호출하여 정보를 가져올 필요 없이, 모델에서 직접 가져옵니다.
-    # 이렇게 하면 API 호출 수를 줄이고 성능을 개선할 수 있습니다.
-    
     data = []
     for m in mappings:
-        # PatientMapping 모델의 필드들을 직접 사용
+        # ✅ OpenMRS에서 실제 환자 이름 가져오기
+        patient_name = get_patient_full_name(m.openmrs_patient_uuid, m.display, m.patient_identifier)
+        
         gender = m.gender if m.gender else '-'
-        birthdate = str(m.birthdate) if m.birthdate else '-' # DateField는 직접 str() 변환 필요
+        birthdate = str(m.birthdate) if m.birthdate else '-'
 
         data.append({
-            'mapping_id':         m.mapping_id,
+            'mapping_id': m.mapping_id,
             'patient_identifier': m.patient_identifier,
-            'display':            m.display or m.patient_identifier,
-            'status':             m.status,             # PatientMapping 모델의 status 필드
-            'assigned_room':      m.assigned_room,      # PatientMapping 모델의 assigned_room 필드
-            'created_at':         m.created_date.isoformat(),
-            'gender':             gender,
-            'birthdate':          birthdate,
+            'display': patient_name,  # ✅ 실제 환자 이름
+            'name': patient_name,     # ✅ name 필드도 추가
+            'status': m.status,
+            'assigned_room': m.assigned_room,
+            'created_at': m.created_date.isoformat(),
+            'gender': gender,
+            'birthdate': birthdate,
         })
 
     return Response(data)
@@ -1374,8 +1435,7 @@ def proxy_openmrs_providers(request):
 @api_view(['POST'])
 def create_identifier_based_mapping(request):
     """
-    IDENTIFIER_BASED 타입의 매핑 생성 (대기창용)
-    삭제된 환자가 다시 등록될 수 있도록 기존 매핑을 재활성화
+    IDENTIFIER_BASED 타입의 매핑 생성 시 실제 환자 이름도 저장
     """
     try:
         orthanc_id = request.data.get("orthanc_patient_id") or f"DUMMY-{timezone.now().strftime('%H%M%S')}"
@@ -1385,7 +1445,32 @@ def create_identifier_based_mapping(request):
         if not (openmrs_uuid and patient_identifier):
             return Response({'error': 'UUID 또는 식별자가 누락되었습니다.'}, status=400)
 
-        # ✅ 기존 비활성화된 매핑 재활성화
+        # ✅ OpenMRS에서 실제 환자 정보 가져오기
+        patient_name = get_patient_full_name(openmrs_uuid)
+        
+        # 추가 환자 정보도 가져오기
+        try:
+            api = OpenMRSAPI()
+            patient_data = api.get_patient(openmrs_uuid)
+            if patient_data and patient_data.get('person'):
+                person = patient_data['person']
+                gender = person.get('gender', '')
+                birthdate_str = person.get('birthdate', '')
+                birthdate = None
+                if birthdate_str:
+                    try:
+                        from datetime import datetime
+                        birthdate = datetime.strptime(birthdate_str.split('T')[0], '%Y-%m-%d').date()
+                    except:
+                        pass
+            else:
+                gender = ''
+                birthdate = None
+        except:
+            gender = ''
+            birthdate = None
+
+        # 기존 비활성화된 매핑 재활성화
         existing = PatientMapping.objects.filter(
             openmrs_patient_uuid=openmrs_uuid,
             patient_identifier=patient_identifier,
@@ -1395,19 +1480,29 @@ def create_identifier_based_mapping(request):
 
         if existing:
             existing.is_active = True
-            existing.orthanc_patient_id = orthanc_id  # 최신 ID 반영
+            existing.orthanc_patient_id = orthanc_id
+            existing.display = patient_name  # ✅ 실제 이름 업데이트
+            existing.gender = gender or existing.gender
+            existing.birthdate = birthdate or existing.birthdate
             existing.sync_status = "PENDING"
-            existing.save(update_fields=['is_active', 'orthanc_patient_id', 'sync_status'])
+            existing.save(update_fields=['is_active', 'orthanc_patient_id', 'display', 'gender', 'birthdate', 'sync_status'])
             return Response({'success': True, 'mapping_id': existing.mapping_id, 'message': '기존 매핑 재활성화됨'}, status=200)
 
-        # 🔥 신규 생성
-        mapping = PatientMapping.create_identifier_based_mapping(
+        # 신규 매핑 생성
+        mapping = PatientMapping.objects.create(
             orthanc_patient_id=orthanc_id,
             openmrs_patient_uuid=openmrs_uuid,
-            patient_identifier=patient_identifier
+            patient_identifier=patient_identifier,
+            mapping_type='IDENTIFIER_BASED',
+            display=patient_name,  # ✅ 실제 환자 이름 저장
+            gender=gender,
+            birthdate=birthdate,
+            status='waiting',
+            sync_status='PENDING'
         )
 
         if mapping:
+            logger.info(f"환자 매핑 생성: {patient_name} (ID: {patient_identifier})")
             return Response({'success': True, 'mapping_id': mapping.mapping_id}, status=201)
         return Response({'error': '매핑 생성 실패'}, status=500)
 
@@ -1535,9 +1630,7 @@ def unassign_room(request):
 def identifier_based_waiting_list(request):
     """
     오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
-    mapping_id, patient_identifier, display, status, created_at,
-    gender, birthdate, assigned_room, age 필드와 함께 반환합니다.
-    (진료 진행도 페이지 및 환자 정보 패널에서 사용)
+    실제 환자 이름과 함께 반환
     """
     today = timezone.now().date()
     mappings = PatientMapping.objects.filter(
@@ -1548,25 +1641,25 @@ def identifier_based_waiting_list(request):
 
     result = []
     for m in mappings:
-        # PatientMapping 모델에 저장된 필드들을 직접 사용
-        gender = m.gender if m.gender else '-'
-        birthdate_str = str(m.birthdate) if m.birthdate else '-' # DateField는 str() 변환 필요
+        # ✅ OpenMRS에서 실제 환자 이름 가져오기
+        patient_name = get_patient_full_name(m.openmrs_patient_uuid, m.display, m.patient_identifier)
         
-        # 나이 계산 및 결과에 포함
-        age = calculate_age_from_birthdate(birthdate_str) # 계산된 나이
+        gender = m.gender if m.gender else '-'
+        birthdate_str = str(m.birthdate) if m.birthdate else '-'
+        age = calculate_age_from_birthdate(birthdate_str)
         
         result.append({
-            'mapping_id':         m.mapping_id,
+            'mapping_id': m.mapping_id,
             'patient_identifier': m.patient_identifier,
-            'name':               m.display or m.patient_identifier or '이름 없음',
-            'display':            m.display or m.patient_identifier,
-            'gender':             gender,
-            'birthdate':          birthdate_str,
-            'age':                age, # <-- 'age' 필드를 결과에 추가
-            'waitTime':           m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
-            'assigned_room':      m.assigned_room,
-            'created_at':         m.created_date.isoformat(),
-            'status':             m.status,
+            'name': patient_name,  # ✅ 실제 환자 이름
+            'display': patient_name,  # ✅ display도 실제 이름
+            'gender': gender,
+            'birthdate': birthdate_str,
+            'age': age,
+            'waitTime': m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
+            'assigned_room': m.assigned_room,
+            'created_at': m.created_date.isoformat(),
+            'status': m.status,
         })
 
     return Response(result)
