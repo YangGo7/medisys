@@ -1,4 +1,4 @@
-// 1. frontend/src/components/EMR/DiagnosisPrescriptionPanel.jsx - 최종 완성 버전
+// frontend/src/components/EMR/DiagnosisPrescriptionPanel.jsx - 원본 스타일 유지하면서 수정
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -14,26 +14,21 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+  // ✅ API_BASE 올바른 설정
+  const API_BASE = 'http://35.225.63.41:8000/api';
 
   console.log('🔍 DiagnosisPrescriptionPanel received patient:', patient);
 
-  // 🔥 완전한 환자 정보 추출
-  const getPatientInfo = () => {
-    if (!patient) return null;
-    
-    return {
-      uuid: patient.uuid,                                    // person_uuid
-      patient_identifier: patient.patient_identifier,       // P5448
-      name: patient.name,                                    // 환자 이름
-      display: patient.display,                              // "P5448 - 용녀 선우"
-      gender: patient.gender,
-      age: patient.age,
-      birthdate: patient.birthdate
-    };
-  };
-
-  const patientInfo = getPatientInfo();
+  // ✅ 환자 정보 추출 - prop 이름 대응
+  const patientInfo = patient ? {
+    uuid: patient.uuid,                           // person_uuid
+    patient_identifier: patient.patient_identifier, // P5448
+    name: patient.name || patient.display,        // 환자 이름
+    display: patient.display,                     // "P5448 - 용녀 선우"
+    gender: patient.gender,
+    age: patient.age,
+    birthdate: patient.birthdate
+  } : null;
 
   // 환자 임상 데이터 로드
   const loadClinicalData = async () => {
@@ -93,7 +88,7 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
     }
   }, [patientInfo?.uuid]);
 
-  // 진단 검색
+  // ✅ 진단 검색 - API 응답 구조 개선
   const searchDiagnosis = async (searchTerm) => {
     if (searchTerm.length < 2) {
       setDiagnosisSearchResults([]);
@@ -101,14 +96,18 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
     }
 
     try {
+      console.log('🔍 진단 검색:', searchTerm);
+      
       // obs_clinical_api 검색 시도
       let response = await axios.get(`${API_BASE}/search-concepts-obs/`, {
-        params: { q: searchTerm },
+        params: { q: searchTerm, type: 'diagnosis' },
         timeout: 10000
       });
       
-      if (response.data.success) {
-        setDiagnosisSearchResults(response.data.results || []);
+      console.log('✅ 검색 응답:', response.data);
+      
+      if (response.data.success && response.data.results) {
+        setDiagnosisSearchResults(response.data.results);
         return;
       }
     } catch (error) {
@@ -117,23 +116,30 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
 
     try {
       // fallback: 기존 API
+      console.log('🔄 Fallback 검색 시도...');
       const response = await axios.get(`${API_BASE}/openmrs-clinical/search-diagnosis/`, {
         params: { q: searchTerm },
         timeout: 10000
       });
       
+      console.log('✅ Fallback 검색 응답:', response.data);
+      
       if (response.data.results) {
-        setDiagnosisSearchResults(response.data.results || []);
+        setDiagnosisSearchResults(response.data.results);
       }
     } catch (error) {
-      console.error('모든 검색 실패:', error);
+      console.error('❌ 모든 검색 실패:', error);
       setDiagnosisSearchResults([]);
     }
   };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      searchDiagnosis(diagnosisSearchTerm);
+      if (diagnosisSearchTerm.trim()) {
+        searchDiagnosis(diagnosisSearchTerm);
+      } else {
+        setDiagnosisSearchResults([]);
+      }
     }, 300);
     
     return () => clearTimeout(timeoutId);
@@ -221,7 +227,7 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
     }
   };
 
-  // 렌더링
+  // 렌더링 - 환자가 없을 때
   if (!patient) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
@@ -231,40 +237,81 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
     );
   }
 
+  // UUID 없을 때 디버깅 정보
   if (!patientInfo?.uuid) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: '#ff9800' }}>
-        <h3>⚠️ UUID 없음</h3>
+      <div style={{ 
+        padding: '1rem', 
+        backgroundColor: '#fff3cd', 
+        border: '1px solid #ffeaa7',
+        borderRadius: '8px',
+        color: '#856404' 
+      }}>
+        <h3>⚠️ 환자 UUID 없음</h3>
         <p><strong>환자:</strong> {patient.display || patient.name}</p>
         <p>patient.uuid가 필요합니다.</p>
-        <pre style={{ fontSize: '10px', textAlign: 'left', marginTop: '1rem' }}>
-          {JSON.stringify(patient, null, 2)}
-        </pre>
+        <details style={{ marginTop: '1rem' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
+            환자 객체 구조 보기
+          </summary>
+          <pre style={{ 
+            fontSize: '10px', 
+            background: '#f8f9fa',
+            padding: '10px',
+            borderRadius: '4px',
+            marginTop: '0.5rem',
+            overflow: 'auto',
+            maxHeight: '200px'
+          }}>
+            {JSON.stringify(patient, null, 2)}
+          </pre>
+        </details>
       </div>
     );
   }
 
   return (
     <div style={{ 
-      padding: '1rem', 
-      border: '1px solid #ddd', 
-      borderRadius: '8px',
-      backgroundColor: '#f9f9f9'
+      padding: '1.5rem', 
+      backgroundColor: '#ffffff',
+      borderRadius: '12px',
+      border: '1px solid #e0e4e7',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
     }}>
-      <h3 style={{ marginBottom: '1rem', color: '#2c3e50' }}>
-        🏥 진단 관리 - OpenMRS
-      </h3>
-
-      {/* 🔥 완전한 환자 정보 표시 */}
+      {/* 헤더 */}
       <div style={{ 
-        marginBottom: '1rem', 
-        padding: '1rem', 
-        backgroundColor: '#e8f4fd',
-        borderRadius: '8px',
-        border: '1px solid #90caf9'
+        display: 'flex', 
+        alignItems: 'center', 
+        marginBottom: '1.5rem',
+        paddingBottom: '1rem',
+        borderBottom: '2px solid #f0f2f5'
       }}>
-        <div style={{ marginBottom: '0.75rem', fontSize: '16px', fontWeight: 'bold' }}>
-          📋 환자 정보
+        <div style={{ fontSize: '20px', marginRight: '0.5rem' }}>🏥</div>
+        <h3 style={{ 
+          margin: 0, 
+          color: '#2c3e50',
+          fontSize: '18px',
+          fontWeight: '600'
+        }}>
+          진단 및 처방 관리
+        </h3>
+      </div>
+
+      {/* 환자 정보 요약 */}
+      <div style={{ 
+        marginBottom: '1.5rem', 
+        padding: '1rem', 
+        backgroundColor: '#f8f9fc',
+        borderRadius: '8px',
+        border: '1px solid #e1e5e9'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          marginBottom: '0.75rem'
+        }}>
+          <div style={{ fontSize: '16px', marginRight: '0.5rem' }}>📋</div>
+          <div style={{ fontWeight: '600', color: '#2c3e50' }}>환자 정보</div>
         </div>
         
         <div style={{ 
@@ -273,34 +320,6 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
           gap: '0.75rem',
           fontSize: '14px'
         }}>
-          <div style={{ 
-            padding: '0.5rem', 
-            backgroundColor: '#e3f2fd', 
-            borderRadius: '4px',
-            border: '1px solid #bbdefb'
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: '#1976d2', marginBottom: '0.25rem' }}>
-              환자 ID
-            </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '15px', fontWeight: 'bold' }}>
-              {patientInfo.patient_identifier || 'N/A'}
-            </div>
-          </div>
-
-          <div style={{ 
-            padding: '0.5rem', 
-            backgroundColor: '#f3e5f5', 
-            borderRadius: '4px',
-            border: '1px solid #ce93d8'
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: '#7b1fa2', marginBottom: '0.25rem' }}>
-              환자명
-            </div>
-            <div style={{ fontSize: '15px', fontWeight: 'bold' }}>
-              {patientInfo.name || 'N/A'}
-            </div>
-          </div>
-
           <div style={{ 
             padding: '0.5rem', 
             backgroundColor: patientInfo.gender === 'M' ? '#e8f5e8' : '#fce4ec', 
@@ -359,16 +378,20 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
         <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
           <input
             type="text"
-            placeholder="진단명 검색 (2글자 이상)"
+            placeholder="진단명 검색 (예: diabetes, hypertension...)"
             value={diagnosisSearchTerm}
             onChange={(e) => setDiagnosisSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px',
-              border: '1px solid #ddd',
+              padding: '12px',
+              border: '2px solid #ddd',
               borderRadius: '6px',
-              fontSize: '14px'
+              fontSize: '14px',
+              outline: 'none',
+              transition: 'border-color 0.2s'
             }}
+            onFocus={(e) => e.target.style.borderColor = '#3498db'}
+            onBlur={(e) => e.target.style.borderColor = '#ddd'}
           />
           
           {/* 검색 결과 드롭다운 */}
@@ -378,74 +401,87 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
               top: '100%',
               left: 0,
               right: 0,
+              maxHeight: '200px',
+              overflowY: 'auto',
               backgroundColor: 'white',
               border: '1px solid #ddd',
               borderTop: 'none',
               borderRadius: '0 0 6px 6px',
-              maxHeight: '200px',
-              overflowY: 'auto',
               zIndex: 1000,
-              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
               {diagnosisSearchResults.map((concept, index) => (
                 <div
                   key={index}
                   onClick={() => selectDiagnosis(concept)}
                   style={{
-                    padding: '10px',
+                    padding: '10px 12px',
+                    borderBottom: '1px solid #f0f0f0',
                     cursor: 'pointer',
-                    borderBottom: '1px solid #eee',
-                    fontSize: '13px'
+                    fontSize: '14px',
+                    transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
                 >
-                  <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{concept.display}</div>
-                  <div style={{ fontSize: '11px', color: '#666' }}>
-                    {concept.short_name && `${concept.short_name} | `}
-                    {concept.uuid.substring(0, 8)}...
-                  </div>
+                  <div style={{ fontWeight: '500' }}>{concept.display}</div>
+                  {concept.concept_class && (
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                      {concept.concept_class}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* 진단 노트 */}
-        <textarea
-          placeholder="진단 관련 노트 (선택사항)"
-          value={newDiagnosis.notes}
-          onChange={(e) => setNewDiagnosis(prev => ({ ...prev, notes: e.target.value }))}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
+        {/* 선택된 진단 입력 */}
+        {newDiagnosis.value && (
+          <div style={{
+            padding: '12px',
+            backgroundColor: '#e8f5e8',
+            border: '1px solid #4caf50',
             borderRadius: '6px',
-            fontSize: '14px',
-            height: '70px',
-            resize: 'vertical'
-          }}
-        />
-
-        {/* 진단 추가 버튼 */}
-        <button
-          onClick={addDiagnosis}
-          disabled={!newDiagnosis.concept_uuid}
-          style={{
-            marginTop: '0.75rem',
-            padding: '8px 16px',
-            backgroundColor: newDiagnosis.concept_uuid ? '#e74c3c' : '#ccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: newDiagnosis.concept_uuid ? 'pointer' : 'not-allowed',
-            transition: 'background-color 0.2s'
-          }}
-        >
-          ➕ 진단 추가
-        </button>
+            marginBottom: '0.75rem'
+          }}>
+            <div style={{ fontWeight: '600', marginBottom: '8px', color: '#2e7d32' }}>
+              선택된 진단: {newDiagnosis.value}
+            </div>
+            <textarea
+              placeholder="진단 노트 (선택사항)..."
+              value={newDiagnosis.notes}
+              onChange={(e) => setNewDiagnosis(prev => ({...prev, notes: e.target.value}))}
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #c8e6c9',
+                borderRadius: '4px',
+                resize: 'vertical',
+                minHeight: '60px',
+                fontSize: '14px',
+                marginBottom: '8px'
+              }}
+            />
+            <button
+              onClick={addDiagnosis}
+              disabled={!newDiagnosis.concept_uuid}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: newDiagnosis.concept_uuid ? '#4caf50' : '#ccc',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: newDiagnosis.concept_uuid ? 'pointer' : 'not-allowed',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              ➕ 진단 추가
+            </button>
+          </div>
+        )}
 
         {/* 현재 진단 목록 */}
         {diagnoses.length > 0 && (
@@ -506,74 +542,110 @@ const DiagnosisPrescriptionPanel = ({ patient }) => {
 
       {/* 임상 노트 섹션 */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ color: '#8e44ad', marginBottom: '0.75rem', fontSize: '16px' }}>📝 임상 노트</h4>
+        <h4 style={{ color: '#3498db', marginBottom: '0.75rem', fontSize: '16px' }}>📝 임상 노트</h4>
         <textarea
-          placeholder="임상 관찰 사항, 환자 상태, 추가 메모 등을 기록하세요..."
           value={clinicalNotes}
           onChange={(e) => setClinicalNotes(e.target.value)}
+          placeholder="환자의 임상 상태, 치료 계획, 특이사항 등을 기록하세요..."
           style={{
             width: '100%',
             padding: '12px',
-            border: '1px solid #ddd',
+            border: '2px solid #ddd',
             borderRadius: '6px',
+            resize: 'vertical',
+            minHeight: '100px',
             fontSize: '14px',
-            height: '100px',
-            resize: 'vertical'
+            fontFamily: 'inherit',
+            outline: 'none',
+            transition: 'border-color 0.2s'
           }}
+          onFocus={(e) => e.target.style.borderColor = '#3498db'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
         />
       </div>
 
       {/* 저장 버튼 */}
-      <div style={{ 
-        borderTop: '1px solid #eee', 
-        paddingTop: '1rem',
-        textAlign: 'right'
-      }}>
-        <button
-          onClick={saveClinicalData}
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <button 
+          onClick={saveClinicalData} 
           disabled={saving || (!diagnoses.length && !clinicalNotes.trim())}
           style={{
-            padding: '12px 24px',
-            backgroundColor: saving ? '#6c757d' : '#3498db',
+            padding: '12px 30px',
+            backgroundColor: saving ? '#95a5a6' : '#27ae60',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: 'bold',
+            fontSize: '16px',
+            fontWeight: '600',
             cursor: saving ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.2s'
           }}
           onMouseEnter={(e) => {
             if (!saving && (diagnoses.length || clinicalNotes.trim())) {
-              e.target.style.backgroundColor = '#2980b9';
+              e.target.style.backgroundColor = '#219a52';
             }
           }}
           onMouseLeave={(e) => {
             if (!saving) {
-              e.target.style.backgroundColor = '#3498db';
+              e.target.style.backgroundColor = '#27ae60';
             }
           }}
         >
-          {saving ? '💾 저장 중...' : '💾 OpenMRS에 저장'}
+          {saving ? '💾 저장 중...' : '💾 저장하기'}
         </button>
       </div>
 
-      {/* 진료 이력 요약 */}
+      {/* 기존 임상 이력 */}
       {clinicalHistory.length > 0 && (
-        <div style={{ 
-          marginTop: '1rem', 
-          padding: '0.75rem',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '6px',
-          fontSize: '12px',
-          border: '1px solid #e9ecef'
-        }}>
-          <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-            📚 진료 이력: {clinicalHistory.length}회
-          </div>
-          <div style={{ color: '#666' }}>
-            최근 진료: {clinicalHistory[0]?.encounter_datetime?.substring(0, 16).replace('T', ' ')}
-          </div>
+        <div>
+          <h4 style={{ color: '#8e44ad', marginBottom: '0.75rem', fontSize: '16px' }}>📊 임상 이력</h4>
+          {clinicalHistory.map((history, index) => (
+            <div key={index} style={{
+              marginBottom: '1rem',
+              padding: '15px',
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #e9ecef',
+              borderRadius: '8px'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '10px',
+                paddingBottom: '8px',
+                borderBottom: '1px solid #dee2e6'
+              }}>
+                <div style={{ fontWeight: '600', color: '#495057' }}>
+                  {new Date(history.encounter_datetime).toLocaleString('ko-KR')}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                  {history.encounter_type}
+                </div>
+              </div>
+              
+              {history.diagnoses?.length > 0 && (
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ fontWeight: '600', marginBottom: '5px', color: '#e74c3c' }}>진단:</div>
+                  {history.diagnoses.map((diag, diagIndex) => (
+                    <div key={diagIndex} style={{ fontSize: '14px', marginLeft: '10px', marginBottom: '3px' }}>
+                      • <strong>{diag.concept_name}:</strong> {diag.value}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {history.notes?.length > 0 && (
+                <div>
+                  <div style={{ fontWeight: '600', marginBottom: '5px', color: '#3498db' }}>노트:</div>
+                  {history.notes.map((note, noteIndex) => (
+                    <div key={noteIndex} style={{ fontSize: '14px', marginLeft: '10px', fontStyle: 'italic' }}>
+                      • {note.value}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
