@@ -33,7 +33,7 @@ export default function MainPage() {
       case 'patientsList': return <PatientsList />;
       case 'Medicalemployee': return <Medicalemployee />;
       case 'RISPage': return <RISPage />;
-      case 'statisticsboard': return <StatisticsBoard />;
+      case 'StatisticsBoard': return <StatisticsBoard />;
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };
@@ -47,7 +47,7 @@ export default function MainPage() {
     { id: 'Medicalemployee', icon: '👨‍⚕️', label: '의료인 정보' },
     { id: 'lis', icon: '🧪', label: 'LIS' },
     { id: 'RISPage', icon: '📋', label: 'RIS' },
-    { id: 'statisticsboard', icon: '📋', label: 'statisticsboard' }
+    { id: 'StatisticsBoard', icon: '📋', label: 'StatisticsBoard' }
   ];
 
   return (

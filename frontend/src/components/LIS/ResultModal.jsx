@@ -1,34 +1,28 @@
 // LIS/ResultModal.jsx
 
 import React from 'react';
-import './ResultModal.css'; // 팝업 스타일은 따로 작성
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import './ResultModal.css';
+import axios from 'axios';
+import ShapContributionChart from './ShapContributionChart'; // 실제 쓰는 것만 유지
+import ShapSummaryText from './ShapSummaryText';
 
-const ShapBarChart = ({ shapData }) => {
-  if (!shapData || !shapData.features) return <p>SHAP 데이터 없음</p>;
-
-  const data = shapData.features.map((feature, i) => ({
-    name: feature,
-    value: shapData.shap_values[i],
-  }));
-
-  return (
-    <div style={{ width: '100%', height: 300 }}>
-      <h3>📈 SHAP 영향도</h3>
-      <ResponsiveContainer>
-        <BarChart data={data}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip formatter={(value) => value.toFixed(4)} />
-          <Bar dataKey="value" >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.value >= 0 ? '#ff5e57' : '#57a0ff'} />
-            ))}  
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
+// ✅ API 호출 함수 (유지)
+const runFullCdssAnalysis = async (sampleId, testType, components) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_BASE_URL}cdss/receive_full_sample/`,
+      {
+        sample: sampleId,
+        test_type: testType,
+        components: components
+      }
+    );
+    console.log("📦 분석 결과:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("❌ 분석 요청 실패:", err);
+    return null;
+  }
 };
 
 const CdssResultModal = ({ data, onClose }) => {
@@ -36,10 +30,8 @@ const CdssResultModal = ({ data, onClose }) => {
 
   console.log("📦 SHAP 데이터 확인:", data.shap_data);
 
-  // ✅ 중복 제거
   const uniqueResults = [...new Map(data.results.map(item => [item.component_name, item])).values()];
 
-  // ✅ 예측 결과 해석 함수
   const interpretPrediction = (value) => {
     if (value === 1 || value === true || value === "1") return '🔴 이상 소견';
     if (value === 0 || value === false || value === "0") return '🟢 정상';
@@ -71,10 +63,11 @@ const CdssResultModal = ({ data, onClose }) => {
           </tbody>
         </table>
 
-        {/* 🔽 이후 추가 영역: 그래프, shap 등 */}
-        {/* <div className="chart-section">BarChart 삽입</div> */}
-        {/* <img src={`data:image/png;base64,${data.shap_image}`} /> */}
-        {data.shap_data ? <ShapBarChart shapData={data.shap_data} /> : <p>SHAP 설명 없음</p>}
+        {/* 🔽 SHAP 기여도 시각화 */}
+        {data.shap_data && <ShapContributionChart shapData={data.shap_data} />}
+        {data.shap_data && data.prediction_prob && (
+          <ShapSummaryText predictionProb={data.prediction_prob} shapData={data.shap_data} />
+        )}
       </div>
     </div>
   );
