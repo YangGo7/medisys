@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Stethoscope, Clock, CheckCircle, Users, Search, Filter } from 'lucide-react';
 import WaitingRoom from './WaitingRoom';
 import './EmrMainPage.css';
+import './UnifiedPatientStatus.css'; // ✅ 새로운 CSS 파일 import
 
 const API_BASE = process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/';
 
@@ -281,7 +282,7 @@ const UnifiedPatientStatus = ({
   };
 
   return (
-    <div className="page-container-full">
+    <div className="page-container-full unified-patient-container">
       <div className="card">
         {/* 헤더 */}
         <div className="unified-header">
