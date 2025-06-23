@@ -32,7 +32,7 @@ urlpatterns = [
     path('openmrs/patients/search/', views.search_patients, name='search_openmrs_patients'),
     path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/', views.get_all_patients_simple, name='get_all_patients'),
-
+    path('person-uuid-by-identifier/<str:identifier>/', views.get_person_uuid_by_identifier, name='get_person_uuid_by_identifier'),
     # Orthanc 환자 관리
     path('orthanc/studies/', views.get_orthanc_studies, name='get_orthanc_studies'),
     path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),
@@ -93,13 +93,4 @@ urlpatterns = [
     path('daily-summary-stats/', views.get_daily_summary_stats, name='daily_summary_stats'),
     path('debug/openmrs-metadata/', views.debug_openmrs_metadata, name='debug_openmrs_metadata'),
     path('debug/test-minimal-patient/', views.test_minimal_patient_creation, name='test_minimal_patient'),
-
-    path('update-patient-status/', views.update_patient_status, name='update_patient_status'),
-    path('complete-visit/', views.complete_visit, name='complete_visit'),
-    path('room-status/', views.get_room_status, name='get_room_status'),
-    path('batch-update-status/', views.batch_update_status, name='batch_update_status'),
-    
-    # ✅ 환자 이름 관리 API 추가
-    path('update-all-patient-names/', views.update_all_patient_names, name='update_all_patient_names'),
-
 ]

@@ -19,7 +19,6 @@ class OpenMRSAPI:
         self._identifier_types = None
         self._locations = None
         self._session_checked = False
-        logger.info(f"🔧 OpenMRS API 초기화: {self.api_url}")
     
     def test_connection_detailed(self):
         """🔥 상세한 연결 및 메타데이터 테스트"""
@@ -465,3 +464,366 @@ class OpenMRSAPI:
                 
         except Exception as e:
             return {'error': f'세션 조회 예외: {str(e)}'}
+    
+    def get_patient_encounters(self, patient_uuid, limit=10):
+        """환자의 Encounter 목록 조회"""
+        try:
+            params = {
+                'patient': patient_uuid,
+                'v': 'custom:(uuid,encounterDatetime,encounterType:(uuid,display),location:(uuid,display),provider:(uuid,display),obs:(uuid,concept:(uuid,display),value,valueText,valueDatetime,valueNumeric))',
+                'limit': limit,
+                'order': 'desc'
+            }
+            
+            response = requests.get(
+                f"{self.api_url}/encounter",
+                auth=self.auth,
+                headers={'Accept': 'application/json'},
+                params=params,
+                timeout=15
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('results', [])
+            else:
+                logger.error(f"Encounter 조회 실패: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Encounter 조회 예외: {e}")
+            return []
+
+    def search_diagnosis_concepts(self, query, limit=20):
+        """진단 관련 Concept 검색"""
+        try:
+            params = {
+                'q': query,
+                'conceptClasses': 'Diagnosis',
+                'v': 'custom:(uuid,display,conceptClass:(uuid,display),names:(uuid,name,conceptNameType))',
+                'limit': limit
+            }
+            
+            response = requests.get(
+                f"{self.api_url}/concept",
+                auth=self.auth,
+                headers={'Accept': 'application/json'},
+                params=params,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                results = data.get('results', [])
+                
+                # 결과 정리 (한글명 우선)
+                cleaned_results = []
+                for concept in results:
+                    names = concept.get('names', [])
+                    display_name = concept.get('display', '')
+                    
+                    # 한글명이 있으면 우선 사용
+                    for name in names:
+                        if any('\uac00' <= char <= '\ud7af' for char in name.get('name', '')):
+                            display_name = name['name']
+                            break
+                    
+                    cleaned_results.append({
+                        'uuid': concept['uuid'],
+                        'display': display_name,
+                        'conceptClass': concept.get('conceptClass', {}).get('display', ''),
+                        'original_display': concept.get('display', '')
+                    })
+                
+                return cleaned_results
+            else:
+                logger.error(f"진단 Concept 검색 실패: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"진단 Concept 검색 예외: {e}")
+            return []
+
+    def search_drug_concepts(self, query, limit=20):
+        """약물 관련 Concept 검색"""
+        try:
+            params = {
+                'q': query,
+                'v': 'custom:(uuid,display,strength,dosageForm:(uuid,display),concept:(uuid,display))',
+                'limit': limit
+            }
+            
+            response = requests.get(
+                f"{self.api_url}/drug",
+                auth=self.auth,
+                headers={'Accept': 'application/json'},
+                params=params,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                results = data.get('results', [])
+                
+                # 약물 결과 정리
+                cleaned_results = []
+                for drug in results:
+                    cleaned_results.append({
+                        'uuid': drug['uuid'],
+                        'display': drug.get('display', ''),
+                        'strength': drug.get('strength', ''),
+                        'dosageForm': drug.get('dosageForm', {}).get('display', ''),
+                        'concept_uuid': drug.get('concept', {}).get('uuid', '')
+                    })
+                
+                return cleaned_results
+            else:
+                logger.error(f"약물 검색 실패: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"약물 검색 예외: {e}")
+            return []
+
+    def create_encounter(self, patient_uuid, encounter_type_uuid=None, location_uuid=None, provider_uuid=None):
+        """새 Encounter 생성"""
+        try:
+            # 기본값 설정
+            if not encounter_type_uuid:
+                encounter_type_uuid = "61ae96f4-6afe-4351-b6f8-cd4fc383cce1"  # Consultation
+            if not location_uuid:
+                location_uuid = self.get_default_location()
+            if not provider_uuid:
+                provider_uuid = self.get_default_provider()
+            
+            encounter_data = {
+                "patient": patient_uuid,
+                "encounterType": encounter_type_uuid,
+                "location": location_uuid,
+                "provider": provider_uuid,
+                "encounterDatetime": datetime.now().isoformat()
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/encounter",
+                auth=self.auth,
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
+                json=encounter_data,
+                timeout=15
+            )
+            
+            if response.status_code == 201:
+                return response.json()
+            else:
+                logger.error(f"Encounter 생성 실패: {response.status_code}, {response.text}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Encounter 생성 예외: {e}")
+            return None
+
+    def create_observation(self, obs_data):
+        """Observation 생성"""
+        try:
+            # obsDatetime 기본값 설정
+            if 'obsDatetime' not in obs_data:
+                obs_data['obsDatetime'] = datetime.now().isoformat()
+            
+            response = requests.post(
+                f"{self.api_url}/obs",
+                auth=self.auth,
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
+                json=obs_data,
+                timeout=15
+            )
+            
+            if response.status_code == 201:
+                return response.json()
+            else:
+                logger.error(f"Observation 생성 실패: {response.status_code}, {response.text}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Observation 생성 예외: {e}")
+            return None
+
+    def create_diagnosis_obs(self, patient_uuid, encounter_uuid, diagnosis_concept_uuid, diagnosis_notes=""):
+        """진단 Observation 생성"""
+        try:
+            # 진단용 Concept UUID (실제 OpenMRS 환경에 맞게 수정 필요)
+            DIAGNOSIS_CONCEPT_UUID = "159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  # Visit Diagnoses
+            
+            obs_data = {
+                "person": patient_uuid,
+                "encounter": encounter_uuid,
+                "concept": DIAGNOSIS_CONCEPT_UUID,
+                "value": diagnosis_concept_uuid,  # 진단 concept의 UUID
+                "comment": diagnosis_notes,
+                "obsDatetime": datetime.now().isoformat()
+            }
+            
+            return self.create_observation(obs_data)
+            
+        except Exception as e:
+            logger.error(f"진단 Observation 생성 예외: {e}")
+            return None
+
+    def create_prescription_obs_group(self, patient_uuid, encounter_uuid, prescription_data):
+        """처방 관련 Observation 그룹 생성"""
+        try:
+            obs_list = []
+            
+            # 약물명 Observation
+            if prescription_data.get('drug_uuid'):
+                drug_obs = self.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Drug Orders
+                    "value": prescription_data['drug_uuid'],
+                    "comment": f"약물: {prescription_data.get('drug_name', '')}"
+                })
+                if drug_obs:
+                    obs_list.append(drug_obs)
+            
+            # 용량 Observation
+            if prescription_data.get('dosage'):
+                dosage_obs = self.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "160856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Dosage
+                    "valueText": f"{prescription_data['dosage']} {prescription_data.get('dose_units', 'mg')}",
+                    "comment": "용량"
+                })
+                if dosage_obs:
+                    obs_list.append(dosage_obs)
+            
+            # 복용 빈도 Observation
+            if prescription_data.get('frequency'):
+                frequency_obs = self.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "160855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Frequency
+                    "valueText": prescription_data['frequency'],
+                    "comment": "복용 빈도"
+                })
+                if frequency_obs:
+                    obs_list.append(frequency_obs)
+            
+            # 복용 기간 Observation
+            if prescription_data.get('duration'):
+                duration_obs = self.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "159368AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Duration
+                    "valueText": prescription_data['duration'],
+                    "comment": "복용 기간"
+                })
+                if duration_obs:
+                    obs_list.append(duration_obs)
+            
+            # 복용 지시사항 Observation
+            if prescription_data.get('instructions'):
+                instructions_obs = self.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "162749AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Instructions
+                    "valueText": prescription_data['instructions'],
+                    "comment": "복용 지시사항"
+                })
+                if instructions_obs:
+                    obs_list.append(instructions_obs)
+            
+            return obs_list
+            
+        except Exception as e:
+            logger.error(f"처방 Observation 그룹 생성 예외: {e}")
+            return []
+
+    def get_default_provider(self):
+        """기본 Provider UUID 반환"""
+        try:
+            response = requests.get(
+                f"{self.api_url}/provider",
+                auth=self.auth,
+                headers={'Accept': 'application/json'},
+                params={'v': 'default', 'limit': 1},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                results = data.get('results', [])
+                if results:
+                    return results[0]['uuid']
+            
+            # 기본값 반환
+            return "ae7a0028-dcc8-11e3-92bb-0800200c9a66"  # 실제 환경에 맞게 수정
+            
+        except Exception as e:
+            logger.error(f"기본 Provider 조회 예외: {e}")
+            return "ae7a0028-dcc8-11e3-92bb-0800200c9a66"
+
+    def get_default_location(self):
+        """기본 Location UUID 반환"""
+        try:
+            # 기존 get_locations 메서드 활용
+            locations = self.get_locations()
+            if locations:
+                return locations[0]['uuid']
+            
+            # 기본값 반환
+            return "aff27d58-a15c-49a6-9beb-d30dcfc0c66e"  # 실제 환경에 맞게 수정
+            
+        except Exception as e:
+            logger.error(f"기본 Location 조회 예외: {e}")
+            return "aff27d58-a15c-49a6-9beb-d30dcfc0c66e"
+
+    def get_patient_clinical_summary(self, patient_uuid, limit=5):
+        """환자의 최근 임상 데이터 요약"""
+        try:
+            encounters = self.get_patient_encounters(patient_uuid, limit)
+            
+            clinical_data = []
+            for encounter in encounters:
+                encounter_summary = {
+                    'encounter_uuid': encounter['uuid'],
+                    'encounter_datetime': encounter['encounterDatetime'],
+                    'encounter_type': encounter.get('encounterType', {}).get('display', ''),
+                    'location': encounter.get('location', {}).get('display', ''),
+                    'provider': encounter.get('provider', {}).get('display', ''),
+                    'diagnoses': [],
+                    'prescriptions': [],
+                    'other_obs': []
+                }
+                
+                # Observations 분류
+                for obs in encounter.get('obs', []):
+                    concept_display = obs.get('concept', {}).get('display', '')
+                    obs_value = obs.get('value') or obs.get('valueText') or obs.get('valueNumeric')
+                    
+                    if 'diagnosis' in concept_display.lower():
+                        encounter_summary['diagnoses'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs['uuid']
+                        })
+                    elif any(keyword in concept_display.lower() for keyword in ['drug', 'medication', 'dosage', 'frequency']):
+                        encounter_summary['prescriptions'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs['uuid']
+                        })
+                    else:
+                        encounter_summary['other_obs'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs['uuid']
+                        })
+                
+                clinical_data.append(encounter_summary)
+            
+            return clinical_data
+            
+        except Exception as e:
+            logger.error(f"환자 임상 요약 조회 예외: {e}")
+            return []

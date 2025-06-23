@@ -12,6 +12,7 @@ const LISSidebar = () => {
     { name: '샘플 목록 확인', path: '/lis/samples', icon: '🔬' },
     { name: '결과 기록하기', path: '/lis/result/new', icon: '📝' },
     { name: '결과 목록 확인', path: '/lis/result-list', icon: '✅' },
+    { name: '결과 시각화 확인', path: '/lis/cdss/results', icon: '📊' },
   ];
 
   const isActive = (path) => location.pathname === path;

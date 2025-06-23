@@ -4,11 +4,11 @@ import './StatisticsBoard.css';
 
 // 백엔드 API 서비스 클래스
 class DashboardAPI {
-  static BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
+  static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api/';
   // HTTP 요청 헬퍼 함수
   static async request(endpoint, options = {}) {
     try {
-      const response = await fetch(`${this.BASE_URL}${endpoint}`, {
+      const response = await fetch(`${this.BASE_URL}statisticsboard${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,

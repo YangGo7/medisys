@@ -64,35 +64,35 @@ const EmrMainPage = () => {
   const API_BASE = process.env.REACT_APP_INTEGRATION_API;
 
   const fetchAllPatientData = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API_BASE}identifier-waiting/`);
-      const all = Array.isArray(res.data) ? res.data : [];
-      setAllPatientMappings(all);
+  try {
+    const res = await axios.get(`${API_BASE}identifier-waiting/`);
+    const all = Array.isArray(res.data) ? res.data : [];
+    setAllPatientMappings(all);
 
-      const waiting = all
-        .filter(p => !p.assigned_room)
-        .reduce((acc, p) => {
-          if (!acc.find(x => x.patient_identifier === p.patient_identifier)) {
-            acc.push(p);
-          }
-          return acc;
-        }, []);
-      setWaitingList(waiting);
+    const waiting = all
+      .filter(p => !p.assigned_room)
+      .reduce((acc, p) => {
+        if (!acc.find(x => x.patient_identifier === p.patient_identifier)) {
+          acc.push(p);
+        }
+        return acc;
+      }, []);
+    setWaitingList(waiting);
 
-      const assigned = { 1: null, 2: null };
-      all.forEach(p => {
-        if (p.assigned_room === 1) assigned[1] = p;
-        if (p.assigned_room === 2) assigned[2] = p;
-      });
-      setAssignedPatients(assigned);
+    const assigned = { 1: null, 2: null };
+    all.forEach(p => {
+      if (p.assigned_room === 1) assigned[1] = p;
+      if (p.assigned_room === 2) assigned[2] = p;
+    });
+    setAssignedPatients(assigned);
 
-    } catch (err) {
-      console.error('환자 데이터 조회 실패:', err);
-      setWaitingList([]);
-      setAssignedPatients({ 1: null, 2: null });
-      setAllPatientMappings([]);
-    }
-  }, [API_BASE]);
+  } catch (err) {
+    console.error('환자 데이터 조회 실패:', err);
+    setWaitingList([]);
+    setAssignedPatients({ 1: null, 2: null });
+    setAllPatientMappings([]);
+  }
+}, [API_BASE]);
 
   const fetchCompletedPatients = useCallback(async () => {
     try {
@@ -308,7 +308,7 @@ const EmrMainPage = () => {
     <div className="page-container-full">
       <ReceptionPanel
         onReceptionSuccess={() => {
-          setActiveTab('진료 대시보드');
+          setActiveTab('환자 관리');
           setScheduleRefresh(prev => prev + 1);
         }}
       />
@@ -567,7 +567,7 @@ const EmrMainPage = () => {
           {activeTab === '접수' && renderReception()}
           {activeTab === '설정' && renderSettings()}
           {/* ✅ 진료 대시보드 탭 */}
-          {activeTab === '진료 대시보드' && renderClinicalDashboard()}
+          {activeTab === '환자 관리' && renderClinicalDashboard()}
           {activeTab === '대기 화면' && renderWaitingBoard()}
           {activeTab === '진료 진행도' && renderPatientStatus()}
           {activeTab === '의사 대시보드' && renderClinical()}
