@@ -19813,3 +19813,1586 @@ WARNING 2025-06-23 23:24:11,242 log 913980 129537069274816 Not Found: /api//main
 WARNING 2025-06-23 23:24:11,242 basehttp 913980 129537069274816 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
 WARNING 2025-06-23 23:29:11,053 log 913980 129537069274816 Not Found: /api//main-page-function/main-data/
 WARNING 2025-06-23 23:29:11,053 basehttp 913980 129537069274816 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:34:11,053 log 913980 129537069274816 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:34:11,054 basehttp 913980 129537069274816 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:39:11,258 log 913980 129537086060224 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:39:11,258 basehttp 913980 129537086060224 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:39:11,611 log 913980 129537077667520 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:39:11,611 basehttp 913980 129537077667520 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:39:11,964 log 913980 129537164703424 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:39:11,964 basehttp 913980 129537164703424 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-23 23:39:33,522 basehttp 913980 129537057736384 - Broken pipe from ('199.45.154.150', 32904)
+WARNING 2025-06-23 23:39:37,595 log 913980 129537057736384 Not Found: /
+WARNING 2025-06-23 23:39:37,595 basehttp 913980 129537057736384 "GET / HTTP/1.1" 404 5531
+INFO 2025-06-23 23:39:38,249 basehttp 913980 129537057736384 - Broken pipe from ('199.45.154.150', 50204)
+WARNING 2025-06-23 23:39:41,862 log 913980 129537049343680 Not Found: /
+WARNING 2025-06-23 23:39:41,862 basehttp 913980 129537049343680 "GET / HTTP/1.1" 404 5531
+INFO 2025-06-23 23:39:43,095 basehttp 913980 129537040950976 code 505, message Invalid HTTP version (2.0)
+ERROR 2025-06-23 23:39:43,096 basehttp 913980 129537040950976 "PRI * HTTP/2.0" 505 -
+WARNING 2025-06-23 23:39:49,087 log 913980 129537040950976 Not Found: /favicon.ico
+WARNING 2025-06-23 23:39:49,088 basehttp 913980 129537040950976 "GET /favicon.ico HTTP/1.1" 404 5582
+INFO 2025-06-23 23:39:49,688 basehttp 913980 129537032558272 code 505, message Invalid HTTP version (2.0)
+ERROR 2025-06-23 23:39:49,689 basehttp 913980 129537032558272 "PRI * HTTP/2.0" 505 -
+INFO 2025-06-23 23:39:53,533 basehttp 913980 129537032558272 code 400, message Bad request version ('À\x14À')
+ERROR 2025-06-23 23:39:53,534 basehttp 913980 129537032558272 You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2025-06-23 23:39:54,476 log 913980 129537032558272 Not Found: /login
+WARNING 2025-06-23 23:39:54,477 basehttp 913980 129537032558272 "GET /login HTTP/1.1" 404 5564
+WARNING 2025-06-23 23:43:15,612 log 913980 129537024165568 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:43:15,613 basehttp 913980 129537024165568 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:47:13,107 log 913980 129537015772864 Not Found: /www.google.com:443
+WARNING 2025-06-23 23:47:13,108 basehttp 913980 129537015772864 "CONNECT www.google.com:443 HTTP/1.1" 404 1862
+WARNING 2025-06-23 23:48:15,424 log 913980 129537024165568 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:48:15,425 basehttp 913980 129537024165568 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-23 23:53:15,603 log 913980 129537015772864 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:53:15,603 basehttp 913980 129537015772864 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-23 23:59:11,239 basehttp 913980 129537032558272 "OPTIONS /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 200 0
+WARNING 2025-06-23 23:59:11,627 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-23 23:59:11,627 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:04:11,074 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:04:11,074 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:09:11,081 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:09:11,082 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:14:11,089 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:14:11,090 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:19:11,115 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:19:11,115 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:24:11,264 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:24:11,265 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:29:11,097 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:29:11,098 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:34:11,099 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:34:11,100 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:39:11,107 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:39:11,108 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-24 00:39:45,459 basehttp 913980 129537032558272 code 400, message Bad request syntax ('MGLNDD_35.225.63.41_8000')
+WARNING 2025-06-24 00:39:45,459 basehttp 913980 129537032558272 "MGLNDD_35.225.63.41_8000" 400 -
+WARNING 2025-06-24 00:43:19,278 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:43:19,279 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:48:15,469 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:48:15,470 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:53:15,647 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:53:15,648 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 00:58:15,482 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 00:58:15,482 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:03:15,488 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:03:15,489 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:08:15,492 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:08:15,493 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:13:15,489 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:13:15,489 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:15:53,029 log 913980 129537015772864 Not Found: /google.com:443
+WARNING 2025-06-24 01:15:53,029 basehttp 913980 129537015772864 "CONNECT google.com:443 HTTP/1.1" 404 1846
+WARNING 2025-06-24 01:18:15,497 log 913980 129537032558272 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:18:15,498 basehttp 913980 129537032558272 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:24:11,311 log 913980 129537015772864 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:24:11,311 basehttp 913980 129537015772864 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-24 01:25:09,076 basehttp 913980 129537040950976 code 400, message Bad request syntax ('nil')
+WARNING 2025-06-24 01:25:09,076 basehttp 913980 129537040950976 "nil" 400 -
+WARNING 2025-06-24 01:28:27,543 log 913980 129537015772864 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:28:27,543 basehttp 913980 129537015772864 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:36:26,112 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:36:26,112 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:36:26,474 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:36:26,474 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-24 01:36:29,067 basehttp 913980 129537024165568 "OPTIONS /api/main-page-function/notices/board/?page=1&page_size=10&search=&type=&show_inactive=false HTTP/1.1" 200 0
+INFO 2025-06-24 01:36:29,069 basehttp 913980 129537040950976 "OPTIONS /api/main-page-function/notices/board/?page=1&page_size=10&search=&type=&show_inactive=false HTTP/1.1" 200 0
+INFO 2025-06-24 01:36:29,552 basehttp 913980 129537040950976 "GET /api/main-page-function/notices/board/?page=1&page_size=10&search=&type=&show_inactive=false HTTP/1.1" 200 1948
+INFO 2025-06-24 01:36:29,753 basehttp 913980 129537024165568 "GET /api/main-page-function/notices/board/?page=1&page_size=10&search=&type=&show_inactive=false HTTP/1.1" 200 1948
+INFO 2025-06-24 01:36:31,962 basehttp 913980 129537024165568 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 1070
+INFO 2025-06-24 01:36:32,235 basehttp 913980 129537040950976 "GET /api/integration/openmrs-patients/ HTTP/1.1" 200 1070
+WARNING 2025-06-24 01:36:34,018 log 913980 129537040950976 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:36:34,019 basehttp 913980 129537040950976 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+WARNING 2025-06-24 01:36:34,201 log 913980 129537024165568 Not Found: /api//main-page-function/main-data/
+WARNING 2025-06-24 01:36:34,201 basehttp 913980 129537024165568 "GET /api//main-page-function/main-data/?doctor_id=default_doctor HTTP/1.1" 404 11829
+INFO 2025-06-24 01:36:37,746 basehttp 913980 129537015772864 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 920
+INFO 2025-06-24 01:36:37,978 basehttp 913980 129537032558272 "GET /api/integration/openmrs/providers/ HTTP/1.1" 200 920
+INFO 2025-06-24 01:36:40,007 basehttp 913980 129537040950976 "GET /api/worklist/study-requests/?page=1&page_size=10&patient_id=&doctor_id=&start_date=2025-06-16&end_date=2025-06-23 HTTP/1.1" 200 1818
+INFO 2025-06-24 01:36:40,015 basehttp 913980 129537024165568 "GET /api/orders/logs/?page=1&page_size=10&start_date=2025-06-16&end_date=2025-06-23&order_type=LIS HTTP/1.1" 200 621
+INFO 2025-06-24 01:36:40,365 basehttp 913980 129537040950976 "GET /api/worklist/study-requests/?page=1&page_size=10&patient_id=&doctor_id=&start_date=2025-06-16&end_date=2025-06-23 HTTP/1.1" 200 1818
+INFO 2025-06-24 01:36:40,422 basehttp 913980 129537049343680 "GET /api/orders/logs/?page=1&page_size=10&start_date=2025-06-16&end_date=2025-06-23&order_type=LIS HTTP/1.1" 200 621
+INFO 2025-06-24 01:36:42,988 basehttp 913980 129537049343680 "OPTIONS /api/statisticsboard/all/ HTTP/1.1" 200 0
+INFO 2025-06-24 01:36:42,988 basehttp 913980 129537040950976 "OPTIONS /api/statisticsboard/all/ HTTP/1.1" 200 0
+INFO 2025-06-24 01:36:43,688 basehttp 913980 129537040950976 "GET /api/statisticsboard/all/ HTTP/1.1" 200 1700
+INFO 2025-06-24 01:36:43,979 basehttp 913980 129537049343680 "GET /api/statisticsboard/all/ HTTP/1.1" 200 1700
+INFO 2025-06-24 02:06:12,091 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:12,092 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:12,096 basehttp 913980 129537040950976 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:06:12,102 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:12,161 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:12,162 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:12,490 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:12,504 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:12,510 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:06:12,520 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:12,546 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:12,547 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:16,910 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:16,962 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:16,962 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:21,914 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:21,918 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:21,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:21,969 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:21,970 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:26,912 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:26,917 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:06:26,958 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:26,959 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:31,911 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:31,912 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:31,913 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:31,962 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:31,963 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:36,904 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:36,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:36,967 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:41,924 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:41,926 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:41,930 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:41,931 basehttp 913980 129537040950976 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:06:41,984 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:41,985 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:46,915 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:46,970 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:46,971 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:51,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:51,922 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:06:51,923 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:06:51,977 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:51,978 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:06:56,913 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:06:56,916 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:06:56,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:06:56,964 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:01,911 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:01,912 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:07:01,917 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:01,962 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:01,963 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:06,908 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:06,949 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:06,950 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:11,911 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:11,914 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:07:11,916 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:07:11,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:11,959 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:11,960 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:16,914 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:16,958 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:16,959 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:21,916 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:21,916 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:21,917 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:07:21,969 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:21,970 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:26,909 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:26,914 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:07:26,954 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:26,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:31,923 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:31,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:31,927 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:07:31,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:31,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:36,912 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:36,956 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:36,957 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:41,920 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:41,922 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:07:41,923 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:07:41,924 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:41,963 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:41,964 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:46,907 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:46,951 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:46,952 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:51,914 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:07:51,915 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:51,919 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:07:51,966 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:51,967 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:07:56,921 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:07:56,925 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:07:56,968 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:07:56,969 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:01,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:08:01,918 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:01,919 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:01,968 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:01,969 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:06,908 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:06,954 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:06,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:11,914 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:11,914 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:11,918 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:08:11,918 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:08:11,970 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:11,972 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:16,915 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:16,957 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:16,958 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:21,915 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:21,918 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:08:21,920 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:21,962 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:21,963 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:26,910 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:26,913 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:08:26,952 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:26,953 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:31,910 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:08:31,911 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:31,912 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:31,965 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:31,966 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:36,916 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:36,962 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:36,963 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:41,920 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:08:41,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:41,927 basehttp 913980 129537077667520 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:08:41,929 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:41,968 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:41,969 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:46,912 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:08:46,955 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:46,956 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:51,913 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:51,915 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:51,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:08:51,976 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:51,977 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:08:56,908 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:08:56,913 basehttp 913980 129537077667520 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:08:56,950 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:08:56,951 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:01,906 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:01,907 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:01,912 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:01,953 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:01,954 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:06,913 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:06,953 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:06,954 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:13,287 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:13,291 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:13,293 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:13,298 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:09:13,338 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:13,339 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:16,907 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:16,947 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:16,948 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:21,907 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:21,910 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:21,913 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:21,956 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:21,957 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:26,927 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:09:26,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:26,971 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:26,972 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:31,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:31,916 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:31,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:31,967 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:31,968 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:36,910 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:36,957 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:36,958 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:41,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:41,919 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:41,920 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:41,924 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:09:41,968 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:41,969 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:46,920 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:46,964 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:46,965 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:51,921 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:09:51,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:51,927 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:09:51,974 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:51,975 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:09:56,918 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:09:56,919 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:09:56,959 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:09:56,960 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:01,920 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:01,927 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:01,927 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:10:01,978 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:01,979 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:06,911 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:06,959 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:06,961 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:11,913 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:10:11,914 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:11,921 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:11,922 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:10:11,964 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:11,965 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:16,914 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:16,958 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:16,959 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:21,918 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:21,919 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:10:21,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:21,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:21,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:26,917 basehttp 913980 129537049343680 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:10:26,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:26,961 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:26,962 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:31,913 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:10:31,915 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:31,918 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:31,964 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:31,965 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:36,907 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:36,953 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:36,954 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:41,927 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:41,929 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:10:41,930 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:41,934 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:10:41,976 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:41,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:46,917 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:46,968 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:46,969 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:51,914 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:10:51,917 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:10:51,919 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:51,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:51,964 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:10:56,911 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:10:56,911 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:10:56,949 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:10:56,950 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:01,921 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:01,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:01,926 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:01,972 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:01,973 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:06,914 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:06,963 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:06,965 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:11,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:11,920 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:11,923 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:11,924 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:11:11,963 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:11,964 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:16,907 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:16,949 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:16,950 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:21,914 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:21,914 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:21,917 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:21,965 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:21,966 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:26,913 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:26,916 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:11:26,955 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:26,956 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:31,922 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:31,925 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:31,927 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:31,971 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:31,972 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:36,915 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:36,959 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:36,960 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:41,924 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:41,926 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:41,929 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:41,935 basehttp 913980 129537077667520 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:11:41,975 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:41,976 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:46,914 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:46,962 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:46,964 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:51,912 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:51,916 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:11:51,918 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:11:51,967 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:51,968 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:11:56,926 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:11:56,928 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:11:56,970 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:11:56,971 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:01,921 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:01,922 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:01,923 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:01,976 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:01,977 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:06,914 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:06,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:06,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:11,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:11,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:11,928 basehttp 913980 129537077667520 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+INFO 2025-06-24 02:12:11,929 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:11,969 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:11,970 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:16,911 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:16,954 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:16,954 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:21,917 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:21,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:21,920 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:21,963 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:21,964 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:26,907 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:26,915 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:12:26,955 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:26,957 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:31,922 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:31,924 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:31,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:31,975 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:31,976 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:36,914 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:36,960 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:36,961 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:41,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:41,921 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:41,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:41,925 basehttp 913980 129537024165568 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:12:41,972 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:41,973 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:46,906 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:46,955 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:46,956 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:51,922 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:12:51,925 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:51,928 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:12:51,972 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:51,974 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:12:56,930 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:12:56,931 basehttp 913980 129537086060224 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:12:57,021 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:12:57,022 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:01,915 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:13:01,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:13:01,920 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:01,964 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:01,965 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:06,908 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:06,954 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:06,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:11,915 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:13:11,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:13:11,919 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:13:11,923 basehttp 913980 129537040950976 "GET /api/integration/daily-summary-stats/ HTTP/1.1" 200 85
+WARNING 2025-06-24 02:13:11,971 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:11,972 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:16,920 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:16,968 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:16,969 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:21,926 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:13:21,929 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:13:21,929 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:21,974 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:21,975 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+WARNING 2025-06-24 02:13:26,848 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:26,849 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:26,918 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:27,080 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:27,081 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+WARNING 2025-06-24 02:13:27,310 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:27,311 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:31,915 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:13:31,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:31,961 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:31,963 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:36,909 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:36,954 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:36,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:41,909 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:13:41,909 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:13:41,958 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:41,959 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:46,915 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:46,970 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:46,971 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:51,915 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:13:51,916 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:51,964 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:51,965 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:13:56,909 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:13:56,949 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:13:56,950 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:01,911 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:14:01,911 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:14:01,959 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:01,960 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:06,920 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:06,968 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:06,970 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:11,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:14:11,922 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:11,964 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:11,965 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:16,911 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:16,952 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:16,953 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:21,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:14:21,924 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:14:21,972 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:21,973 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:26,918 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:26,970 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:26,971 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:31,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:14:31,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:31,964 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:31,965 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:36,909 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:36,951 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:36,952 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:41,923 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:14:41,923 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:14:41,972 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:41,973 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:46,915 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:46,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:46,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:51,912 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:14:51,916 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:51,961 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:51,962 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:14:56,925 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:14:56,967 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:14:56,968 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:01,922 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:15:01,925 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:15:01,968 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:01,969 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:06,918 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:06,964 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:06,965 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:11,912 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:15:11,913 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:15:11,957 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:11,958 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:16,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:16,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:16,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:21,920 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:15:21,922 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:21,968 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:21,969 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:26,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:26,962 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:26,963 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:31,917 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:15:31,921 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:15:31,966 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:31,967 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:36,911 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:36,959 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:36,960 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:41,924 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:15:41,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:41,971 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:41,972 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:46,915 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:46,961 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:46,962 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:51,921 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:15:51,924 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:51,966 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:51,967 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:15:56,915 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:15:56,957 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:15:56,959 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:01,912 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:16:01,912 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:16:01,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:01,964 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:06,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:06,961 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:06,962 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:11,917 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:16:11,921 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:11,963 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:11,964 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:16,912 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:16,954 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:16,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:21,911 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:16:21,911 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:16:21,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:21,964 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:26,918 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:26,966 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:26,967 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:31,920 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:16:31,932 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:31,976 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:31,977 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:36,914 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:36,957 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:36,958 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:41,911 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:16:41,913 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:41,960 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:41,961 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:46,922 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:46,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:46,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:51,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:16:51,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:16:51,969 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:51,970 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:16:56,910 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:16:56,956 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:16:56,957 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:01,927 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:17:01,928 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:01,977 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:01,979 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:06,923 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:06,981 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:06,982 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:11,925 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:17:11,926 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:11,997 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:11,998 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:16,911 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:16,956 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:16,957 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:21,925 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:17:21,927 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:17:21,972 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:21,974 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:26,916 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:26,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:26,964 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:31,917 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:17:31,920 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:17:31,966 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:31,967 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:36,911 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:36,953 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:36,955 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:41,926 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:17:41,926 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:41,977 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:41,979 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:46,922 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:46,971 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:46,972 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:51,925 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:17:51,926 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:51,973 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:51,974 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:17:56,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:17:56,963 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:17:56,964 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:01,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:18:01,918 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:01,963 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:01,965 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:06,908 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:06,956 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:06,957 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:11,928 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:18:11,930 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:11,975 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:11,976 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:16,921 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:16,964 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:16,965 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:21,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:18:21,920 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:18:21,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:21,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:26,922 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:26,967 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:26,968 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:31,923 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:18:31,925 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:31,971 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:31,972 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:36,917 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:36,960 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:36,961 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:41,915 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:18:41,915 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:18:41,964 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:41,965 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:46,920 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:46,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:46,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:51,925 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:18:51,929 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:51,977 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:51,978 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:18:56,920 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:18:56,961 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:18:56,962 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:01,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:01,918 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:01,974 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:01,975 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:06,925 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:06,970 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:06,971 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:11,922 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:11,926 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:11,974 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:11,975 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:16,916 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:16,962 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:16,963 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:21,915 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:21,919 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:21,965 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:21,966 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:26,920 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:26,963 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:26,964 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:31,917 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:31,919 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:31,967 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:31,968 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:36,916 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:36,963 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:36,964 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:41,928 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:41,930 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:41,978 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:41,979 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:46,920 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:46,964 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:46,965 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:51,920 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:19:51,922 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:51,980 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:51,981 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:19:56,913 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:19:56,962 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:19:56,963 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:01,924 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:20:01,927 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:20:01,980 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:01,981 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:06,916 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:06,965 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:06,966 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:11,917 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:20:11,917 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:20:11,970 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:11,971 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:16,913 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:16,956 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:16,958 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:21,919 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:20:21,920 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:21,966 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:21,967 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:26,915 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:26,958 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:26,958 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:31,922 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:20:31,922 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:20:31,980 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:31,981 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:36,920 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:36,967 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:36,968 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:41,916 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:20:41,920 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:20:41,972 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:41,973 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:46,916 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:46,972 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:46,973 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:51,916 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:20:51,917 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:51,975 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:51,977 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:20:57,086 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:20:57,133 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:20:57,134 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:01,921 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:21:01,975 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:01,976 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:02,099 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:21:06,912 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:06,961 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:06,962 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:11,922 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:21:11,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:11,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:11,976 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:16,922 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:16,977 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:16,978 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:21,925 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:21:21,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:21,974 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:21,975 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:26,916 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:26,962 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:26,963 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:31,915 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:21:31,920 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:31,966 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:31,967 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:36,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:36,970 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:36,971 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:41,924 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:21:41,926 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:21:41,976 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:41,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:46,927 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:46,976 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:46,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:51,922 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:21:51,929 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:51,977 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:51,979 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:21:56,914 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:21:56,956 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:21:56,957 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:01,915 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:22:01,919 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:01,964 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:01,965 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:06,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:06,961 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:06,962 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:11,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:22:11,923 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:22:11,974 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:11,976 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:16,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:16,966 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:16,967 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:21,915 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:22:21,918 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:21,965 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:21,966 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:26,919 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:26,962 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:26,963 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:31,917 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:22:31,921 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:31,965 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:31,967 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:36,922 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:36,970 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:36,971 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:41,926 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:22:41,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:41,969 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:41,970 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:46,917 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:46,961 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:46,962 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:51,917 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:22:51,919 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:51,971 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:51,972 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:22:56,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:22:56,968 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:22:56,969 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:01,924 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:23:01,925 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:01,969 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:01,970 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:06,914 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:06,958 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:06,959 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:11,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:23:11,925 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:23:11,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:11,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:16,919 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:16,961 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:16,962 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:21,929 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:23:21,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:21,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:21,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:26,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:26,965 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:26,966 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:31,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:23:31,932 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:23:31,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:31,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:36,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:36,970 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:36,971 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:41,926 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:23:41,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:41,970 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:41,971 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:46,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:46,976 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:46,977 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:51,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:23:51,927 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:23:51,980 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:51,982 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:23:56,921 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:23:56,965 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:23:56,966 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:01,924 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:24:01,926 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:01,970 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:01,971 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:06,919 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:06,967 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:06,968 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:11,925 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:24:11,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:11,972 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:11,974 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:16,928 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:16,971 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:16,972 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:21,927 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:24:21,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:21,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:21,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:26,923 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:26,963 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:26,964 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:31,917 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:24:31,918 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:24:31,966 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:31,967 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:36,927 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:36,973 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:36,974 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:41,918 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:24:41,921 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:41,966 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:41,967 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:46,922 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:46,967 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:46,968 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:51,923 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:24:51,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:51,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:51,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:24:56,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:24:56,976 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:24:56,978 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:01,927 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:25:01,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:01,977 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:01,978 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:06,920 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:06,967 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:06,968 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:11,925 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:25:11,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:11,972 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:11,973 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:16,923 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:16,964 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:16,965 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:21,928 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:25:21,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:21,972 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:21,973 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:26,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:26,961 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:26,962 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:31,929 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:25:31,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:31,972 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:31,973 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:36,921 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:36,970 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:36,971 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:41,922 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:25:41,925 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:41,968 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:41,969 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:46,918 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:46,963 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:46,964 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+WARNING 2025-06-24 02:25:48,970 log 913980 129537024165568 Not Found: /www.google.com:443
+WARNING 2025-06-24 02:25:48,970 basehttp 913980 129537024165568 "CONNECT www.google.com:443 HTTP/1.1" 404 1862
+INFO 2025-06-24 02:25:51,919 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:25:51,920 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:25:51,969 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:51,970 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:25:56,925 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:25:56,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:25:56,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:01,922 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:01,925 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:01,970 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:01,971 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:06,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:06,974 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:06,975 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:11,927 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:11,932 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:11,975 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:11,976 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:16,930 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:16,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:16,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:21,927 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:21,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:21,976 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:21,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:26,919 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:26,965 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:26,966 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:31,930 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:31,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:31,975 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:31,975 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:36,920 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:36,962 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:36,963 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:41,924 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:41,925 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:41,974 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:41,975 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:46,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:46,969 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:46,970 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:51,928 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:26:51,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:51,979 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:51,980 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:26:56,929 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:26:56,981 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:26:56,982 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:01,927 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:27:01,932 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:01,994 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:01,995 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:06,926 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:06,972 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:06,973 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:11,929 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:27:11,932 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:11,978 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:11,979 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:16,928 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:16,974 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:16,975 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:21,925 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:27:21,929 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:21,996 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:21,998 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:26,929 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:26,978 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:26,979 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:31,923 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:27:31,927 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:31,972 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:31,973 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:36,923 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:36,973 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:36,974 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:41,912 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:27:41,934 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:41,983 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:41,984 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:46,921 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:46,970 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:46,971 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:51,919 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:27:51,921 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:27:51,972 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:51,974 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:27:56,939 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:27:56,981 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:27:56,982 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:01,929 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:01,932 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:01,977 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:01,978 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:06,923 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:06,966 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:06,967 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:11,931 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:11,934 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:11,980 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:11,981 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:16,917 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:16,962 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:16,963 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:21,920 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:21,923 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:21,964 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:21,966 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:26,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:26,991 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:26,992 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:31,926 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:31,928 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:31,975 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:31,976 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:36,934 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:36,987 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:36,988 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:41,927 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:41,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:41,974 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:41,975 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:46,920 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:46,963 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:46,964 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:51,918 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:28:51,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:51,967 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:51,968 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:28:56,933 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:28:56,978 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:28:56,979 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:01,935 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:29:01,938 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:01,981 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:01,982 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:06,928 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:06,976 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:06,977 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:11,930 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:29:11,932 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:11,978 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:11,979 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:16,925 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:16,971 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:16,972 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:21,930 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:29:21,934 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:21,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:21,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:26,919 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:26,962 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:26,963 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:31,923 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:29:31,923 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:29:31,973 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:31,974 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:36,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:36,964 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:36,965 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:41,930 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:29:41,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:41,975 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:41,976 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:46,930 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:46,982 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:46,983 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:51,921 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:29:51,926 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:51,969 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:51,970 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:29:56,922 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:29:56,964 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:29:56,965 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:01,923 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:01,924 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:01,978 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:01,979 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:06,919 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:06,965 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:06,965 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:11,929 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:11,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:11,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:11,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+WARNING 2025-06-24 02:30:17,008 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:17,009 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:17,026 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:30:21,928 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:21,929 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:21,980 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:21,981 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:26,931 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:26,975 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:26,976 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:31,929 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:31,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:31,977 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:31,979 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:36,925 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:36,973 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:36,974 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:41,927 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:41,929 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:41,979 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:41,980 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:46,932 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:46,975 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:46,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:51,930 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:30:51,935 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:51,981 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:51,982 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:30:56,933 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:30:56,976 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:30:56,977 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:01,929 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:01,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:01,977 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:01,978 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:06,928 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:06,972 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:06,973 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:11,928 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:11,930 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:11,975 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:11,976 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:16,931 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:16,973 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:16,974 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:22,104 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:22,104 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:22,154 views 913980 129537077667520 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:22,155 basehttp 913980 129537077667520 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:27,000 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:27,040 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:27,041 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:31,933 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:31,937 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:31,982 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:31,983 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:36,926 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:36,966 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:36,967 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:41,924 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:41,928 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:41,974 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:41,975 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:46,933 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:46,978 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:46,979 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:51,931 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:31:51,935 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:51,982 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:51,983 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:31:56,935 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:31:56,980 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:31:56,981 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:01,928 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:01,933 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:01,999 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:02,001 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:06,922 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:06,968 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:06,969 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:12,186 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:12,188 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:12,229 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:12,230 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:17,175 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:17,217 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:17,218 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:22,177 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:22,181 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:22,224 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:22,225 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:27,174 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:27,219 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:27,220 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:32,172 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:32,175 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:32,218 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:32,219 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:37,178 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:37,221 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:37,222 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:42,181 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:42,186 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:42,228 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:42,229 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:47,175 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:47,219 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:47,220 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:52,178 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:32:52,180 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:52,225 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:52,226 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:32:57,169 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:32:57,213 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:32:57,214 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:33:02,187 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:33:02,189 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:33:02,238 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:33:02,240 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:33:11,188 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:33:11,244 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:33:11,245 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:34:11,212 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:34:11,216 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:34:11,261 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:34:11,262 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:35:11,187 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:35:11,191 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:35:11,237 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:35:11,238 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:36:11,182 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:36:11,184 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:36:11,232 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:36:11,234 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:37:11,181 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:37:11,186 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:37:11,238 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:37:11,239 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:38:11,192 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:38:11,195 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:38:11,244 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:38:11,245 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:39:11,204 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:39:11,209 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:39:11,268 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:39:11,270 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:40:11,212 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:40:11,217 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:40:11,278 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:40:11,279 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:41:11,201 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:41:11,207 basehttp 913980 129537077667520 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:41:11,285 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:41:11,287 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:42:11,190 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:42:11,192 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:42:11,234 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:42:11,235 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:43:11,192 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:43:11,194 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:43:11,244 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:43:11,245 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:44:11,194 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:44:11,196 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:44:11,243 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:44:11,244 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:45:11,192 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:45:11,196 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:45:11,243 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:45:11,244 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:46:11,194 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:46:11,198 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:46:11,249 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:46:11,251 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:47:11,192 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:47:11,196 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:47:11,248 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:47:11,249 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:04,265 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:04,270 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:04,323 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:04,324 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:06,935 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:06,982 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:06,983 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:11,939 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:11,941 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:11,992 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:11,994 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:16,939 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:16,995 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:16,996 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:21,946 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:21,946 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:22,000 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:22,002 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:26,941 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:26,984 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:26,985 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:31,931 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:31,937 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:31,987 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:31,988 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:36,940 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:36,990 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:36,992 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:41,936 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:41,938 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:41,988 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:41,989 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:46,935 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:46,984 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:46,985 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:51,944 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:48:51,947 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:52,001 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:52,003 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:48:56,948 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:48:57,002 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:48:57,003 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:01,946 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:01,948 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:02,006 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:02,007 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:06,938 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:06,982 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:06,983 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:11,938 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:11,942 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:11,991 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:11,992 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:16,935 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:16,984 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:16,985 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:21,935 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:21,940 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:21,988 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:21,989 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:26,937 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:27,001 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:27,003 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:31,943 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:31,947 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:31,995 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:31,996 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:36,940 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:36,989 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:36,989 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:41,950 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:41,953 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:42,000 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:42,001 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:46,937 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:46,985 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:46,986 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:51,938 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:49:51,942 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:51,994 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:51,995 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:49:56,938 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:49:56,983 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:49:56,984 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:01,946 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:01,949 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:01,999 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:02,000 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:06,948 basehttp 913980 129537164703424 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:06,994 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:06,995 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:11,934 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:11,938 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:11,985 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:11,986 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:16,935 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:16,980 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:16,981 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:21,940 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:21,944 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:21,989 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:21,990 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:26,940 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:26,984 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:26,985 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:31,938 basehttp 913980 129537164703424 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:31,942 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:31,987 views 913980 129537049343680 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:31,988 basehttp 913980 129537049343680 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:36,937 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:36,981 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:36,982 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:41,940 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:41,942 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:42,034 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:42,035 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:46,941 basehttp 913980 129537049343680 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:46,991 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:46,992 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:51,946 basehttp 913980 129537049343680 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:50:51,950 basehttp 913980 129537077667520 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:52,003 views 913980 129537164703424 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:52,004 basehttp 913980 129537164703424 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:50:57,114 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:50:57,156 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:50:57,157 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:01,936 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:51:01,987 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:01,989 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:02,109 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:51:06,936 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:06,989 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:06,990 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:11,941 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:51:11,941 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:51:11,985 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:11,986 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:16,941 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:16,993 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:16,994 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:21,947 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:51:21,951 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:51:21,997 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:21,998 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:26,942 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:26,995 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:26,996 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:31,950 basehttp 913980 129537024165568 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:51:31,951 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:32,001 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:32,002 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:36,938 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:36,988 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:36,989 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:41,932 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:51:41,945 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:41,997 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:41,998 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:46,935 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:46,996 views 913980 129537040950976 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:46,997 basehttp 913980 129537040950976 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:51,941 basehttp 913980 129537040950976 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:51:51,943 basehttp 913980 129537086060224 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:51,992 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:51,993 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:51:56,942 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:51:56,994 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:51:56,995 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:01,938 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+INFO 2025-06-24 02:52:01,938 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:01,985 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:01,986 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:06,949 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:06,996 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:06,997 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:11,938 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:52:11,942 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:52:11,987 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:11,988 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:16,949 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:17,069 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:17,071 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:21,947 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:52:21,951 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:52:21,999 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:22,000 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:26,943 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:26,989 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:26,990 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:31,943 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:52:31,944 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:52:31,990 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:31,991 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:36,945 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:37,026 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:37,028 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:41,942 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:52:41,947 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:52:41,997 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:41,998 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:46,937 basehttp 913980 129537024165568 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+WARNING 2025-06-24 02:52:46,989 views 913980 129537086060224 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:46,990 basehttp 913980 129537086060224 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558
+INFO 2025-06-24 02:52:51,939 basehttp 913980 129537040950976 "GET /api/integration/completed-patients/ HTTP/1.1" 200 2
+INFO 2025-06-24 02:52:51,942 basehttp 913980 129537086060224 "GET /api/integration/alerts/urgent/count/ HTTP/1.1" 200 11
+WARNING 2025-06-24 02:52:51,988 views 913980 129537024165568 Patient not found for UUID: 7019408f-d172-4db6-9a6e-9fecadee4a29
+INFO 2025-06-24 02:52:51,989 basehttp 913980 129537024165568 "GET /api/integration/identifier-waiting/ HTTP/1.1" 200 1558

@@ -12,7 +12,7 @@ import RISPage from '../pacsapp';
 import TitlePage from './Main_page/TitlePage';
 import StatisticsBoard from './Main_page/StatisticsBoard';
 import './MainPage.css'; // CSS 파일 import 추가
-
+import Controlpage from './Main_page/Control_page';
 
 
 
@@ -35,6 +35,7 @@ export default function MainPage() {
       case 'Medicalemployee': return <Medicalemployee />;
       case 'RISPage': return <RISPage />;
       case 'StatisticsBoard': return <StatisticsBoard />;
+      case 'Controlpage': return <Controlpage />;
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };
@@ -42,13 +43,11 @@ export default function MainPage() {
   const menuItems = [
     { id: 'TitlePage', icon: '🏠', label: '홈' },
     { id: 'dicom', icon: '🖼️', label: 'DICOM' },
-    { id: 'logs', icon: '📄', label: '로그' },
     { id: 'logins', icon: '🔐', label: '로그인' },
-    { id: 'patientsList', icon: '🧑‍🤝‍🧑', label: '환자 목록' },
-    { id: 'Medicalemployee', icon: '👨‍⚕️', label: '의료인 정보' },
     { id: 'lis', icon: '🧪', label: 'LIS' },
     { id: 'RISPage', icon: '📋', label: 'RIS' },
-    { id: 'StatisticsBoard', icon: '📋', label: 'StatisticsBoard' },
+    { id: 'Controlpage', label: 'Controlpage' },
+
   ];
 
   return (
