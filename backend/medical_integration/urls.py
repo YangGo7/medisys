@@ -93,4 +93,13 @@ urlpatterns = [
     path('daily-summary-stats/', views.get_daily_summary_stats, name='daily_summary_stats'),
     path('debug/openmrs-metadata/', views.debug_openmrs_metadata, name='debug_openmrs_metadata'),
     path('debug/test-minimal-patient/', views.test_minimal_patient_creation, name='test_minimal_patient'),
+
+    path('update-patient-status/', views.update_patient_status, name='update_patient_status'),
+    path('complete-visit/', views.complete_visit, name='complete_visit'),
+    path('room-status/', views.get_room_status, name='get_room_status'),
+    path('batch-update-status/', views.batch_update_status, name='batch_update_status'),
+    
+    # ✅ 환자 이름 관리 API 추가
+    path('update-all-patient-names/', views.update_all_patient_names, name='update_all_patient_names'),
+
 ]

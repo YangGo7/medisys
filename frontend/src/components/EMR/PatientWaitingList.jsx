@@ -60,7 +60,7 @@ const PatientWaitingList = ({ onAssignSuccess, onMarkAsComplete, onUnassignFromR
   const filtered = waitingList.filter(
     p =>
       !searchTerm ||
-      (p.display || p.name).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.name || p.display).toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.patient_identifier.includes(searchTerm)
   );
 

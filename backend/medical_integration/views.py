@@ -94,14 +94,208 @@ def get_patient_full_name(openmrs_uuid, fallback_display=None, fallback_identifi
         return fallback_display or fallback_identifier or '이름 없음'
 
 
+# backend/medical_integration/views.py 수정
+
+# openmrs_models에서 필요한 모델들 import
+from openmrs_models.models import Patient, Person, PersonName
+
+def get_patient_full_name_from_db(openmrs_uuid, fallback_display=None, fallback_identifier=None):
+    """
+    OpenMRS 데이터베이스에서 직접 환자 이름 조회 (person_name 테이블 사용)
+    """
+    try:
+        if not openmrs_uuid:
+            return fallback_display or fallback_identifier or '이름 없음'
+        
+        # Patient → Person → PersonName 순서로 조회
+        try:
+            # 1. Patient 테이블에서 person_id 조회
+            patient = Patient.objects.get(uuid=openmrs_uuid, voided=False)
+            person = patient.patient_id  # patient_id가 실제로는 person_id를 가리킴
+            
+            # 2. PersonName 테이블에서 preferred=True인 이름 조회
+            preferred_name = PersonName.objects.filter(
+                person_id=person.person_id,
+                voided=False,
+                preferred=True
+            ).first()
+            
+            if preferred_name:
+                # 한국식 이름 조합: 성 + 이름
+                family_name = preferred_name.family_name or ''
+                given_name = preferred_name.given_name or ''
+                middle_name = preferred_name.middle_name or ''
+                
+                if family_name and given_name:
+                    full_name = f"{family_name}{given_name}"
+                    if middle_name:
+                        full_name += f" {middle_name}"
+                    return full_name
+                elif given_name:
+                    return given_name
+                elif family_name:
+                    return family_name
+            
+            # 3. preferred가 없으면 가장 최근 이름 사용
+            latest_name = PersonName.objects.filter(
+                person_id=person.person_id,
+                voided=False
+            ).order_by('-date_created').first()
+            
+            if latest_name:
+                family_name = latest_name.family_name or ''
+                given_name = latest_name.given_name or ''
+                if family_name and given_name:
+                    return f"{family_name}{given_name}"
+                elif given_name:
+                    return given_name
+                elif family_name:
+                    return family_name
+            
+            logger.warning(f"PersonName을 찾을 수 없음: UUID {openmrs_uuid}")
+            return fallback_display or fallback_identifier or '이름 없음'
+            
+        except Patient.DoesNotExist:
+            logger.warning(f"Patient를 찾을 수 없음: UUID {openmrs_uuid}")
+            return fallback_display or fallback_identifier or '이름 없음'
+            
+    except Exception as e:
+        logger.error(f"DB에서 환자 이름 조회 실패 (UUID: {openmrs_uuid}): {e}")
+        return fallback_display or fallback_identifier or '이름 없음'
+
+
+def get_patient_info_from_db(openmrs_uuid):
+    """
+    OpenMRS 데이터베이스에서 환자 전체 정보 조회
+    """
+    try:
+        if not openmrs_uuid:
+            return None
+        
+        # Patient → Person 조회
+        patient = Patient.objects.get(uuid=openmrs_uuid, voided=False)
+        person = patient.patient_id
+        
+        # PersonName 조회 (preferred 우선)
+        preferred_name = PersonName.objects.filter(
+            person_id=person.person_id,
+            voided=False,
+            preferred=True
+        ).first()
+        
+        if not preferred_name:
+            preferred_name = PersonName.objects.filter(
+                person_id=person.person_id,
+                voided=False
+            ).order_by('-date_created').first()
+        
+        # 이름 조합
+        full_name = '이름 없음'
+        if preferred_name:
+            family_name = preferred_name.family_name or ''
+            given_name = preferred_name.given_name or ''
+            if family_name and given_name:
+                full_name = f"{family_name}{given_name}"
+            elif given_name:
+                full_name = given_name
+            elif family_name:
+                full_name = family_name
+        
+        return {
+            'uuid': openmrs_uuid,
+            'name': full_name,
+            'gender': person.gender,
+            'birthdate': person.birthdate,
+            'family_name': preferred_name.family_name if preferred_name else '',
+            'given_name': preferred_name.given_name if preferred_name else '',
+            'middle_name': preferred_name.middle_name if preferred_name else ''
+        }
+        
+    except Patient.DoesNotExist:
+        logger.warning(f"Patient를 찾을 수 없음: UUID {openmrs_uuid}")
+        return None
+    except Exception as e:
+        logger.error(f"DB에서 환자 정보 조회 실패 (UUID: {openmrs_uuid}): {e}")
+        return None
+
+
+@api_view(['GET'])
+def waiting_board_view(request):
+    today = timezone.now().date()
+    
+    # 1. 대기 중인 환자 (진료실 미배정, 오늘자, 활성화)
+    waiting_list = PatientMapping.objects.filter(
+        is_active=True,
+        mapping_type='IDENTIFIER_BASED',
+        assigned_room__isnull=True,
+        created_date__date=today
+    ).order_by('created_date')
+
+    waiting = []
+    for m in waiting_list:
+        # ✅ ReceptionPanel처럼 get_all_openmrs_patients 로직 사용
+        try:
+            patient = Patient.objects.get(uuid=m.openmrs_patient_uuid, voided=False)
+            person = patient.patient_id
+            active_name_obj = patient.get_active_name()
+            full_name = active_name_obj.get_full_name() if active_name_obj else None
+            
+            # 실제 이름이 있으면 사용, 없으면 fallback
+            patient_name = full_name if full_name else (m.display or m.patient_identifier or '이름 없음')
+            
+        except:
+            # 오류 시 fallback
+            patient_name = m.display or m.patient_identifier or '이름 없음'
+        
+        waiting.append({
+            "name": patient_name,
+            "display": patient_name,
+            "patient_identifier": m.patient_identifier,
+            "uuid": m.openmrs_patient_uuid,
+            "room": None
+        })
+
+    # 2. 최근 배정된 환자
+    recent_assigned = PatientMapping.objects.filter(
+        is_active=True,
+        mapping_type='IDENTIFIER_BASED',
+        assigned_room__isnull=False,
+        created_date__date=today,
+    ).order_by('-created_date').first()
+
+    assigned_recent = None
+    if recent_assigned:
+        # ✅ 배정된 환자도 동일한 방식으로 이름 가져오기
+        try:
+            patient = Patient.objects.get(uuid=recent_assigned.openmrs_patient_uuid, voided=False)
+            person = patient.patient_id
+            active_name_obj = patient.get_active_name()
+            full_name = active_name_obj.get_full_name() if active_name_obj else None
+            
+            patient_name = full_name if full_name else (recent_assigned.display or recent_assigned.patient_identifier or '이름 없음')
+            
+        except:
+            patient_name = recent_assigned.display or recent_assigned.patient_identifier or '이름 없음'
+        
+        assigned_recent = {
+            "name": patient_name,
+            "display": patient_name,
+            "room": recent_assigned.assigned_room
+        }
+
+    return Response({
+        "waiting": waiting,
+        "assigned_recent": assigned_recent
+    })
+
+
+
+
 @api_view(['GET'])
 def reception_list_view(request):
     """
-    오늘 생성된 IDENTIFIER_BASED 타입의 매핑을
-    실제 환자 이름과 함께 반환 (진료 진행도 페이지에서 사용)
+    오늘 접수된 환자 목록 (ReceptionPanel과 동일한 방식으로 이름 가져오기)
     """
-    from django.utils import timezone
-
     today = timezone.now().date()
     
     mappings = PatientMapping.objects.filter(
@@ -112,8 +306,17 @@ def reception_list_view(request):
 
     data = []
     for m in mappings:
-        # ✅ OpenMRS에서 실제 환자 이름 가져오기
-        patient_name = get_patient_full_name(m.openmrs_patient_uuid, m.display, m.patient_identifier)
+        # ✅ ReceptionPanel처럼 get_all_openmrs_patients 로직 사용
+        try:
+            patient = Patient.objects.get(uuid=m.openmrs_patient_uuid, voided=False)
+            person = patient.patient_id
+            active_name_obj = patient.get_active_name()
+            full_name = active_name_obj.get_full_name() if active_name_obj else None
+            
+            patient_name = full_name if full_name else (m.display or m.patient_identifier or '이름 없음')
+            
+        except:
+            patient_name = m.display or m.patient_identifier or '이름 없음'
         
         gender = m.gender if m.gender else '-'
         birthdate = str(m.birthdate) if m.birthdate else '-'
@@ -131,7 +334,6 @@ def reception_list_view(request):
         })
 
     return Response(data)
-
 
 
 
@@ -1626,6 +1828,9 @@ def unassign_room(request):
         logger.error(f"Error unassigning room {room}: {e}", exc_info=True) # exc_info=True로 트레이스백 포함
         return Response({'success': False, 'error': f'서버 내부 오류: {str(e)}'}, status=500)
 
+# backend/medical_integration/views.py
+# identifier_based_waiting_list 함수를 다음과 같이 수정하세요
+
 @api_view(['GET'])
 def identifier_based_waiting_list(request):
     """
@@ -1641,7 +1846,7 @@ def identifier_based_waiting_list(request):
 
     result = []
     for m in mappings:
-        # ✅ OpenMRS에서 실제 환자 이름 가져오기
+        # ✅ OpenMRS에서 실제 환자 이름 가져오기 (ReceptionPanel처럼)
         patient_name = get_patient_full_name(m.openmrs_patient_uuid, m.display, m.patient_identifier)
         
         gender = m.gender if m.gender else '-'
@@ -1652,7 +1857,7 @@ def identifier_based_waiting_list(request):
             'mapping_id': m.mapping_id,
             'patient_identifier': m.patient_identifier,
             'name': patient_name,  # ✅ 실제 환자 이름
-            'display': patient_name,  # ✅ display도 실제 이름
+            'display': patient_name,  # ✅ display도 실제 이름으로 변경
             'gender': gender,
             'birthdate': birthdate_str,
             'age': age,
@@ -1696,56 +1901,104 @@ def waiting_board_view(request):
         created_date__date=today
     ).order_by('created_date')
 
-    waiting = [
-        {
-            "name": m.display or m.patient_identifier,
-            "room": None
-        }
-        for m in waiting_list
-    ]
+    waiting = []
+    for m in waiting_list:
+        # ✅ ReceptionPanel처럼 실제 환자 이름 가져오기
+        patient_name = get_patient_full_name(m.openmrs_patient_uuid, m.display, m.patient_identifier)
+        
+        waiting.append({
+            "name": patient_name,  # ✅ 실제 환자 이름 사용
+            "patient_identifier": m.patient_identifier,  # 추가 정보로 제공
+            "room": None,
+            "wait_time": m.waiting_minutes() if hasattr(m, 'waiting_minutes') else 0,
+            "mapping_id": m.mapping_id
+        })
 
-    # 2. 최근 1분 내 배정된 환자
-    one_minute_ago = timezone.now() - timedelta(seconds=60)
-    recent_assigned = PatientMapping.objects.filter(
-        is_active=True,
-        mapping_type='IDENTIFIER_BASED',
-        assigned_room__isnull=False,
-        created_date__date=today,
-        # 최근 1분 내에 배정되었을 것 (created_date 말고 updated_at 쓰는 게 더 명확하나 일단 created 기준)
-    ).order_by('-created_date').first()
+    # 2. 배정된 환자들 (1번방, 2번방)
+    assigned_patients = {}
+    for room_num in [1, 2]:
+        try:
+            assigned = PatientMapping.objects.get(
+                is_active=True,
+                mapping_type='IDENTIFIER_BASED',
+                assigned_room=room_num,
+                created_date__date=today
+            )
+            # ✅ 배정된 환자도 실제 이름 가져오기
+            patient_name = get_patient_full_name(assigned.openmrs_patient_uuid, assigned.display, assigned.patient_identifier)
+            
+            assigned_patients[f"room_{room_num}"] = {
+                "name": patient_name,  # ✅ 실제 환자 이름 사용
+                "patient_identifier": assigned.patient_identifier,
+                "room": room_num,
+                "mapping_id": assigned.mapping_id
+            }
+        except PatientMapping.DoesNotExist:
+            assigned_patients[f"room_{room_num}"] = None
 
-    assigned_recent = None
-    if recent_assigned:
-        assigned_recent = {
-            "name": recent_assigned.display or recent_assigned.patient_identifier,
-            "room": recent_assigned.assigned_room
-        }
+    # 3. 가장 최근 배정된 환자 (알림용)
+    try:
+        recent_assigned = PatientMapping.objects.filter(
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED',
+            assigned_room__isnull=False,
+            created_date__date=today
+        ).order_by('-last_sync').first()
+        
+        if recent_assigned:
+            # ✅ 최근 배정 환자도 실제 이름 가져오기
+            patient_name = get_patient_full_name(recent_assigned.openmrs_patient_uuid, recent_assigned.display, recent_assigned.patient_identifier)
+            
+            assigned_recent = {
+                "name": patient_name,  # ✅ 실제 환자 이름 사용
+                "patient_identifier": recent_assigned.patient_identifier,
+                "room": recent_assigned.assigned_room,
+                "mapping_id": recent_assigned.mapping_id
+            }
+        else:
+            assigned_recent = None
+    except Exception:
+        assigned_recent = None
 
     return Response({
         "waiting": waiting,
+        "assigned_patients": assigned_patients,
         "assigned_recent": assigned_recent
     })
     
 
 @api_view(['GET'])
 def completed_patients_list(request):
-    completed_patients = PatientMapping.objects.filter(status='COMPLETED').order_by('-last_sync')
+    """
+    완료된 환자 목록을 실제 환자 이름과 함께 반환
+    """
+    completed_patients = PatientMapping.objects.filter(
+        status='complete',  # ✅ 'COMPLETED' → 'complete' 로 수정 (모델의 STATUS_CHOICES와 일치)
+        is_active=True
+    ).order_by('-last_sync')
     
     data = []
     for p in completed_patients:
+        # ✅ OpenMRS에서 실제 환자 이름 가져오기
+        patient_name = get_patient_full_name(p.openmrs_patient_uuid, p.display, p.patient_identifier)
+        
+        # 나이 계산
+        age = calculate_age_from_birthdate(str(p.birthdate)) if p.birthdate else None
+        
         data.append({
             "mapping_id": p.mapping_id,
-            "name": p.display,
+            "name": patient_name,  # ✅ 실제 환자 이름
+            "display": patient_name,  # ✅ display도 실제 이름으로 변경
             "patient_identifier": p.patient_identifier,
             "gender": p.gender,
             "birthdate": p.birthdate.isoformat() if p.birthdate else None,
+            "age": age,  # ✅ 나이 필드 추가
             "last_sync": p.last_sync,
             "assigned_room": p.assigned_room,
             "status": p.status,
         })
 
     return Response(data)
-
 
 @api_view(['GET'])
 def get_daily_summary_stats(request):
@@ -2334,3 +2587,82 @@ def batch_update_status(request):
             'success': False,
             'error': f'서버 오류: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+def get_real_patient_name(openmrs_uuid):
+        """
+        OpenMRS 데이터베이스에서 실제 환자 이름 조회
+        """
+        try:
+            if not openmrs_uuid:
+                return None
+            
+            # Patient → Person → PersonName 순서로 조회
+            patient = Patient.objects.get(uuid=openmrs_uuid, voided=False)
+            person = patient.patient_id  # patient_id가 실제로는 person_id
+            
+            # PersonName에서 preferred=True인 이름 우선 조회
+            preferred_name = PersonName.objects.filter(
+                person_id=person.person_id,
+                voided=False,
+                preferred=True
+            ).first()
+            
+            if not preferred_name:
+                # preferred가 없으면 가장 최근 이름 사용
+                preferred_name = PersonName.objects.filter(
+                    person_id=person.person_id,
+                    voided=False
+                ).order_by('-date_created').first()
+            
+            if preferred_name:
+                family_name = preferred_name.family_name or ''
+                given_name = preferred_name.given_name or ''
+                
+                # 한국식 이름 조합: 성 + 이름
+                if family_name and given_name:
+                    return f"{family_name}{given_name}"
+                elif given_name:
+                    return given_name
+                elif family_name:
+                    return family_name
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"실제 환자 이름 조회 실패 (UUID: {openmrs_uuid}): {e}")
+            return None
+
+@api_view(['POST'])
+def update_all_patient_names(request):
+    """
+    모든 PatientMapping의 display 필드를 실제 환자 이름으로 업데이트
+    """
+    try:
+        mappings = PatientMapping.objects.filter(
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED'
+        )
+        
+        updated_count = 0
+        for mapping in mappings:
+            real_name = get_real_patient_name(mapping.openmrs_patient_uuid)
+            if real_name and mapping.display != real_name:
+                mapping.display = real_name
+                mapping.save(update_fields=['display'])
+                updated_count += 1
+                logger.info(f"업데이트: {mapping.patient_identifier} → {real_name}")
+        
+        return Response({
+            'success': True,
+            'message': f'{updated_count}개의 환자 이름이 업데이트되었습니다.',
+            'updated_count': updated_count,
+            'total_mappings': mappings.count()
+        })
+        
+    except Exception as e:
+        logger.error(f"환자 이름 일괄 업데이트 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
