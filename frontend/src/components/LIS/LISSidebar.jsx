@@ -1,18 +1,17 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from '../EMR/NotificationBell';
-import { FaFlask, FaVial, FaClipboardList, FaFileAlt, FaCheckCircle } from 'react-icons/fa';
 
 const LISSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const menus = [
-    { name: '오더 목록 확인', path: '/lis/orders', icon: <FaClipboardList /> },
-    { name: '샘플 생성하기', path: '/lis/sample/new', icon: <FaVial /> },
-    { name: '샘플 목록 확인', path: '/lis/samples', icon: <FaFlask /> },
-    { name: '결과 기록하기', path: '/lis/result/new', icon: <FaFileAlt /> },
-    { name: '결과 목록 확인', path: '/lis/result-list', icon: <FaCheckCircle /> },
+    { name: '오더 목록 확인', path: '/lis/orders', icon: '📋' },
+    { name: '샘플 생성하기', path: '/lis/sample/new', icon: '🧪' },
+    { name: '샘플 목록 확인', path: '/lis/samples', icon: '🔬' },
+    { name: '결과 기록하기', path: '/lis/result/new', icon: '📝' },
+    { name: '결과 목록 확인', path: '/lis/result-list', icon: '✅' },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -30,18 +29,15 @@ const LISSidebar = () => {
         boxSizing: 'border-box',
       }}
     >
-      {/* 상단 타이틀 */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '0.25rem' }}></h1>
         <div style={{ fontSize: '14px', color: '#6b7280' }}>1조 메디컬</div>
       </div>
 
-      {/* 알림 */}
       <div style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
         <NotificationBell />
       </div>
 
-      {/* 메뉴 */}
       <nav style={{ flex: 1 }}>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {menus.map((menu) => (
@@ -74,7 +70,6 @@ const LISSidebar = () => {
         </ul>
       </nav>
 
-      {/* 하단 시스템 상태 */}
       <footer style={{ fontSize: '12px', color: '#9ca3af', marginTop: 'auto', paddingTop: '2rem' }}>
         병원 시스템 상태: 정상 운영 중
       </footer>

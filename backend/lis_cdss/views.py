@@ -107,3 +107,45 @@ def receive_model_result(request):
         return Response(CDSSResultSerializer(instance).data, status=201)
 
     return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
+def receive_full_sample(request):
+    data = request.data
+    sample_id = data.get("sample")
+    test_type = data.get("test_type")
+    components = data.get("components", [])
+
+    if not sample_id or not test_type or not components:
+        return Response({"error": "샘플 ID, 검사 종류, 항목 정보가 모두 필요합니다."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    values = {}
+
+    # 항목별 저장
+    for c in components:
+        CDSSResult.objects.update_or_create(
+            sample=sample_id,
+            test_type=test_type,
+            component_name=c["component_name"],
+            defaults={
+                "value": c["value"],
+                "unit": c["unit"]
+            }
+        )
+        values[c["component_name"]] = c["value"]
+
+    # 예측 및 SHAP
+    model = MODELS.get(test_type)
+    prediction = run_blood_model(test_type, values) if model else None
+    shap_data = generate_shap_values(model, values) if model else None
+
+    # 예측값 저장
+    CDSSResult.objects.filter(sample=sample_id, test_type=test_type).update(prediction=prediction)
+
+    return Response({
+        "sample": sample_id,
+        "test_type": test_type,
+        "prediction": prediction,
+        "shap_data": shap_data,
+        "message": f"{len(components)}개 항목 저장 완료"
+    }, status=201)

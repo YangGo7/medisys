@@ -11,6 +11,10 @@ import DicomViewer from './OHIF/OHIFViewer';
 import RISPage from '../pacsapp';
 import TitlePage from './Main_page/TitlePage';
 import './MainPage.css'; // CSS 파일 import 추가
+import StatisticsBoard from './Main_page/StatisticsBoard';
+
+
+
 
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('TitlePage');
@@ -29,6 +33,7 @@ export default function MainPage() {
       case 'patientsList': return <PatientsList />;
       case 'Medicalemployee': return <Medicalemployee />;
       case 'RISPage': return <RISPage />;
+      case 'statisticsboard': return <StatisticsBoard />;
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };
@@ -41,7 +46,8 @@ export default function MainPage() {
     { id: 'patientsList', icon: '🧑‍🤝‍🧑', label: '환자 목록' },
     { id: 'Medicalemployee', icon: '👨‍⚕️', label: '의료인 정보' },
     { id: 'lis', icon: '🧪', label: 'LIS' },
-    { id: 'RISPage', icon: '📋', label: 'RIS' }
+    { id: 'RISPage', icon: '📋', label: 'RIS' },
+    { id: 'statisticsboard', icon: '📋', label: 'statisticsboard' }
   ];
 
   return (
