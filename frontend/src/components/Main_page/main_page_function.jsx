@@ -7,12 +7,12 @@ import './titlepage.css';
 // API 서비스 클래스
 class MainPageFunctionAPI {
   // ✅ 올바른 BASE_URL 사용
-  static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api';
+  static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api/';
 
   static async request(endpoint, options = {}) {
     try {
       // ✅ main-page-function 경로로 수정
-      const response = await fetch(`${this.BASE_URL}/main-page-function${endpoint}`, {
+      const response = await fetch(`${this.BASE_URL}main-page-function${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,

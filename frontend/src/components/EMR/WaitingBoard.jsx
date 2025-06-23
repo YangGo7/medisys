@@ -49,22 +49,16 @@ const WaitingBoard = () => {
     };
   }, []);
 
-  // ✅ 환자 이름 추출 함수 개선
+  // ✅ 환자 이름 추출 함수 간소화 (백엔드에서 실제 이름을 보내주므로)
   const getPatientName = (patient) => {
-    // 다양한 이름 필드 체크
+    // 백엔드에서 실제 환자 이름을 보내주므로 간단히 처리
     if (patient.name) return patient.name;
     if (patient.display) return patient.display;
-    if (patient.patient_name) return patient.patient_name;
     
-    // UUID인지 확인하여 환자 식별자로 대체
+    // 그래도 혹시 모르니 identifier로 fallback
     const identifier = patient.patient_identifier || patient.identifier;
     if (identifier && identifier !== patient.uuid) {
       return identifier;
-    }
-    
-    // 마지막으로 UUID의 일부만 표시
-    if (patient.uuid) {
-      return `환자-${patient.uuid.substring(0, 8)}`;
     }
     
     return '이름 없음';
@@ -73,13 +67,7 @@ const WaitingBoard = () => {
   const maskName = (name) => {
     if (!name || name.length <= 1) return name;
     
-    // UUID 패턴 체크 (8-4-4-4-12 형식)
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (uuidPattern.test(name)) {
-      return `환자-${name.substring(0, 8)}`;
-    }
-    
-    // 일반적인 이름 마스킹
+    // 실제 환자 이름이므로 일반적인 마스킹만 적용
     return name
       .split(' ')
       .map(part => {

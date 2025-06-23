@@ -20,7 +20,7 @@ urlpatterns = [
     path('notices/<int:notice_id>/', views.get_notice_detail, name='notice_detail'),
     path('notices/<int:notice_id>/update/', views.update_notice, name='update_notice'),
     path('notices/<int:notice_id>/delete/', views.delete_notice, name='delete_notice'),
-    
+    path('alerts/urgent/count/', views.alert_count, name='alert_count'),
     # 의사 상태 관리
     path('doctor/<str:doctor_id>/status/', views.update_doctor_status, name='update_doctor_status'),
     
