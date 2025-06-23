@@ -1976,3 +1976,268 @@ def test_minimal_patient_creation(request):
             'error': str(e),
             'traceback': traceback.format_exc()
         }, status=500)
+    
+    
+@api_view(['PATCH'])
+def update_patient_status(request):
+    """환자 상태 업데이트 (대기 → 진료중 → 완료)"""
+    try:
+        mapping_id = request.data.get('mapping_id')
+        new_status = request.data.get('status')
+        
+        if not mapping_id or not new_status:
+            return Response({
+                'success': False,
+                'error': 'mapping_id와 status가 필요합니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 유효한 상태 확인
+        valid_statuses = ['waiting', 'in_progress', 'complete']
+        if new_status not in valid_statuses:
+            return Response({
+                'success': False,
+                'error': f'유효하지 않은 상태입니다. 사용 가능: {valid_statuses}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 환자 매핑 조회
+        try:
+            mapping = PatientMapping.objects.get(mapping_id=mapping_id, is_active=True)
+        except PatientMapping.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        old_status = mapping.status
+        old_room = mapping.assigned_room
+        
+        # 진료 완료 시 특별 처리
+        if new_status == 'complete':
+            # 진료실 배정이 있다면 해제
+            if mapping.assigned_room:
+                mapping.assigned_room = None
+                logger.info(f"진료 완료로 인한 진료실 {old_room}번 배정 해제: {mapping.display}")
+        
+        # 상태 업데이트
+        mapping.status = new_status
+        mapping.last_sync = timezone.now()
+        
+        # 저장할 필드 결정
+        update_fields = ['status', 'last_sync']
+        if new_status == 'complete' and old_room:
+            update_fields.append('assigned_room')
+        
+        mapping.save(update_fields=update_fields)
+        
+        # 로그 기록
+        status_names = {
+            'waiting': '대기중',
+            'in_progress': '진료 중',
+            'complete': '진료 완료'
+        }
+        
+        logger.info(f"환자 상태 변경: {mapping.display} ({old_status} → {new_status})")
+        
+        response_data = {
+            'success': True,
+            'message': f'환자 상태가 "{status_names.get(new_status, new_status)}"로 변경되었습니다.',
+            'mapping_id': mapping.mapping_id,
+            'old_status': old_status,
+            'new_status': new_status,
+            'patient_name': mapping.display or mapping.patient_identifier
+        }
+        
+        # 진료실 배정 해제 정보 추가
+        if new_status == 'complete' and old_room:
+            response_data['room_unassigned'] = old_room
+            response_data['message'] += f' 진료실 {old_room}번 배정도 해제되었습니다.'
+        
+        return Response(response_data)
+        
+    except Exception as e:
+        logger.error(f"환자 상태 업데이트 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def complete_visit(request):
+    """진료 완료 처리 (진료실 기반)"""
+    try:
+        room = request.data.get('room')
+        
+        if not room or room not in [1, 2]:
+            return Response({
+                'success': False,
+                'error': '유효한 진료실 번호(1 또는 2)가 필요합니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 해당 진료실에 배정된 환자 찾기
+        try:
+            mapping = PatientMapping.objects.get(
+                assigned_room=room,
+                is_active=True,
+                mapping_type='IDENTIFIER_BASED'
+            )
+        except PatientMapping.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': f'진료실 {room}번에 배정된 환자가 없습니다.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 상태를 완료로 변경하고 진료실 배정 해제
+        old_status = mapping.status
+        mapping.status = 'complete'
+        mapping.assigned_room = None
+        mapping.last_sync = timezone.now()
+        mapping.save(update_fields=['status', 'assigned_room', 'last_sync'])
+        
+        logger.info(f"진료 완료 처리: {mapping.display} (진료실 {room}번 → 완료)")
+        
+        return Response({
+            'success': True,
+            'message': f'{mapping.display}님의 진료가 완료되었습니다.',
+            'mapping_id': mapping.mapping_id,
+            'patient_name': mapping.display or mapping.patient_identifier,
+            'room': room,
+            'old_status': old_status,
+            'new_status': 'complete'
+        })
+        
+    except Exception as e:
+        logger.error(f"진료 완료 처리 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_room_status(request):
+    """진료실 현황 조회"""
+    try:
+        room_status = {}
+        
+        for room_num in [1, 2]:
+            # 해당 진료실에 배정된 환자 찾기
+            assigned_patient = PatientMapping.objects.filter(
+                assigned_room=room_num,
+                is_active=True,
+                mapping_type='IDENTIFIER_BASED'
+            ).first()
+            
+            if assigned_patient:
+                room_status[room_num] = {
+                    'occupied': True,
+                    'patient': {
+                        'mapping_id': assigned_patient.mapping_id,
+                        'name': assigned_patient.display or assigned_patient.patient_identifier,
+                        'patient_identifier': assigned_patient.patient_identifier,
+                        'status': assigned_patient.status,
+                        'assigned_time': assigned_patient.created_date.isoformat() if assigned_patient.created_date else None
+                    }
+                }
+            else:
+                room_status[room_num] = {
+                    'occupied': False,
+                    'patient': None
+                }
+        
+        return Response({
+            'success': True,
+            'room_status': room_status,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"진료실 현황 조회 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def batch_update_status(request):
+    """여러 환자 상태 일괄 업데이트"""
+    try:
+        updates = request.data.get('updates', [])
+        
+        if not updates or not isinstance(updates, list):
+            return Response({
+                'success': False,
+                'error': 'updates 배열이 필요합니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        results = []
+        
+        for update in updates:
+            mapping_id = update.get('mapping_id')
+            new_status = update.get('status')
+            
+            try:
+                mapping = PatientMapping.objects.get(mapping_id=mapping_id, is_active=True)
+                old_status = mapping.status
+                
+                # 진료 완료 시 진료실 배정 해제
+                if new_status == 'complete' and mapping.assigned_room:
+                    old_room = mapping.assigned_room
+                    mapping.assigned_room = None
+                    mapping.status = new_status
+                    mapping.last_sync = timezone.now()
+                    mapping.save(update_fields=['status', 'assigned_room', 'last_sync'])
+                    
+                    results.append({
+                        'mapping_id': mapping_id,
+                        'success': True,
+                        'old_status': old_status,
+                        'new_status': new_status,
+                        'room_unassigned': old_room
+                    })
+                else:
+                    mapping.status = new_status
+                    mapping.last_sync = timezone.now()
+                    mapping.save(update_fields=['status', 'last_sync'])
+                    
+                    results.append({
+                        'mapping_id': mapping_id,
+                        'success': True,
+                        'old_status': old_status,
+                        'new_status': new_status
+                    })
+                    
+            except PatientMapping.DoesNotExist:
+                results.append({
+                    'mapping_id': mapping_id,
+                    'success': False,
+                    'error': '환자를 찾을 수 없습니다.'
+                })
+            except Exception as e:
+                results.append({
+                    'mapping_id': mapping_id,
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        successful_updates = [r for r in results if r.get('success')]
+        failed_updates = [r for r in results if not r.get('success')]
+        
+        return Response({
+            'success': True,
+            'message': f'{len(successful_updates)}개 성공, {len(failed_updates)}개 실패',
+            'results': results,
+            'summary': {
+                'total': len(updates),
+                'successful': len(successful_updates),
+                'failed': len(failed_updates)
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"일괄 상태 업데이트 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

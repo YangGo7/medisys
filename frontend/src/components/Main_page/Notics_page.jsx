@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-// API 서비스 클래스
+// API 서비스 클래스 (수정된 버전)
 class NoticeAPI {
-  static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api/main-page-function';
+  // ✅ 올바른 BASE_URL 사용
+  static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api';
 
   static async request(endpoint, options = {}) {
     try {
-      const response = await fetch(`${this.BASE_URL}${endpoint}`, {
+      // ✅ main-page-function 경로로 수정
+      const response = await fetch(`${this.BASE_URL}/main-page-function${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
@@ -25,7 +27,7 @@ class NoticeAPI {
     }
   }
 
-  // 공지사항 목록 조회
+  // 공지사항 목록 조회 (게시판용)
   static async getNoticesBoard(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return await this.request(`/notices/board/?${queryString}`);
@@ -81,17 +83,49 @@ const NoticeBoard = () => {
   const loadNotices = async () => {
     try {
       setLoading(true);
+      console.log('📡 공지사항 로드 시작:', filters);
+      
       const response = await NoticeAPI.getNoticesBoard(filters);
+      
+      console.log('📊 받은 공지사항 데이터:', response);
       
       if (response.status === 'success') {
         setNotices(response.data);
         setPagination(response.pagination);
         setStatistics(response.statistics);
         setError(null);
+      } else {
+        throw new Error(response.message || '공지사항 로드 실패');
       }
     } catch (error) {
-      console.error('공지사항 로드 실패:', error);
+      console.error('❌ 공지사항 로드 실패:', error);
       setError(error.message);
+      
+      // 에러 시 더미 데이터 표시
+      setNotices([
+        {
+          id: 1,
+          title: '시스템 점검 안내',
+          notice_type: 'maintenance',
+          notice_type_display: '점검',
+          is_pinned: true,
+          created_by: '관리자',
+          created_at: new Date().toISOString(),
+          views: 0
+        },
+        {
+          id: 2,
+          title: 'EMR 시스템 업데이트 완료',
+          notice_type: 'update',
+          notice_type_display: '업데이트',
+          is_pinned: false,
+          created_by: '시스템',
+          created_at: new Date().toISOString(),
+          views: 5
+        }
+      ]);
+      setPagination({ current_page: 1, total_pages: 1, total_count: 2 });
+      setStatistics({ total_count: 2, active_count: 2, pinned_count: 1 });
     } finally {
       setLoading(false);
     }
@@ -115,14 +149,17 @@ const NoticeBoard = () => {
   // 공지사항 상세 보기
   const handleViewDetail = async (noticeId) => {
     try {
+      console.log(`📋 공지사항 상세 조회: ${noticeId}`);
       const response = await NoticeAPI.getNoticeDetail(noticeId);
       if (response.status === 'success') {
         setSelectedNotice(response.data);
         setShowDetail(true);
+      } else {
+        throw new Error(response.message || '공지사항 상세 조회 실패');
       }
     } catch (error) {
-      console.error('공지사항 상세 조회 실패:', error);
-      alert('공지사항을 불러올 수 없습니다.');
+      console.error('❌ 공지사항 상세 조회 실패:', error);
+      alert('공지사항을 불러올 수 없습니다: ' + error.message);
     }
   };
 
@@ -168,6 +205,7 @@ const NoticeBoard = () => {
 
   // 초기 로드
   useEffect(() => {
+    console.log('🚀 NoticeBoard 컴포넌트 마운트');
     loadNotices();
   }, [filters]);
 
@@ -220,6 +258,37 @@ const NoticeBoard = () => {
             + 새 공지사항
           </button>
         </div>
+
+        {/* 에러 표시 */}
+        {error && (
+          <div style={{
+            background: 'rgba(231, 76, 60, 0.1)',
+            border: '1px solid rgba(231, 76, 60, 0.3)',
+            borderRadius: '12px',
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            color: '#e74c3c'
+          }}>
+            <p>⚠️ API 연결 오류: {error}</p>
+            <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
+              더미 데이터를 표시합니다. API 서버 상태를 확인해주세요.
+            </p>
+            <button 
+              onClick={loadNotices}
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.5rem 1rem',
+                background: '#e74c3c',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
 
         {/* 통계 */}
         <div style={{ 
@@ -335,24 +404,6 @@ const NoticeBoard = () => {
             }}></div>
             <p>공지사항을 불러오는 중...</p>
           </div>
-        ) : error ? (
-          <div style={{ padding: '4rem', textAlign: 'center', color: '#e74c3c' }}>
-            <p>⚠️ {error}</p>
-            <button
-              onClick={loadNotices}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1rem',
-                background: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              다시 시도
-            </button>
-          </div>
         ) : notices.length === 0 ? (
           <div style={{ padding: '4rem', textAlign: 'center', color: '#7f8c8d' }}>
             <p>📭 공지사항이 없습니다.</p>
@@ -411,20 +462,6 @@ const NoticeBoard = () => {
                       }}>
                         {notice.notice_type_display}
                       </span>
-
-                      {/* 상태 표시 */}
-                      {!notice.is_valid && (
-                        <span style={{
-                          background: '#95a5a6',
-                          color: 'white',
-                          fontSize: '0.7rem',
-                          padding: '0.2rem 0.6rem',
-                          borderRadius: '8px',
-                          fontWeight: '600'
-                        }}>
-                          만료
-                        </span>
-                      )}
                     </div>
 
                     {/* 제목 */}

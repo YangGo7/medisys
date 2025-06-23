@@ -506,3 +506,18 @@ def delete_notice(request, notice_id):
             'error': f'공지사항 삭제 실패: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """시스템 상태 확인"""
+    try:
+        return Response({
+            'status': 'healthy',
+            'timestamp': timezone.now().isoformat(),
+            'message': '메인 페이지 기능이 정상 작동 중입니다.'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

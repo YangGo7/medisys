@@ -271,10 +271,19 @@
   border-bottom: 1px solid rgba(230, 230, 228, 0.3);
   font-size: 0.95rem;
   color: #2c3e50;
+  transition: all 0.3s ease;
 }
 
 .notice-list li:last-child {
   border-bottom: none;
+}
+
+.notice-list li:hover {
+  background: rgba(52, 152, 219, 0.05);
+  transform: translateX(4px);
+  border-radius: 8px;
+  margin: 0 -0.5rem;
+  padding: 0.75rem 0.5rem;
 }
 
 .notice-badge {
@@ -343,7 +352,7 @@
   transform: translateY(-2px);
 }
 
-.quick-links h4 {
+.quick-links h4, .main-functions h4 {
   font-size: 1.4rem;
   color: #2c3e50;
   margin: 0 0 1.5rem 0;
@@ -355,6 +364,17 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+}
+
+/* 메인페이지 기능 섹션 */
+.main-functions {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 4px solid #8e44ad;
 }
 
 .quick-btn {
@@ -427,6 +447,23 @@
 
 .stats-btn:hover {
   background: rgba(243, 156, 18, 0.05);
+}
+
+/* 새로 추가된 메인페이지 기능 버튼들 */
+.function-btn {
+  border-left: 4px solid #e74c3c;
+}
+
+.function-btn:hover {
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.notice-btn {
+  border-left: 4px solid #8e44ad;
+}
+
+.notice-btn:hover {
+  background: rgba(142, 68, 173, 0.05);
 }
 
 /* 에러 표시 */
@@ -529,18 +566,6 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
-}
-
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: rgba(46, 204, 113, 0.05);
-  border-bottom: 1px solid rgba(46, 204, 113, 0.1);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
 }
 
 .chat-count {
