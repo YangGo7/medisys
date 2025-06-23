@@ -22,6 +22,6 @@ def run_blood_model(test_type, input_dict):
         input_vector = [float(input_dict.get(comp, 0)) for comp in PANEL_ORDER[test_type]]
         
         df = pd.DataFrame([input_vector], columns=PANEL_ORDER[test_type])
-        return str(model.predict(df)[0])
+        return int(model.predict(df)[0])
     except Exception as e:
         return f"오류: {e}"

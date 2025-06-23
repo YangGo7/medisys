@@ -1,30 +1,64 @@
+// CdssVisualizationPage.jsx (업데이트된 전체 코드)
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
 import SimulationPanel from './SimulationPanel';
 import ShapContributionChart from './ShapContributionChart';
 import ShapSummaryText from './ShapSummaryText';
-// import GlobalInsights from './GlobalInsights'; // ← 나중에 전체 DB 기반 시각화 들어갈 자리
 
-const CdssVisualizationPage = ({ sampleId }) => {
+const CdssVisualizationPage = () => {
+  const { sampleId } = useParams();
+  const navigate = useNavigate();
   const [sampleData, setSampleData] = useState(null);
+  const [sampleList, setSampleList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 📡 샘플 상세 정보 + SHAP 가져오기
+  // 샘플 목록 전체 불러오기 (ID만)
   useEffect(() => {
+    const fetchList = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
+        const ids = [...new Set(res.data.map(r => r.sample))];
+        setSampleList(ids);
+      } catch (err) {
+        console.error("❌ 샘플 목록 불러오기 실패:", err);
+      }
+    };
+    fetchList();
+  }, []);
+
+  // 선택된 샘플 ID가 있을 경우 해당 데이터 불러오기
+  useEffect(() => {
+    if (!sampleId) return;
     const fetchData = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL}cdss/results/${sampleId}/`
-        );
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/${sampleId}/`);
         setSampleData(res.data);
       } catch (err) {
         console.error('❌ 샘플 데이터 불러오기 실패:', err);
+        setSampleData(null);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, [sampleId]);
+
+  if (!sampleId) {
+    return (
+      <div className="p-6">
+        <h2 className="text-xl font-bold mb-4">📋 CDSS 시각화</h2>
+        <p>샘플을 선택하세요:</p>
+        <select onChange={(e) => navigate(`/lis/cdss/results/${e.target.value}`)}>
+          <option value="">-- 샘플 선택 --</option>
+          {sampleList.map(id => (
+            <option key={id} value={id}>Sample {id}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   if (loading) return <p className="p-4">⏳ 데이터 불러오는 중...</p>;
   if (!sampleData) return <p className="p-4">❌ 샘플 데이터를 찾을 수 없습니다.</p>;
@@ -66,12 +100,6 @@ const CdssVisualizationPage = ({ sampleId }) => {
         />
         <ShapContributionChart shapData={sampleData.shap_data} />
       </div>
-
-      {/* ✅ 전체 시각화 (예: 평균 중요도, 트렌드 등) 
-      <div className="mt-10 border-t pt-6">
-        <h3 className="text-lg font-semibold mb-2">📊 전체 통계 기반 시각화</h3>
-        <GlobalInsights />
-      </div> */}
     </div>
   );
 };

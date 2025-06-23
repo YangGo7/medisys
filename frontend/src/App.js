@@ -31,6 +31,7 @@ import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
 
 import './App.css';
+import CdssVisualizationPage from './components/LIS/CdssVisualizationPage';
 
 function App() {
   console.log("✅ API URL:", process.env.REACT_APP_API_URL);
@@ -67,7 +68,8 @@ function App() {
               <Route path="result/new" element={<ResultInputForm />} />
               <Route path="result/new/:sampleId" element={<ResultInputForm />} />
               <Route path="result-list" element={<ResultCdss />} />
-              <Route path="cdss/results/:sampleId" element={<LISModelResultPage />} />
+              <Route path="cdss/results" element={<LISModelResultPage />} />
+              <Route path="cdss/results/:sampleId" element={<LISModelResultPage />} /> 
             </Route>
             <Route path="/tests" element={<OpenMRSPatientList />} />
             <Route path="/logs" element={<OCSLogPage />} />

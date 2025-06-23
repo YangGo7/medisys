@@ -9,9 +9,13 @@ import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from base64 import b64encode
-
+from .models import PatientIdentifier, Patient, Person, PersonName
 # 알림 기능 연결
 from medical_integration.models import Alert  # Alert 모델 import
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 @api_view(['GET'])
 def openmrs_vitals(request):
@@ -129,3 +133,81 @@ def openmrs_encounters(request):
         })
 
     return Response(history)
+
+
+def get_person_uuid_by_identifier(request, patient_identifier):
+    """
+    patient_identifier로 OpenMRS DB에서 직접 person.uuid 조회
+    /api/person-uuid-by-identifier/P8644/
+    
+    경로: patient_identifier → patient → person → person.uuid
+    """
+    try:
+        logger.info(f"🔍 Finding person UUID for identifier: {patient_identifier}")
+        
+        # PatientIdentifier → Patient → Person 조인해서 조회
+        patient_id_obj = PatientIdentifier.objects.select_related(
+            'patient',           # PatientIdentifier → Patient
+            'patient__patient_id'  # Patient → Person (patient_id는 Person의 FK)
+        ).filter(
+            identifier=patient_identifier,
+            voided=False
+        ).first()
+        
+        if not patient_id_obj:
+            logger.warning(f"❌ Patient identifier '{patient_identifier}' not found")
+            return Response({
+                'success': False,
+                'error': f'Patient identifier "{patient_identifier}" not found'
+            }, status=404)
+        
+        # Person 객체 추출 (patient.patient_id가 Person 객체)
+        person = patient_id_obj.patient.patient_id
+        person_uuid = person.uuid
+        
+        logger.info(f"✅ Found person UUID: {person_uuid}")
+        
+        # Person 이름 정보 가져오기
+        try:
+            person_name = PersonName.objects.filter(
+                person=person,
+                voided=False,
+                preferred=True
+            ).first()
+            
+            if person_name:
+                display_name = f"{person_name.given_name or ''} {person_name.family_name or ''}".strip()
+            else:
+                display_name = f"Patient {patient_identifier}"
+        except Exception as name_error:
+            logger.warning(f"⚠️ Could not get person name: {name_error}")
+            display_name = f"Patient {patient_identifier}"
+        
+        # 환자 기본 정보도 함께 반환
+        patient_info = {
+            'uuid': person_uuid,
+            'patient_identifier': patient_identifier,
+            'display': display_name,
+            'person': {
+                'gender': person.gender,
+                'birthdate': person.birthdate.isoformat() if person.birthdate else None,
+                'age': getattr(person, 'age', None)
+            }
+        }
+        
+        logger.info(f"✅ Person info: {display_name} (UUID: {person_uuid})")
+        
+        return Response({
+            'success': True,
+            'person_uuid': person_uuid,
+            'patient_info': patient_info
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error finding person UUID for {patient_identifier}: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)

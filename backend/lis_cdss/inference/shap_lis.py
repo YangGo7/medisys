@@ -15,8 +15,9 @@ def generate_shap_values(model, input_dict):
         # 클래스 1(이상 소견)의 SHAP만 뽑음
         return {
             "features": expected_features,
-            "shap_values": shap_values.values.tolist()
+            "shap_values": shap_values.values[0][1].tolist()
         }
+        consol
     except Exception as e:
         print("SHAP 생성 오류:", e)
         return None

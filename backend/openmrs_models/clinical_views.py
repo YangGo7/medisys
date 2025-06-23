@@ -13,16 +13,19 @@ from base64 import b64encode
 from django.utils import timezone
 from datetime import datetime
 import json
-
+from medical_integration.openmrs_api import OpenMRSAPI
 from .models import Patient, Person, Encounter
+from django.db import transaction
 from .obs_models import Concept, Obs, ConceptName
 from medical_integration.models import PatientMapping
+import logging
 
 # OpenMRS 기본 설정
 OPENMRS_BASE_URL = 'http://openmrs:8080/openmrs/ws/rest/v1'
 OPENMRS_AUTH = b64encode(b'admin:Admin123').decode()
 HEADERS = {'Authorization': f'Basic {OPENMRS_AUTH}', 'Content-Type': 'application/json'}
 
+logger = logging.getLogger('openmrs_models')
 # 미리 정의된 Concept UUID들 (실제 OpenMRS 환경에 맞게 수정 필요)
 DIAGNOSIS_CONCEPTS = {
     'primary_diagnosis': '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
@@ -410,3 +413,465 @@ def get_recent_vitals(request, patient_uuid):
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_diagnosis_concepts(request):
+    """진단 Concept 검색 API"""
+    try:
+        query = request.GET.get('q', '').strip()
+        if len(query) < 2:
+            return Response({
+                'success': False,
+                'results': [],
+                'message': '검색어는 2글자 이상 입력해주세요.'
+            })
+
+        # OpenMRS API 사용
+        api = OpenMRSAPI()
+        concepts = api.search_diagnosis_concepts(query, limit=30)
+        
+        # 결과 포맷팅
+        formatted_results = []
+        for concept in concepts:
+            formatted_results.append({
+                'uuid': concept['uuid'],
+                'display': concept['display'],
+                'conceptClass': concept.get('conceptClass', ''),
+                'searchRelevance': len([word for word in query.split() if word.lower() in concept['display'].lower()])
+            })
+        
+        # 검색 관련성으로 정렬
+        formatted_results.sort(key=lambda x: x['searchRelevance'], reverse=True)
+        
+        return Response({
+            'success': True,
+            'results': formatted_results,
+            'count': len(formatted_results)
+        })
+
+    except Exception as e:
+        logger.error(f"진단 검색 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e),
+            'results': []
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_drug_concepts(request):
+    """약물 Concept 검색 API"""
+    try:
+        query = request.GET.get('q', '').strip()
+        if len(query) < 2:
+            return Response({
+                'success': False,
+                'results': [],
+                'message': '검색어는 2글자 이상 입력해주세요.'
+            })
+
+        # OpenMRS API 사용
+        api = OpenMRSAPI()
+        drugs = api.search_drug_concepts(query, limit=30)
+        
+        # 결과 포맷팅
+        formatted_results = []
+        for drug in drugs:
+            formatted_results.append({
+                'uuid': drug['uuid'],
+                'display': drug['display'],
+                'strength': drug.get('strength', ''),
+                'dosageForm': drug.get('dosageForm', ''),
+                'concept_uuid': drug.get('concept_uuid', ''),
+                'searchRelevance': len([word for word in query.split() if word.lower() in drug['display'].lower()])
+            })
+        
+        # 검색 관련성으로 정렬
+        formatted_results.sort(key=lambda x: x['searchRelevance'], reverse=True)
+        
+        return Response({
+            'success': True,
+            'results': formatted_results,
+            'count': len(formatted_results)
+        })
+
+    except Exception as e:
+        logger.error(f"약물 검색 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e),
+            'results': []
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_patient_clinical_data(request, patient_uuid):
+    """환자의 진단/처방 이력 조회"""
+    try:
+        # 환자 존재 확인
+        api = OpenMRSAPI()
+        patient_data = api.get_patient(patient_uuid)
+        
+        if not patient_data:
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다.',
+                'patient_uuid': patient_uuid
+            }, status=404)
+
+        # 임상 데이터 조회
+        clinical_data = api.get_patient_clinical_summary(patient_uuid, limit=10)
+        
+        # PatientMapping에서 추가 정보 조회
+        from medical_integration.models import PatientMapping
+        mapping = PatientMapping.objects.filter(
+            openmrs_patient_uuid=patient_uuid,
+            is_active=True
+        ).first()
+        
+        patient_info = {
+            'uuid': patient_uuid,
+            'display': mapping.display if mapping else patient_data.get('display', ''),
+            'identifier': mapping.patient_identifier if mapping else '',
+            'person': patient_data.get('person', {}),
+            'mapping_status': mapping.sync_status if mapping else 'NO_MAPPING'
+        }
+
+        return Response({
+            'success': True,
+            'patient_info': patient_info,
+            'clinical_data': clinical_data,
+            'total_encounters': len(clinical_data)
+        })
+
+    except Exception as e:
+        logger.error(f"환자 임상 데이터 조회 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e),
+            'patient_uuid': patient_uuid
+        }, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_encounter_with_data(request, patient_uuid):
+    """새 Encounter 생성 및 진단/처방 데이터 저장"""
+    try:
+        # 요청 데이터 검증
+        diagnoses = request.data.get('diagnoses', [])
+        prescriptions = request.data.get('prescriptions', [])
+        clinical_notes = request.data.get('clinical_notes', '')
+        
+        if not diagnoses and not prescriptions and not clinical_notes:
+            return Response({
+                'success': False,
+                'error': '저장할 데이터가 없습니다.'
+            }, status=400)
+
+        # 환자 존재 확인
+        api = OpenMRSAPI()
+        patient_data = api.get_patient(patient_uuid)
+        
+        if not patient_data:
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다.'
+            }, status=404)
+
+        # 새 Encounter 생성
+        encounter = api.create_encounter(patient_uuid)
+        
+        if not encounter:
+            return Response({
+                'success': False,
+                'error': 'Encounter 생성에 실패했습니다.'
+            }, status=500)
+
+        encounter_uuid = encounter['uuid']
+        saved_data = {
+            'encounter_uuid': encounter_uuid,
+            'diagnoses': [],
+            'prescriptions': [],
+            'clinical_notes': None,
+            'errors': []
+        }
+
+        # 진단 데이터 저장
+        for diagnosis in diagnoses:
+            if diagnosis.get('concept_uuid') and diagnosis.get('value'):
+                try:
+                    diagnosis_obs = api.create_diagnosis_obs(
+                        patient_uuid=patient_uuid,
+                        encounter_uuid=encounter_uuid,
+                        diagnosis_concept_uuid=diagnosis['concept_uuid'],
+                        diagnosis_notes=diagnosis.get('notes', '')
+                    )
+                    
+                    if diagnosis_obs:
+                        saved_data['diagnoses'].append({
+                            'obs_uuid': diagnosis_obs['uuid'],
+                            'concept_uuid': diagnosis['concept_uuid'],
+                            'value': diagnosis['value'],
+                            'notes': diagnosis.get('notes', '')
+                        })
+                    else:
+                        saved_data['errors'].append(f"진단 저장 실패: {diagnosis['value']}")
+                        
+                except Exception as e:
+                    saved_data['errors'].append(f"진단 저장 오류: {str(e)}")
+
+        # 처방 데이터 저장
+        for prescription in prescriptions:
+            if prescription.get('drug_uuid') and prescription.get('drug_name'):
+                try:
+                    prescription_obs_list = api.create_prescription_obs_group(
+                        patient_uuid=patient_uuid,
+                        encounter_uuid=encounter_uuid,
+                        prescription_data={
+                            'drug_uuid': prescription.get('drug_uuid') or prescription.get('drug_concept_uuid'),
+                            'drug_name': prescription.get('drug_name'),
+                            'dosage': prescription.get('dosage'),
+                            'dose_units': prescription.get('dose_units', 'mg'),
+                            'frequency': prescription.get('frequency'),
+                            'duration': prescription.get('duration'),
+                            'instructions': prescription.get('instructions')
+                        }
+                    )
+                    
+                    if prescription_obs_list:
+                        saved_data['prescriptions'].append({
+                            'obs_count': len(prescription_obs_list),
+                            'drug_name': prescription['drug_name'],
+                            'dosage': prescription.get('dosage'),
+                            'frequency': prescription.get('frequency')
+                        })
+                    else:
+                        saved_data['errors'].append(f"처방 저장 실패: {prescription['drug_name']}")
+                        
+                except Exception as e:
+                    saved_data['errors'].append(f"처방 저장 오류: {str(e)}")
+
+        # 임상 노트 저장
+        if clinical_notes:
+            try:
+                notes_obs = api.create_observation({
+                    "person": patient_uuid,
+                    "encounter": encounter_uuid,
+                    "concept": "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Clinical Notes
+                    "valueText": clinical_notes,
+                    "comment": "임상 노트"
+                })
+                
+                if notes_obs:
+                    saved_data['clinical_notes'] = {
+                        'obs_uuid': notes_obs['uuid'],
+                        'notes': clinical_notes
+                    }
+                else:
+                    saved_data['errors'].append("임상 노트 저장 실패")
+                    
+            except Exception as e:
+                saved_data['errors'].append(f"임상 노트 저장 오류: {str(e)}")
+
+        # 결과 반환
+        return Response({
+            'success': True,
+            'message': 'EMR 데이터가 저장되었습니다.',
+            'encounter_uuid': encounter_uuid,
+            'saved_data': saved_data
+        })
+
+    except Exception as e:
+        logger.error(f"Encounter 생성 및 데이터 저장 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_patient_visits_history(request, patient_uuid):
+    """환자 내원이력 조회 (상세 정보 포함)"""
+    try:
+        # 환자 존재 확인
+        api = OpenMRSAPI()
+        patient_data = api.get_patient(patient_uuid)
+        
+        if not patient_data:
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다.'
+            }, status=404)
+
+        # 더 많은 이력 조회 (최대 50개)
+        limit = int(request.GET.get('limit', 20))
+        clinical_data = api.get_patient_clinical_summary(patient_uuid, limit=limit)
+        
+        # 이력 데이터 상세 포맷팅
+        formatted_history = []
+        for encounter in clinical_data:
+            # 진단 요약
+            diagnosis_summary = []
+            for diag in encounter['diagnoses']:
+                diagnosis_summary.append(diag['concept'])
+            
+            # 처방 요약
+            prescription_summary = []
+            for presc in encounter['prescriptions']:
+                if 'drug' in presc['concept'].lower():
+                    prescription_summary.append(presc['value'])
+            
+            formatted_history.append({
+                'encounter_uuid': encounter['encounter_uuid'],
+                'visit_date': encounter['encounter_datetime'][:10],  # YYYY-MM-DD
+                'visit_time': encounter['encounter_datetime'][11:16],  # HH:MM
+                'encounter_type': encounter['encounter_type'],
+                'location': encounter['location'],
+                'provider': encounter['provider'],
+                'diagnosis_count': len(encounter['diagnoses']),
+                'prescription_count': len(encounter['prescriptions']),
+                'diagnosis_summary': ', '.join(diagnosis_summary) if diagnosis_summary else '진단 없음',
+                'prescription_summary': ', '.join(prescription_summary) if prescription_summary else '처방 없음',
+                'total_observations': len(encounter['diagnoses']) + len(encounter['prescriptions']) + len(encounter['other_obs'])
+            })
+        
+        # 통계 정보
+        stats = {
+            'total_visits': len(formatted_history),
+            'total_diagnoses': sum(visit['diagnosis_count'] for visit in formatted_history),
+            'total_prescriptions': sum(visit['prescription_count'] for visit in formatted_history),
+            'last_visit_date': formatted_history[0]['visit_date'] if formatted_history else None,
+            'visit_frequency': len(formatted_history) / 12 if formatted_history else 0  # 연간 평균
+        }
+
+        return Response({
+            'success': True,
+            'patient_uuid': patient_uuid,
+            'patient_display': patient_data.get('display', ''),
+            'visits_history': formatted_history,
+            'statistics': stats
+        })
+
+    except Exception as e:
+        logger.error(f"환자 내원이력 조회 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def save_clinical_notes(request, patient_uuid):
+    """임상 노트만 별도 저장"""
+    try:
+        notes = request.data.get('notes', '').strip()
+        encounter_uuid = request.data.get('encounter_uuid')
+        
+        if not notes:
+            return Response({
+                'success': False,
+                'error': '저장할 노트가 없습니다.'
+            }, status=400)
+
+        api = OpenMRSAPI()
+        
+        # 기존 Encounter가 없으면 새로 생성
+        if not encounter_uuid:
+            encounter = api.create_encounter(patient_uuid)
+            if not encounter:
+                return Response({
+                    'success': False,
+                    'error': 'Encounter 생성 실패'
+                }, status=500)
+            encounter_uuid = encounter['uuid']
+
+        # 임상 노트 저장
+        notes_obs = api.create_observation({
+            "person": patient_uuid,
+            "encounter": encounter_uuid,
+            "concept": "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Clinical Notes
+            "valueText": notes,
+            "comment": "임상 노트"
+        })
+        
+        if notes_obs:
+            return Response({
+                'success': True,
+                'message': '임상 노트가 저장되었습니다.',
+                'encounter_uuid': encounter_uuid,
+                'obs_uuid': notes_obs['uuid']
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': '임상 노트 저장에 실패했습니다.'
+            }, status=500)
+
+    except Exception as e:
+        logger.error(f"임상 노트 저장 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_recent_vitals(request, patient_uuid):
+    """환자의 최근 생체징후 조회"""
+    try:
+        api = OpenMRSAPI()
+        encounters = api.get_patient_encounters(patient_uuid, limit=5)
+        
+        vitals_data = []
+        for encounter in encounters:
+            encounter_vitals = {
+                'encounter_uuid': encounter['uuid'],
+                'encounter_date': encounter['encounterDatetime'][:10],
+                'vitals': {}
+            }
+            
+            # 생체징후 관련 Observation 추출
+            for obs in encounter.get('obs', []):
+                concept_display = obs.get('concept', {}).get('display', '').lower()
+                value = obs.get('valueNumeric') or obs.get('valueText')
+                
+                if value:
+                    if 'temperature' in concept_display or '체온' in concept_display:
+                        encounter_vitals['vitals']['temperature'] = f"{value}°C"
+                    elif 'pulse' in concept_display or '맥박' in concept_display:
+                        encounter_vitals['vitals']['pulse'] = f"{value} bpm"
+                    elif 'systolic' in concept_display or '수축기' in concept_display:
+                        encounter_vitals['vitals']['systolic_bp'] = f"{value} mmHg"
+                    elif 'diastolic' in concept_display or '이완기' in concept_display:
+                        encounter_vitals['vitals']['diastolic_bp'] = f"{value} mmHg"
+                    elif 'respiratory' in concept_display or '호흡' in concept_display:
+                        encounter_vitals['vitals']['respiratory_rate'] = f"{value} /min"
+                    elif 'oxygen' in concept_display or '산소포화도' in concept_display:
+                        encounter_vitals['vitals']['oxygen_saturation'] = f"{value}%"
+                    elif 'weight' in concept_display or '체중' in concept_display:
+                        encounter_vitals['vitals']['weight'] = f"{value} kg"
+                    elif 'height' in concept_display or '신장' in concept_display:
+                        encounter_vitals['vitals']['height'] = f"{value} cm"
+            
+            if encounter_vitals['vitals']:
+                vitals_data.append(encounter_vitals)
+        
+        return Response({
+            'success': True,
+            'patient_uuid': patient_uuid,
+            'vitals_history': vitals_data
+        })
+
+    except Exception as e:
+        logger.error(f"생체징후 조회 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)

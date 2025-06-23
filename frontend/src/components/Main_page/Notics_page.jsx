@@ -7,8 +7,11 @@ class NoticeAPI {
 
   static async request(endpoint, options = {}) {
     try {
-      // ✅ 올바른 API 경로 구성
-      const response = await fetch(`${this.BASE_URL}main-page-function${endpoint}`, {
+      // ✅ 슬래시 처리 개선
+      const url = `${this.BASE_URL.replace(/\/$/, '')}/main-page-function${endpoint}`;
+      console.log('🔍 API 요청 URL:', url); // 디버깅용
+      
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,

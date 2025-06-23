@@ -7,7 +7,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
   const menus = [
     '홈',
     '접수',
-    '진료 대시보드',  // ✅ 통합된 환자 상태 관리
+    '환자 관리',  // ✅ 통합된 환자 상태 관리
     '의사 대시보드',
     '진료 진행도',
     '대기 화면',
