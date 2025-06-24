@@ -21,11 +21,9 @@ from medical_integration.openmrs_api import OpenMRSAPI
 logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_patient_obs_clinical_data(request, patient_uuid):
-    """
-    기존 Obs 모델을 사용한 환자 임상 데이터 조회
-    DiagnosisPanel, DiagnosisPrescriptionPanel용
-    """
+    """✅ PatientMapping 중복 문제 해결"""
     try:
         # 환자 존재 확인
         try:
@@ -33,90 +31,77 @@ def get_patient_obs_clinical_data(request, patient_uuid):
         except Person.DoesNotExist:
             return Response({
                 'success': False,
-                'error': '환자를 찾을 수 없습니다.',
-                'patient_uuid': patient_uuid
+                'error': '환자를 찾을 수 없습니다.'
             }, status=404)
 
-        # PatientMapping 정보
-        mapping = PatientMapping.objects.filter(
-            openmrs_patient_uuid=patient_uuid,
-            is_active=True
-        ).first()
+        # ✅ PatientMapping 중복 문제 해결 - 더 안전한 방법
+        mapping = None
+        try:
+            # 활성 매핑 중에서 가장 최근 것만 가져오기
+            mapping = PatientMapping.objects.filter(
+                openmrs_patient_uuid=patient_uuid,
+                is_active=True
+            ).order_by('-created_date', '-mapping_id').first()
+            
+            # 중복이 있다면 로그에 기록
+            mapping_count = PatientMapping.objects.filter(
+                openmrs_patient_uuid=patient_uuid,
+                is_active=True
+            ).count()
+            
+            if mapping_count > 1:
+                logger.warning(f"⚠️ 환자 {patient_uuid}에 대해 {mapping_count}개의 활성 매핑이 발견됨. 최신 것을 사용.")
+                
+        except Exception as e:
+            logger.warning(f"매핑 정보 조회 중 오류: {e}")
+            mapping = None
 
-        # 최근 Encounter들 조회 (최근 10개)
-        recent_encounters = Encounter.objects.filter(
-            patient__uuid=patient_uuid,
+        # Encounter 조회
+        encounters = Encounter.objects.filter(
+            patient__person=person,
             voided=False
-        ).order_by('-encounter_datetime')[:10]
+        ).order_by('-encounter_datetime')[:5]
 
-        # 각 Encounter별로 Obs 조회
         clinical_history = []
-        for encounter in recent_encounters:
-            # 해당 Encounter의 모든 Obs 조회
+        for encounter in encounters:
             encounter_obs = Obs.objects.filter(
                 encounter=encounter,
                 voided=False
-            ).select_related('concept', 'value_coded').order_by('-obs_datetime')
+            ).select_related('concept').order_by('-obs_datetime')
 
-            # Obs를 카테고리별로 분류
+            # Obs 분류
             diagnoses = []
             prescriptions = []
             vitals = []
             notes = []
 
             for obs in encounter_obs:
-                concept_name = obs.get_concept_name('ko') or obs.get_concept_name('en')
+                concept_name = (obs.concept.short_name or '').lower()
                 
-                # 진단 관련 Obs
-                if any(keyword in concept_name.lower() for keyword in ['diagnosis', '진단', 'problem']):
-                    diagnoses.append({
-                        'obs_id': obs.obs_id,
-                        'concept_name': concept_name,
-                        'concept_uuid': obs.concept.uuid,
-                        'value': obs.get_display_value(),
-                        'value_coded_uuid': obs.value_coded.uuid if obs.value_coded else None,
-                        'comments': obs.comments,
-                        'datetime': obs.obs_datetime.isoformat()
-                    })
-                
-                # 처방 관련 Obs
-                elif any(keyword in concept_name.lower() for keyword in ['drug', 'medication', '약물', '처방', 'dosage', 'frequency']):
-                    prescriptions.append({
-                        'obs_id': obs.obs_id,
-                        'concept_name': concept_name,
-                        'concept_uuid': obs.concept.uuid,
-                        'value': obs.get_display_value(),
-                        'value_drug': obs.value_drug,
-                        'comments': obs.comments,
-                        'datetime': obs.obs_datetime.isoformat()
-                    })
-                
-                # 생체징후 관련 Obs
-                elif any(keyword in concept_name.lower() for keyword in ['temperature', 'pulse', 'pressure', 'weight', '체온', '맥박', '혈압', '체중']):
-                    vitals.append({
-                        'obs_id': obs.obs_id,
-                        'concept_name': concept_name,
-                        'concept_uuid': obs.concept.uuid,
-                        'value': obs.get_display_value(),
-                        'value_numeric': float(obs.value_numeric) if obs.value_numeric else None,
-                        'datetime': obs.obs_datetime.isoformat()
-                    })
-                
-                # 임상 노트
-                elif any(keyword in concept_name.lower() for keyword in ['notes', 'comment', '노트', '메모']):
-                    notes.append({
-                        'obs_id': obs.obs_id,
-                        'concept_name': concept_name,
-                        'value': obs.get_display_value(),
-                        'datetime': obs.obs_datetime.isoformat()
-                    })
+                obs_data = {
+                    'obs_uuid': str(obs.uuid),
+                    'concept_uuid': str(obs.concept.uuid),
+                    'concept_name': obs.concept.fully_specified_name or obs.concept.short_name or '',
+                    'value': obs.get_display_value(),
+                    'datetime': obs.obs_datetime.isoformat() if obs.obs_datetime else None,
+                    'comments': obs.comments or ''
+                }
+
+                # 분류 로직
+                if any(word in concept_name for word in ['diagnosis', 'disease', 'condition']):
+                    diagnoses.append(obs_data)
+                elif any(word in concept_name for word in ['drug', 'medication', 'prescription']):
+                    prescriptions.append(obs_data)
+                elif any(word in concept_name for word in ['vital', 'temperature', 'pressure', 'pulse']):
+                    vitals.append(obs_data)
+                else:
+                    notes.append(obs_data)
 
             clinical_history.append({
-                'encounter_id': encounter.encounter_id,
-                'encounter_uuid': encounter.uuid,
-                'encounter_datetime': encounter.encounter_datetime.isoformat(),
+                'encounter_uuid': str(encounter.uuid),
+                'encounter_datetime': encounter.encounter_datetime.isoformat() if encounter.encounter_datetime else '',
                 'encounter_type': encounter.encounter_type.name if encounter.encounter_type else '',
-                'location': encounter.location.name if encounter.location else '',
+                'provider': encounter.provider.display if encounter.provider else '',
                 'diagnoses': diagnoses,
                 'prescriptions': prescriptions,
                 'vitals': vitals,
@@ -130,7 +115,7 @@ def get_patient_obs_clinical_data(request, patient_uuid):
             'display': f"{person.given_name or ''} {person.family_name or ''}".strip(),
             'gender': person.gender,
             'birthdate': person.birthdate.isoformat() if person.birthdate else None,
-            'age': person.age if hasattr(person, 'age') else None
+            'age': getattr(person, 'age', None)
         }
 
         # 매핑 정보
@@ -138,7 +123,8 @@ def get_patient_obs_clinical_data(request, patient_uuid):
             'patient_identifier': mapping.patient_identifier if mapping else None,
             'orthanc_patient_id': mapping.orthanc_patient_id if mapping else None,
             'status': mapping.status if mapping else 'unknown',
-            'display': mapping.display if mapping else None
+            'display': mapping.display if mapping else None,
+            'mapping_count': mapping_count if 'mapping_count' in locals() else 1
         }
 
         return Response({
@@ -159,10 +145,11 @@ def get_patient_obs_clinical_data(request, patient_uuid):
         }, status=500)
 
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def save_obs_clinical_data(request, patient_uuid):
-    """기존 Obs 모델을 사용한 진단/처방 저장"""
+    """✅ 올바른 OpenMRS 호스트 사용"""
     try:
         # 환자 존재 확인
         try:
@@ -175,50 +162,51 @@ def save_obs_clinical_data(request, patient_uuid):
 
         # 요청 데이터 파싱
         diagnoses = request.data.get('diagnoses', [])
-        prescriptions = request.data.get('prescriptions', [])
         clinical_notes = request.data.get('clinical_notes', '')
 
-        if not any([diagnoses, prescriptions, clinical_notes]):
+        if not any([diagnoses, clinical_notes]):
             return Response({
                 'success': False,
                 'error': '저장할 데이터가 없습니다.'
             }, status=400)
 
-        # ✅ OpenMRS API로 새 Encounter 생성
+        # ✅ OpenMRS 설정 사용
         from datetime import datetime
         import pytz
         
         now_utc = datetime.now(pytz.UTC)
         encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         
-        # OpenMRS API 호출
         encounter_data = {
             'patient': patient_uuid,
-            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # Consultation
-            'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',      # Default Location
-            'encounterDatetime': encounter_datetime,
+            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',
+            'encounterDatetime': encounter_datetime
         }
 
+        print(f"🌐 사용할 OpenMRS URL: {OPENMRS_BASE_URL}")
+        print(f"🏥 Encounter 생성 데이터: {encounter_data}")
+
+        # ✅ 올바른 URL로 요청
         response = requests.post(
-            'http://openmrs:8080/openmrs/ws/rest/v1/encounter',
-            headers={
-                'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',  # admin:Admin123
-                'Content-Type': 'application/json'
-            },
+            f'{OPENMRS_BASE_URL}/encounter',
+            headers=HEADERS,
             json=encounter_data,
-            timeout=10
+            timeout=15
         )
 
         if response.status_code != 201:
+            error_msg = f'Encounter 생성 실패: {response.status_code}, {response.text}'
+            print(f"❌ {error_msg}")
             return Response({
                 'success': False,
-                'error': f'Encounter 생성 실패: {response.status_code}'
+                'error': error_msg
             }, status=500)
 
         encounter_result = response.json()
         encounter_uuid = encounter_result['uuid']
+        print(f"✅ Encounter 생성 성공: {encounter_uuid}")
 
-        # ✅ 진단 및 노트 저장
+        # 데이터 저장
         saved_items = []
 
         # 진단 저장
@@ -235,17 +223,15 @@ def save_obs_clinical_data(request, patient_uuid):
                 }
 
                 obs_response = requests.post(
-                    'http://openmrs:8080/openmrs/ws/rest/v1/obs',
-                    headers={
-                        'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
-                        'Content-Type': 'application/json'
-                    },
+                    f'{OPENMRS_BASE_URL}/obs',
+                    headers=HEADERS,
                     json=obs_data,
-                    timeout=10
+                    timeout=15
                 )
 
                 if obs_response.status_code == 201:
                     saved_items.append(f'진단: {diagnosis["value"]}')
+                    print(f"✅ 진단 저장 성공: {diagnosis['value']}")
 
         # 임상 노트 저장
         if clinical_notes.strip():
@@ -253,24 +239,22 @@ def save_obs_clinical_data(request, patient_uuid):
             
             notes_obs_data = {
                 'person': patient_uuid,
-                'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes
+                'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                 'encounter': encounter_uuid,
                 'obsDatetime': obs_datetime,
                 'value': clinical_notes.strip()
             }
 
             notes_response = requests.post(
-                'http://openmrs:8080/openmrs/ws/rest/v1/obs',
-                headers={
-                    'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
-                    'Content-Type': 'application/json'
-                },
+                f'{OPENMRS_BASE_URL}/obs',
+                headers=HEADERS,
                 json=notes_obs_data,
-                timeout=10
+                timeout=15
             )
 
             if notes_response.status_code == 201:
                 saved_items.append('임상 노트')
+                print(f"✅ 임상 노트 저장 성공")
 
         return Response({
             'success': True,
@@ -286,7 +270,6 @@ def save_obs_clinical_data(request, patient_uuid):
             'success': False,
             'error': str(e)
         }, status=500)
-
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -608,13 +591,12 @@ def save_obs_clinical_data(request, patient_uuid):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def search_concepts_for_obs(request):
-    """
-    Obs 생성용 Concept 검색
-    """
+    """✅ voided 필드 제거된 Concept 검색"""
     try:
         query = request.GET.get('q', '').strip()
-        concept_type = request.GET.get('type', 'all')  # diagnosis, drug, vital, all
+        concept_type = request.GET.get('type', 'all')
         
         if len(query) < 2:
             return Response({
@@ -623,10 +605,9 @@ def search_concepts_for_obs(request):
                 'message': '검색어는 2글자 이상 입력해주세요.'
             })
 
-        # Concept 검색 (ConceptName을 통해)
+        # ✅ ConceptName에서 voided 조건 제거
         concept_names = ConceptName.objects.filter(
-            name__icontains=query,
-            voided=False
+            name__icontains=query
         ).select_related('concept')[:20]
 
         results = []
@@ -634,30 +615,42 @@ def search_concepts_for_obs(request):
 
         for concept_name in concept_names:
             concept = concept_name.concept
-            if concept.uuid in seen_concepts or concept.retired:
+            
+            # 이미 처리된 concept이거나 retired된 경우 스킵
+            concept_uuid = str(concept.uuid)
+            if concept_uuid in seen_concepts:
                 continue
                 
-            seen_concepts.add(concept.uuid)
+            # retired 체크 (안전하게)
+            try:
+                if hasattr(concept, 'retired') and concept.retired:
+                    continue
+            except:
+                pass
+                
+            seen_concepts.add(concept_uuid)
             
-            # 타입별 필터링 (간단한 키워드 기반)
+            # 타입별 필터링
+            concept_name_lower = concept_name.name.lower()
             if concept_type == 'diagnosis':
-                if not any(word in concept_name.name.lower() for word in ['diagnosis', 'disease', 'condition', 'disorder']):
+                if not any(word in concept_name_lower for word in ['diagnosis', 'disease', 'condition', 'disorder']):
                     continue
             elif concept_type == 'drug':
-                if not any(word in concept_name.name.lower() for word in ['drug', 'medication', 'medicine']):
+                if not any(word in concept_name_lower for word in ['drug', 'medication', 'medicine']):
                     continue
             elif concept_type == 'vital':
-                if not any(word in concept_name.name.lower() for word in ['vital', 'temperature', 'pressure', 'pulse', 'weight', 'height']):
+                if not any(word in concept_name_lower for word in ['vital', 'temperature', 'pressure', 'pulse', 'weight', 'height']):
                     continue
 
+            # 안전한 속성 접근
             results.append({
-                'uuid': str(concept.uuid),
+                'uuid': concept_uuid,
                 'display': concept_name.name,
-                'concept_class': concept.concept_class.name if concept.concept_class else '',
-                'datatype': concept.datatype.name if concept.datatype else '',
-                'fully_specified_name': concept.fully_specified_name,
-                'short_name': concept.short_name,
-                'description': concept.description
+                'concept_class': getattr(concept.concept_class, 'name', '') if hasattr(concept, 'concept_class') and concept.concept_class else '',
+                'datatype': getattr(concept.datatype, 'name', '') if hasattr(concept, 'datatype') and concept.datatype else '',
+                'fully_specified_name': getattr(concept, 'fully_specified_name', ''),
+                'short_name': getattr(concept, 'short_name', ''),
+                'description': getattr(concept, 'description', '')
             })
 
         return Response({
