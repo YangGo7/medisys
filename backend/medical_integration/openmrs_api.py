@@ -437,3 +437,55 @@ class OpenMRSAPI:
         except Exception as e:
             logger.error(f"❌ Patient Encounters 조회 실패: {e}")
             return []
+        
+        
+
+    def get_patient_clinical_summary(self, patient_uuid, limit=5):
+        """환자의 최근 임상 데이터 요약"""
+        try:
+            encounters = self.get_patient_encounters(patient_uuid)
+            
+            clinical_data = []
+            for encounter in encounters[:limit]:
+                encounter_summary = {
+                    'encounter_uuid': encounter.get('uuid'),
+                    'encounter_datetime': encounter.get('encounterDatetime'),
+                    'encounter_type': encounter.get('encounterType', {}).get('display', ''),
+                    'location': encounter.get('location', {}).get('display', ''),
+                    'provider': encounter.get('provider', {}).get('display', '') if encounter.get('provider') else '',
+                    'diagnoses': [],
+                    'prescriptions': [],
+                    'other_obs': []
+                }
+                
+                # Observations 분류
+                for obs in encounter.get('obs', []):
+                    concept_display = obs.get('concept', {}).get('display', '')
+                    obs_value = obs.get('value') or obs.get('valueText') or obs.get('valueNumeric')
+                    
+                    if 'diagnosis' in concept_display.lower():
+                        encounter_summary['diagnoses'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs.get('uuid')
+                        })
+                    elif any(keyword in concept_display.lower() for keyword in ['drug', 'medication', 'dosage', 'frequency']):
+                        encounter_summary['prescriptions'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs.get('uuid')
+                        })
+                    else:
+                        encounter_summary['other_obs'].append({
+                            'concept': concept_display,
+                            'value': obs_value,
+                            'obs_uuid': obs.get('uuid')
+                        })
+                
+                clinical_data.append(encounter_summary)
+            
+            return clinical_data
+            
+        except Exception as e:
+            logger.error(f"❌ 환자 임상 요약 조회 예외: {e}")
+            return []

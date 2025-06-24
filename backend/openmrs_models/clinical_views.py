@@ -862,73 +862,136 @@ def create_encounter_with_data(request, patient_uuid):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_patient_visits_history(request, patient_uuid):
-    """환자 내원이력 조회 (상세 정보 포함)"""
+    """
+    🔥 환자 방문 이력 조회 - 간단하고 안전한 버전
+    """
     try:
-        # 환자 존재 확인
-        api = OpenMRSAPI()
-        patient_data = api.get_patient(patient_uuid)
+        logger.info(f"📂 환자 방문 이력 조회: {patient_uuid}")
         
-        if not patient_data:
+        from medical_integration.openmrs_api import OpenMRSAPI
+        openmrs_api = OpenMRSAPI()
+        
+        if not openmrs_api.test_connection():
+            logger.error("OpenMRS 연결 실패")
             return Response({
                 'success': False,
-                'error': '환자를 찾을 수 없습니다.'
-            }, status=404)
-
-        # 더 많은 이력 조회 (최대 50개)
-        limit = int(request.GET.get('limit', 20))
-        clinical_data = api.get_patient_clinical_summary(patient_uuid, limit=limit)
+                'error': 'OpenMRS 서버에 연결할 수 없습니다'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         
-        # 이력 데이터 상세 포맷팅
-        formatted_history = []
-        for encounter in clinical_data:
-            # 진단 요약
-            diagnosis_summary = []
-            for diag in encounter['diagnoses']:
-                diagnosis_summary.append(diag['concept'])
+        # 환자 정보 확인
+        patient_info = openmrs_api.get_patient(patient_uuid)
+        if not patient_info:
+            logger.error(f"환자를 찾을 수 없음: {patient_uuid}")
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 🔥 간단하고 안전한 Encounter 조회
+        try:
+            encounters = openmrs_api.get_patient_encounters(patient_uuid)
             
-            # 처방 요약
-            prescription_summary = []
-            for presc in encounter['prescriptions']:
-                if 'drug' in presc['concept'].lower():
-                    prescription_summary.append(presc['value'])
+            if not encounters:
+                logger.info(f"환자 {patient_uuid}의 Encounter가 없습니다")
+                return Response({
+                    'success': True,
+                    'patient_uuid': patient_uuid,
+                    'patient_display': patient_info.get('display', 'Unknown'),
+                    'visits_history': [],
+                    'total_visits': 0,
+                    'message': '내원 이력이 없습니다'
+                })
             
-            formatted_history.append({
-                'encounter_uuid': encounter['encounter_uuid'],
-                'visit_date': encounter['encounter_datetime'][:10],  # YYYY-MM-DD
-                'visit_time': encounter['encounter_datetime'][11:16],  # HH:MM
-                'encounter_type': encounter['encounter_type'],
-                'location': encounter['location'],
-                'provider': encounter['provider'],
-                'diagnosis_count': len(encounter['diagnoses']),
-                'prescription_count': len(encounter['prescriptions']),
-                'diagnosis_summary': ', '.join(diagnosis_summary) if diagnosis_summary else '진단 없음',
-                'prescription_summary': ', '.join(prescription_summary) if prescription_summary else '처방 없음',
-                'total_observations': len(encounter['diagnoses']) + len(encounter['prescriptions']) + len(encounter['other_obs'])
+            logger.info(f"✅ {len(encounters)}개의 Encounter 조회됨")
+            
+            # 🔥 안전한 방문 이력 포맷팅
+            visits_history = []
+            for encounter in encounters:
+                try:
+                    # Provider 정보 안전하게 처리
+                    provider_info = encounter.get('provider', [])
+                    if isinstance(provider_info, list) and len(provider_info) > 0:
+                        provider_display = provider_info[0].get('display', 'Unknown Provider')
+                    elif isinstance(provider_info, dict):
+                        provider_display = provider_info.get('display', 'Unknown Provider')
+                    else:
+                        provider_display = 'No Provider'
+                    
+                    # Observations 안전하게 처리
+                    observations = encounter.get('obs', [])
+                    processed_observations = []
+                    
+                    for obs in observations:
+                        try:
+                            obs_data = {
+                                'uuid': obs.get('uuid', ''),
+                                'concept': {
+                                    'uuid': obs.get('concept', {}).get('uuid', ''),
+                                    'display': obs.get('concept', {}).get('display', 'Unknown Concept')
+                                },
+                                'value': obs.get('value'),
+                                'valueText': obs.get('valueText'),
+                                'valueNumeric': obs.get('valueNumeric'),
+                                'obsDatetime': obs.get('obsDatetime'),
+                                'comment': obs.get('comment', '')
+                            }
+                            processed_observations.append(obs_data)
+                        except Exception as obs_error:
+                            logger.warning(f"Observation 처리 중 오류: {obs_error}")
+                            continue
+                    
+                    visit_record = {
+                        'encounter_uuid': encounter.get('uuid', ''),
+                        'encounter_datetime': encounter.get('encounterDatetime', ''),
+                        'encounter_type': encounter.get('encounterType', {}).get('display', 'Unknown'),
+                        'location': encounter.get('location', {}).get('display', 'Unknown'),
+                        'provider': provider_display,
+                        'visit_date': encounter.get('encounterDatetime', '')[:10] if encounter.get('encounterDatetime') else '',
+                        'visit_time': encounter.get('encounterDatetime', '')[11:16] if encounter.get('encounterDatetime') else '',
+                        'observations': processed_observations,
+                        'obs_count': len(processed_observations)
+                    }
+                    
+                    visits_history.append(visit_record)
+                    
+                except Exception as encounter_error:
+                    logger.warning(f"Encounter 처리 중 오류: {encounter_error}")
+                    continue
+            
+            logger.info(f"🎯 최종 처리된 방문 이력: {len(visits_history)}건")
+            
+            return Response({
+                'success': True,
+                'patient_uuid': patient_uuid,
+                'patient_display': patient_info.get('display', 'Unknown'),
+                'visits_history': visits_history,
+                'total_visits': len(visits_history),
+                'message': f'{len(visits_history)}건의 내원 이력을 조회했습니다'
             })
-        
-        # 통계 정보
-        stats = {
-            'total_visits': len(formatted_history),
-            'total_diagnoses': sum(visit['diagnosis_count'] for visit in formatted_history),
-            'total_prescriptions': sum(visit['prescription_count'] for visit in formatted_history),
-            'last_visit_date': formatted_history[0]['visit_date'] if formatted_history else None,
-            'visit_frequency': len(formatted_history) / 12 if formatted_history else 0  # 연간 평균
-        }
-
-        return Response({
-            'success': True,
-            'patient_uuid': patient_uuid,
-            'patient_display': patient_data.get('display', ''),
-            'visits_history': formatted_history,
-            'statistics': stats
-        })
-
+            
+        except Exception as e:
+            logger.error(f"Encounter 조회 중 예외: {e}")
+            import traceback
+            logger.error(f"상세 에러: {traceback.format_exc()}")
+            
+            # 빈 결과 반환 (오류 대신)
+            return Response({
+                'success': True,
+                'patient_uuid': patient_uuid,
+                'patient_display': patient_info.get('display', 'Unknown'),
+                'visits_history': [],
+                'total_visits': 0,
+                'error_message': f'Encounter 조회 중 오류: {str(e)}'
+            })
+            
     except Exception as e:
-        logger.error(f"환자 내원이력 조회 실패: {e}")
+        logger.error(f"❌ 환자 방문 이력 조회 실패: {e}")
+        import traceback
+        logger.error(f"상세 에러: {traceback.format_exc()}")
         return Response({
             'success': False,
-            'error': str(e)
-        }, status=500)
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

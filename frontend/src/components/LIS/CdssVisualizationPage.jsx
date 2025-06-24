@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import ShapContributionChart from './ShapContributionChart';
+import SimulationPanel from './SimulationPanel';
 
 const CdssVisualizationPage = () => {
   const [sampleList, setSampleList] = useState([]);
   const [selectedSample, setSelectedSample] = useState('');
   const [stats, setStats] = useState(null);
+  const [sampleDetail, setSampleDetail] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,6 +30,21 @@ const CdssVisualizationPage = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (selectedSample) {
+      axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/${selectedSample}/`)
+        .then(res => {
+          setSampleDetail(res.data);
+        })
+        .catch(err => {
+          console.error('❌ 샘플 예측 결과 불러오기 실패:', err);
+          setSampleDetail(null);
+        });
+    } else {
+      setSampleDetail(null);
+    }
+  }, [selectedSample]);
+
   const renderDonutChart = () => {
     if (!stats) return null;
     return (
@@ -38,11 +56,7 @@ const CdssVisualizationPage = () => {
             backgroundColor: ['#10B981', '#EF4444'],
           }],
         }}
-        options={{
-          plugins: {
-            legend: { position: 'top' },
-          },
-        }}
+        options={{ plugins: { legend: { position: 'top' } } }}
       />
     );
   };
@@ -58,24 +72,11 @@ const CdssVisualizationPage = () => {
         data={{
           labels,
           datasets: [
-            {
-              label: '정상 평균',
-              data: normalData,
-              backgroundColor: '#3B82F6',
-            },
-            {
-              label: '이상 평균',
-              data: abnormalData,
-              backgroundColor: '#F59E0B',
-            },
+            { label: '정상 평균', data: normalData, backgroundColor: '#3B82F6' },
+            { label: '이상 평균', data: abnormalData, backgroundColor: '#F59E0B' },
           ],
         }}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' },
-          },
-        }}
+        options={{ responsive: true, plugins: { legend: { position: 'top' } } }}
       />
     );
   };
@@ -96,11 +97,7 @@ const CdssVisualizationPage = () => {
             },
           ],
         }}
-        options={{
-          plugins: {
-            legend: { position: 'top' },
-          },
-        }}
+        options={{ plugins: { legend: { position: 'top' } } }}
       />
     );
   };
@@ -122,42 +119,47 @@ const CdssVisualizationPage = () => {
         ))}
       </select>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        {/* 왼쪽 카드: 샘플 결과 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+        {/* 샘플 결과 카드 */}
         <div style={{
           backgroundColor: '#fff',
           borderRadius: '1rem',
           padding: '1.5rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
         }}>
-          <h2 style={{ marginBottom: '1rem' }}>🧬 샘플 결과 시각화</h2>
-          {/* 샘플 선택 후 결과 표시 구성 예정 */}
-          <p style={{ color: '#6b7280' }}>추후 구성 예정</p>
+          <h2>🧬 샘플 결과 ({selectedSample || '선택 안 됨'})</h2>
+          {sampleDetail ? (
+            <>
+              <ShapContributionChart shapValues={sampleDetail.shap_values} />
+              <SimulationPanel sample={sampleDetail} />
+            </>
+          ) : (
+            <p style={{ color: '#6b7280' }}>예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
+          )}
         </div>
-
-        {/* 오른쪽 카드: 전체 검사 통계 */}
+        
+        {/* 전체 시각화 카드 */}
         <div style={{
           backgroundColor: '#fff',
           borderRadius: '1rem',
           padding: '1.5rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
         }}>
-          <h2 style={{ marginBottom: '1rem' }}>📊 전체 검사 통계</h2>
+          <h2 style={{ marginBottom: '1rem' }}>📊 전체 시각화</h2>
           {loading ? (
             <p>불러오는 중...</p>
           ) : stats ? (
             <>
-              <h3 style={{ marginTop: '1rem' }}>🟢 검사 결과 분포 (정상 vs 이상)</h3>
               {renderDonutChart()}
-              <h3 style={{ marginTop: '2rem' }}>📉 지표별 평균값 (정상 vs 이상)</h3>
               {renderBarChart()}
-              <h3 style={{ marginTop: '2rem' }}>📅 주간 이상 발생 추이</h3>
               {renderLineChart()}
             </>
           ) : (
             <p>📉 통계 데이터를 불러오는 중이거나 존재하지 않습니다.</p>
           )}
         </div>
+
+        
       </div>
     </div>
   );

@@ -54,6 +54,9 @@ LOCAL_APPS = [
     'dr_reports',
     'main_page_function',
     'statisticsboard',
+    'doctors',
+    'worklists',
+    'schedules',
     
 ]
 

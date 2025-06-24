@@ -1,19 +1,19 @@
+
 import os
 import sys
+import pandas as pd
 import django
 
-# 프로젝트 루트 경로 추가 (manage.py 있는 경로)
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # 현재 파일 기준으로
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# 🔧 /home/medical_system/backend를 모듈 경로에 추가
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-# settings 모듈 지정
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "medical_system.settings")
+# ✅ settings 모듈 경로 정확히 지정 (두 번 쓰지 말고!)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
-# Django 초기화
 django.setup()
 
 from lis_cdss.inference.blood_inference import run_blood_model, MODELS
-from lis.models import LiverFunctionSample
+from lis_cdss.models import LiverFunctionSample
 
 # CSV 파일 경로 (절대경로로 바꿔도 됨)
 csv_path = "/home/medical_system/backend/lis_data/lft_data.csv"
@@ -22,7 +22,7 @@ csv_path = "/home/medical_system/backend/lis_data/lft_data.csv"
 COLUMN_MAP = {
     'ALT': 'ALT (U/L)',
     'AST': 'AST (U/L)',
-    'ALP': 'ALP (U/L)',
+    'ALP': ' ALP (U/L)',
     'Albumin': 'Albumin (g/dL)',
     'Total Bilirubin': 'Total Bilirubin (mg/dL)',
     'Direct Bilirubin': 'Direct Bilirubin (mg/dL)',
@@ -48,7 +48,8 @@ for i, row in df.iterrows():
 
     try:
         model = MODELS["LFT"]
-        X = pd.DataFrame([features])
+        ordered_cols = ["ALT", "AST", "ALP", "Total Bilirubin", "Direct Bilirubin", "Albumin"]
+        X = pd.DataFrame([[features[col] for col in ordered_cols]], columns=ordered_cols)
         prob = float(model.predict_proba(X)[0][1])
     except Exception as e:
         print(f"❌ 확률 계산 실패 @ index {i}: {e}")

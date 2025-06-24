@@ -348,6 +348,7 @@ const EmrMainPage = () => {
 
   const renderClinical = () => (
   <div className="clinical-container-new">
+    {/* 섹션 1: 환자 검색 */}
     <section className="tab-col tab1-new">
       <h3 className="section-title">
         🧑‍⚕️ 환자 검색
@@ -505,18 +506,15 @@ const EmrMainPage = () => {
       )}
     </section>
 
+    {/* 섹션 2: 환자 정보만 */}
     <section className="tab-col tab2">
       <h3 className="section-title">📄 환자 정보</h3>
       {selectedPatient
         ? <PatientInfoPanel patient={selectedPatient} onOpenDetailModal={openPatientModal} />
         : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
-      <hr style={{ margin: '1rem 0', borderColor: '#eee' }} />
-      <h3 className="section-title">📁 내원 이력</h3>
-      {selectedPatient
-        ? <VisitHistoryPanel patient={selectedPatient} />
-        : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
     </section>
 
+    {/* 섹션 3: LIS + 영상검사 */}
     <section className="tab-col tab3-combined">
       <h3 className="section-title">🔬 LIS 검사 요청</h3>
       {selectedPatient
@@ -531,17 +529,19 @@ const EmrMainPage = () => {
         : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
     </section>
 
-    <section className="tab-col tab4-ai">
-      <DiagnosisPrescriptionPanel 
-        patient={selectedPatient} 
-        panelType="diagnosis"
-      />
+    {/* 섹션 4: 📁 내원 이력 (새로 추가) */}
+    <section className="tab-col tab4-history">
+      <h3 className="section-title">📁 내원 이력</h3>
+      {selectedPatient
+        ? <VisitHistoryPanel patient={selectedPatient} />
+        : <p className="empty-text">배정된 환자를 선택해주세요.</p>}
     </section>
 
-    <section className="tab-col tab5-empty">
+    {/* 섹션 5: 🩺 진단 및 처방 (통합) */}
+    <section className="tab-col tab5-diagnosis-prescription">
       <DiagnosisPrescriptionPanel 
         patient={selectedPatient} 
-        panelType="prescription"
+        panelType="both"  // ✅ 진단과 처방 모두 포함
       />
     </section>
 
