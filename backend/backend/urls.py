@@ -49,7 +49,10 @@ urlpatterns = [
     path('api/stt/', include('stt_service.urls')),
     path('api/statisticsboard/', include('statisticsboard.urls')),
     path('api/main-page-function/', include('main_page_function.urls')),  # 새로 추가
-    
+    path('api/schedules/', include('schedules.urls')),
+    path('api/doctors/', include('doctors.urls')),
+    path('api/notices/', include('notices.urls')),
+    path('api/worklists', include('worklists.urls')),
 
 ]
 

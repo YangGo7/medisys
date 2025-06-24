@@ -1,38 +1,81 @@
-// SampleImportanceChart.jsx
+// components/CDSS/SampleImportanceChart.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
-import 'chart.js/auto';
+import axios from 'axios';
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
-const SampleImportanceChart = ({ sampleId }) => {
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+const SampleImportanceChart = () => {
+  const { sampleId } = useParams();
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!sampleId) return;
-    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/importance/sample/${sampleId}/`)
-      .then(res => setData(res.data))
-      .catch(err => setError('❌ 변수 기여도 데이터를 불러오지 못했습니다.'));
+    const fetchContributions = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}cdss/lft/importance/sample/${sampleId}/`
+        );
+        setData(res.data);
+      } catch (err) {
+        console.error("❌ 기여도 데이터 불러오기 실패", err);
+      }
+    };
+    fetchContributions();
   }, [sampleId]);
 
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!data) return <p>📊 변수 기여도 불러오는 중...</p>;
+  if (!data) return <p>📊 기여도 데이터를 불러오는 중입니다...</p>;
 
-  const barData = {
-    labels: data.map(d => d.feature),
+  const chartData = {
+    labels: data.features,
     datasets: [
       {
-        label: '변수 기여도 (SHAP-like)',
-        data: data.map(d => d.contribution),
-        backgroundColor: data.map(d => d.contribution > 0 ? '#EF4444' : '#3B82F6')
+        label: '기여도 (양수: 위험 ↑ / 음수: 위험 ↓)',
+        data: data.contributions,
+        backgroundColor: data.contributions.map(val =>
+          val > 0 ? 'rgba(255, 99, 132, 0.6)' : 'rgba(54, 162, 235, 0.6)'
+        ),
+        borderColor: data.contributions.map(val =>
+          val > 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)'
+        ),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    indexAxis: 'y', // 👉 수평 막대 차트
+    scales: {
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: '기여도 크기',
+        },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: context => `기여도: ${context.raw.toFixed(4)}`
+        }
       }
-    ]
+    },
   };
 
   return (
-    <div className="my-6">
-      <h3 className="font-bold text-lg mb-2">🔍 샘플별 변수 중요도</h3>
-      <Bar data={barData} options={{ plugins: { legend: { display: false } }, indexAxis: 'y' }} />
+    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+      <h3>🧬 변수별 기여도 분석 (Sample {sampleId})</h3>
+      <Bar data={chartData} options={chartOptions} />
     </div>
   );
 };

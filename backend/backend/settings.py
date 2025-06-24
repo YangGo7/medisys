@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'webhook_handler',
     'ai_analysis',
     'common',
+    'notices',
     'dr_annotations',
     'dr_reports',
     'main_page_function',
@@ -57,6 +58,7 @@ LOCAL_APPS = [
     'doctors',
     'worklists',
     'schedules',
+    'notifications',
     
 ]
 

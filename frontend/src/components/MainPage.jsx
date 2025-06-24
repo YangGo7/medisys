@@ -13,7 +13,7 @@ import TitlePage from './Main_page/TitlePage';
 import StatisticsBoard from './Main_page/StatisticsBoard';
 import Controlpage from './Main_page/Control_page';
 import './MainPage.css';
-import DoctorDashboardOnly from './DoctorDashboardOnly';
+import DocDashBoard from './DocDashBoard/DocDashBoard';
 
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('TitlePage');
@@ -33,7 +33,7 @@ export default function MainPage() {
       case 'Medicalemployee': return <Medicalemployee />;
       case 'StatisticsBoard': return <StatisticsBoard />;
       case 'Controlpage': return <Controlpage />;
-      case 'DoctorDashboardOnly': return <DoctorDashboardOnly />;
+      case 'DocDashBoard': return <DocDashBoard />;
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };
@@ -41,7 +41,7 @@ export default function MainPage() {
   const menuItems = [
     { id: 'TitlePage', icon: '🏠', label: '홈' },
     { id: 'dicom', icon: '🖼️', label: 'DICOM(제거 예정)' },
-    { id: 'DoctorDashboardOnly', icon: '🖥️', label: 'DoctorDashboardOnly' },
+    { id: 'DocDashBoard', icon: '🖥️', label: 'DocDashBoard' },
     { id: 'logins', icon: '🔐', label: '로그인' },
     { id: 'lis', icon: '🧪', label: 'LIS' },
     { id: 'RISPage', icon: '📋', label: 'RIS' },
