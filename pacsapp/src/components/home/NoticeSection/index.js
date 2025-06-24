@@ -1,5 +1,6 @@
-// components/home/NoticeSection/index.js - 메인 페이지 공지사항 API 연결
+// components/home/NoticeSection/index.js - 수정된 버전
 import React, { useState, useEffect } from 'react';
+// 🔧 올바른 경로에서 noticeService import
 import { noticeService } from '../../../services/noticeService';
 import Modal from '../../common/Modal';
 import './NoticeSection.css';
@@ -21,19 +22,26 @@ const NoticeSection = ({ type, title }) => {
         
         let noticeData = [];
         
-        // 🆕 메인 페이지 API 연결 - type에 따라 다른 필터 적용
+        // 🔧 main_page_function API 연결 - type에 따라 다른 필터 적용
         if (type === 'system') {
           // 시스템 공지사항 = important 타입
+          console.log('🔗 Fetching system notices (important type)');
           noticeData = await noticeService.getMainPageNotices('important', 5);
         } else if (type === 'ris') {
           // RIS 공지사항 = general 타입
+          console.log('🔗 Fetching RIS notices (general type)');
           noticeData = await noticeService.getMainPageNotices('general', 5);
         } else {
           // 기본: 모든 공지사항
+          console.log('🔗 Fetching all notices');
           noticeData = await noticeService.getMainPageNotices('', 5);
         }
         
-        console.log('📢 공지사항 조회 결과:', noticeData);
+        console.log('📢 공지사항 조회 결과:', {
+          type: type,
+          dataLength: Array.isArray(noticeData) ? noticeData.length : 'not array',
+          data: noticeData
+        });
         
         // 🔧 API 응답 구조에 맞게 데이터 처리
         let processedNotices = [];
@@ -44,6 +52,9 @@ const NoticeSection = ({ type, title }) => {
           processedNotices = noticeData.data;
         } else if (noticeData && Array.isArray(noticeData.notices)) {
           processedNotices = noticeData.notices;
+        } else {
+          console.warn('⚠️ Unexpected data structure:', noticeData);
+          processedNotices = [];
         }
         
         // 🔧 공지사항 정렬: 중요 공지 우선, 그 다음 최신순
@@ -67,7 +78,17 @@ const NoticeSection = ({ type, title }) => {
         
       } catch (err) {
         console.error('📢 공지사항 조회 실패:', err);
-        setError('공지사항을 불러올 수 없습니다.');
+        
+        // 🔧 더 상세한 에러 분석
+        if (err.response?.status === 404) {
+          setError(`API 경로를 찾을 수 없습니다. (${type} 타입)`);
+        } else if (err.response?.status >= 500) {
+          setError(`서버 오류가 발생했습니다. (${type} 타입)`);
+        } else if (err.code === 'NETWORK_ERROR') {
+          setError(`네트워크 연결을 확인해주세요. (${type} 타입)`);
+        } else {
+          setError(`공지사항을 불러올 수 없습니다. (${type} 타입)`);
+        }
         
         // 🔧 에러 시에도 빈 배열로 설정하여 UI가 깨지지 않도록
         setNotices([]);
@@ -77,11 +98,13 @@ const NoticeSection = ({ type, title }) => {
     };
 
     fetchNotices();
-  }, [type]);
+  }, [type]); // type이 변경될 때마다 다시 조회
 
   // 공지사항 클릭 핸들러
   const handleNoticeClick = async (notice) => {
     try {
+      console.log('📰 공지사항 클릭:', notice.id);
+      
       // 🆕 상세 조회 API 호출 (조회수 증가)
       const detailData = await noticeService.getNoticeDetail(notice.id);
       
@@ -91,7 +114,7 @@ const NoticeSection = ({ type, title }) => {
       setSelectedNotice(noticeDetail);
       setIsModalOpen(true);
     } catch (err) {
-      console.error('공지사항 상세 조회 실패:', err);
+      console.error('📰 공지사항 상세 조회 실패:', err);
       // 에러가 발생해도 기본 데이터로 모달 열기
       setSelectedNotice(notice);
       setIsModalOpen(true);
@@ -125,7 +148,7 @@ const NoticeSection = ({ type, title }) => {
     return (
       <div className="notice-section">
         <div className="notice-header">{title}</div>
-        <div className="loading">로딩 중...</div>
+        <div className="loading">로딩 중... ({type})</div>
       </div>
     );
   }
@@ -135,6 +158,22 @@ const NoticeSection = ({ type, title }) => {
       <div className="notice-section">
         <div className="notice-header">{title}</div>
         <div className="error">{error}</div>
+        {/* 🔧 재시도 버튼 추가 */}
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{
+            margin: '1rem',
+            padding: '0.5rem 1rem',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem'
+          }}
+        >
+          다시 시도
+        </button>
       </div>
     );
   }
@@ -186,7 +225,7 @@ const NoticeSection = ({ type, title }) => {
           ))
         ) : (
           <div className="notice-item" style={{ textAlign: 'center', color: '#6b7280' }}>
-            등록된 공지사항이 없습니다.
+            등록된 {type === 'system' ? '시스템' : type === 'ris' ? 'RIS' : ''} 공지사항이 없습니다.
           </div>
         )}
       </div>

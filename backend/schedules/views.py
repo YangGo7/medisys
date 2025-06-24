@@ -1,301 +1,4 @@
-# schedules/views.py - DateTime 처리 개선
-
-# from rest_framework import viewsets, status
-# from rest_framework.decorators import action
-# from rest_framework.response import Response
-# from datetime import datetime, date
-# from django.utils import timezone
-# from .models import ScheduleCommon, ScheduleRIS, PersonalSchedule, ExamRoom
-# from .serializers import ScheduleCommonSerializer, ScheduleRISSerializer, PersonalScheduleSerializer, ExamRoomSerializer
-# import logging
-
-# logger = logging.getLogger(__name__)
-
-# class ScheduleCommonViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = ScheduleCommon.objects.all().order_by('datetime')
-#     serializer_class = ScheduleCommonSerializer
-
-# class ScheduleRISViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = ScheduleRIS.objects.all().order_by('datetime')
-#     serializer_class = ScheduleRISSerializer
-
-# class PersonalScheduleViewSet(viewsets.ModelViewSet):
-#     queryset = PersonalSchedule.objects.all()
-#     serializer_class = PersonalScheduleSerializer
-    
-#     def get_queryset(self):
-#         try:
-#             from doctors.models import Doctor
-#             doctor = Doctor.objects.first()
-#             if doctor:
-#                 return PersonalSchedule.objects.filter(doctor=doctor).order_by('datetime')
-#             return PersonalSchedule.objects.none()
-#         except Exception as e:
-#             logger.error(f"Error in get_queryset: {e}")
-#             return PersonalSchedule.objects.none()
-    
-#     def perform_create(self, serializer):
-#         try:
-#             from doctors.models import Doctor
-#             doctor = Doctor.objects.first()
-            
-#             if not doctor:
-#                 raise ValueError("의사 정보를 찾을 수 없습니다.")
-            
-#             # datetime 처리
-#             datetime_str = self.request.data.get('datetime')
-#             end_datetime_str = self.request.data.get('end_datetime')
-            
-#             # datetime 변환
-#             if isinstance(datetime_str, str):
-#                 try:
-#                     dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
-#                     if timezone.is_naive(dt):
-#                         dt = timezone.make_aware(dt)
-#                     datetime_value = dt
-#                 except ValueError:
-#                     # 다른 형식 시도
-#                     dt = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M')
-#                     datetime_value = timezone.make_aware(dt)
-#             else:
-#                 datetime_value = datetime_str
-            
-#             # end_datetime 처리
-#             end_datetime_value = None
-#             if end_datetime_str and end_datetime_str != '':
-#                 try:
-#                     if isinstance(end_datetime_str, str):
-#                         end_dt = datetime.fromisoformat(end_datetime_str.replace('Z', '+00:00'))
-#                         if timezone.is_naive(end_dt):
-#                             end_dt = timezone.make_aware(end_dt)
-#                         end_datetime_value = end_dt
-#                     else:
-#                         end_datetime_value = end_datetime_str
-#                 except ValueError:
-#                     try:
-#                         end_dt = datetime.strptime(end_datetime_str, '%Y-%m-%dT%H:%M')
-#                         end_datetime_value = timezone.make_aware(end_dt)
-#                     except ValueError:
-#                         logger.warning(f"Invalid end_datetime format: {end_datetime_str}")
-#                         end_datetime_value = None
-            
-#             logger.info(f"Creating schedule - datetime: {datetime_value}, end_datetime: {end_datetime_value}")
-            
-#             serializer.save(
-#                 doctor=doctor,
-#                 datetime=datetime_value,
-#                 end_datetime=end_datetime_value
-#             )
-            
-#         except Exception as e:
-#             logger.error(f"Error in perform_create: {e}")
-#             logger.error(f"Request data: {self.request.data}")
-#             raise
-    
-#     def perform_update(self, serializer):
-#         try:
-#             # 수정 시에도 동일한 datetime 처리
-#             datetime_str = self.request.data.get('datetime')
-#             end_datetime_str = self.request.data.get('end_datetime')
-            
-#             update_data = {}
-            
-#             if datetime_str:
-#                 if isinstance(datetime_str, str):
-#                     try:
-#                         dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
-#                         if timezone.is_naive(dt):
-#                             dt = timezone.make_aware(dt)
-#                         update_data['datetime'] = dt
-#                     except ValueError:
-#                         dt = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M')
-#                         update_data['datetime'] = timezone.make_aware(dt)
-            
-#             if end_datetime_str == '' or end_datetime_str is None:
-#                 update_data['end_datetime'] = None
-#             elif end_datetime_str:
-#                 try:
-#                     if isinstance(end_datetime_str, str):
-#                         end_dt = datetime.fromisoformat(end_datetime_str.replace('Z', '+00:00'))
-#                         if timezone.is_naive(end_dt):
-#                             end_dt = timezone.make_aware(end_dt)
-#                         update_data['end_datetime'] = end_dt
-#                 except ValueError:
-#                     try:
-#                         end_dt = datetime.strptime(end_datetime_str, '%Y-%m-%dT%H:%M')
-#                         update_data['end_datetime'] = timezone.make_aware(end_dt)
-#                     except ValueError:
-#                         update_data['end_datetime'] = None
-            
-#             logger.info(f"Updating schedule {serializer.instance.id}: {update_data}")
-#             serializer.save(**update_data)
-            
-#         except Exception as e:
-#             logger.error(f"Error in perform_update: {e}")
-#             raise
-    
-#     def create(self, request, *args, **kwargs):
-#         try:
-#             logger.info(f"POST request data: {request.data}")
-            
-#             # 기본 검증
-#             if not request.data.get('title'):
-#                 return Response({'error': '제목은 필수입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-#             if not request.data.get('datetime'):
-#                 return Response({'error': '날짜/시간은 필수입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-#             return super().create(request, *args, **kwargs)
-            
-#         except Exception as e:
-#             logger.error(f"Error in create: {e}")
-#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-#     @action(detail=False, methods=['get'])
-#     def my_schedules(self, request):
-#         try:
-#             from doctors.models import Doctor
-#             doctor = Doctor.objects.first()
-            
-#             if not doctor:
-#                 return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
-            
-#             schedules = PersonalSchedule.objects.filter(doctor=doctor).order_by('datetime')
-#             serializer = self.get_serializer(schedules, many=True)
-#             return Response(serializer.data)
-            
-#         except Exception as e:
-#             logger.error(f"Error in my_schedules: {e}")
-#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-#     @action(detail=False, methods=['get'])
-#     def today_schedules(self, request):
-#         try:
-#             from datetime import date
-#             from doctors.models import Doctor
-            
-#             doctor = Doctor.objects.first()
-#             if not doctor:
-#                 return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
-            
-#             today = date.today()
-#             schedules = PersonalSchedule.objects.filter(
-#                 doctor=doctor,
-#                 datetime__date=today
-#             ).order_by('datetime')
-            
-#             serializer = self.get_serializer(schedules, many=True)
-#             return Response(serializer.data)
-            
-#         except Exception as e:
-#             logger.error(f"Error in today_schedules: {e}")
-#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-#     @action(detail=False, methods=['get'], url_path='date/(?P<target_date>[^/.]+)')
-#     def schedules_by_date(self, request, target_date=None):
-#         try:
-#             target_date = datetime.strptime(target_date, '%Y-%m-%d').date()
-#             from doctors.models import Doctor
-#             doctor = Doctor.objects.first()
-            
-#             if not doctor:
-#                 return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
-            
-#             # 전체 일정
-#             common_schedules = ScheduleCommon.objects.filter(
-#                 datetime__date=target_date
-#             ).order_by('datetime')
-            
-#             # 부서 일정  
-#             ris_schedules = ScheduleRIS.objects.filter(
-#                 datetime__date=target_date
-#             ).order_by('datetime')
-            
-#             # 개인 일정
-#             personal_schedules = PersonalSchedule.objects.filter(
-#                 doctor=doctor,
-#                 datetime__date=target_date
-#             ).order_by('datetime')
-            
-#             return Response({
-#                 'date': target_date,
-#                 'common_schedules': ScheduleCommonSerializer(common_schedules, many=True).data,
-#                 'ris_schedules': ScheduleRISSerializer(ris_schedules, many=True).data,
-#                 'personal_schedules': PersonalScheduleSerializer(personal_schedules, many=True).data
-#             })
-            
-#         except ValueError as e:
-#             logger.error(f"Invalid date format: {target_date}")
-#             return Response({'error': '잘못된 날짜 형식입니다. YYYY-MM-DD 형식을 사용하세요.'}, status=status.HTTP_400_BAD_REQUEST)
-#         except Exception as e:
-#             logger.error(f"Error in schedules_by_date: {e}")
-#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#     @action(detail=False, methods=['get'], url_path='month/(?P<year>[^/.]+)/(?P<month>[^/.]+)')
-#     def month_summary(self, request, year=None, month=None):
-#         try:
-#             from doctors.models import Doctor
-#             from calendar import monthrange
-            
-#             doctor = Doctor.objects.first()
-#             if not doctor:
-#                 return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
-            
-#             year, month = int(year), int(month)
-            
-#             if month < 1 or month > 12:
-#                 return Response({'error': '잘못된 월입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-                
-#             if year < 2000 or year > 2100:
-#                 return Response({'error': '잘못된 년도입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-#             month_data = {}
-#             _, last_day = monthrange(year, month)
-            
-#             for day in range(1, last_day + 1):
-#                 target_date = date(year, month, day)
-                
-#                 common_count = ScheduleCommon.objects.filter(datetime__date=target_date).count()
-#                 ris_count = ScheduleRIS.objects.filter(datetime__date=target_date).count()
-#                 personal_count = PersonalSchedule.objects.filter(
-#                     doctor=doctor, datetime__date=target_date
-#                 ).count()
-                
-#                 if common_count > 0 or ris_count > 0 or personal_count > 0:
-#                     month_data[str(day)] = {
-#                         'common': common_count,
-#                         'ris': ris_count,
-#                         'personal': personal_count,
-#                         'total': common_count + ris_count + personal_count
-#                     }
-            
-#             return Response({
-#                 'year': year,
-#                 'month': month,
-#                 'schedules': month_data
-#             })
-            
-#         except ValueError as e:
-#             logger.error(f"Invalid year/month: {year}/{month}")
-#             return Response({'error': '잘못된 년도/월 형식입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-#         except Exception as e:
-#             logger.error(f"Error in month_summary: {e}")
-#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
-# class ExamRoomViewSet(viewsets.ReadOnlyModelViewSet):
-#     """검사실 목록 API (읽기 전용)"""
-#     queryset = ExamRoom.objects.filter(is_active=True).order_by('room_id')
-#     serializer_class = ExamRoomSerializer
-    
-#     @action(detail=False, methods=['get'])
-#     def active_rooms(self, request):
-#         """활성화된 검사실만 조회"""
-#         rooms = ExamRoom.objects.filter(is_active=True).order_by('room_id')
-#         serializer = self.get_serializer(rooms, many=True)
-#         return Response(serializer.data)
-
-# schedules/views.py - DateTime 처리 개선 + 검사실 스케줄 API 추가
+# schedules/views.py - DateTime 처리 개선 + 의사 정보 문제 해결
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
@@ -322,8 +25,7 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         try:
-            from doctors.models import Doctor
-            doctor = Doctor.objects.first()
+            doctor = self.get_current_doctor()
             if doctor:
                 return PersonalSchedule.objects.filter(doctor=doctor).order_by('datetime')
             return PersonalSchedule.objects.none()
@@ -331,13 +33,48 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
             logger.error(f"Error in get_queryset: {e}")
             return PersonalSchedule.objects.none()
     
-    def perform_create(self, serializer):
+    # 🔧 의사 정보 조회 로직 개선
+    def get_current_doctor(self):
+        """현재 의사 정보 조회 - 여러 방법으로 시도"""
         try:
             from doctors.models import Doctor
+            
+            # 방법 1: 첫 번째 의사 조회
             doctor = Doctor.objects.first()
+            if doctor:
+                logger.info(f"Doctor found: {doctor.name} (ID: {doctor.id})")
+                return doctor
+            
+            # 방법 2: 의사가 없으면 생성 (개발용)
+            logger.warning("No doctor found in database. Creating default doctor...")
+            doctor = Doctor.objects.create(
+                name="기본의사",
+                department="영상의학과",
+                role="의사",
+                status="온라인"
+            )
+            logger.info(f"Default doctor created: {doctor.name} (ID: {doctor.id})")
+            return doctor
+            
+        except ImportError:
+            logger.error("doctors.models.Doctor import failed")
+            return None
+        except Exception as e:
+            logger.error(f"Error getting current doctor: {e}")
+            return None
+    
+    def perform_create(self, serializer):
+        try:
+            doctor = self.get_current_doctor()
             
             if not doctor:
-                raise ValueError("의사 정보를 찾을 수 없습니다.")
+                # 🔧 더 구체적인 에러 메시지와 함께 JSON 응답 반환
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({
+                    'error': '의사 정보를 찾을 수 없습니다.',
+                    'detail': 'Doctor 테이블에 데이터가 없거나 doctors 앱이 설정되지 않았습니다.',
+                    'suggestion': 'Django admin에서 Doctor 정보를 추가하거나 doctors 앱을 확인하세요.'
+                })
             
             # datetime 처리
             datetime_str = self.request.data.get('datetime')
@@ -376,7 +113,7 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
                         logger.warning(f"Invalid end_datetime format: {end_datetime_str}")
                         end_datetime_value = None
             
-            logger.info(f"Creating schedule - datetime: {datetime_value}, end_datetime: {end_datetime_value}")
+            logger.info(f"Creating schedule - doctor: {doctor.name}, datetime: {datetime_value}, end_datetime: {end_datetime_value}")
             
             serializer.save(
                 doctor=doctor,
@@ -437,25 +174,36 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
             
             # 기본 검증
             if not request.data.get('title'):
-                return Response({'error': '제목은 필수입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'error': '제목은 필수입니다.',
+                    'field': 'title'
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             if not request.data.get('datetime'):
-                return Response({'error': '날짜/시간은 필수입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'error': '날짜/시간은 필수입니다.',
+                    'field': 'datetime'
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             return super().create(request, *args, **kwargs)
             
         except Exception as e:
             logger.error(f"Error in create: {e}")
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({
+                'error': str(e),
+                'type': 'create_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @action(detail=False, methods=['get'])
     def my_schedules(self, request):
         try:
-            from doctors.models import Doctor
-            doctor = Doctor.objects.first()
+            doctor = self.get_current_doctor()
             
             if not doctor:
-                return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    'error': '의사 정보를 찾을 수 없습니다.',
+                    'suggestion': 'Doctor 정보를 생성하거나 확인하세요.'
+                }, status=status.HTTP_404_NOT_FOUND)
             
             schedules = PersonalSchedule.objects.filter(doctor=doctor).order_by('datetime')
             serializer = self.get_serializer(schedules, many=True)
@@ -469,11 +217,12 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
     def today_schedules(self, request):
         try:
             from datetime import date
-            from doctors.models import Doctor
             
-            doctor = Doctor.objects.first()
+            doctor = self.get_current_doctor()
             if not doctor:
-                return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    'error': '의사 정보를 찾을 수 없습니다.'
+                }, status=status.HTTP_404_NOT_FOUND)
             
             today = date.today()
             schedules = PersonalSchedule.objects.filter(
@@ -492,11 +241,12 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
     def schedules_by_date(self, request, target_date=None):
         try:
             target_date = datetime.strptime(target_date, '%Y-%m-%d').date()
-            from doctors.models import Doctor
-            doctor = Doctor.objects.first()
+            doctor = self.get_current_doctor()
             
             if not doctor:
-                return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    'error': '의사 정보를 찾을 수 없습니다.'
+                }, status=status.HTTP_404_NOT_FOUND)
             
             # 전체 일정
             common_schedules = ScheduleCommon.objects.filter(
@@ -531,12 +281,13 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='month/(?P<year>[^/.]+)/(?P<month>[^/.]+)')
     def month_summary(self, request, year=None, month=None):
         try:
-            from doctors.models import Doctor
             from calendar import monthrange
             
-            doctor = Doctor.objects.first()
+            doctor = self.get_current_doctor()
             if not doctor:
-                return Response({'error': '의사 정보를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    'error': '의사 정보를 찾을 수 없습니다.'
+                }, status=status.HTTP_404_NOT_FOUND)
             
             year, month = int(year), int(month)
             
@@ -687,7 +438,7 @@ def get_room_schedules_summary(request):
     """
     try:
         from worklists.models import StudyRequest
-        from django.db.models import Count
+        from django.db.models import Count, Q
         
         # 날짜 파라미터
         date_param = request.GET.get('date', timezone.now().date())
@@ -706,9 +457,9 @@ def get_room_schedules_summary(request):
             'assigned_room__room_type'
         ).annotate(
             total_count=Count('id'),
-            waiting_count=Count('id', filter=models.Q(study_status='검사대기')),
-            in_progress_count=Count('id', filter=models.Q(study_status='검사중')),
-            completed_count=Count('id', filter=models.Q(study_status='검사완료'))
+            waiting_count=Count('id', filter=Q(study_status='검사대기')),
+            in_progress_count=Count('id', filter=Q(study_status='검사중')),
+            completed_count=Count('id', filter=Q(study_status='검사완료'))
         ).order_by('assigned_room__id')
         
         return Response({

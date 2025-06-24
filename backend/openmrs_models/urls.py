@@ -79,4 +79,34 @@ urlpatterns = [
     
     path('test/minimal-encounter/<str:patient_uuid>/', 
          obs_clinical_api.test_minimal_encounter, name='test_minimal_encounter'),
+    
+    
+     path('enhanced-search/prefix/', 
+         clinical_views.search_concepts_by_prefix, 
+         name='search_by_prefix'),
+    
+    path('enhanced-search/concept/<str:concept_uuid>/', 
+         clinical_views.get_concept_details, 
+         name='concept_details'),
+    
+    path('enhanced-search/statistics/', 
+         clinical_views.get_search_statistics, 
+         name='search_statistics'),
+    
+    path('enhanced-search/raw-sql/', 
+         clinical_views.search_concepts_raw_sql, 
+         name='search_raw_sql'),
+    
+        # 🔥 NEW: 향상된 검색 API들
+    path('enhanced-search/diagnosis/', 
+         clinical_views.search_diagnosis_concepts_enhanced, 
+         name='enhanced_search_diagnosis'),
+    
+    path('enhanced-search/drugs/', 
+         clinical_views.search_drug_concepts_enhanced, 
+         name='enhanced_search_drugs'),
+    
+    path('enhanced-search/prefix/', 
+         clinical_views.search_concepts_prefix,
+         name='search_by_prefix')
 ]

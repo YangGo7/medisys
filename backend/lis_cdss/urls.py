@@ -8,6 +8,7 @@ from .views import (
     receive_full_sample,
     lft_statistics_summary
 )
+from lis_cdss.inference.importance_view import get_logistic_importance, get_sample_contributions
 
 urlpatterns = [
     path('receive/', receive_test_result),  # 단순 저장 (모델 X)
@@ -17,4 +18,6 @@ urlpatterns = [
     path('delete/<int:sample_id>/', delete_cdss_result),  # 삭제 (DELETE)
     path('receive_full_sample/', receive_full_sample),
     path('lft/stats/', lft_statistics_summary),
+    path('lft/importance/', get_logistic_importance),
+    path('lft/importance/sample/<int:sample_id>/', get_sample_contributions),
 ]
