@@ -1,39 +1,76 @@
+// components/home/NoticeSection/index.js - 메인 페이지 공지사항 API 연결
 import React, { useState, useEffect } from 'react';
 import { noticeService } from '../../../services/noticeService';
-import Modal from '../../common/Modal';  // 모달 import 추가
+import Modal from '../../common/Modal';
 import './NoticeSection.css';
 
 const NoticeSection = ({ type, title }) => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedNotice, setSelectedNotice] = useState(null);  // 선택된 공지사항
-  const [isModalOpen, setIsModalOpen] = useState(false);       // 모달 상태
+  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
     
   useEffect(() => {
     const fetchNotices = async () => {
       try {
-        let noticeData;
+        setLoading(true);
+        setError(null);
+        
+        console.log('📢 공지사항 조회 시작:', { type, title });
+        
+        let noticeData = [];
+        
+        // 🆕 메인 페이지 API 연결 - type에 따라 다른 필터 적용
         if (type === 'system') {
-          noticeData = await noticeService.getSystemNotices();
+          // 시스템 공지사항 = important 타입
+          noticeData = await noticeService.getMainPageNotices('important', 5);
+        } else if (type === 'ris') {
+          // RIS 공지사항 = general 타입
+          noticeData = await noticeService.getMainPageNotices('general', 5);
         } else {
-          noticeData = await noticeService.getRISNotices();
+          // 기본: 모든 공지사항
+          noticeData = await noticeService.getMainPageNotices('', 5);
         }
         
-        // 중요 공지를 맨 위로 정렬
-        const sortedNotices = noticeData.sort((a, b) => {
-          // 1. 중요 공지 우선
-          if (a.is_important && !b.is_important) return -1;
-          if (!a.is_important && b.is_important) return 1;
+        console.log('📢 공지사항 조회 결과:', noticeData);
+        
+        // 🔧 API 응답 구조에 맞게 데이터 처리
+        let processedNotices = [];
+        
+        if (Array.isArray(noticeData)) {
+          processedNotices = noticeData;
+        } else if (noticeData && noticeData.data && Array.isArray(noticeData.data)) {
+          processedNotices = noticeData.data;
+        } else if (noticeData && Array.isArray(noticeData.notices)) {
+          processedNotices = noticeData.notices;
+        }
+        
+        // 🔧 공지사항 정렬: 중요 공지 우선, 그 다음 최신순
+        const sortedNotices = processedNotices.sort((a, b) => {
+          // 1. 고정 공지사항 우선 (is_pinned)
+          if (a.is_pinned && !b.is_pinned) return -1;
+          if (!a.is_pinned && b.is_pinned) return 1;
+          
+          // 2. 중요 공지사항 우선 (notice_type === 'important')
+          const aImportant = a.notice_type === 'important' || a.is_important;
+          const bImportant = b.notice_type === 'important' || b.is_important;
+          if (aImportant && !bImportant) return -1;
+          if (!aImportant && bImportant) return 1;
                    
-          // 2. 같은 중요도면 최신순
+          // 3. 같은 중요도면 최신순
           return new Date(b.created_at) - new Date(a.created_at);
         });
         
-        setNotices(sortedNotices);  // sortedNotices로 변경
+        console.log('📢 정렬된 공지사항:', sortedNotices);
+        setNotices(sortedNotices);
+        
       } catch (err) {
+        console.error('📢 공지사항 조회 실패:', err);
         setError('공지사항을 불러올 수 없습니다.');
-        console.error(err);
+        
+        // 🔧 에러 시에도 빈 배열로 설정하여 UI가 깨지지 않도록
+        setNotices([]);
       } finally {
         setLoading(false);
       }
@@ -42,16 +79,46 @@ const NoticeSection = ({ type, title }) => {
     fetchNotices();
   }, [type]);
 
-  // 공지사항 클릭 핸들러 추가
-  const handleNoticeClick = (notice) => {
-    setSelectedNotice(notice);
-    setIsModalOpen(true);
+  // 공지사항 클릭 핸들러
+  const handleNoticeClick = async (notice) => {
+    try {
+      // 🆕 상세 조회 API 호출 (조회수 증가)
+      const detailData = await noticeService.getNoticeDetail(notice.id);
+      
+      // 상세 데이터가 있으면 사용, 없으면 기본 데이터 사용
+      const noticeDetail = detailData?.data || notice;
+      
+      setSelectedNotice(noticeDetail);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error('공지사항 상세 조회 실패:', err);
+      // 에러가 발생해도 기본 데이터로 모달 열기
+      setSelectedNotice(notice);
+      setIsModalOpen(true);
+    }
   };
 
-  // 모달 닫기 핸들러 추가
+  // 모달 닫기 핸들러
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedNotice(null);
+  };
+
+  // 🔧 안전한 날짜 포맷팅
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return '날짜 없음';
+      return new Date(dateString).toLocaleDateString('ko-KR');
+    } catch (error) {
+      return '날짜 없음';
+    }
+  };
+
+  // 🔧 중요도 확인 함수
+  const isImportantNotice = (notice) => {
+    return notice.notice_type === 'important' || 
+           notice.is_important === true ||
+           notice.is_pinned === true;
   };
 
   if (loading) {
@@ -76,40 +143,128 @@ const NoticeSection = ({ type, title }) => {
     <div className="notice-section">
       <div className="notice-header">{title}</div>
       <div className="notice-list">
-        {notices.map((notice) => (
-          <div 
-            key={notice.id} 
-            className={`notice-item ${notice.is_important ? 'important' : ''}`}
-            onClick={() => handleNoticeClick(notice)}  // 클릭 이벤트 추가
-          >
-            <div className="notice-date">
-              {new Date(notice.created_at).toLocaleDateString('ko-KR')}
+        {notices && notices.length > 0 ? (
+          notices.map((notice) => (
+            <div 
+              key={notice.id} 
+              className={`notice-item ${isImportantNotice(notice) ? 'important' : ''}`}
+              onClick={() => handleNoticeClick(notice)}
+            >
+              <div className="notice-date">
+                {formatDate(notice.created_at)}
+                {/* 🆕 중요 공지사항 표시 */}
+                {isImportantNotice(notice) && (
+                  <span className="important-badge" style={{
+                    marginLeft: '0.5rem',
+                    background: '#ef4444',
+                    color: 'white',
+                    fontSize: '0.625rem',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    중요
+                  </span>
+                )}
+                {/* 🆕 고정 공지사항 표시 */}
+                {notice.is_pinned && (
+                  <span className="pinned-badge" style={{
+                    marginLeft: '0.25rem',
+                    background: '#3b82f6',
+                    color: 'white',
+                    fontSize: '0.625rem',
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    📌
+                  </span>
+                )}
+              </div>
+              <div className="notice-title">{notice.title}</div>
             </div>
-            <div className="notice-title">{notice.title}</div>
-            {notice.is_important && <span className="important-badge">중요</span>}  {/* 중요 배지 추가 */}
+          ))
+        ) : (
+          <div className="notice-item" style={{ textAlign: 'center', color: '#6b7280' }}>
+            등록된 공지사항이 없습니다.
           </div>
-        ))}
+        )}
       </div>
 
-      {/* 모달 추가 */}
+      {/* 공지사항 상세 모달 */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={selectedNotice?.title}
       >
-        <div className="notice-modal-content">
-          <div className="notice-modal-meta">
-            <span className="notice-modal-date">
-              작성일: {selectedNotice && new Date(selectedNotice.created_at).toLocaleString('ko-KR')}
-            </span>
-            {selectedNotice?.is_important && (
-              <span className="notice-modal-important">중요 공지</span>
-            )}
+        {selectedNotice && (
+          <div className="notice-modal-content">
+            <div className="notice-modal-meta" style={{
+              marginBottom: '1rem',
+              paddingBottom: '1rem',
+              borderBottom: '1px solid #e5e7eb',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.5rem'
+            }}>
+              <div>
+                <span className="notice-modal-date" style={{
+                  fontSize: '0.875rem',
+                  color: '#6b7280'
+                }}>
+                  작성일: {formatDate(selectedNotice.created_at)}
+                </span>
+                <br />
+                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                  작성자: {selectedNotice.created_by || '관리자'}
+                </span>
+                {selectedNotice.views && (
+                  <>
+                    <br />
+                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                      조회수: {selectedNotice.views}
+                    </span>
+                  </>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {isImportantNotice(selectedNotice) && (
+                  <span style={{
+                    background: '#ef4444',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    중요 공지
+                  </span>
+                )}
+                {selectedNotice.is_pinned && (
+                  <span style={{
+                    background: '#3b82f6',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem',
+                    fontWeight: '600'
+                  }}>
+                    📌 고정
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="notice-modal-text" style={{
+              lineHeight: '1.6',
+              color: '#374151',
+              whiteSpace: 'pre-wrap' // 줄바꿈 유지
+            }}>
+              {selectedNotice.content || '내용이 없습니다.'}
+            </div>
           </div>
-          <div className="notice-modal-text">
-            {selectedNotice?.content}
-          </div>
-        </div>
+        )}
       </Modal>
     </div>
   );
