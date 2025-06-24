@@ -3,15 +3,71 @@
 from django.db import models
 from .models import Person, Patient, Encounter  # 기존 모델 import
 
+class ConceptClass(models.Model):
+    """Concept 분류 (Diagnosis, Drug, Finding, Procedure 등)"""
+    concept_class_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    creator = models.IntegerField()
+    date_created = models.DateTimeField()
+    retired = models.BooleanField(default=False)
+    retired_by = models.IntegerField(null=True, blank=True)
+    date_retired = models.DateTimeField(null=True, blank=True)
+    retire_reason = models.CharField(max_length=255, null=True, blank=True)
+    uuid = models.CharField(max_length=38, unique=True)
+
+    class Meta:
+        managed = False
+        db_table = 'concept_class'
+        app_label = 'openmrs_models'
+
+    def __str__(self):
+        return self.name
+
+class ConceptDatatype(models.Model):
+    """Concept 데이터 타입 (Text, Numeric, Boolean, Coded 등)"""
+    concept_datatype_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    hl7_abbreviation = models.CharField(max_length=3, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    creator = models.IntegerField()
+    date_created = models.DateTimeField()
+    retired = models.BooleanField(default=False)
+    retired_by = models.IntegerField(null=True, blank=True)
+    date_retired = models.DateTimeField(null=True, blank=True)
+    retire_reason = models.CharField(max_length=255, null=True, blank=True)
+    uuid = models.CharField(max_length=38, unique=True)
+
+    class Meta:
+        managed = False
+        db_table = 'concept_datatype'
+        app_label = 'openmrs_models'
+
+    def __str__(self):
+        return self.name
+
 class Concept(models.Model):
-    """OpenMRS Concept 테이블 - 관찰 항목의 정의"""
+    """OpenMRS Concept 테이블 - 모든 의료 개념의 기본"""
     concept_id = models.AutoField(primary_key=True)
     retired = models.BooleanField(default=False)
     short_name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     form_text = models.TextField(null=True, blank=True)
-    datatype_id = models.IntegerField()
-    class_id = models.IntegerField()
+    
+    # 🔥 ForeignKey 관계로 수정
+    datatype = models.ForeignKey(
+        ConceptDatatype, 
+        on_delete=models.CASCADE, 
+        db_column='datatype_id',
+        related_name='concepts'
+    )
+    concept_class = models.ForeignKey(
+        ConceptClass, 
+        on_delete=models.CASCADE, 
+        db_column='class_id',
+        related_name='concepts'
+    )
+    
     is_set = models.BooleanField(default=False)
     creator = models.IntegerField()
     date_created = models.DateTimeField()
@@ -28,15 +84,42 @@ class Concept(models.Model):
     def __str__(self):
         return self.short_name or f"Concept {self.concept_id}"
 
+    def get_preferred_name(self, locale='en'):
+        """선호 이름 가져오기"""
+        preferred_name = self.names.filter(
+            locale=locale, 
+            locale_preferred=True
+        ).first()
+        return preferred_name.name if preferred_name else self.short_name
+
+    def is_diagnosis(self):
+        """진단 관련 Concept인지 확인"""
+        return self.concept_class.name in ['Diagnosis', 'Finding', 'Symptom']
+
+    def is_drug(self):
+        """약물 관련 Concept인지 확인"""
+        return self.concept_class.name in ['Drug', 'Medication']
+
+
 class ConceptName(models.Model):
     """Concept 이름 (다국어 지원)"""
     concept_name_id = models.AutoField(primary_key=True)
-    concept = models.ForeignKey(Concept, on_delete=models.CASCADE, related_name='names')
+    concept = models.ForeignKey(
+        Concept, 
+        on_delete=models.CASCADE, 
+        related_name='names',
+        db_column='concept_id'
+    )
     name = models.CharField(max_length=255)
-    locale = models.CharField(max_length=50)
+    locale = models.CharField(max_length=50, default='en')
     locale_preferred = models.BooleanField(default=False)
     creator = models.IntegerField()
     date_created = models.DateTimeField()
+    concept_name_type = models.CharField(max_length=50, null=True, blank=True)  # FULLY_SPECIFIED, SHORT, SYNONYM
+    voided = models.BooleanField(default=False)
+    voided_by = models.IntegerField(null=True, blank=True)
+    date_voided = models.DateTimeField(null=True, blank=True)
+    void_reason = models.CharField(max_length=255, null=True, blank=True)
     uuid = models.CharField(max_length=38, unique=True)
 
     class Meta:
@@ -253,4 +336,141 @@ class ObsManager(models.Manager):
         ).order_by('-obs_datetime')
 
 # Obs 모델에 커스텀 Manager 추가
+
+class Drug(models.Model):
+    """OpenMRS Drug 테이블 - 약물 정보"""
+    drug_id = models.AutoField(primary_key=True)
+    concept = models.ForeignKey(
+        Concept, 
+        on_delete=models.CASCADE, 
+        related_name='drugs',
+        db_column='concept_id'
+    )
+    name = models.CharField(max_length=255, null=True, blank=True)
+    combination = models.BooleanField(default=False)
+    
+    # 복용 형태 (tablet, capsule, liquid 등)
+    dosage_form = models.ForeignKey(
+        Concept, 
+        on_delete=models.CASCADE, 
+        related_name='dosage_form_drugs',
+        null=True, 
+        blank=True,
+        db_column='dosage_form'
+    )
+    
+    # 용량 정보
+    dose_strength = models.CharField(max_length=255, null=True, blank=True)
+    maximum_daily_dose = models.FloatField(null=True, blank=True)
+    minimum_daily_dose = models.FloatField(null=True, blank=True)
+    
+    # 투여 경로 (oral, IV, IM 등)
+    route = models.ForeignKey(
+        Concept, 
+        on_delete=models.CASCADE, 
+        related_name='route_drugs',
+        null=True, 
+        blank=True,
+        db_column='route'
+    )
+    
+    units = models.CharField(max_length=50, null=True, blank=True)
+    creator = models.IntegerField()
+    date_created = models.DateTimeField()
+    retired = models.BooleanField(default=False)
+    retired_by = models.IntegerField(null=True, blank=True)
+    date_retired = models.DateTimeField(null=True, blank=True)
+    retire_reason = models.CharField(max_length=255, null=True, blank=True)
+    uuid = models.CharField(max_length=38, unique=True)
+
+    class Meta:
+        managed = False
+        db_table = 'drug'
+        app_label = 'openmrs_models'
+
+    def __str__(self):
+        return self.name or f"Drug {self.drug_id}"
+
+    @property
+    def strength(self):
+        """용량 정보 반환"""
+        return self.dose_strength or ''
+
+    @property
+    def display_name(self):
+        """표시용 이름 (약물명 + 용량)"""
+        name = self.name or self.concept.get_preferred_name()
+        if self.dose_strength:
+            return f"{name} {self.dose_strength}"
+        return name
+
+class ConceptWithRelations(models.Model):
+    """Concept 모델에 관계 추가된 버전 (임시용)"""
+    concept_id = models.AutoField(primary_key=True)
+    retired = models.BooleanField(default=False)
+    short_name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    form_text = models.TextField(null=True, blank=True)
+    datatype = models.ForeignKey(ConceptDatatype, on_delete=models.CASCADE, db_column='datatype_id', null=True, blank=True)
+    concept_class = models.ForeignKey(ConceptClass, on_delete=models.CASCADE, db_column='class_id', null=True, blank=True)
+    is_set = models.BooleanField(default=False)
+    creator = models.IntegerField()
+    date_created = models.DateTimeField()
+    version = models.CharField(max_length=50, null=True, blank=True)
+    changed_by = models.IntegerField(null=True, blank=True)
+    date_changed = models.DateTimeField(null=True, blank=True)
+    uuid = models.CharField(max_length=38, unique=True)
+
+    class Meta:
+        managed = False
+        db_table = 'concept'
+        app_label = 'openmrs_models'
+
+    def __str__(self):
+        return self.short_name or f"Concept {self.concept_id}"
+
+class ConceptManager(models.Manager):
+    """Concept 전용 Manager"""
+    
+    def diagnosis_concepts(self):
+        """진단 관련 Concept들"""
+        return self.filter(
+            concept_class__name__in=['Diagnosis', 'Finding', 'Symptom'],
+            retired=False
+        )
+    
+    def drug_concepts(self):
+        """약물 관련 Concept들"""
+        return self.filter(
+            concept_class__name__in=['Drug', 'Medication'],
+            retired=False
+        )
+    
+    def search_by_name(self, query):
+        """이름으로 검색"""
+        return self.filter(
+            names__name__icontains=query,
+            retired=False
+        ).distinct()
+
+
+class DrugManager(models.Manager):
+    """Drug 전용 Manager"""
+    
+    def active_drugs(self):
+        """활성 약물들"""
+        return self.filter(retired=False)
+    
+    def search_by_name(self, query):
+        """이름으로 검색"""
+        return self.filter(
+            models.Q(name__icontains=query) |
+            models.Q(concept__names__name__icontains=query),
+            retired=False
+        ).distinct()
+
+
+# Manager 추가
+Concept.add_to_class('objects', ConceptManager())
+Drug.add_to_class('objects', DrugManager())
 Obs.add_to_class('objects', ObsManager())

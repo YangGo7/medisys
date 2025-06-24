@@ -1,15 +1,19 @@
-// SimulationPanel.jsx (슬라이더 시뮬레이션 기능 포함)
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import './SimulationPanel.css';
 
-const SimulationPanel = ({ sampleId, testType, initialValues }) => {
-  const [formValues, setFormValues] = useState(initialValues);
+const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
+  const [formValues, setFormValues] = useState(initialValues || {});
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
+  const prevInitialJson = useRef("");
 
   useEffect(() => {
-    setFormValues(initialValues);
+    const currentJson = JSON.stringify(initialValues);
+    if (currentJson !== prevInitialJson.current) {
+      setFormValues(initialValues);
+      prevInitialJson.current = currentJson;
+    }
   }, [initialValues]);
 
   const handleChange = (key, newValue) => {
@@ -53,8 +57,8 @@ const SimulationPanel = ({ sampleId, testType, initialValues }) => {
           <input
             type="range"
             min={0}
-            max={500}
-            step={1}
+            max={statMax[key] || 100}
+            step={0.1}
             value={value}
             onChange={(e) => handleChange(key, parseFloat(e.target.value))}
             className="w-full"
@@ -71,8 +75,22 @@ const SimulationPanel = ({ sampleId, testType, initialValues }) => {
       </button>
 
       {prediction !== null && (
-        <div className="mt-4 text-lg">
-          예측 확률: <strong>{(prediction * 100).toFixed(2)}%</strong>
+        <div className="prediction-box">
+          <p className={`prediction-text ${prediction >= 0.5 ? 'probability-high' : 'probability-low'}`}>
+            예측 확률: {(prediction * 100).toFixed(2)}%
+          </p>
+
+          <p className="probability-explanation">
+            현재 입력된 검사 결과를 바탕으로 AI 모델은 이 샘플이{" "}
+            <strong className={prediction >= 0.5 ? 'probability-high' : 'probability-low'}>
+              {prediction >= 0.5 ? "이상 소견일 확률이 높다" : "정상일 가능성이 높다"}
+            </strong>
+            고 예측했습니다.
+          </p>
+
+          <p className="warning-text">
+            ⚠️ 이 확률은 검사 수치만을 기반으로 계산되며, 실제 진단은 의료진의 종합적인 판단을 따라야 합니다.
+          </p>
         </div>
       )}
     </div>

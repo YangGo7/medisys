@@ -3,7 +3,9 @@ import axios from 'axios';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import ShapContributionChart from './ShapContributionChart';
+import VariableImportanceChart from './VariableImportanceChart';
 import SimulationPanel from './SimulationPanel';
+import SampleImportanceChart from './SampleImportanceChart';
 
 const CdssVisualizationPage = () => {
   const [sampleList, setSampleList] = useState([]);
@@ -130,8 +132,27 @@ const CdssVisualizationPage = () => {
           <h2>🧬 샘플 결과 ({selectedSample || '선택 안 됨'})</h2>
           {sampleDetail ? (
             <>
+              <span>{sampleDetail?.prediction === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
               <ShapContributionChart shapValues={sampleDetail.shap_values} />
-              <SimulationPanel sample={sampleDetail} />
+              <SimulationPanel
+                sampleId={selectedSample}
+                testType={sampleDetail?.test_type}
+                initialValues={
+                  sampleDetail?.results
+                    ? Object.fromEntries(
+                        sampleDetail.results.map(r => [r.component_name, parseFloat(r.value)])
+                     )
+                  : {}
+                }
+                statMax={
+                  stats?.mean_values
+                    ? Object.fromEntries(
+                        Object.entries(stats.mean_values).map(([k, v]) => [k, v.abnormal * 2 || 100])
+                      )
+                    : {}
+                }
+              />
+              <SampleImportanceChart sampleId={selectedSample} />
             </>
           ) : (
             <p style={{ color: '#6b7280' }}>예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
@@ -153,6 +174,7 @@ const CdssVisualizationPage = () => {
               {renderDonutChart()}
               {renderBarChart()}
               {renderLineChart()}
+              <VariableImportanceChart />
             </>
           ) : (
             <p>📉 통계 데이터를 불러오는 중이거나 존재하지 않습니다.</p>
