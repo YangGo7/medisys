@@ -5,7 +5,8 @@ from .views import (
     get_cdss_results,
     get_cdss_result_by_sample,
     delete_cdss_result,
-    receive_full_sample
+    receive_full_sample,
+    lft_statistics_summary
 )
 
 urlpatterns = [
@@ -15,4 +16,5 @@ urlpatterns = [
     path('results/<int:sample_id>/', get_cdss_result_by_sample),  # 샘플 단일 조회 (GET)
     path('delete/<int:sample_id>/', delete_cdss_result),  # 삭제 (DELETE)
     path('receive_full_sample/', receive_full_sample),
+    path('lft/stats/', lft_statistics_summary),
 ]

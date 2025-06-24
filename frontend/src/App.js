@@ -17,7 +17,6 @@ import MainPage from './components/MainPage';
 import EmrMainPage from './components/EMR/EmrMainPage';
 import PatientList from './components/patientsList';
 import SettingsPage from './components/EMR/SettingsPage';
-import RISPage from './pacsapp/';
 import ReceptionPanel from './components/EMR/ReceptionPanel';
 import PatientWaitingList from './components/EMR/PatientWaitingList';
 import PatientStatusBoard from './components/EMR/PatientStatusBoard'; 
@@ -25,11 +24,10 @@ import CompletedPatients from './components/EMR/CompletedPatients';
 import StatisticsBoard from './components/Main_page/StatisticsBoard.jsx';
 import MainPageFunction from './components/Main_page/main_page_function';
 import NoticeBoard from './components/Main_page/Notics_page'; // 새로 추가
-
 // ThemeContext, ReceptionContext 추가
 import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
-
+import DoctorDashboardOnly from './components/DoctorDashboardOnly';
 import './App.css';
 import CdssVisualizationPage from './components/LIS/CdssVisualizationPage';
 
@@ -57,7 +55,7 @@ function App() {
             <Route path="/emr/waiting" element={<PatientWaitingList />} />
             <Route path="/emr/patient-status" element={<PatientStatusBoard />} />
             <Route path="/emr/completed-patients" element={<CompletedPatients />} />
-
+            <Route path="/doctor-dashboard" element={<DoctorDashboardOnly />} />
             {/* LIS 관련 페이지 */}
             <Route path="/lis" element={<LisHome />}>
               <Route path="orders" element={<OrderListPage />} />
@@ -73,7 +71,6 @@ function App() {
             </Route>
             <Route path="/tests" element={<OpenMRSPatientList />} />
             <Route path="/logs" element={<OCSLogPage />} />
-            <Route path="/RISPage" element={<RISPage />} />
 
             {/* 기존 환자 목록 페이지 */}
             <Route path="/patients" element={<PatientList />} /> 

@@ -1,107 +1,163 @@
-// CdssVisualizationPage.jsx (업데이트된 전체 코드)
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import SimulationPanel from './SimulationPanel';
-import ShapContributionChart from './ShapContributionChart';
-import ShapSummaryText from './ShapSummaryText';
+import { Doughnut, Bar, Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
 const CdssVisualizationPage = () => {
-  const { sampleId } = useParams();
-  const navigate = useNavigate();
-  const [sampleData, setSampleData] = useState(null);
   const [sampleList, setSampleList] = useState([]);
+  const [selectedSample, setSelectedSample] = useState('');
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 샘플 목록 전체 불러오기 (ID만)
   useEffect(() => {
-    const fetchList = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`);
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/`)
+      .then(res => {
         const ids = [...new Set(res.data.map(r => r.sample))];
         setSampleList(ids);
-      } catch (err) {
-        console.error("❌ 샘플 목록 불러오기 실패:", err);
-      }
-    };
-    fetchList();
+      });
+
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/stats/`)
+      .then(res => {
+        setStats(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('📉 통계 데이터 로딩 실패:', err);
+        setLoading(false);
+      });
   }, []);
 
-  // 선택된 샘플 ID가 있을 경우 해당 데이터 불러오기
-  useEffect(() => {
-    if (!sampleId) return;
-    const fetchData = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/results/${sampleId}/`);
-        setSampleData(res.data);
-      } catch (err) {
-        console.error('❌ 샘플 데이터 불러오기 실패:', err);
-        if (err.response?.data) {
-          console.error('💡 서버 응답:', err.response.data);
-        }
-        setSampleData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [sampleId]);
-
-  if (!sampleId) {
+  const renderDonutChart = () => {
+    if (!stats) return null;
     return (
-      <div className="p-6">
-        <h2 className="text-xl font-bold mb-4">📋 CDSS 시각화</h2>
-        <p>샘플을 선택하세요:</p>
-        <select onChange={(e) => navigate(`/lis/cdss/results/${e.target.value}`)}>
-          <option value="">-- 샘플 선택 --</option>
-          {sampleList.map(id => (
-            <option key={id} value={id}>Sample {id}</option>
-          ))}
-        </select>
-      </div>
+      <Doughnut
+        data={{
+          labels: ['정상', '이상'],
+          datasets: [{
+            data: [stats.normal, stats.abnormal],
+            backgroundColor: ['#10B981', '#EF4444'],
+          }],
+        }}
+        options={{
+          plugins: {
+            legend: { position: 'top' },
+          },
+        }}
+      />
     );
-  }
+  };
 
-  if (loading) return <p className="p-4">⏳ 데이터 불러오는 중...</p>;
-  if (!sampleData) return <p className="p-4">❌ 샘플 데이터를 찾을 수 없습니다.</p>;
+  const renderBarChart = () => {
+    if (!stats || !stats.mean_values) return null;
+    const labels = Object.keys(stats.mean_values);
+    const normalData = labels.map(l => stats.mean_values[l].normal);
+    const abnormalData = labels.map(l => stats.mean_values[l].abnormal);
+
+    return (
+      <Bar
+        data={{
+          labels,
+          datasets: [
+            {
+              label: '정상 평균',
+              data: normalData,
+              backgroundColor: '#3B82F6',
+            },
+            {
+              label: '이상 평균',
+              data: abnormalData,
+              backgroundColor: '#F59E0B',
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+          },
+        }}
+      />
+    );
+  };
+
+  const renderLineChart = () => {
+    if (!stats || !stats.weekly_abnormal_trend) return null;
+    return (
+      <Line
+        data={{
+          labels: stats.weekly_abnormal_trend.map(d => d.week),
+          datasets: [
+            {
+              label: '주간 이상 건수',
+              data: stats.weekly_abnormal_trend.map(d => d.abnormal_count),
+              borderColor: '#6366F1',
+              backgroundColor: 'rgba(99, 102, 241, 0.2)',
+              fill: true,
+            },
+          ],
+        }}
+        options={{
+          plugins: {
+            legend: { position: 'top' },
+          },
+        }}
+      />
+    );
+  };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">🧬 CDSS 시각화 분석 – Sample {sampleId}</h2>
+    <div style={{ padding: '2rem', backgroundColor: '#f9fafb' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '1rem' }}>🧾 CDSS 시각화</h1>
 
-      {/* ✅ 예측 결과 */}
-      <div className="mb-4 text-lg">
-        🔍 AI 예측 결과:
-        <span style={{ fontWeight: 'bold', color: sampleData.prediction === '1' ? 'red' : 'green' }}>
-          {sampleData.prediction === '1' ? ' 이상 소견' : ' 정상'}
-        </span>
-        {sampleData.prediction_prob && (
-          <span style={{ marginLeft: '0.5rem', fontSize: '0.95rem', color: '#555' }}>
-            ({(sampleData.prediction_prob * 100).toFixed(1)}%)
-          </span>
-        )}
-      </div>
+      <label htmlFor="sample-select" style={{ display: 'block', marginBottom: '0.5rem' }}>샘플을 선택하세요:</label>
+      <select
+        id="sample-select"
+        value={selectedSample}
+        onChange={e => setSelectedSample(e.target.value)}
+        style={{ padding: '0.5rem', marginBottom: '2rem', minWidth: '200px' }}
+      >
+        <option value=''>-- 샘플 선택 --</option>
+        {sampleList.map(id => (
+          <option key={id} value={id}>{id}</option>
+        ))}
+      </select>
 
-      {/* ✅ 확률 변화 시뮬레이션 */}
-      <div className="mt-6 border-t pt-6">
-        <h3 className="text-lg font-semibold mb-2">🎛 확률 변화 시뮬레이션</h3>
-        <SimulationPanel
-          sampleId={sampleId}
-          testType={sampleData.test_type}
-          initialValues={Object.fromEntries(
-            sampleData.results.map(r => [r.component_name, parseFloat(r.value)])
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        {/* 왼쪽 카드: 샘플 결과 */}
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        }}>
+          <h2 style={{ marginBottom: '1rem' }}>🧬 샘플 결과 시각화</h2>
+          {/* 샘플 선택 후 결과 표시 구성 예정 */}
+          <p style={{ color: '#6b7280' }}>추후 구성 예정</p>
+        </div>
+
+        {/* 오른쪽 카드: 전체 검사 통계 */}
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        }}>
+          <h2 style={{ marginBottom: '1rem' }}>📊 전체 검사 통계</h2>
+          {loading ? (
+            <p>불러오는 중...</p>
+          ) : stats ? (
+            <>
+              <h3 style={{ marginTop: '1rem' }}>🟢 검사 결과 분포 (정상 vs 이상)</h3>
+              {renderDonutChart()}
+              <h3 style={{ marginTop: '2rem' }}>📉 지표별 평균값 (정상 vs 이상)</h3>
+              {renderBarChart()}
+              <h3 style={{ marginTop: '2rem' }}>📅 주간 이상 발생 추이</h3>
+              {renderLineChart()}
+            </>
+          ) : (
+            <p>📉 통계 데이터를 불러오는 중이거나 존재하지 않습니다.</p>
           )}
-        />
-      </div>
-
-      {/* ✅ SHAP 변수 기여도 */}
-      <div className="mt-10 border-t pt-6">
-        <ShapSummaryText
-          predictionProb={sampleData.prediction_prob}
-          shapData={sampleData.shap_data}
-        />
-        <ShapContributionChart shapData={sampleData.shap_data} />
+        </div>
       </div>
     </div>
   );

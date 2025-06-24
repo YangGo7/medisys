@@ -1,0 +1,87 @@
+{
+  "timestamp": "2025-05-25T09:18:49.176344",
+  "tests": {
+    "mariadb": {
+      "success": true,
+      "data": {
+        "databases": [
+          "information_schema",
+          "medical_platform",
+          "mysql",
+          "performance_schema",
+          "sys"
+        ],
+        "version": "10.11.13-MariaDB-ubu2204"
+      }
+    },
+    "openmrs_mysql": {
+      "success": true,
+      "data": {
+        "patient_count": 0,
+        "sample_data": []
+      }
+    },
+    "orthanc_postgres": {
+      "success": true,
+      "data": {
+        "version": "PostgreSQL 14.18 (Debian 14.18-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit",
+        "resource_count": 0,
+        "patient_count": 0,
+        "tables": [
+          "globalproperties",
+          "resources",
+          "metadata",
+          "maindicomtags",
+          "attachedfiles",
+          "dicomidentifiers",
+          "changes",
+          "exportedresources",
+          "patientrecyclingorder",
+          "deletedfiles",
+          "remainingancestor",
+          "deletedresources",
+          "globalintegers",
+          "serverproperties",
+          "labels"
+        ]
+      }
+    },
+    "mongodb": {
+      "success": false,
+      "data": {
+        "error": "Command listCollections requires authentication, full error: {'ok': 0.0, 'errmsg': 'Command listCollections requires authentication', 'code': 13, 'codeName': 'Unauthorized'}"
+      }
+    },
+    "orthanc_api": {
+      "success": true,
+      "data": {
+        "version": "1.12.0",
+        "patient_count": 0,
+        "sample_patient": null
+      }
+    },
+    "openmrs_api": {
+      "success": true,
+      "data": {
+        "authenticated": false,
+        "session_info": {
+          "sessionId": "E477796354691A69B5CB2F1EE884067C",
+          "authenticated": false
+        }
+      }
+    },
+    "data_integration": {
+      "success": true,
+      "data": {
+        "mapping_count": 0,
+        "sample_mappings": []
+      }
+    }
+  },
+  "summary": {
+    "successful_tests": 6,
+    "total_tests": 7,
+    "success_rate": 85.71428571428571,
+    "status": "Partial Success"
+  }
+}

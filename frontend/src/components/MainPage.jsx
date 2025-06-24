@@ -8,14 +8,12 @@ import LoginPage from './login/LoginPage';
 import PatientsList from './patientsList';
 import Medicalemployee from './Medicalemployee';
 import DicomViewer from './OHIF/OHIFViewer';
-import RISPage from '../pacsapp';
+
 import TitlePage from './Main_page/TitlePage';
 import StatisticsBoard from './Main_page/StatisticsBoard';
-import './MainPage.css'; // CSS 파일 import 추가
 import Controlpage from './Main_page/Control_page';
-
-
-
+import './MainPage.css';
+import DoctorDashboardOnly from './DoctorDashboardOnly';
 
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('TitlePage');
@@ -33,22 +31,32 @@ export default function MainPage() {
       case 'TitlePage': return <TitlePage setCurrentTab={setCurrentTab} />;
       case 'patientsList': return <PatientsList />;
       case 'Medicalemployee': return <Medicalemployee />;
-      case 'RISPage': return <RISPage />;
       case 'StatisticsBoard': return <StatisticsBoard />;
       case 'Controlpage': return <Controlpage />;
+      case 'DoctorDashboardOnly': return <DoctorDashboardOnly />;
       default: return <TitlePage setCurrentTab={setCurrentTab} />;
     }
   };
 
   const menuItems = [
     { id: 'TitlePage', icon: '🏠', label: '홈' },
-    { id: 'dicom', icon: '🖼️', label: 'DICOM' },
+    { id: 'dicom', icon: '🖼️', label: 'DICOM(제거 예정)' },
+    { id: 'DoctorDashboardOnly', icon: '🖥️', label: 'DoctorDashboardOnly' },
     { id: 'logins', icon: '🔐', label: '로그인' },
     { id: 'lis', icon: '🧪', label: 'LIS' },
     { id: 'RISPage', icon: '📋', label: 'RIS' },
     { id: 'Controlpage', label: 'Controlpage' },
-
   ];
+
+  const handleMenuClick = (itemId) => {
+    if (itemId === 'RISPage') {
+      window.open('/ris', '_blank', 'noopener,noreferrer');
+    } else if (itemId === 'lis') {
+      window.open('/lis', '_blank', 'noopener,noreferrer');
+    } else {
+      setCurrentTab(itemId);
+    }
+  };
 
   return (
     <div className="main-container">
@@ -67,25 +75,26 @@ export default function MainPage() {
           </div>
           <div className="user">{username} 님</div>
         </div>
-        
+
         <nav>
           {menuItems.map(item => (
-            <button 
+            <button
               key={item.id}
-              onClick={() => setCurrentTab(item.id)}
+              onClick={() => handleMenuClick(item.id)}
               className={currentTab === item.id ? 'active' : ''}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
             </button>
           ))}
-          
-          <Link to="/emr">
+
+          {/* EMR은 새 탭 */}
+          <a href="/emr" target="_blank" rel="noopener noreferrer">
             <button className="emr-link-btn">
               <span className="nav-icon">📁</span>
               <span className="nav-label">EMR 이동</span>
             </button>
-          </Link>
+          </a>
         </nav>
       </aside>
 
@@ -100,7 +109,7 @@ export default function MainPage() {
             ☰
           </button>
         )}
-        
+
         <div className="tab-content">
           {renderTab()}
         </div>
