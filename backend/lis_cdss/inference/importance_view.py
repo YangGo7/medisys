@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from lis_cdss.models import LiverFunctionSample
 from lis_cdss.inference.blood_inference import MODELS
-from .shap_lis import generate_shap_values
+from .manual_contributions import get_manual_contributions
 
 @api_view(['GET'])
 def get_logistic_importance(request):
@@ -24,10 +24,9 @@ def get_logistic_importance(request):
 @api_view(['GET'])
 def get_sample_contributions(request, sample_id):
     try:
-        # 샘플 불러오기
         sample = LiverFunctionSample.objects.get(id=sample_id)
 
-        # SHAP용 입력 딕셔너리 (사람이 읽기 쉬운 이름 → 모델에 쓰이는 이름 유지)
+        # 입력값 딕셔너리
         input_dict = {
             "ALT": sample.ALT,
             "AST": sample.AST,
@@ -37,30 +36,15 @@ def get_sample_contributions(request, sample_id):
             "Albumin": sample.Albumin,
         }
 
-        # SHAP 계산용 모델 및 feature 순서 정의
-        model = MODELS["LFT"]
-        feature_names = ["ALT", "AST", "ALP", "Total Bilirubin", "Direct Bilirubin", "Albumin"]
+        # 모델 및 배경 데이터 로드
+        model = joblib.load('lis_cdss/inference/lft_logistic_model.pkl')
+        background_df = pd.read_csv('lis_cdss/inference/lft_training_data.csv')
 
-        # Django 모델 필드 이름 → DB 실제 필드명
-        db_fields = {
-            "ALT": "ALT",
-            "AST": "AST",
-            "ALP": "ALP",
-            "Albumin": "Albumin",
-            "Total Bilirubin": "Total_Bilirubin",
-            "Direct Bilirubin": "Direct_Bilirubin",
-        }
-
-        # DB에서 background_df 생성 (컬럼명 매핑하여 순서 맞춤)
-        background_queryset = LiverFunctionSample.objects.values(*db_fields.values()).exclude(**{k: None for k in db_fields.values()})
-        background_df = pd.DataFrame(list(background_queryset))
-        background_df.columns = [k for k in db_fields]  # 컬럼명 다시 사람이 읽기 쉬운 이름으로
-
-        # SHAP 값 계산
-        result = generate_shap_values(model, input_dict, background_df)
+        # 기여도 계산
+        result = get_manual_contributions(model, input_dict, background_df)
 
         if result is None:
-            return Response({"error": "SHAP 계산 실패"}, status=500)
+            return Response({"error": "기여도 계산 실패"}, status=500)
 
         return Response(result)
 
