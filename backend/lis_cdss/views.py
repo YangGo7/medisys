@@ -20,38 +20,26 @@ def get_cdss_results(request):
 # ✅ 단일 샘플 결과 + 예측 포함
 @api_view(['GET'])
 def get_cdss_result_by_sample(request, sample_id):
-    results = CDSSResult.objects.filter(sample__id=sample_id)
-    if not results.exists():
-        return Response({'error': '샘플 결과 없음'}, status=404)
-
-    test_type = results.first().test_type
-    model = MODELS.get(test_type)
-
-    if not model:
-        return Response({'error': '모델 없음'}, status=500)
-
     try:
-        input_dict = {r.component_name: float(r.value) for r in results}
-        df = pd.DataFrame([[input_dict.get(f, 0.0) for f in PANEL_ORDER[test_type]]], columns=PANEL_ORDER[test_type])
+        results = CDSSResult.objects.filter(sample__id=sample_id)
+        if not results.exists():
+            return Response({'error': '샘플 결과 없음'}, status=404)
 
-        # 예측
-        prediction_prob = model.predict_proba(df)[0][1]
-        prediction = int(prediction_prob >= 0.5)
-
-        # SHAP
-        shap_data = generate_shap_values(model, input_dict)
-
-        # 결과 직렬화
         serializer = CDSSResultSerializer(results, many=True)
+        first = results.first()
 
         return Response({
             "sample": sample_id,
-            "test_type": test_type,
-            "prediction": prediction,
-            "prediction_prob": prediction_prob,
-            "shap_data": shap_data,
-            "results": serializer.data
+            "test_type": getattr(first, 'test_type', 'UNKNOWN'),
+            "prediction": getattr(first, 'prediction', None),
+            "prediction_prob": getattr(first, 'prediction_prob', None),
+            "results": serializer.data,
+            "shap_data": getattr(first, 'shap_data', None),
         })
+
+    except Exception as e:
+        print("❌ get_cdss_result_by_sample 에러:", e)
+        return Response({'error': str(e)}, status=500)
 
     except Exception as e:
         print("❌ CDSS 분석 오류:", str(e))

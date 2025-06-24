@@ -814,57 +814,83 @@ def get_patient_visits_history(request, patient_uuid):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def save_clinical_notes(request, patient_uuid):
-    """임상 노트만 별도 저장"""
+    """임상 기록 저장 - Provider 문제 완전 해결"""
     try:
-        notes = request.data.get('notes', '').strip()
-        encounter_uuid = request.data.get('encounter_uuid')
+        notes = request.data.get('notes', '')
         
         if not notes:
-            return Response({
-                'success': False,
-                'error': '저장할 노트가 없습니다.'
-            }, status=400)
+            return Response({'error': '노트가 필요합니다.'}, status=400)
 
-        api = OpenMRSAPI()
+        # ✅ 최소한의 Encounter 데이터만 사용 - Provider 완전 제거
+        from datetime import datetime
+        import pytz
         
-        # 기존 Encounter가 없으면 새로 생성
-        if not encounter_uuid:
-            encounter = api.create_encounter(patient_uuid)
-            if not encounter:
-                return Response({
-                    'success': False,
-                    'error': 'Encounter 생성 실패'
-                }, status=500)
-            encounter_uuid = encounter['uuid']
+        now_utc = datetime.now(pytz.UTC)
+        encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        
+        # ✅ 기본 필드만 사용 - location도 제거하여 최소화
+        encounter_data = {
+            'patient': patient_uuid,
+            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # Consultation
+            'encounterDatetime': encounter_datetime
+            # 'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',  # ❌ 이것도 제거해보자
+            # 'provider': None,  # ❌ 완전 제거
+        }
 
-        # 임상 노트 저장
-        notes_obs = api.create_observation({
-            "person": patient_uuid,
-            "encounter": encounter_uuid,
-            "concept": "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  # Clinical Notes
-            "valueText": notes,
-            "comment": "임상 노트"
-        })
+        print(f"🕐 최소 Encounter 데이터: {encounter_data}")
+
+        response = requests.post(
+            f'{OPENMRS_BASE_URL}/encounter',
+            headers=HEADERS,
+            json=encounter_data,
+            timeout=10
+        )
+
+        if response.status_code != 201:
+            error_msg = f"Encounter 생성 실패: {response.status_code}, {response.text}"
+            print(f"❌ {error_msg}")
+            return Response({'error': error_msg}, status=400)
+
+        encounter_result = response.json()
+        encounter_uuid = encounter_result['uuid']
+        print(f"✅ Encounter 생성 성공: {encounter_uuid}")
+
+        # ✅ Clinical Notes Obs 생성
+        obs_datetime = datetime.now(pytz.UTC).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         
-        if notes_obs:
+        obs_data = {
+            'person': patient_uuid,
+            'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes Concept
+            'encounter': encounter_uuid,
+            'obsDatetime': obs_datetime,
+            'value': notes
+        }
+
+        print(f"🩺 저장할 Obs 데이터: {obs_data}")
+
+        obs_response = requests.post(
+            f'{OPENMRS_BASE_URL}/obs',
+            headers=HEADERS,
+            json=obs_data,
+            timeout=10
+        )
+
+        if obs_response.status_code == 201:
+            obs_result = obs_response.json()
             return Response({
-                'success': True,
-                'message': '임상 노트가 저장되었습니다.',
+                'success': True, 
+                'message': '임상 기록이 저장되었습니다.',
                 'encounter_uuid': encounter_uuid,
-                'obs_uuid': notes_obs['uuid']
+                'obs_uuid': obs_result['uuid']
             })
         else:
-            return Response({
-                'success': False,
-                'error': '임상 노트 저장에 실패했습니다.'
-            }, status=500)
+            error_msg = f"Obs 저장 실패: {obs_response.status_code}, {obs_response.text}"
+            print(f"❌ {error_msg}")
+            return Response({'error': error_msg}, status=400)
 
     except Exception as e:
-        logger.error(f"임상 노트 저장 실패: {e}")
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+        print(f"❌ save_clinical_notes 예외: {e}")
+        return Response({'error': str(e)}, status=500)
 
 
 @api_view(['GET'])

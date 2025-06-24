@@ -37,6 +37,9 @@ const CdssVisualizationPage = () => {
         setSampleData(res.data);
       } catch (err) {
         console.error('❌ 샘플 데이터 불러오기 실패:', err);
+        if (err.response?.data) {
+          console.error('💡 서버 응답:', err.response.data);
+        }
         setSampleData(null);
       } finally {
         setLoading(false);
