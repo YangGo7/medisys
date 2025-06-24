@@ -73,6 +73,7 @@ def delete_cdss_result(request, sample_id):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ✅ 검사 항목별 개별 등록 → 전체 결과 갱신 및 SHAP 생성 포함
+
 @api_view(['POST'])
 def receive_model_result(request):
     data = request.data
@@ -80,6 +81,7 @@ def receive_model_result(request):
     test_type = data.get("test_type")
     component_name = data.get("component_name")
 
+    # 기존 항목 수정 또는 새로 생성
     existing = CDSSResult.objects.filter(
         sample=sample,
         test_type=test_type,
@@ -95,18 +97,24 @@ def receive_model_result(request):
         instance = serializer.save()
 
         try:
+            # 동일 sample, test_type에 해당하는 모든 항목 불러오기
             related = CDSSResult.objects.filter(
                 sample=sample,
                 test_type=test_type
             ).order_by('component_name')
+
+            # 항목별 값 dictionary로 구성
             values = {r.component_name: r.value for r in related}
 
+            # 예측 및 SHAP 생성
             model = MODELS.get(test_type)
             prediction = run_blood_model(test_type, values) if model else None
             shap_data = generate_shap_values(model, values) if model else None
+
+            # 예측 결과 전체 항목에 반영
             related.update(prediction=prediction)
-            
-            # ✅ LFT일 경우 LiverFunctionSample에도 저장
+
+            # ✅ LFT일 경우 LiverFunctionSample에 저장
             if test_type == "LFT":
                 lft_components = {
                     "ALT": None,
@@ -121,18 +129,27 @@ def receive_model_result(request):
                     if comp.component_name in lft_components:
                         lft_components[comp.component_name] = comp.value
 
+                # 모든 항목이 다 들어온 경우만 저장
                 if all(v is not None for v in lft_components.values()):
+                    # 중복 방지: 기존 sample+prediction 조합 있으면 삭제
+                    LiverFunctionSample.objects.filter(
+                        sample_id=sample,
+                        prediction=prediction
+                    ).delete()
+
                     LiverFunctionSample.objects.create(
+                        sample_id=sample,
                         ALT=lft_components["ALT"],
                         AST=lft_components["AST"],
                         ALP=lft_components["ALP"],
                         Albumin=lft_components["Albumin"],
-                       Total_Bilirubin=lft_components["Total Bilirubin"],
+                        Total_Bilirubin=lft_components["Total Bilirubin"],
                         Direct_Bilirubin=lft_components["Direct Bilirubin"],
                         prediction=prediction,
-                        probability=instance.prediction_prob  # prob 저장 필요 시
+                        probability=instance.prediction_prob  # 필요 시 사용
                     )
 
+            # 응답 데이터 구성
             response_data = CDSSResultSerializer(instance).data
             response_data['shap_data'] = shap_data
             response_data['prediction'] = prediction
@@ -140,11 +157,12 @@ def receive_model_result(request):
             return Response(response_data, status=201)
 
         except Exception as e:
-            print("예측 오류:", e)
+            print("❌ 예측 또는 저장 오류:", e)
 
         return Response(CDSSResultSerializer(instance).data, status=201)
 
     return Response(serializer.errors, status=400)
+
 
 # ✅ 슬라이더 기반 전체 시뮬레이션 입력 처리 (시각화용)
 @api_view(['POST'])

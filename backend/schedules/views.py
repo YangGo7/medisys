@@ -473,3 +473,12 @@ def get_room_schedules_summary(request):
             {'error': f'스케줄 요약 조회 중 오류가 발생했습니다: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+from django.http import JsonResponse        
+def get_month_schedules_summary(request, year, month):
+    # 예시 응답
+    return JsonResponse({
+        'status': 'success',
+        'year': year,
+        'month': month,
+        'appointments': [],  # 또는 실제 데이터
+    })
