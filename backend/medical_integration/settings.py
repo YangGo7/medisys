@@ -212,7 +212,7 @@ ORTHANC_PASSWORD = PACS_CONFIG['PASSWORD']
 
 EXTERNAL_SERVICES = {
     'openmrs': {
-        'host': '35.225.63.41',
+        'host': '127.0.0.1',
         'port': '8082',
         'username': 'admin',
         'password': 'Admin123',

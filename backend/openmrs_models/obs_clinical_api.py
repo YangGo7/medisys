@@ -497,7 +497,7 @@ def save_obs_clinical_data(request, patient_uuid):
         print(f"🏥 Encounter 생성 데이터: {encounter_data}")
 
         response = requests.post(
-            'http://openmrs:8080/openmrs/ws/rest/v1/encounter',
+            'http://127.0.0.1:8082/openmrs/ws/rest/v1/encounter',
             headers={
                 'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
                 'Content-Type': 'application/json'
@@ -535,7 +535,7 @@ def save_obs_clinical_data(request, patient_uuid):
                 }
 
                 obs_response = requests.post(
-                    'http://openmrs:8080/openmrs/ws/rest/v1/obs',
+                    'http://127.0.0.1:8082/openmrs/ws/rest/v1/obs',
                     headers={
                         'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
                         'Content-Type': 'application/json'
@@ -561,7 +561,7 @@ def save_obs_clinical_data(request, patient_uuid):
             }
 
             notes_response = requests.post(
-                'http://openmrs:8080/openmrs/ws/rest/v1/obs',
+                'http://127.0.0.1:8082/openmrs/ws/rest/v1/obs',
                 headers={
                     'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
                     'Content-Type': 'application/json'
@@ -691,7 +691,7 @@ def test_minimal_encounter(request, patient_uuid):
         print(f"🧪 테스트 Encounter 데이터: {encounter_data}")
 
         response = requests.post(
-            'http://openmrs:8080/openmrs/ws/rest/v1/encounter',
+            'http://127.0.0.1:8082/openmrs/ws/rest/v1/encounter',
             headers={
                 'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
                 'Content-Type': 'application/json'

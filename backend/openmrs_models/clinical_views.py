@@ -21,7 +21,7 @@ from medical_integration.models import PatientMapping
 import logging
 
 # OpenMRS 기본 설정
-OPENMRS_BASE_URL = 'http://openmrs:8080/openmrs/ws/rest/v1'
+OPENMRS_BASE_URL = 'http://127.0.0.1:8082/openmrs/ws/rest/v1'
 OPENMRS_AUTH = b64encode(b'admin:Admin123').decode()
 HEADERS = {'Authorization': f'Basic {OPENMRS_AUTH}', 'Content-Type': 'application/json'}
 
@@ -330,83 +330,203 @@ def get_patient_visits_history(request, patient_uuid):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def save_clinical_notes(request, patient_uuid):
-    """임상 기록 저장 (간단한 텍스트 형태)"""
+    """
+    🔥 완전 수정된 진료 기록 저장 함수 - Provider, Location 필수 필드 포함
+    """
     try:
-        notes = request.data.get('notes', '')
-        encounter_uuid = request.data.get('encounter_uuid')
+        logger.info(f"🩺 진료 기록 저장 시작: 환자 {patient_uuid}")
+        logger.info(f"요청 데이터: {request.data}")
         
-        if not notes:
-            return Response({'error': '노트가 필요합니다.'}, status=400)
-
-        # ✅ 새 Encounter 생성 (encounter_uuid가 없는 경우)
-        if not encounter_uuid:
-            # OpenMRS가 요구하는 올바른 ISO8601 형식으로 날짜 생성
-            from datetime import datetime
-            import pytz
-            
-            # UTC 시간으로 생성하고 Z를 붙임
-            now_utc = datetime.now(pytz.UTC)
-            encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-            
-            encounter_data = {
-                'patient': patient_uuid,
-                'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # Consultation
-                'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',      # Default Location
-                'encounterDatetime': encounter_datetime,  # ✅ 올바른 형식
-            }
-
-            print(f"🕐 보내는 날짜 형식: {encounter_datetime}")  # 디버깅용
-
-            response = requests.post(
-                f'{OPENMRS_BASE_URL}/encounter',
-                headers=HEADERS,
-                json=encounter_data,
-                timeout=10
-            )
-
-            if response.status_code != 201:
-                error_msg = f"Encounter 생성 실패: {response.status_code}, {response.text}"
-                print(f"❌ {error_msg}")
-                return Response({'error': error_msg}, status=400)
-
-            encounter_uuid = response.json()['uuid']
-            print(f"✅ Encounter 생성 성공: {encounter_uuid}")
-
-        # ✅ Clinical Notes Obs 생성
-        obs_datetime = datetime.now(pytz.UTC).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        # OpenMRS API 인스턴스 생성
+        openmrs_api = OpenMRSAPI()
         
-        obs_data = {
-            'person': patient_uuid,
-            'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes Concept UUID
-            'encounter': encounter_uuid,
-            'obsDatetime': obs_datetime,  # ✅ 올바른 형식
-            'value': notes
-        }
-
-        print(f"🩺 Obs 날짜 형식: {obs_datetime}")  # 디버깅용
-
-        response = requests.post(
-            f'{OPENMRS_BASE_URL}/obs',
-            headers=HEADERS,
-            json=obs_data,
-            timeout=10
-        )
-
-        if response.status_code == 201:
+        # 연결 테스트
+        if not openmrs_api.test_connection():
+            logger.error("OpenMRS 서버 연결 실패")
             return Response({
-                'success': True, 
-                'message': '임상 기록이 저장되었습니다.',
-                'encounter_uuid': encounter_uuid,
-                'obs_uuid': response.json()['uuid']
-            })
+                'success': False,
+                'error': 'OpenMRS 서버에 연결할 수 없습니다'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+        # 환자 존재 확인
+        patient_info = openmrs_api.get_patient(patient_uuid)
+        if not patient_info:
+            logger.error(f"환자를 찾을 수 없음: {patient_uuid}")
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없습니다'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 🔥 필수 메타데이터 조회
+        try:
+            encounter_type_uuid = openmrs_api.get_default_encounter_type_uuid()
+            location_uuid = openmrs_api.get_default_location_uuid()
+            provider_uuid = openmrs_api.get_default_provider_uuid()
+            
+            logger.info(f"📋 메타데이터 조회:")
+            logger.info(f"  Encounter Type: {encounter_type_uuid}")
+            logger.info(f"  Location: {location_uuid}")
+            logger.info(f"  Provider: {provider_uuid}")
+            
+            if not encounter_type_uuid:
+                raise Exception("Encounter Type을 찾을 수 없습니다")
+            if not location_uuid:
+                raise Exception("Location을 찾을 수 없습니다")
+            
+        except Exception as e:
+            logger.error(f"메타데이터 조회 실패: {e}")
+            return Response({
+                'success': False,
+                'error': f'OpenMRS 메타데이터 조회 실패: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # 🔥 완전한 Encounter 데이터 구성
+        encounter_data = {
+            'patient': patient_uuid,
+            'encounterType': encounter_type_uuid,
+            'location': location_uuid,
+            'encounterDatetime': None  # API가 자동으로 올바른 형식 설정
+        }
+        
+        # Provider가 있으면 추가 (선택사항으로 처리)
+        if provider_uuid:
+            encounter_data['provider'] = provider_uuid
+            logger.info(f"✅ Provider 추가: {provider_uuid}")
         else:
-            error_msg = f"Obs 저장 실패: {response.status_code}, {response.text}"
-            print(f"❌ {error_msg}")
-            return Response({'error': error_msg}, status=400)
-
+            logger.warning("⚠️ Provider 없이 진행")
+        
+        logger.info(f"🕐 완전한 Encounter 데이터: {encounter_data}")
+        
+        # Encounter 생성
+        encounter_result = openmrs_api.create_encounter(encounter_data)
+        if 'error' in encounter_result:
+            logger.error(f"Encounter 생성 실패: {encounter_result['error']}")
+            return Response({
+                'success': False,
+                'error': f"Encounter 생성 실패: {encounter_result['error']}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        encounter_uuid = encounter_result.get('uuid')
+        logger.info(f"✅ Encounter 생성 성공: {encounter_uuid}")
+        
+        # 🔥 진단 정보 저장 (안전한 방식)
+        diagnosis_data = request.data.get('diagnosis', [])
+        saved_diagnoses = []
+        for diag in diagnosis_data:
+            if diag.get('value') and diag.get('value').strip():
+                # 텍스트 기반 진단으로 저장
+                obs_data = {
+                    'person': patient_uuid,
+                    'encounter': encounter_uuid,
+                    'concept': '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Visit Diagnoses
+                    'valueText': str(diag['value']).strip(),
+                    'obsDatetime': None
+                }
+                
+                obs_result = openmrs_api.create_obs(obs_data)
+                if 'error' in obs_result:
+                    logger.warning(f"진단 Obs 생성 실패: {obs_result['error']}")
+                else:
+                    saved_diagnoses.append(obs_result.get('uuid'))
+                    logger.info(f"✅ 진단 Obs 생성 성공: {obs_result.get('uuid')}")
+        
+        # 🔥 처방 정보 저장 (안전한 방식)
+        prescription_data = request.data.get('prescriptions', [])
+        saved_prescriptions = []
+        for prescription in prescription_data:
+            if prescription.get('drug') and prescription.get('drug').strip():
+                # 약물명을 텍스트로 저장
+                drug_info = []
+                if prescription.get('drug'):
+                    drug_info.append(f"약물: {prescription['drug']}")
+                if prescription.get('dosage'):
+                    drug_info.append(f"용량: {prescription['dosage']}")
+                if prescription.get('frequency'):
+                    drug_info.append(f"빈도: {prescription['frequency']}")
+                if prescription.get('duration'):
+                    drug_info.append(f"기간: {prescription['duration']}")
+                
+                obs_data = {
+                    'person': patient_uuid,
+                    'encounter': encounter_uuid,
+                    'concept': '1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Drug Orders
+                    'valueText': ' | '.join(drug_info),
+                    'obsDatetime': None
+                }
+                
+                obs_result = openmrs_api.create_obs(obs_data)
+                if 'error' in obs_result:
+                    logger.warning(f"처방 Obs 생성 실패: {obs_result['error']}")
+                else:
+                    saved_prescriptions.append(obs_result.get('uuid'))
+                    logger.info(f"✅ 처방 Obs 생성 성공: {obs_result.get('uuid')}")
+        
+        # 🔥 임상 메모 저장 (필수)
+        notes = request.data.get('notes', '').strip()
+        saved_notes = None
+        if notes:
+            # Clinical Notes concept으로 저장
+            obs_data = {
+                'person': patient_uuid,
+                'encounter': encounter_uuid,
+                'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes
+                'valueText': notes,
+                'obsDatetime': None
+            }
+            
+            obs_result = openmrs_api.create_obs(obs_data)
+            if 'error' in obs_result:
+                logger.warning(f"메모 Obs 생성 실패: {obs_result['error']}")
+            else:
+                saved_notes = obs_result.get('uuid')
+                logger.info(f"✅ 메모 Obs 생성 성공: {obs_result.get('uuid')}")
+        
+        # 🔥 체중 정보 저장 (선택사항)
+        weight = request.data.get('weight', '').strip()
+        saved_weight = None
+        if weight and weight.replace('.', '').isdigit():
+            try:
+                weight_value = float(weight)
+                obs_data = {
+                    'person': patient_uuid,
+                    'encounter': encounter_uuid,
+                    'concept': '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Weight (kg)
+                    'value': weight_value,
+                    'obsDatetime': None
+                }
+                
+                obs_result = openmrs_api.create_obs(obs_data)
+                if 'error' in obs_result:
+                    logger.warning(f"체중 Obs 생성 실패: {obs_result['error']}")
+                else:
+                    saved_weight = obs_result.get('uuid')
+                    logger.info(f"✅ 체중 Obs 생성 성공: {obs_result.get('uuid')}")
+            except ValueError:
+                logger.warning(f"⚠️ 잘못된 체중 값: {weight}")
+        
+        logger.info(f"🎉 진료 기록 저장 완료: Encounter {encounter_uuid}")
+        
+        return Response({
+            'success': True,
+            'encounter_uuid': encounter_uuid,
+            'saved_data': {
+                'diagnoses_count': len(saved_diagnoses),
+                'prescriptions_count': len(saved_prescriptions),
+                'notes_saved': saved_notes is not None,
+                'weight_saved': saved_weight is not None,
+                'total_observations': len(saved_diagnoses) + len(saved_prescriptions) + (1 if saved_notes else 0) + (1 if saved_weight else 0)
+            },
+            'message': '진료 기록이 성공적으로 저장되었습니다'
+        })
+        
     except Exception as e:
-        print(f"❌ save_clinical_notes 예외: {e}")
-        return Response({'error': str(e)}, status=500)
+        logger.error(f"❌ save_clinical_notes_fixed 예외: {e}")
+        import traceback
+        logger.error(f"상세 에러: {traceback.format_exc()}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -811,87 +931,6 @@ def get_patient_visits_history(request, patient_uuid):
         }, status=500)
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def save_clinical_notes(request, patient_uuid):
-    """임상 기록 저장 - Provider 문제 완전 해결"""
-    try:
-        notes = request.data.get('notes', '')
-        
-        if not notes:
-            return Response({'error': '노트가 필요합니다.'}, status=400)
-
-        # ✅ 최소한의 Encounter 데이터만 사용 - Provider 완전 제거
-        from datetime import datetime
-        import pytz
-        
-        now_utc = datetime.now(pytz.UTC)
-        encounter_datetime = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-        
-        # ✅ 기본 필드만 사용 - location도 제거하여 최소화
-        encounter_data = {
-            'patient': patient_uuid,
-            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # Consultation
-            'encounterDatetime': encounter_datetime
-            # 'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',  # ❌ 이것도 제거해보자
-            # 'provider': None,  # ❌ 완전 제거
-        }
-
-        print(f"🕐 최소 Encounter 데이터: {encounter_data}")
-
-        response = requests.post(
-            f'{OPENMRS_BASE_URL}/encounter',
-            headers=HEADERS,
-            json=encounter_data,
-            timeout=10
-        )
-
-        if response.status_code != 201:
-            error_msg = f"Encounter 생성 실패: {response.status_code}, {response.text}"
-            print(f"❌ {error_msg}")
-            return Response({'error': error_msg}, status=400)
-
-        encounter_result = response.json()
-        encounter_uuid = encounter_result['uuid']
-        print(f"✅ Encounter 생성 성공: {encounter_uuid}")
-
-        # ✅ Clinical Notes Obs 생성
-        obs_datetime = datetime.now(pytz.UTC).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-        
-        obs_data = {
-            'person': patient_uuid,
-            'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical Notes Concept
-            'encounter': encounter_uuid,
-            'obsDatetime': obs_datetime,
-            'value': notes
-        }
-
-        print(f"🩺 저장할 Obs 데이터: {obs_data}")
-
-        obs_response = requests.post(
-            f'{OPENMRS_BASE_URL}/obs',
-            headers=HEADERS,
-            json=obs_data,
-            timeout=10
-        )
-
-        if obs_response.status_code == 201:
-            obs_result = obs_response.json()
-            return Response({
-                'success': True, 
-                'message': '임상 기록이 저장되었습니다.',
-                'encounter_uuid': encounter_uuid,
-                'obs_uuid': obs_result['uuid']
-            })
-        else:
-            error_msg = f"Obs 저장 실패: {obs_response.status_code}, {obs_response.text}"
-            print(f"❌ {error_msg}")
-            return Response({'error': error_msg}, status=400)
-
-    except Exception as e:
-        print(f"❌ save_clinical_notes 예외: {e}")
-        return Response({'error': str(e)}, status=500)
-
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -947,3 +986,79 @@ def get_recent_vitals(request, patient_uuid):
             'success': False,
             'error': str(e)
         }, status=500)
+        
+        
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def test_minimal_encounter(request, patient_uuid):
+    """최소한의 Encounter 생성 테스트"""
+    try:
+        logger.info(f"🧪 최소 Encounter 테스트: {patient_uuid}")
+        
+        openmrs_api = OpenMRSAPI()
+        
+        # 연결 테스트
+        if not openmrs_api.test_connection():
+            return Response({
+                'success': False,
+                'error': 'OpenMRS 연결 실패'
+            })
+        
+        # 환자 확인
+        patient = openmrs_api.get_patient(patient_uuid)
+        if not patient:
+            return Response({
+                'success': False,
+                'error': '환자를 찾을 수 없음'
+            })
+        
+        # 메타데이터 수집
+        encounter_type = openmrs_api.get_default_encounter_type_uuid()
+        location = openmrs_api.get_default_location_uuid()
+        provider = openmrs_api.get_default_provider_uuid()
+        
+        # 최소 데이터로 Encounter 생성
+        encounter_data = {
+            'patient': patient_uuid,
+            'encounterType': encounter_type,
+            'location': location,
+            'encounterDatetime': None
+        }
+        
+        # Provider는 선택사항으로 처리
+        if provider:
+            encounter_data['provider'] = provider
+        
+        logger.info(f"🔥 테스트 Encounter 데이터: {encounter_data}")
+        
+        result = openmrs_api.create_encounter(encounter_data)
+        
+        if 'error' in result:
+            return Response({
+                'success': False,
+                'error': result['error'],
+                'metadata': {
+                    'encounter_type': encounter_type,
+                    'location': location,
+                    'provider': provider
+                }
+            })
+        
+        return Response({
+            'success': True,
+            'message': '최소 Encounter 생성 성공!',
+            'encounter_uuid': result.get('uuid'),
+            'metadata': {
+                'encounter_type': encounter_type,
+                'location': location,
+                'provider': provider
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"최소 Encounter 테스트 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'테스트 중 오류: {str(e)}'
+        })

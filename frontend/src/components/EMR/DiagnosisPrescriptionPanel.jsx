@@ -1,653 +1,691 @@
-// frontend/src/components/EMR/DiagnosisPrescriptionPanel.jsx - 원본 스타일 유지하면서 수정
+// frontend/src/components/EMR/DiagnosisPrescriptionPanel.jsx (완전 수정 버전)
+/**
+ * 진단 및 처방 패널 - JSON/HTML 응답 오류 해결
+ */
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  Save, 
+  Plus, 
+  Trash2, 
+  AlertCircle, 
+  Check, 
+  Calendar, 
+  Loader,
+  User,
+  Activity
+} from 'lucide-react';
 
-const DiagnosisPrescriptionPanel = ({ patient }) => {
-  const [diagnoses, setDiagnoses] = useState([]);
-  const [clinicalHistory, setClinicalHistory] = useState([]);
-  const [newDiagnosis, setNewDiagnosis] = useState({ concept_uuid: '', value: '', notes: '' });
-  const [diagnosisSearchTerm, setDiagnosisSearchTerm] = useState('');
-  const [diagnosisSearchResults, setDiagnosisSearchResults] = useState([]);
-  const [clinicalNotes, setClinicalNotes] = useState('');
+const DiagnosisPrescriptionPanel = ({ patient, panelType = 'both' }) => {
+  // 상태 관리
+  const [formData, setFormData] = useState({
+    diagnosis: [],
+    prescriptions: [],
+    notes: '',
+    weight: ''
+  });
+  
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loadingPatient, setLoadingPatient] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null);
+  const [patientInfo, setPatientInfo] = useState(null);
   const [error, setError] = useState(null);
 
-  // ✅ API_BASE 올바른 설정
-  const API_BASE = 'http://35.225.63.41:8000/api';
+  // API 설정 - 환경변수에서 가져오기
+  const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://35.225.63.41:8000/api/';
+  const INTEGRATION_API = process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/';
+  
+  // 🔥 수정된 API URL들 - 실제 프로젝트 구조에 맞게
+  const CLINICAL_API_BASE = `${API_BASE}openmrs-clinical`;
+  const OBS_API_BASE = `${API_BASE}openmrs-models`;
 
-  console.log('🔍 DiagnosisPrescriptionPanel received patient:', patient);
+  // 🔥 환자 UUID 추출 - Patient Identifier로 Person UUID 조회
+  let patientUuid = patient?.person?.uuid ||        
+                    patient?.uuid || 
+                    patient?.openmrs_patient_uuid || 
+                    patient?.patient_uuid ||
+                    patient?.PatientUUID;
 
-  // ✅ 환자 정보 추출 - prop 이름 대응
-  const patientInfo = patient ? {
-    uuid: patient.uuid,                           // person_uuid
-    patient_identifier: patient.patient_identifier, // P5448
-    name: patient.name || patient.display,        // 환자 이름
-    display: patient.display,                     // "P5448 - 용녀 선우"
-    gender: patient.gender,
-    age: patient.age,
-    birthdate: patient.birthdate
-  } : null;
+  const patientName = patient?.name || 
+                      patient?.display || 
+                      patient?.patient_name ||
+                      patient?.PatientName ||
+                      patient?.person?.display ||
+                      (patient?.identifiers?.[0]?.display);
 
-  // 환자 임상 데이터 로드
-  const loadClinicalData = async () => {
-    if (!patientInfo?.uuid) return;
-    
+  console.log('🔍 환자 정보 디버깅:', {
+    patient,
+    patientUuid,
+    patientName,
+    patientKeys: patient ? Object.keys(patient) : 'patient is null',
+    // 🔥 Person 구조 확인
+    personObject: patient?.person,
+    personUuid: patient?.person?.uuid,
+    personKeys: patient?.person ? Object.keys(patient.person) : 'person is null',
+    patientIdentifier: patient?.patient_identifier
+  });
+
+  /**
+   * 🔥 안전한 API 요청 함수 - JSON/HTML 응답 오류 해결
+   */
+  const safeApiRequest = async (url, options = {}) => {
     try {
-      setLoading(true);
-      setError(null);
+      console.log(`🌐 API 요청: ${options.method || 'GET'} ${url}`);
       
-      console.log('📊 Loading clinical data for UUID:', patientInfo.uuid);
+      const response = await axios({
+        url,
+        method: 'GET',
+        timeout: 30000,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        ...options
+      });
+
+      console.log(`📡 API 응답: ${response.status} ${url}`);
+
+      // Content-Type 확인
+      const contentType = response.headers['content-type'] || '';
       
-      // obs_clinical_api 사용 시도
-      const response = await axios.get(
-        `${API_BASE}/patient/${patientInfo.uuid}/obs-clinical-data/`,
-        { timeout: 15000 }
-      );
-      
-      if (response.data.success) {
-        setClinicalHistory(response.data.clinical_history || []);
+      // HTML 응답 감지 및 처리
+      if (contentType.includes('text/html') || 
+          (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE'))) {
         
-        if (response.data.clinical_history.length > 0) {
-          const latest = response.data.clinical_history[0];
-          setDiagnoses(latest.diagnoses || []);
+        console.error('❌ HTML 응답 수신 (예상: JSON):', {
+          url,
+          status: response.status,
+          contentType,
+          dataPreview: typeof response.data === 'string' ? response.data.substring(0, 200) : response.data
+        });
+        
+        throw new Error(`서버가 HTML을 반환했습니다. API 엔드포인트를 확인하세요. (URL: ${url})`);
+      }
+
+      // 성공적인 JSON 응답
+      return {
+        success: true,
+        data: response.data,
+        status: response.status
+      };
+
+    } catch (error) {
+      console.error('❌ API 요청 실패:', error);
+
+      if (error.response) {
+        // 서버가 응답했지만 오류 상태
+        const { status, data } = error.response;
+        
+        if (typeof data === 'string' && data.trim().startsWith('<!DOCTYPE')) {
+          return {
+            success: false,
+            error: `서버 오류 (${status}): HTML 오류 페이지가 반환되었습니다.`,
+            errorType: 'html_response',
+            status
+          };
         }
+
+        return {
+          success: false,
+          error: `API 오류 (${status}): ${error.message}`,
+          errorType: 'api_error',
+          status,
+          responseData: data
+        };
+      } else if (error.code === 'ECONNABORTED') {
+        return {
+          success: false,
+          error: '요청 시간이 초과되었습니다. 네트워크를 확인하세요.',
+          errorType: 'timeout'
+        };
+      } else if (error.code === 'ERR_NETWORK') {
+        return {
+          success: false,
+          error: '네트워크 연결에 실패했습니다. 서버 상태를 확인하세요.',
+          errorType: 'network_error'
+        };
       } else {
-        setError(response.data.error || '데이터 로드 실패');
+        return {
+          success: false,
+          error: error.message || '알 수 없는 오류가 발생했습니다.',
+          errorType: 'unknown_error'
+        };
+      }
+    }
+  };
+
+  /**
+   * Patient Identifier로 Person UUID 조회 함수
+   */
+  const fetchPersonUuidByIdentifier = async (identifier) => {
+    try {
+      console.log('🔄 Patient Identifier로 Person UUID 조회 시도:', identifier);
+      
+      const result = await safeApiRequest(
+        `${API_BASE}person-uuid-by-identifier/${identifier}/`,
+        { method: 'GET' }
+      );
+
+      if (result.success && result.data.person_uuid) {
+        console.log('✅ Person UUID 조회 성공:', result.data.person_uuid);
+        // 상태 업데이트를 통해 UUID 설정
+        setPatientInfo(prev => ({
+          ...prev,
+          uuid: result.data.person_uuid,
+          person_uuid: result.data.person_uuid,
+          patient_identifier: identifier,
+          name: result.data.patient_name || patientName
+        }));
+        return result.data.person_uuid;
+      } else {
+        console.warn('⚠️ Person UUID 조회 실패:', result.error);
+        return null;
       }
     } catch (error) {
-      console.error('❌ 데이터 로드 실패:', error);
-      
-      // fallback: 기존 API 시도
-      try {
-        const fallbackResponse = await axios.get(
-          `${API_BASE}/openmrs-clinical/patient/${patientInfo.uuid}/clinical-data/`,
-          { timeout: 15000 }
-        );
-        
-        if (fallbackResponse.data.clinical_data) {
-          setClinicalHistory(fallbackResponse.data.clinical_data);
-          if (fallbackResponse.data.clinical_data.length > 0) {
-            const latest = fallbackResponse.data.clinical_data[0];
-            setDiagnoses(latest.diagnoses || []);
-          }
+      console.error('❌ Person UUID 조회 실패:', error);
+      return null;
+    }
+  };
+
+  /**
+   * 환자 정보 로드
+   */
+  const loadPatientInfo = async () => {
+    if (!patient) {
+      setError('환자 정보가 없습니다');
+      setLoadingPatient(false);
+      return;
+    }
+
+    setLoadingPatient(true);
+    setError(null);
+
+    try {
+      // 🚨 UUID가 없으면 Patient Identifier로 Person UUID 조회 시도
+      if (!patientUuid && patient?.patient_identifier) {
+        const foundUuid = await fetchPersonUuidByIdentifier(patient.patient_identifier);
+        if (foundUuid) {
+          patientUuid = foundUuid;
         }
-      } catch (fallbackError) {
-        console.error('❌ Fallback 데이터 로드도 실패:', fallbackError);
-        setError('네트워크 오류: ' + error.message);
       }
+
+      if (patientUuid) {
+        // UUID가 있으면 추가 환자 정보 로드 시도
+        try {
+          const result = await safeApiRequest(
+            `${INTEGRATION_API}openmrs-patients/${patientUuid}/`,
+            { method: 'GET' }
+          );
+
+          if (result.success) {
+            setPatientInfo(result.data);
+            console.log('✅ 환자 정보 로드 성공:', result.data);
+          } else {
+            // 기본 정보로 설정
+            setPatientInfo({
+              uuid: patientUuid,
+              name: patientName,
+              display: patientName,
+              patient_identifier: patient?.patient_identifier
+            });
+          }
+        } catch (error) {
+          // 기본 정보로 설정
+          setPatientInfo({
+            uuid: patientUuid,
+            name: patientName,
+            display: patientName,
+            patient_identifier: patient?.patient_identifier
+          });
+        }
+      } else {
+        // UUID를 찾을 수 없는 경우
+        setPatientInfo({
+          name: patientName,
+          display: patientName,
+          patient_identifier: patient?.patient_identifier,
+          uuid: null
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ 환자 정보 로드 실패:', error);
+      setError(`환자 정보를 불러올 수 없습니다: ${error.message}`);
+    } finally {
+      setLoadingPatient(false);
+    }
+  };
+
+  /**
+   * 진료 기록 저장
+   */
+  const handleSave = async () => {
+    // 🔥 UUID 최종 확인 - patientInfo에서 업데이트된 UUID 사용
+    const finalPatientUuid = patientInfo?.uuid || 
+                            patientInfo?.person_uuid || 
+                            patientUuid;
+
+    if (!finalPatientUuid) {
+      setSaveStatus({
+        type: 'error',
+        message: '환자 UUID를 찾을 수 없습니다.',
+        details: `Patient Identifier: ${patient?.patient_identifier}. Person UUID 조회가 필요합니다.`
+      });
+      
+      // UUID가 없고 Patient Identifier가 있으면 다시 시도
+      if (!finalPatientUuid && patient?.patient_identifier) {
+        console.log('🔄 UUID 재조회 시도...');
+        await fetchPersonUuidByIdentifier(patient.patient_identifier);
+      }
+      return;
+    }
+
+    if (!formData.notes.trim()) {
+      setSaveStatus({
+        type: 'error',
+        message: '임상 메모를 입력해주세요.',
+        details: '진료 내용을 기록하는 것은 필수입니다.'
+      });
+      return;
+    }
+
+    setLoading(true);
+    setSaveStatus(null);
+
+    try {
+      console.log('💾 진료 기록 저장 시작:', {
+        finalPatientUuid,
+        patientIdentifier: patient?.patient_identifier,
+        formData
+      });
+
+      // 🔥 수정: clinical_views.py의 save_clinical_notes_fixed 함수 호출
+      const saveData = {
+        diagnosis: formData.diagnosis.map(diag => ({
+          concept: '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // Primary diagnosis concept
+          value: diag.value,
+          type: diag.type
+        })),
+        prescriptions: formData.prescriptions.map(pres => ({
+          drug: pres.drug,
+          dosage: pres.dosage,
+          frequency: pres.frequency,
+          duration: pres.duration
+        })),
+        notes: formData.notes,
+        weight: formData.weight
+      };
+
+      const result = await safeApiRequest(
+        `${CLINICAL_API_BASE}/patient/${finalPatientUuid}/save-notes/`,
+        {
+          method: 'POST',
+          data: saveData
+        }
+      );
+
+      if (result.success) {
+        setSaveStatus({
+          type: 'success',
+          message: '진료 기록이 성공적으로 저장되었습니다.',
+          details: result.data
+        });
+
+        console.log('✅ 진료 기록 저장 성공:', result.data);
+      } else {
+        throw new Error(result.error);
+      }
+
+    } catch (error) {
+      console.error('❌ 진료 기록 저장 실패:', error);
+      setSaveStatus({
+        type: 'error',
+        message: '진료 기록 저장에 실패했습니다.',
+        details: error.message
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // 컴포넌트 마운트 시 환자 정보 로드
   useEffect(() => {
-    if (patientInfo?.uuid) {
-      loadClinicalData();
+    if (patient) {
+      loadPatientInfo();
     }
-  }, [patientInfo?.uuid]);
+  }, [patient]);
 
-  // ✅ 진단 검색 - API 응답 구조 개선
-  const searchDiagnosis = async (searchTerm) => {
-    if (searchTerm.length < 2) {
-      setDiagnosisSearchResults([]);
-      return;
-    }
-
-    try {
-      console.log('🔍 진단 검색:', searchTerm);
-      
-      // obs_clinical_api 검색 시도
-      let response = await axios.get(`${API_BASE}/search-concepts-obs/`, {
-        params: { q: searchTerm, type: 'diagnosis' },
-        timeout: 10000
-      });
-      
-      console.log('✅ 검색 응답:', response.data);
-      
-      if (response.data.success && response.data.results) {
-        setDiagnosisSearchResults(response.data.results);
-        return;
-      }
-    } catch (error) {
-      console.error('첫 번째 검색 실패, fallback 시도:', error);
-    }
-
-    try {
-      // fallback: 기존 API
-      console.log('🔄 Fallback 검색 시도...');
-      const response = await axios.get(`${API_BASE}/openmrs-clinical/search-diagnosis/`, {
-        params: { q: searchTerm },
-        timeout: 10000
-      });
-      
-      console.log('✅ Fallback 검색 응답:', response.data);
-      
-      if (response.data.results) {
-        setDiagnosisSearchResults(response.data.results);
-      }
-    } catch (error) {
-      console.error('❌ 모든 검색 실패:', error);
-      setDiagnosisSearchResults([]);
-    }
-  };
-
+  // 상태 메시지 자동 제거
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (diagnosisSearchTerm.trim()) {
-        searchDiagnosis(diagnosisSearchTerm);
-      } else {
-        setDiagnosisSearchResults([]);
-      }
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
-  }, [diagnosisSearchTerm]);
+    if (saveStatus) {
+      const timer = setTimeout(() => {
+        setSaveStatus(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveStatus]);
 
-  // 진단 선택, 추가, 삭제
-  const selectDiagnosis = (concept) => {
-    setNewDiagnosis({
-      concept_uuid: concept.uuid,
-      value: concept.display,
-      notes: ''
-    });
-    setDiagnosisSearchTerm(concept.display);
-    setDiagnosisSearchResults([]);
+  /**
+   * 폼 필드 업데이트 함수들
+   */
+  const updateField = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const addDiagnosis = () => {
-    if (newDiagnosis.concept_uuid && newDiagnosis.value) {
-      setDiagnoses(prev => [...prev, { ...newDiagnosis, id: Date.now() }]);
-      setNewDiagnosis({ concept_uuid: '', value: '', notes: '' });
-      setDiagnosisSearchTerm('');
-    }
+    setFormData(prev => ({
+      ...prev,
+      diagnosis: [...prev.diagnosis, { type: 'primary', value: '' }]
+    }));
   };
 
   const removeDiagnosis = (index) => {
-    setDiagnoses(prev => prev.filter((_, i) => i !== index));
+    setFormData(prev => ({
+      ...prev,
+      diagnosis: prev.diagnosis.filter((_, i) => i !== index)
+    }));
   };
 
-  // 저장
-  const saveClinicalData = async () => {
-    if (!patientInfo?.uuid) {
-      alert('환자 UUID가 없습니다.');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError(null);
-      
-      const data = {
-        diagnoses: diagnoses,
-        prescriptions: [],
-        clinical_notes: clinicalNotes.trim()
-      };
-
-      console.log('💾 Saving for UUID:', patientInfo.uuid);
-
-      // obs_clinical_api 저장 시도
-      try {
-        const response = await axios.post(
-          `${API_BASE}/patient/${patientInfo.uuid}/save-obs-clinical/`,
-          data,
-          { timeout: 20000 }
-        );
-
-        if (response.data.success) {
-          alert(`✅ 저장 완료! (${response.data.total_saved}개 항목)`);
-          await loadClinicalData();
-          return;
-        }
-      } catch (error) {
-        console.error('첫 번째 저장 실패, fallback 시도:', error);
-      }
-
-      // fallback: 기존 API
-      const fallbackResponse = await axios.post(
-        `${API_BASE}/openmrs-clinical/patient/${patientInfo.uuid}/save-notes/`,
-        { notes: clinicalNotes.trim() },
-        { timeout: 20000 }
-      );
-
-      if (fallbackResponse.data.success) {
-        alert('✅ 임상 노트 저장 완료!');
-        await loadClinicalData();
-      } else {
-        throw new Error(fallbackResponse.data.error || '저장 실패');
-      }
-    } catch (error) {
-      console.error('❌ 모든 저장 방법 실패:', error);
-      const errorMsg = error.response?.data?.error || error.message || '네트워크 오류';
-      setError(errorMsg);
-      alert('❌ 저장 오류: ' + errorMsg);
-    } finally {
-      setSaving(false);
-    }
+  const updateDiagnosis = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      diagnosis: prev.diagnosis.map((diag, i) => 
+        i === index ? { ...diag, [field]: value } : diag
+      )
+    }));
   };
 
-  // 렌더링 - 환자가 없을 때
+  const addPrescription = () => {
+    setFormData(prev => ({
+      ...prev,
+      prescriptions: [...prev.prescriptions, { 
+        drug: '', 
+        dosage: '', 
+        frequency: '', 
+        duration: '' 
+      }]
+    }));
+  };
+
+  const removePrescription = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      prescriptions: prev.prescriptions.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updatePrescription = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      prescriptions: prev.prescriptions.map((pres, i) => 
+        i === index ? { ...pres, [field]: value } : pres
+      )
+    }));
+  };
+
+  // 환자가 선택되지 않은 경우
   if (!patient) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-        <h3>🏥 진단 관리</h3>
-        <p>환자를 선택해 주세요.</p>
-      </div>
-    );
-  }
-
-  // UUID 없을 때 디버깅 정보
-  if (!patientInfo?.uuid) {
-    return (
-      <div style={{ 
-        padding: '1rem', 
-        backgroundColor: '#fff3cd', 
-        border: '1px solid #ffeaa7',
-        borderRadius: '8px',
-        color: '#856404' 
-      }}>
-        <h3>⚠️ 환자 UUID 없음</h3>
-        <p><strong>환자:</strong> {patient.display || patient.name}</p>
-        <p>patient.uuid가 필요합니다.</p>
-        <details style={{ marginTop: '1rem' }}>
-          <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
-            환자 객체 구조 보기
-          </summary>
-          <pre style={{ 
-            fontSize: '10px', 
-            background: '#f8f9fa',
-            padding: '10px',
-            borderRadius: '4px',
-            marginTop: '0.5rem',
-            overflow: 'auto',
-            maxHeight: '200px'
-          }}>
-            {JSON.stringify(patient, null, 2)}
-          </pre>
-        </details>
+      <div className="p-6 bg-gray-50 rounded-lg">
+        <div className="text-center text-gray-500">
+          <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-medium mb-2">환자를 선택해주세요</h3>
+          <p className="text-sm">진단 및 처방을 입력하려면 먼저 환자를 선택해야 합니다.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      padding: '1.5rem', 
-      backgroundColor: '#ffffff',
-      borderRadius: '12px',
-      border: '1px solid #e0e4e7',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-    }}>
+    <div className="p-6 bg-white rounded-lg shadow-sm border">
       {/* 헤더 */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        marginBottom: '1.5rem',
-        paddingBottom: '1rem',
-        borderBottom: '2px solid #f0f2f5'
-      }}>
-        <div style={{ fontSize: '20px', marginRight: '0.5rem' }}>🏥</div>
-        <h3 style={{ 
-          margin: 0, 
-          color: '#2c3e50',
-          fontSize: '18px',
-          fontWeight: '600'
-        }}>
-          진단 및 처방 관리
-        </h3>
-      </div>
-
-      {/* 환자 정보 요약 */}
-      <div style={{ 
-        marginBottom: '1.5rem', 
-        padding: '1rem', 
-        backgroundColor: '#f8f9fc',
-        borderRadius: '8px',
-        border: '1px solid #e1e5e9'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center',
-          marginBottom: '0.75rem'
-        }}>
-          <div style={{ fontSize: '16px', marginRight: '0.5rem' }}>📋</div>
-          <div style={{ fontWeight: '600', color: '#2c3e50' }}>환자 정보</div>
-        </div>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '0.75rem',
-          fontSize: '14px'
-        }}>
-          <div style={{ 
-            padding: '0.5rem', 
-            backgroundColor: patientInfo.gender === 'M' ? '#e8f5e8' : '#fce4ec', 
-            borderRadius: '4px',
-            border: `1px solid ${patientInfo.gender === 'M' ? '#a5d6a7' : '#f8bbd9'}`
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: patientInfo.gender === 'M' ? '#2e7d32' : '#c2185b', marginBottom: '0.25rem' }}>
-              성별/나이
-            </div>
-            <div style={{ fontSize: '15px', fontWeight: 'bold' }}>
-              {patientInfo.gender === 'M' ? '남성' : patientInfo.gender === 'F' ? '여성' : 'N/A'} / {patientInfo.age || 'N/A'}세
+      <div className="border-b pb-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+              <Activity className="w-6 h-6 text-blue-600" />
+              <span>진단 및 처방</span>
+            </h2>
+            <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+              {loadingPatient ? (
+                <div className="flex items-center space-x-2">
+                  <Loader className="w-4 h-4 animate-spin" />
+                  <span>환자 정보 로딩 중...</span>
+                </div>
+              ) : (
+                <span>{patientInfo?.display || patientName || '환자 정보 없음'}</span>
+              )}
+              <Calendar className="w-4 h-4 ml-4" />
+              <span>{new Date().toLocaleDateString('ko-KR')}</span>
             </div>
           </div>
         </div>
-
-        <div style={{ 
-          marginTop: '0.75rem', 
-          padding: '0.5rem',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#666'
-        }}>
-          <div><strong>Person UUID:</strong> {patientInfo.uuid}</div>
-          <div><strong>Display:</strong> {patientInfo.display}</div>
-        </div>
       </div>
 
-      {/* 로딩 상태 */}
-      {loading && (
-        <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-          📋 데이터 로드 중...
-        </div>
-      )}
-
-      {/* 에러 표시 */}
+      {/* 오류 메시지 */}
       {error && (
-        <div style={{
-          marginBottom: '1rem',
-          padding: '0.75rem',
-          backgroundColor: '#ffebee',
-          border: '1px solid #f44336',
-          borderRadius: '4px',
-          fontSize: '14px',
-          color: '#c62828'
-        }}>
-          ⚠️ {error}
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center space-x-2 text-red-800">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <div className="font-medium">연결 오류</div>
+              <div className="text-sm mt-1">{error}</div>
+              <button
+                onClick={loadPatientInfo}
+                className="mt-2 text-sm bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition-colors"
+              >
+                다시 시도
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* 진단 입력 섹션 */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ color: '#e74c3c', marginBottom: '0.75rem', fontSize: '16px' }}>🔍 진단 입력</h4>
-        
-        {/* 진단 검색 */}
-        <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-          <input
-            type="text"
-            placeholder="진단명 검색 (예: diabetes, hypertension...)"
-            value={diagnosisSearchTerm}
-            onChange={(e) => setDiagnosisSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '2px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '14px',
-              outline: 'none',
-              transition: 'border-color 0.2s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
-          />
-          
-          {/* 검색 결과 드롭다운 */}
-          {diagnosisSearchResults.length > 0 && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              maxHeight: '200px',
-              overflowY: 'auto',
-              backgroundColor: 'white',
-              border: '1px solid #ddd',
-              borderTop: 'none',
-              borderRadius: '0 0 6px 6px',
-              zIndex: 1000,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              {diagnosisSearchResults.map((concept, index) => (
-                <div
-                  key={index}
-                  onClick={() => selectDiagnosis(concept)}
-                  style={{
-                    padding: '10px 12px',
-                    borderBottom: '1px solid #f0f0f0',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
-                >
-                  <div style={{ fontWeight: '500' }}>{concept.display}</div>
-                  {concept.concept_class && (
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                      {concept.concept_class}
-                    </div>
-                  )}
+      {/* 상태 메시지 */}
+      {saveStatus && (
+        <div className={`mb-4 p-4 rounded-lg flex items-center space-x-2 ${
+          saveStatus.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {saveStatus.type === 'success' ? 
+            <Check className="w-5 h-5" /> : 
+            <AlertCircle className="w-5 h-5" />
+          }
+          <div>
+            <div className="font-medium">{saveStatus.message}</div>
+            {saveStatus.details && (
+              <div className="text-sm mt-1">
+                {typeof saveStatus.details === 'object' ? 
+                  `Encounter: ${saveStatus.details.encounter_uuid?.substring(0, 8)}...` :
+                  saveStatus.details
+                }
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 왼쪽: 기본 정보 */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              임상 메모 *
+            </label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => updateField('notes', e.target.value)}
+              placeholder="환자 상태, 진료 내용, 특이사항 등을 기록하세요..."
+              className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              체중 (kg)
+            </label>
+            <input
+              type="number"
+              value={formData.weight}
+              onChange={(e) => updateField('weight', e.target.value)}
+              placeholder="70"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* 오른쪽: 진단 및 처방 */}
+        <div className="space-y-6">
+          {/* 진단 섹션 */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-gray-800">진단</h3>
+              <button
+                onClick={addDiagnosis}
+                className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>추가</span>
+              </button>
+            </div>
+            
+            <div className="space-y-2">
+              {formData.diagnosis.map((diag, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <select
+                    value={diag.type}
+                    onChange={(e) => updateDiagnosis(index, 'type', e.target.value)}
+                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                    <option value="primary">주진단</option>
+                    <option value="secondary">부진단</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="진단명"
+                    value={diag.value}
+                    onChange={(e) => updateDiagnosis(index, 'value', e.target.value)}
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                  <button
+                    onClick={() => removeDiagnosis(index)}
+                    className="p-1 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* 선택된 진단 입력 */}
-        {newDiagnosis.value && (
-          <div style={{
-            padding: '12px',
-            backgroundColor: '#e8f5e8',
-            border: '1px solid #4caf50',
-            borderRadius: '6px',
-            marginBottom: '0.75rem'
-          }}>
-            <div style={{ fontWeight: '600', marginBottom: '8px', color: '#2e7d32' }}>
-              선택된 진단: {newDiagnosis.value}
-            </div>
-            <textarea
-              placeholder="진단 노트 (선택사항)..."
-              value={newDiagnosis.notes}
-              onChange={(e) => setNewDiagnosis(prev => ({...prev, notes: e.target.value}))}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #c8e6c9',
-                borderRadius: '4px',
-                resize: 'vertical',
-                minHeight: '60px',
-                fontSize: '14px',
-                marginBottom: '8px'
-              }}
-            />
-            <button
-              onClick={addDiagnosis}
-              disabled={!newDiagnosis.concept_uuid}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: newDiagnosis.concept_uuid ? '#4caf50' : '#ccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: newDiagnosis.concept_uuid ? 'pointer' : 'not-allowed',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              ➕ 진단 추가
-            </button>
-          </div>
-        )}
-
-        {/* 현재 진단 목록 */}
-        {diagnoses.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>
-              현재 진단 ({diagnoses.length}개):
-            </div>
-            {diagnoses.map((diagnosis, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '10px',
-                margin: '4px 0',
-                backgroundColor: '#fff5f5',
-                border: '1px solid #ffcdd2',
-                borderRadius: '6px',
-                fontSize: '14px'
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '600', marginBottom: '2px' }}>
-                    {diagnosis.value}
-                  </div>
-                  {diagnosis.notes && (
-                    <div style={{ 
-                      color: '#666', 
-                      fontSize: '12px', 
-                      fontStyle: 'italic',
-                      marginTop: '4px'
-                    }}>
-                      📝 {diagnosis.notes}
-                    </div>
-                  )}
+              
+              {formData.diagnosis.length === 0 && (
+                <div className="text-gray-500 text-sm italic">
+                  진단을 추가하려면 "추가" 버튼을 클릭하세요
                 </div>
-                <button
-                  onClick={() => removeDiagnosis(index)}
-                  style={{
-                    marginLeft: '10px',
-                    backgroundColor: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#d32f2f'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* 임상 노트 섹션 */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ color: '#3498db', marginBottom: '0.75rem', fontSize: '16px' }}>📝 임상 노트</h4>
-        <textarea
-          value={clinicalNotes}
-          onChange={(e) => setClinicalNotes(e.target.value)}
-          placeholder="환자의 임상 상태, 치료 계획, 특이사항 등을 기록하세요..."
-          style={{
-            width: '100%',
-            padding: '12px',
-            border: '2px solid #ddd',
-            borderRadius: '6px',
-            resize: 'vertical',
-            minHeight: '100px',
-            fontSize: '14px',
-            fontFamily: 'inherit',
-            outline: 'none',
-            transition: 'border-color 0.2s'
-          }}
-          onFocus={(e) => e.target.style.borderColor = '#3498db'}
-          onBlur={(e) => e.target.style.borderColor = '#ddd'}
-        />
+          {/* 처방 섹션 */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-gray-800">처방</h3>
+              <button
+                onClick={addPrescription}
+                className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>추가</span>
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {formData.prescriptions.map((prescription, index) => (
+                <div key={index} className="border rounded-lg p-3 bg-gray-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">처방 {index + 1}</span>
+                    <button
+                      onClick={() => removePrescription(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      placeholder="약물명"
+                      value={prescription.drug}
+                      onChange={(e) => updatePrescription(index, 'drug', e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      <input
+                        type="text"
+                        placeholder="용량"
+                        value={prescription.dosage}
+                        onChange={(e) => updatePrescription(index, 'dosage', e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                      <input
+                        type="text"
+                        placeholder="빈도"
+                        value={prescription.frequency}
+                        onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                      <input
+                        type="text"
+                        placeholder="기간"
+                        value={prescription.duration}
+                        onChange={(e) => updatePrescription(index, 'duration', e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {formData.prescriptions.length === 0 && (
+                <div className="text-gray-500 text-sm italic">
+                  처방을 추가하려면 "추가" 버튼을 클릭하세요
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 저장 버튼 */}
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <button 
-          onClick={saveClinicalData} 
-          disabled={saving || (!diagnoses.length && !clinicalNotes.trim())}
-          style={{
-            padding: '12px 30px',
-            backgroundColor: saving ? '#95a5a6' : '#27ae60',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            if (!saving && (diagnoses.length || clinicalNotes.trim())) {
-              e.target.style.backgroundColor = '#219a52';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!saving) {
-              e.target.style.backgroundColor = '#27ae60';
-            }
-          }}
-        >
-          {saving ? '💾 저장 중...' : '💾 저장하기'}
-        </button>
-      </div>
-
-      {/* 기존 임상 이력 */}
-      {clinicalHistory.length > 0 && (
-        <div>
-          <h4 style={{ color: '#8e44ad', marginBottom: '0.75rem', fontSize: '16px' }}>📊 임상 이력</h4>
-          {clinicalHistory.map((history, index) => (
-            <div key={index} style={{
-              marginBottom: '1rem',
-              padding: '15px',
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
-              borderRadius: '8px'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '10px',
-                paddingBottom: '8px',
-                borderBottom: '1px solid #dee2e6'
-              }}>
-                <div style={{ fontWeight: '600', color: '#495057' }}>
-                  {new Date(history.encounter_datetime).toLocaleString('ko-KR')}
-                </div>
-                <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                  {history.encounter_type}
-                </div>
+      <div className="mt-8 pt-4 border-t">
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-gray-500">
+            <div>환자 ID: {patient?.patient_identifier || 'Unknown'}</div>
+            <div>UUID: {patientInfo?.uuid || patientUuid || '조회 중...'}</div>
+            {patientInfo && (
+              <div className="mt-1">
+                <span className="font-medium">이름:</span> {patientInfo.name || patientName}
               </div>
-              
-              {history.diagnoses?.length > 0 && (
-                <div style={{ marginBottom: '10px' }}>
-                  <div style={{ fontWeight: '600', marginBottom: '5px', color: '#e74c3c' }}>진단:</div>
-                  {history.diagnoses.map((diag, diagIndex) => (
-                    <div key={diagIndex} style={{ fontSize: '14px', marginLeft: '10px', marginBottom: '3px' }}>
-                      • <strong>{diag.concept_name}:</strong> {diag.value}
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {history.notes?.length > 0 && (
-                <div>
-                  <div style={{ fontWeight: '600', marginBottom: '5px', color: '#3498db' }}>노트:</div>
-                  {history.notes.map((note, noteIndex) => (
-                    <div key={noteIndex} style={{ fontSize: '14px', marginLeft: '10px', fontStyle: 'italic' }}>
-                      • {note.value}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            )}
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={loading || !formData.notes.trim() || loadingPatient}
+            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
+              loading || !formData.notes.trim() || loadingPatient
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
+            }`}
+          >
+            <Save className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            <span>{loading ? '저장 중...' : '진료 기록 저장'}</span>
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

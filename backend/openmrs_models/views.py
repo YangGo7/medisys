@@ -25,7 +25,7 @@ def openmrs_vitals(request):
 
     auth = b64encode(b'admin:Admin123').decode()
     headers = {'Authorization': f'Basic {auth}'}
-    url = 'http://openmrs:8080/openmrs/ws/rest/v1/obs'
+    url = 'http://127.0.0.1:8082/openmrs/ws/rest/v1/obs'
     res = requests.get(url, headers=headers, params={'patient': uuid})
     data = res.json()
 
@@ -119,7 +119,7 @@ def openmrs_encounters(request):
 
     auth = b64encode(b'admin:Admin123').decode()
     headers = {'Authorization': f'Basic {auth}'}
-    url = 'http://openmrs:8080/openmrs/ws/rest/v1/encounter'
+    url = 'http://http://127.0.0.1:8082/openmrs/ws/rest/v1/encounter'
     res = requests.get(url, headers=headers, params={'patient': uuid})
     data = res.json()
 
@@ -207,6 +207,121 @@ def get_person_uuid_by_identifier(request, patient_identifier):
         logger.error(f"❌ Error finding person UUID for {patient_identifier}: {e}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+def get_patient_name_by_uuid(patient_uuid):
+    """
+    🔥 수정된 UUID 기반 환자 이름 조회
+    UUID는 Person 테이블에 있으므로 Person → Patient → PatientIdentifier 순으로 조회
+    """
+    try:
+        from openmrs_models.models import Person, Patient, PatientIdentifier, PersonName
+        
+        # 1. Person 테이블에서 UUID로 조회
+        try:
+            person = Person.objects.get(uuid=patient_uuid, voided=False)
+            logger.info(f"✅ Person 발견: {person.person_id}")
+        except Person.DoesNotExist:
+            logger.error(f"❌ Person not found for UUID: {patient_uuid}")
+            return None
+        
+        # 2. Person → Patient 관계 조회
+        try:
+            patient = Patient.objects.get(patient_id=person, voided=False)
+            logger.info(f"✅ Patient 발견: {patient.patient_id}")
+        except Patient.DoesNotExist:
+            logger.error(f"❌ Patient not found for Person: {person.person_id}")
+            return None
+        
+        # 3. Patient → PatientIdentifier 조회
+        try:
+            patient_identifier = PatientIdentifier.objects.filter(
+                patient=patient,
+                voided=False,
+                preferred=True
+            ).first()
+            
+            if not patient_identifier:
+                # preferred가 없으면 아무거나
+                patient_identifier = PatientIdentifier.objects.filter(
+                    patient=patient,
+                    voided=False
+                ).first()
+                
+            identifier_value = patient_identifier.identifier if patient_identifier else f"Patient_{person.person_id}"
+            logger.info(f"✅ Patient Identifier: {identifier_value}")
+        except Exception as e:
+            logger.warning(f"⚠️ PatientIdentifier 조회 실패: {e}")
+            identifier_value = f"Patient_{person.person_id}"
+        
+        # 4. PersonName 조회
+        try:
+            person_name = PersonName.objects.filter(
+                person=person,
+                voided=False,
+                preferred=True
+            ).first()
+            
+            if not person_name:
+                # preferred가 없으면 아무거나
+                person_name = PersonName.objects.filter(
+                    person=person,
+                    voided=False
+                ).first()
+            
+            if person_name:
+                full_name = f"{person_name.given_name or ''} {person_name.family_name or ''}".strip()
+                if not full_name:
+                    full_name = person_name.given_name or person_name.family_name or f"Patient {identifier_value}"
+            else:
+                full_name = f"Patient {identifier_value}"
+                
+            logger.info(f"✅ Person Name: {full_name}")
+        except Exception as e:
+            logger.warning(f"⚠️ PersonName 조회 실패: {e}")
+            full_name = f"Patient {identifier_value}"
+        
+        # 5. 최종 결과 반환
+        result = {
+            'uuid': patient_uuid,
+            'patient_identifier': identifier_value,
+            'name': full_name,
+            'display': f"{identifier_value} - {full_name}",
+            'gender': person.gender,
+            'birthdate': person.birthdate.isoformat() if person.birthdate else None,
+            'person_id': person.person_id,
+            'patient_id': patient.patient_id if patient else None
+        }
+        
+        logger.info(f"🎉 환자 정보 조회 성공: {result['display']}")
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ DB에서 환자 이름 조회 실패 (UUID: {patient_uuid}): {e}")
+        return None
+    
+@api_view(['GET'])
+def get_patient_info_by_uuid(request, patient_uuid):
+    """UUID 기반 환자 정보 조회 API"""
+    try:
+        patient_info = get_patient_name_by_uuid(patient_uuid)
+        
+        if patient_info:
+            return Response({
+                'success': True,
+                'patient': patient_info
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': f'UUID {patient_uuid}에 해당하는 환자를 찾을 수 없습니다.'
+            }, status=404)
+            
+    except Exception as e:
+        logger.error(f"환자 정보 조회 API 실패: {e}")
         return Response({
             'success': False,
             'error': str(e)
