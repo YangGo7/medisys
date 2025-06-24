@@ -77,5 +77,6 @@ urlpatterns = [
          name='get_person_uuid_by_identifier'),
     
     
-    
+    path('test/minimal-encounter/<str:patient_uuid>/', 
+         obs_clinical_api.test_minimal_encounter, name='test_minimal_encounter'),
 ]
