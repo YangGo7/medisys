@@ -1,60 +1,55 @@
-// src/viewerApp/App.js
-import React, { useState } from 'react';
-import Navigation from './components/Navigation/Navigation';
-import StudyRequestForm from './components/WorkList/StudyRequestForm';
-import WorkList from './components/WorkList/WorkList';
-import OHIFViewer from './components/OHIFViewer';
-import PacsExplorer2 from './components/PacsExplorer2/PacsExplorer2';
-
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import MainLayout from './components/layout/MainLayout';
+import Home from './pages/Home';
 import './App.css';
+import Dashboard from './pages/Dashboard';
+import { DoctorProvider } from './contexts/DoctorContext'; // 추가
+import PacsPage from './pages/PACS/PacsPage';
 
-function ViewerApp() {
-  const [currentPage, setCurrentPage] = useState('request');
 
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'request':
-        return <StudyRequestForm />;
-      case 'results':
-        return <WorkList />;
-      case 'schedule':
-        return <OHIFViewer />;
-      case 'pacs':
-        return <PacsExplorer2 />;
-      case 'settings':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>⚙️ 설정 페이지</h2>
-            <p>시스템 설정이 여기에 들어갑니다.</p>
-            <div style={{
-              marginTop: '30px',
-              padding: '20px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '8px',
-              border: '1px solid #dee2e6'
-            }}>
-              <h3>시스템 정보</h3>
-              <p>• Django Backend: localhost:8000</p>
-              <p>• React Frontend: localhost:3000</p>
-              <p>• Orthanc PACS: localhost:8042</p>
-              <p>• PACS Explorer 2: localhost:8042/ui/app/</p>
-            </div>
-          </div>
-        );
-      default:
-        return <StudyRequestForm />;
-    }
-  };
-
+function App() {
   return (
-    <div className="viewer-app">
-      <Navigation 
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-      {renderCurrentPage()}
-    </div>
+    <DoctorProvider>
+      <Router>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/pacs" element={<PacsPage />} />
+            <Route path="/statistics" element={
+              <div style={{
+                background: 'linear-gradient(45deg, #f9ca24, #f0932b)', 
+                height: '100%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontSize: '2rem',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                📊 STATISTICS 페이지
+              </div>
+            } />
+            <Route path="/settings" element={
+              <div style={{
+                background: 'linear-gradient(45deg, #6c5ce7, #a55eea)', 
+                height: '100%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontSize: '2rem',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                ⚙️ SETTINGS 페이지
+              </div>
+            } />
+          </Routes>
+        </MainLayout>
+      </Router>
+    </DoctorProvider>
   );
 }
 
-export default ViewerApp;
+export default App;

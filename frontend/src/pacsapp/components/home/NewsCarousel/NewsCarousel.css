@@ -1,0 +1,95 @@
+.carousel-container {
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.carousel-content {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 200px;  /* 최소 높이 추가 */
+}
+
+.carousel-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;  /* cover에서 contain으로 변경 - 이미지 전체 보이게 */
+  border-radius: 6px;
+  max-height: 300px;    /* 최대 높이 제한 */
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(59, 130, 246, 0.8);  /* 파란색으로 변경 */
+  color: white;
+  border: none;
+  width: 35px;   /* 크기 줄임 */
+  height: 35px;  /* 크기 줄임 */
+  border-radius: 50%;
+  font-size: 1rem;  /* 폰트 크기 줄임 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.carousel-btn:hover {
+  background: rgba(59, 130, 246, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn.prev {
+  left: 15px;   /* 여백 늘림 */
+}
+
+.carousel-btn.next {
+  right: 15px;  /* 여백 늘림 */
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.5rem;  /* 패딩 추가 */
+}
+
+.indicator {
+  width: 8px;   /* 크기 줄임 */
+  height: 8px;  /* 크기 줄임 */
+  border-radius: 50%;
+  border: none;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background: #3b82f6;
+  transform: scale(1.3);  /* 활성화 시 크기 */
+}
+
+.indicator:hover {
+  background: #6b7280;
+}
