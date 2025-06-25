@@ -173,11 +173,12 @@
   cursor: not-allowed;
 }
 
-/* 탭 컨텐츠 */
 .tab-content {
-  background: #fff;
+  background: #ffffff;
   padding: 1.5rem;
   min-height: 500px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* 환자 섹션 */
@@ -186,117 +187,284 @@
 }
 
 .section-header {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f3f7;
 }
 
 .section-header h3 {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin: 0;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 /* 환자 그리드 (카드 뷰) */
 .patient-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-  max-height: 600px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  max-height: 650px;
   overflow-y: auto;
+  padding-right: 0.5rem;
 }
 
+/* 환자 카드 기본 스타일 */
 .patient-card {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
+  background: #ffffff;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.patient-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .patient-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-color: #667eea;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.patient-card:hover::before {
+  opacity: 1;
 }
 
 .patient-card.selected {
-  border-color: #1976d2;
-  background: #e3f2fd;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+.patient-card.selected::before {
+  opacity: 1;
+}
+
+/* 배정된 환자 카드 */
+.patient-card.assigned-card {
+  border-color: #28a745;
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 201, 151, 0.05) 100%);
+}
+
+.patient-card.assigned-card::before {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  opacity: 1;
+}
+
+/* 완료된 환자 카드 */
+.patient-card.completed-card {
+  border-color: #6c757d;
+  background: linear-gradient(135deg, rgba(108, 117, 125, 0.05) 0%, rgba(173, 181, 189, 0.05) 100%);
+}
+
+.patient-card.completed-card::before {
+  background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%);
+  opacity: 1;
+}
+
+/* 환자 정보 영역 */
+.patient-info {
+  margin-bottom: 1rem;
 }
 
 .patient-info h4 {
-  margin: 0 0 0.5rem 0;
-  color: #333;
-  font-size: 16px;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .patient-id {
-  color: #6c757d;
-  font-size: 14px;
-  margin: 0.25rem 0;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .patient-details {
-  color: #495057;
-  font-size: 14px;
-  margin: 0.25rem 0;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .wait-time {
-  color: #dc3545;
-  font-size: 14px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #e67e22;
   font-weight: 500;
-  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
+.room-info {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #28a745;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.completion-info {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* 🔥 환자 액션 버튼 영역 */
 .patient-actions {
   display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* 🔥 대기등록 취소 버튼 */
+.btn-cancel-waiting {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.btn-assign {
-  background: #28a745;
-  color: #fff;
-  border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
-}
-
-.btn-assign:hover {
-  background: #218838;
-}
-
-.btn-delete {
-  background: #dc3545;
-  color: #fff;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #ffffff;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 
-.btn-delete:hover {
-  background: #c82333;
+.btn-cancel-waiting:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* 테이블 스타일 (기존 order-table 스타일 사용) */
+.btn-cancel-waiting:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 배정 해제 버튼 */
+.btn-unassign {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.btn-unassign:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.btn-unassign:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 🔥 진료 완료 버튼 */
+.btn-complete {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.btn-complete:hover:not(:disabled) {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-complete:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 완료 배지 */
+.completion-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* 테이블 뷰 스타일 */
 .order-table-wrapper {
-  overflow-x: auto;
-  background-color: white;
+  background: #ffffff;
   border-radius: 8px;
-  border: 1px solid #cce0f0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   max-height: 600px;
   overflow-y: auto;
 }
@@ -304,84 +472,118 @@
 .order-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-.order-table th,
-.order-table td {
-  border: 1px solid #cce0f0;
-  padding: 12px;
-  text-align: center;
-  font-size: 14px;
+.order-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .order-table th {
-  background-color: #A8D5E2;
-  color: #333;
+  padding: 1rem;
+  text-align: left;
   font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.order-table tr:hover {
-  background-color: #f1f9ff;
+.order-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.order-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.order-table tbody tr:hover {
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 .selected-row {
-  background-color: #e3f2fd !important;
+  background-color: rgba(102, 126, 234, 0.1) !important;
 }
 
 .selected-row:hover {
-  background-color: #e3f2fd !important;
+  background-color: rgba(102, 126, 234, 0.15) !important;
 }
 
 /* 버튼 스타일 */
 .btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 12px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
   border-radius: 4px;
   border: none;
   cursor: pointer;
   margin: 0 0.25rem;
   transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .btn-primary {
-  background: #1976d2;
-  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
 }
 
-.btn-primary:hover {
-  background: #1565c0;
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .btn-danger {
-  background: #dc3545;
-  color: #fff;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
-.btn-danger:hover {
-  background: #c82333;
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* 빈 상태 메시지 */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
 }
 
 /* 로딩 스타일 */
 .loading {
   text-align: center;
-  padding: 3rem;
+  padding: 4rem;
   color: #6c757d;
-  font-size: 16px;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 .loading::after {
   content: '';
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e9ecef;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #e9ecef;
   border-radius: 50%;
-  border-top-color: #1976d2;
+  border-top-color: #667eea;
   animation: spin 1s ease-in-out infinite;
-  margin-left: 0.5rem;
 }
 
 @keyframes spin {
@@ -390,22 +592,32 @@
 
 /* 스크롤바 스타일 */
 .patient-grid::-webkit-scrollbar,
-.order-table-wrapper::-webkit-scrollbar {
+.order-table-wrapper::-webkit-scrollbar,
+.tab-content::-webkit-scrollbar {
   width: 8px;
 }
 
 .patient-grid::-webkit-scrollbar-thumb,
-.order-table-wrapper::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
+.order-table-wrapper::-webkit-scrollbar-thumb,
+.tab-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 4px;
 }
 
 .patient-grid::-webkit-scrollbar-track,
-.order-table-wrapper::-webkit-scrollbar-track {
-  background-color: #f8f9fa;
+.order-table-wrapper::-webkit-scrollbar-track,
+.tab-content::-webkit-scrollbar-track {
+  background: #f8f9fa;
 }
 
 /* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .patient-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .unified-header {
     flex-direction: column;
@@ -415,7 +627,7 @@
   
   .search-controls {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
   
   .search-input {
@@ -430,13 +642,24 @@
     flex: 1;
     justify-content: center;
     padding: 0.75rem;
+    min-width: 120px;
   }
   
   .patient-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .assign-buttons {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .patient-actions {
+    justify-content: center;
+  }
+  
+  .selected-patient-info {
+    padding: 1rem;
   }
 }

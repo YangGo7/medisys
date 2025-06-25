@@ -86,14 +86,14 @@ urlpatterns = [
     
     # 🔥 대기 통계 및 완료 환자 관리
     path('waiting-statistics/', get_waiting_statistics, name='waiting_statistics'),                      # 🔥 대기 현황 통계
-    path('completed-patients-today/', get_completed_patients_today, name='completed_patients_today'),    # 🔥 완료 환자 목록
+    path('completed-patients/', get_completed_patients_today, name='completed_patients_today'),    # 🔥 완료 환자 목록
     path('waiting-board/', views.waiting_board_view, name='waiting_board'),
 
     # 알림 API
     path('alerts/urgent/', UrgentAlertList.as_view(), name='urgent_alert_list'),
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
     path('alerts/<int:pk>/mark-read/', AlertMarkRead.as_view(), name='alert_mark_read'),
-
+    path('cancel-waiting/<int:mapping_id>/', views.cancel_waiting_registration, name='cancel_waiting_registration'),
     # 🔥 진료실 배정 관리 (완전한 버전)
     path('assign-room/', assign_room, name='assign_room'),
     path('unassign-room/', unassign_room, name='unassign_room'),
