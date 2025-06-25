@@ -111,11 +111,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MainLayout.css';
+import MessengerSystem from '../../messenger/MessengerSystem';
 
 const MainLayout = ({ children }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false); 
-  const [showChat, setShowChat] = useState(false);
 
   return (
     <div className="dashboard-container">
@@ -129,8 +129,8 @@ const MainLayout = ({ children }) => {
             <Link to="/">Home</Link>
             <Link to="/dashboard">Work Station</Link>
             <Link to="/pacs">PACS</Link>
-            <Link to="/pacsdocs">PACS Docs</Link>
-            <Link to="/settings">Settings</Link>
+            <Link to="/pacsdocs">PacsDocs</Link>
+            <Link to="/ohifviewer">OHIFViewer</Link>
         </nav>
       </div>
 
@@ -198,20 +198,8 @@ const MainLayout = ({ children }) => {
         <span>현재 시간: 2025-06-21</span>
       </div>
 
-      {/* 플로팅 채팅 */}
-      <div 
-        className="floating-chat"
-        onClick={() => setShowChat(!showChat)}
-      >
-        💬
-      </div>
-
-      {/* 채팅 드롭다운 */}
-      {showChat && (
-        <div className="chat-dropdown">
-          <div className="chat-header">메신저 팝업(하드코딩)</div>
-        </div>
-      )}
+      {/* 🚀 새로운 메신저 시스템 - 기존 하드코딩 채팅 대체 */}
+      <MessengerSystem />
     </div>
   );
 };

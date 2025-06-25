@@ -1,223 +1,533 @@
-/* frontend/src/components/EMR/DocDashBoard.css */
+/* frontend/src/components/DocDashBoard/DocDashBoard.css */
+
+:root {
+  /* 마린 블루 & 자색 컬러 팔레트 */
+  --primary-marine-blue: #1D3E59;
+  --secondary-marine-blue: #0981D1;
+  --light-marine-blue: #4A90C2;
+  --primary-purple: #5D4E75;
+  --secondary-purple: #8B5A96;
+  --light-purple: #B399C7;
+  
+  /* 베이스 컬러 */
+  --white: #FFFFFF;
+  --ivory: #FFFFF0;
+  --white-tone-5: #F8F9FA;
+  --light-gray: #F5F7FA;
+  --border-gray: #E6E9ED;
+  --text-dark: #2C3E50;
+  --text-gray: #6C757D;
+  
+  /* 포인트 컬러 */
+  --accent-blue: #3498DB;
+  --success-green: #27AE60;
+  --warning-orange: #F39C12;
+  --danger-red: #E74C3C;
+}
 
 .doc-dashboard {
   height: 100vh;
-  background: #f6f8fa;
+  background: linear-gradient(135deg, var(--white-tone-5) 0%, var(--ivory) 100%);
   display: flex;
   flex-direction: column;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-dark);
 }
 
-/* EMR 헤더 */
-.emr-header {
-  height: 50px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+/* 최상단 헤더 */
+.dashboard-header {
+  height: 60px;
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--primary-purple) 100%);
+  color: var(--white);
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  z-index: 20;
+  justify-content: space-between;
+  padding: 0 2rem;
+  box-shadow: 0 4px 12px rgba(29, 62, 89, 0.15);
+  z-index: 1000;
 }
 
-.emr-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 5개 칼럼 레이아웃 */
-.clinical-columns {
+.header-left {
   display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  font-family: 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: 1px;
+  color: var(--white);
+}
+
+.header-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.current-time {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+/* 메인 컨테이너 - 3칼럼 레이아웃 */
+.main-container {
   flex: 1;
-  height: calc(100vh - 50px);
+  display: grid;
+  grid-template-columns: 320px 1fr 300px;
+  gap: 1.5rem;
+  padding: 1.5rem;
   overflow: hidden;
 }
 
-/* 각 칼럼 공통 스타일 */
-.column {
-  flex: 1;
+/* 좌측 사이드바 */
+.left-sidebar {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(29, 62, 89, 0.1);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-right: 1px solid #e0e0e0;
-  overflow: hidden;
 }
 
-.column:last-child {
-  border-right: none;
-}
-
-/* 칼럼 헤더 */
-.column-header {
-  padding: 16px;
-  border-bottom: 2px solid #e9ecef;
-  background: #f8f9fa;
-  flex-shrink: 0;
-}
-
-.column-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 0 0 12px 0;
-  color: #333;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 8px;
+.sidebar-header {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--light-marine-blue) 100%);
+  color: var(--white);
+  padding: 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.75rem;
 }
 
-/* 검색 모드 버튼 (첫 번째 칼럼) */
+.search-mode-section {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-gray);
+  background: var(--white-tone-5);
+}
+
+.search-mode-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+}
+
 .search-mode-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0.5rem;
 }
 
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #6c757d;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-gray);
   cursor: pointer;
-  transition: color 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .radio-label:hover {
-  color: #495057;
+  background: rgba(52, 152, 219, 0.1);
+  color: var(--text-dark);
 }
 
 .radio-label input[type="radio"] {
-  margin: 0;
-  accent-color: #007bff;
+  accent-color: var(--secondary-marine-blue);
 }
 
-/* 검색 섹션 */
 .search-section {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.search-controls {
   display: flex;
-  gap: 8px;
-  padding: 16px;
-  border-bottom: 1px solid #e9ecef;
-  background: #fff;
+  gap: 0.75rem;
 }
 
 .search-input {
   flex: 1;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: var(--white);
+  transition: all 0.2s ease;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: var(--secondary-marine-blue);
+  box-shadow: 0 0 0 3px rgba(9, 129, 209, 0.1);
 }
 
 .search-button {
-  padding: 8px 12px;
-  background: #1976d2;
-  color: #fff;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-marine-blue) 100%);
+  color: var(--white);
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .search-button:hover {
-  background: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(9, 129, 209, 0.3);
 }
 
-/* 칼럼 콘텐츠 */
-.column-content {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-/* 환자 목록 영역 */
-.patient-list-area {
+.patient-list-container {
   flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.all-patients-list {
+.patient-list {
   flex: 1;
+  padding: 1rem;
   overflow-y: auto;
-  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-/* 환자 아이템 */
-.patient-item {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  margin-bottom: 8px;
+/* 환자 카드 */
+.patient-card {
+  background: var(--white);
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1rem;
   cursor: pointer;
-  background: #fff;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
 }
 
-.patient-item:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+.patient-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-purple) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.patient-item.selected {
-  border-color: #1976d2;
-  background: #e3f2fd;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+.patient-card:hover {
+  border-color: var(--secondary-marine-blue);
+  box-shadow: 0 8px 24px rgba(9, 129, 209, 0.15);
+  transform: translateY(-2px);
 }
 
-.patient-info-text {
-  margin-bottom: 8px;
+.patient-card:hover::before {
+  opacity: 1;
+}
+
+.patient-card.selected {
+  border-color: var(--secondary-marine-blue);
+  background: linear-gradient(135deg, rgba(9, 129, 209, 0.05) 0%, rgba(93, 78, 117, 0.05) 100%);
+  box-shadow: 0 8px 24px rgba(9, 129, 209, 0.2);
+}
+
+.patient-card.selected::before {
+  opacity: 1;
 }
 
 .patient-name {
   font-weight: 600;
-  margin-bottom: 4px;
-  color: #333;
-  font-size: 14px;
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.patient-id,
+.patient-id {
+  font-size: 0.85rem;
+  color: var(--secondary-marine-blue);
+  font-family: 'Monaco', 'Menlo', monospace;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
 .patient-details {
-  font-size: 12px;
-  color: #555;
-  margin-bottom: 2px;
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.assign-btn {
-  margin-top: 8px;
-  padding: 4px 6px;
-  background: #4CAF50;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
+.assign-button {
   width: 100%;
-  transition: background-color 0.2s ease;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, var(--success-green) 0%, #2ECC71 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.assign-btn:hover {
-  background: #45a049;
+.assign-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
-/* 칼럼 구분선 */
-.column-divider {
-  height: 1px;
-  background: #eee;
-  margin: 16px 0;
+/* 메인 콘텐츠 영역 */
+.main-content {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(29, 62, 89, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 환자 정보 헤더 */
+.patient-header {
+  background: linear-gradient(135deg, var(--white-tone-5) 0%, var(--ivory) 100%);
+  padding: 2rem;
+  border-bottom: 2px solid var(--border-gray);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: center;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.patient-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-marine-blue);
+  margin: 0;
+}
+
+.patient-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.patient-avatar {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, var(--light-marine-blue) 0%, var(--light-purple) 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 2.5rem;
+  box-shadow: 0 4px 16px rgba(74, 144, 194, 0.3);
+}
+
+/* 탭 시스템 */
+.tab-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tab-header {
+  display: flex;
+  background: var(--white-tone-5);
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1.2rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tab-button.active {
+  color: var(--secondary-marine-blue);
+  border-bottom-color: var(--secondary-marine-blue);
+  background: var(--white);
+  font-weight: 600;
+}
+
+.tab-button:hover:not(.active) {
+  background: rgba(9, 129, 209, 0.05);
+  color: var(--text-dark);
+}
+
+.tab-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background: var(--white);
+}
+
+.tab-pane {
+  display: none;
+  height: 100%;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* 우측 사이드바 */
+.right-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sidebar-card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(29, 62, 89, 0.1);
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
+  color: var(--white);
+  padding: 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+/* 빠른 작업 버튼 */
+.quick-action-button {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--secondary-marine-blue) 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.quick-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}
+
+.quick-action-button:last-child {
+  margin-bottom: 0;
+}
+
+/* 알림 아이템 */
+.notification-item {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--danger-red);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(231, 76, 60, 0.02) 100%);
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+}
+
+.notification-item:last-child {
+  margin-bottom: 0;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--danger-red);
+  margin-bottom: 0.5rem;
+}
+
+.notification-text {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  line-height: 1.4;
 }
 
 /* 상태 메시지 */
@@ -227,18 +537,19 @@
 .placeholder-message,
 .empty-message {
   text-align: center;
-  padding: 20px;
-  color: #666;
-  font-size: 14px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin: 8px 0;
+  padding: 2rem;
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  background: var(--white-tone-5);
+  border-radius: 12px;
+  border: 2px dashed var(--border-gray);
+  margin: 1rem 0;
 }
 
 .error-message {
-  color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  color: var(--danger-red);
+  background: rgba(231, 76, 60, 0.05);
+  border-color: rgba(231, 76, 60, 0.2);
 }
 
 .empty-message {
@@ -246,104 +557,122 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  font-style: italic;
   flex-direction: column;
-  gap: 12px;
+  gap: 1rem;
 }
 
 .empty-message::before {
   content: '👤';
-  font-size: 2rem;
+  font-size: 3rem;
   opacity: 0.3;
 }
 
 /* 스크롤바 스타일 */
-.column::-webkit-scrollbar,
-.column-content::-webkit-scrollbar,
-.patient-list-area::-webkit-scrollbar,
-.all-patients-list::-webkit-scrollbar {
-  width: 6px;
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.column::-webkit-scrollbar-track,
-.column-content::-webkit-scrollbar-track,
-.patient-list-area::-webkit-scrollbar-track,
-.all-patients-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+::-webkit-scrollbar-track {
+  background: var(--white-tone-5);
+  border-radius: 4px;
 }
 
-.column::-webkit-scrollbar-thumb,
-.column-content::-webkit-scrollbar-thumb,
-.patient-list-area::-webkit-scrollbar-thumb,
-.all-patients-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-purple) 100%);
+  border-radius: 4px;
 }
 
-.column::-webkit-scrollbar-thumb:hover,
-.column-content::-webkit-scrollbar-thumb:hover,
-.patient-list-area::-webkit-scrollbar-thumb:hover,
-.all-patients-list::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 1400px) {
-  .clinical-columns {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  
-  .column {
-    flex: none;
-    min-height: 400px;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .column:last-child {
-    border-bottom: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .search-mode-buttons {
-    flex-direction: row;
-    gap: 16px;
-  }
-  
-  .search-section {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .emr-title {
-    font-size: 16px;
-  }
-  
-  .column-title {
-    font-size: 14px;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--secondary-purple) 100%);
 }
 
 /* 로딩 애니메이션 */
 @keyframes pulse {
-  0% { opacity: 1; }
+  0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-  100% { opacity: 1; }
 }
 
 .status-message {
   animation: pulse 2s infinite;
 }
 
-/* 호버 효과 */
-.column:hover .column-header {
-  background: #e9ecef;
+/* 반응형 디자인 */
+@media (max-width: 1400px) {
+  .main-container {
+    grid-template-columns: 280px 1fr 280px;
+    gap: 1rem;
+  }
+  
+  .header-title {
+    font-size: 1.2rem;
+  }
 }
 
-/* 부드러운 전환 효과 */
-* {
-  transition: all 0.2s ease;
+@media (max-width: 1200px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  
+  .left-sidebar,
+  .right-sidebar {
+    order: 1;
+  }
+  
+  .main-content {
+    order: 2;
+    min-height: 60vh;
+  }
+  
+  .right-sidebar {
+    order: 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 0 1rem;
+    height: 50px;
+  }
+  
+  .header-logo {
+    font-size: 1.4rem;
+  }
+  
+  .header-title {
+    font-size: 1rem;
+  }
+  
+  .patient-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .tab-header {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    flex: 1 1 50%;
+    padding: 1rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .right-sidebar {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-mode-buttons {
+    flex-direction: row;
+    gap: 1rem;
+  }
 }

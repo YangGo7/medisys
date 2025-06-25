@@ -173,6 +173,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import PacsPage from './pages/PACS/PacsPage';
 import PacsDocs from './pages/PacsDocs'; // 🆕 PacsDocs 추가
+import OHIFViewer from './pages/OHIFViewer'; // 🆕 OHIF 추가
 import { DoctorProvider } from './contexts/DoctorContext';
 import './App.css';
 
@@ -185,9 +186,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pacs" element={<PacsPage />} />
-            
-            {/* 🆕 PacsDocs 라우트 추가 (기존 statistics 대체) */}
             <Route path="/pacsdocs" element={<PacsDocs />} />
+            <Route path="/ohif" element={<OHIF />} />
             
             {/* 🆕 새로운 라우트들 추가 */}
             <Route path="/emr" element={
@@ -246,26 +246,6 @@ function App() {
                 <div>🎛️ Control Page</div>
                 <div style={{ fontSize: '1rem', opacity: 0.8 }}>
                   System Control Panel
-                </div>
-              </div>
-            } />
-            
-            <Route path="/settings" element={
-              <div style={{
-                background: 'linear-gradient(45deg, #6c5ce7, #a55eea)', 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontSize: '2rem',
-                color: 'white',
-                fontWeight: 'bold',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <div>⚙️ SETTINGS 페이지</div>
-                <div style={{ fontSize: '1rem', opacity: 0.8 }}>
-                  시스템 설정 및 환경 구성
                 </div>
               </div>
             } />

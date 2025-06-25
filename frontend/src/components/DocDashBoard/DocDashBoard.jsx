@@ -1,37 +1,46 @@
-// frontend/src/components/EMR/DocDashBoard.jsx
+// frontend/src/components/DocDashBoard/DocDashBoard.jsx
+// 🔥 컴포넌트 형식으로 개선된 의사 대시보드
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  User, 
+  FileText, 
+  Activity, 
+  Brain, 
+  Calendar,
+  Search,
+  Stethoscope,
+  TestTube,
+  Camera,
+  Clock,
+  Users
+} from 'lucide-react';
+
+// 개별 컴포넌트들 import - 올바른 경로로 수정
+import AssignedPatientList from '../EMR/AssignedPatientList';
 import PatientInfoPanel from '../EMR/PatientInfoPanel';
-import VisitHistoryPanel from '../EMR/VisitHistoryPanel';
 import LisRequestPanel from '../EMR/LisRequestPanel';
 import ImagingRequestPanel from '../EMR/ImagingRequestPanel';
+import VisitHistoryPanel from '../EMR/VisitHistoryPanel';
 import DiagnosisPrescriptionPanel from '../EMR/DiagnosisPrescriptionPanel';
-import AssignedPatientList from '../EMR/AssignedPatientList';
-import PatientDetailModal from '../EMR/PatientDetailModal';
-import lisConfig from '../EMR/lisConfig';
+import { DEFAULT_DOCTOR_ID } from '../EMR/lisConfig';
 
-import { saveLog } from '../utils/saveLog';
-
-import './DocDashBoard.css';
-const DEFAULT_DOCTOR_ID = "Yanggo"; // 💡 개발용 임시 의사 ID
 const DocDashBoard = () => {
+  // 상태 관리
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [fullSelectedPatientData, setFullSelectedPatientData] = useState(null);
-  const [showPatientModal, setShowPatientModal] = useState(false);
-  const [scheduleRefresh, setScheduleRefresh] = useState(0);
-
-  // 검색 관련 상태
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchMode, setSearchMode] = useState('assigned');
   const [allSearchResults, setAllSearchResults] = useState([]);
   const [isSearchingAllPatients, setIsSearchingAllPatients] = useState(false);
   const [allSearchError, setAllSearchError] = useState(null);
-  const [searchMode, setSearchMode] = useState('assigned');
+  const [scheduleRefresh, setScheduleRefresh] = useState(0);
+  const [assignedPatients, setAssignedPatients] = useState({});
 
   const API_BASE = process.env.REACT_APP_INTEGRATION_API;
 
-  // 전체 환자 검색 함수
-  const fetchAllPatientsFromBackend = useCallback(async () => {
+  // 🔥 전체 환자 검색 함수
+  const fetchAllPatientsFromBackend = async () => {
     if (searchTerm.trim() === '') {
       setAllSearchResults([]);
       return;
@@ -48,24 +57,16 @@ const DocDashBoard = () => {
     } finally {
       setIsSearchingAllPatients(false);
     }
-  }, [API_BASE, searchTerm]);
+  };
 
-  // 검색 모드 변경 시 자동 검색
-  useEffect(() => {
-    if (searchMode === 'all') {
-      const handler = setTimeout(() => {
-        fetchAllPatientsFromBackend();
-      }, 300);
-      return () => clearTimeout(handler);
-    } else {
-      setAllSearchResults([]);
-    }
-  }, [searchTerm, searchMode, fetchAllPatientsFromBackend]);
-
-  // 진료실 배정 함수
+  // 🔥 환자 진료실 배정 함수
   const handleAssignToRoom = async (patientToAssign, roomNumber) => {
     if (!patientToAssign) {
       alert('환자를 먼저 선택해주세요.');
+      return;
+    }
+    if (assignedPatients[roomNumber]) {
+      alert(`진료실 ${roomNumber}번에 이미 환자가 배정되어 있습니다.`);
       return;
     }
     
@@ -78,25 +79,18 @@ const DocDashBoard = () => {
       if (newMappingResponse.data.success) {
         const newMappingId = newMappingResponse.data.mapping_id;
         
-        const response = await axios.post(`${API_BASE}assign-room/`, {
-          patientId: newMappingId,
-          patientIdentifier: patientToAssign.patient_identifier,
-          room: roomNumber,
+        const assignResponse = await axios.post(`${API_BASE}assign-room/`, {
+          mapping_id: newMappingId,
+          room: roomNumber
         });
-        
-        if (!response.data.success) throw new Error(response.data.error || '배정 실패');
-        
-        saveLog({
-          patient_id: newMappingId,
-          patient_name: patientToAssign.name || patientToAssign.display,
-          doctor_id: localStorage.getItem('doctor_id') || 'UNKNOWN',
-          doctor_name: localStorage.getItem('doctor_name') || '',
-          request_type: '진료실 배정',
-          request_detail: `진료실 ${roomNumber}번으로 배정됨`,
-        });
-        
-        alert(`✅ ${patientToAssign.name}님이 진료실 ${roomNumber}번에 배정되었습니다.`);
-        setScheduleRefresh(prev => prev + 1);
+
+        if (assignResponse.data.success) {
+          alert(`${patientToAssign.name}님이 진료실 ${roomNumber}번에 배정되었습니다.`);
+          setSelectedPatient(null);
+          setScheduleRefresh(prev => prev + 1);
+        } else {
+          throw new Error(assignResponse.data.error || '배정에 실패했습니다.');
+        }
       } else {
         alert('환자 매핑 생성에 실패했습니다: ' + (newMappingResponse.data.error || '알 수 없는 오류'));
       }
@@ -113,246 +107,250 @@ const DocDashBoard = () => {
     }
   };
 
-  // 환자 상세 모달 열기
-  const openPatientModal = async () => {
-    if (!selectedPatient) return;
-    try {
-      const res = await axios.get(`${API_BASE}openmrs/patients/${selectedPatient.uuid}/`);
-      setFullSelectedPatientData(res.data);
-      setShowPatientModal(true);
-    } catch (err) {
-      console.error('환자 상세 정보 불러오기 실패:', err);
-      alert('환자 상세 정보를 불러오지 못했습니다. 다시 시도해주세요.');
-      setFullSelectedPatientData(null);
+  // 검색어 변경 시 자동 검색
+  useEffect(() => {
+    if (searchMode === 'all') {
+      const handler = setTimeout(() => {
+        fetchAllPatientsFromBackend();
+      }, 300);
+      return () => clearTimeout(handler);
+    } else {
+      setAllSearchResults([]);
     }
-  };
-
-  const closePatientModal = () => {
-    setShowPatientModal(false);
-    setFullSelectedPatientData(null);
-  };
+  }, [searchTerm, searchMode]);
 
   return (
-    <div className="doc-dashboard">
-      {/* EMR 시스템 헤더 */}
-      <div className="emr-header">
-        <span className="emr-title">🏥 EMR 시스템</span>
+    <div className="doctor-dashboard">
+      {/* 🔥 대시보드 헤더 */}
+      <div className="dashboard-header">
+        <div className="header-left">
+          <Stethoscope className="header-icon" />
+          <h1 className="dashboard-title">의사 대시보드</h1>
+        </div>
+        <div className="header-right">
+          <Clock className="time-icon" />
+          <span className="current-time">
+            {new Date().toLocaleTimeString('ko-KR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+        </div>
       </div>
 
-      {/* 5개 칼럼 레이아웃 */}
-      <div className="clinical-columns">
-        {/* 첫 번째 칼럼: 환자 검색 */}
-        <div className="column column-1">
-          <div className="column-header">
-            <h3 className="column-title">
-              🧑‍⚕️ 환자 검색
-            </h3>
-            <div className="search-mode-buttons">
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="searchMode"
-                  value="assigned"
-                  checked={searchMode === 'assigned'}
-                  onChange={() => {
-                    setSearchMode('assigned');
-                    setAllSearchResults([]);
-                    setSearchTerm('');
-                  }}
-                />
-                진료실 배정 환자
-              </label>
-              <label className="radio-label">
-                <input
-                  type="radio"
-                  name="searchMode"
-                  value="all"
-                  checked={searchMode === 'all'}
-                  onChange={() => {
-                    setSearchMode('all');
-                    setAllSearchResults([]);
-                    setSearchTerm('');
-                  }}
-                />
-                전체 환자
-              </label>
+      {/* 🔥 메인 컨테이너 */}
+      <div className="dashboard-main">
+        {/* 🔥 좌측 사이드바 - 환자 검색 및 선택 */}
+        <div className="dashboard-sidebar">
+          <div className="sidebar-section">
+            <div className="section-header">
+              <Search className="section-icon" />
+              <h3>환자 검색</h3>
+              <div className="search-mode-toggle">
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="searchMode"
+                    value="assigned"
+                    checked={searchMode === 'assigned'}
+                    onChange={() => {
+                      setSearchMode('assigned');
+                      setAllSearchResults([]);
+                      setSearchTerm('');
+                    }}
+                  />
+                  배정 환자
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="searchMode"
+                    value="all"
+                    checked={searchMode === 'all'}
+                    onChange={() => {
+                      setSearchMode('all');
+                      setAllSearchResults([]);
+                      setSearchTerm('');
+                    }}
+                  />
+                  전체 환자
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder="이름 또는 ID로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => { if (e.key === 'Enter') handleMainSearch(); }}
-              className="search-input"
-            />
-            <button onClick={handleMainSearch} className="search-button">
-              검색
-            </button>
-          </div>
-
-          <div className="patient-list-area">
-            {searchMode === 'assigned' ? (
-              <AssignedPatientList
-                onPatientSelect={setSelectedPatient}
-                selectedPatient={selectedPatient}
-                refreshTrigger={scheduleRefresh}
-                searchTerm={searchTerm}
+            <div className="search-controls">
+              <input
+                type="text"
+                placeholder="이름 또는 ID로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => { if (e.key === 'Enter') handleMainSearch(); }}
+                className="search-input"
               />
-            ) : (
-              <div className="all-patients-list">
-                {isSearchingAllPatients && (
-                  <div className="status-message">전체 환자 검색 중...</div>
-                )}
-                {allSearchError && (
-                  <div className="error-message">⚠️ {allSearchError}</div>
-                )}
-                {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() !== '' ? (
-                  <div className="no-results">검색 결과가 없습니다.</div>
-                ) : (
-                  !isSearchingAllPatients && allSearchResults.map(p => {
-                    const patientUniqueId = p.uuid;
-                    const isSelected = selectedPatient?.uuid === patientUniqueId;
+              <button
+                onClick={handleMainSearch}
+                className="search-button"
+              >
+                검색
+              </button>
+            </div>
 
-                    return (
-                      <div
-                        key={patientUniqueId}
-                        onClick={() => setSelectedPatient({
-                          uuid: patientUniqueId,
-                          mapping_id: null,
-                          display: p.name,
-                          name: p.name,
-                          assigned_room: null,
-                          person: { age: p.age, gender: p.gender, birthdate: p.birthdate },
-                          identifiers: [{ identifier: p.patient_identifier, identifierType: 'OpenMRS ID', preferred: true }],
-                          ...p
-                        })}
-                        className={`patient-item ${isSelected ? 'selected' : ''}`}
-                      >
-                        <div className="patient-info-text">
+            <div className="search-results">
+              {searchMode === 'assigned' ? (
+                <AssignedPatientList
+                  onPatientSelect={setSelectedPatient}
+                  selectedPatient={selectedPatient}
+                  refreshTrigger={scheduleRefresh}
+                  searchTerm={searchTerm}
+                />
+              ) : (
+                <div className="all-patients-grid">
+                  {isSearchingAllPatients && (
+                    <div className="loading-message">전체 환자 검색 중...</div>
+                  )}
+                  {allSearchError && (
+                    <div className="error-message">⚠️ {allSearchError}</div>
+                  )}
+                  {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() !== '' ? (
+                    <div className="no-results">검색 결과가 없습니다.</div>
+                  ) : (
+                    !isSearchingAllPatients && allSearchResults.map(p => {
+                      const patientUniqueId = p.uuid;
+                      const isSelected = selectedPatient?.uuid === patientUniqueId;
+
+                      return (
+                        <div
+                          key={patientUniqueId}
+                          onClick={() => setSelectedPatient({
+                            uuid: patientUniqueId,
+                            mapping_id: null,
+                            display: p.name,
+                            name: p.name,
+                            assigned_room: null,
+                            person: { age: p.age, gender: p.gender, birthdate: p.birthdate },
+                            identifiers: [{ identifier: p.patient_identifier, identifierType: 'OpenMRS ID', preferred: true }],
+                            patient_identifier: p.patient_identifier,
+                            ...p
+                          })}
+                          className={`patient-card ${isSelected ? 'selected' : ''}`}
+                        >
                           <div className="patient-name">👤 {p.name}</div>
                           <div className="patient-id">🆔 {p.patient_identifier}</div>
                           <div className="patient-details">
                             👥 {p.gender === 'M' ? '남성' : '여성'} | 🎂 {p.age}세
                           </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAssignToRoom(
+                                {
+                                  uuid: p.uuid,
+                                  name: p.name,
+                                  patient_identifier: p.patient_identifier,
+                                  age: p.age,
+                                  gender: p.gender
+                                },
+                                1
+                              );
+                            }}
+                            className="assign-button"
+                          >
+                            진료실 1번 배정
+                          </button>
                         </div>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await handleAssignToRoom(p, 1);
-                          }}
-                          className="assign-btn"
-                        >
-                          진료실 1번 배정
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-                {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() === '' && (
-                  <div className="placeholder-message">
-                    이름 또는 ID를 입력하여 전체 환자를 검색합니다.
-                  </div>
-                )}
-              </div>
-            )}
+                      );
+                    })
+                  )}
+                  {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() === '' && (
+                    <div className="search-prompt">
+                      이름 또는 ID를 입력하여 전체 환자를 검색합니다.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* 두 번째 칼럼: 환자 정보 */}
-        <div className="column column-2">
-          <div className="column-header">
-            <h3 className="column-title">📄 환자 정보</h3>
-          </div>
-          <div className="column-content">
-            {selectedPatient ? (
-              <PatientInfoPanel 
-                patient={selectedPatient} 
-                onOpenDetailModal={openPatientModal} 
-              />
-            ) : (
-              <div className="empty-message">
-                배정된 환자를 선택해주세요.
+        {/* 🔥 메인 콘텐츠 영역 */}
+        <div className="dashboard-content">
+          {selectedPatient ? (
+            <div className="content-grid">
+              {/* 환자 정보 카드 */}
+              <div className="content-card patient-info-card">
+                <div className="card-header">
+                  <User className="card-icon" />
+                  <h3>환자 정보</h3>
+                </div>
+                <div className="card-content">
+                  <PatientInfoPanel 
+                    patient={selectedPatient} 
+                    onOpenDetailModal={() => {/* 상세 모달 열기 로직 */}} 
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* 세 번째 칼럼: LIS 검사 요청 */}
-        <div className="column column-3">
-          <div className="column-header">
-            <h3 className="column-title">🔬 LIS 검사 요청</h3>
-          </div>
-          <div className="column-content">
-            {selectedPatient ? (
-              <LisRequestPanel 
-                patient={selectedPatient} 
-                doctorId={DEFAULT_DOCTOR_ID} 
-              />
-            ) : (
-              <div className="empty-message">
-                배정된 환자를 선택해주세요.
+              {/* 내원 이력 카드 */}
+              <div className="content-card history-card">
+                <div className="card-header">
+                  <FileText className="card-icon" />
+                  <h3>내원 이력</h3>
+                </div>
+                <div className="card-content">
+                  <VisitHistoryPanel patient={selectedPatient} />
+                </div>
               </div>
-            )}
-          </div>
-          
-          <div className="column-divider"></div>
-          
-          <div className="column-header">
-            <h3 className="column-title">🏥 영상검사 요청</h3>
-          </div>
-          <div className="column-content">
-            {selectedPatient ? (
-              <ImagingRequestPanel selectedPatient={selectedPatient} />
-            ) : (
-              <div className="empty-message">
-                배정된 환자를 선택해주세요.
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* 네 번째 칼럼: 내원 이력 */}
-        <div className="column column-4">
-          <div className="column-header">
-            <h3 className="column-title">📁 내원 이력</h3>
-          </div>
-          <div className="column-content">
-            {selectedPatient ? (
-              <VisitHistoryPanel patient={selectedPatient} />
-            ) : (
-              <div className="empty-message">
-                배정된 환자를 선택해주세요.
+              {/* LIS 검사 요청 카드 */}
+              <div className="content-card lis-card">
+                <div className="card-header">
+                  <TestTube className="card-icon" />
+                  <h3>LIS 검사 요청</h3>
+                </div>
+                <div className="card-content">
+                  <LisRequestPanel 
+                    patient={selectedPatient} 
+                    doctorId={DEFAULT_DOCTOR_ID} 
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* 다섯 번째 칼럼: 진단 및 처방 */}
-        <div className="column column-5">
-          <div className="column-content">
-            <DiagnosisPrescriptionPanel 
-              patient={selectedPatient} 
-              panelType="both"
-            />
-          </div>
+              {/* 영상검사 요청 카드 */}
+              <div className="content-card imaging-card">
+                <div className="card-header">
+                  <Camera className="card-icon" />
+                  <h3>영상검사 요청</h3>
+                </div>
+                <div className="card-content">
+                  <ImagingRequestPanel selectedPatient={selectedPatient} />
+                </div>
+              </div>
+
+              {/* 진단 및 처방 카드 */}
+              <div className="content-card diagnosis-card">
+                <div className="card-header">
+                  <Brain className="card-icon" />
+                  <h3>진단 및 처방</h3>
+                </div>
+                <div className="card-content">
+                  <DiagnosisPrescriptionPanel 
+                    patient={selectedPatient} 
+                    panelType="both"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="no-patient-selected">
+              <div className="empty-state">
+                <Users className="empty-icon" />
+                <h3>환자를 선택해주세요</h3>
+                <p>좌측에서 환자를 검색하고 선택하면 진료를 시작할 수 있습니다.</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* 환자 상세 모달 */}
-      {showPatientModal && selectedPatient && (
-        <PatientDetailModal
-          patient={selectedPatient}
-          doctorId={localStorage.getItem('doctor_id')}
-          onClose={closePatientModal}
-          onPatientDeleted={() => {
-            setScheduleRefresh(prev => prev + 1);
-            setSelectedPatient(null);
-          }}
-        />
-      )}
     </div>
   );
 };

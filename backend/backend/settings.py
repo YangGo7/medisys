@@ -59,6 +59,8 @@ LOCAL_APPS = [
     'worklists',
     'schedules',
     'notifications',
+    'pacsdocs',
+
     
 ]
 
