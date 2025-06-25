@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import './CdssVisualizationPage.css';
 import ShapContributionChart from './ShapContributionChart';
 import VariableImportanceChart from './VariableImportanceChart';
 import SimulationPanel from './SimulationPanel';
@@ -58,7 +59,7 @@ const CdssVisualizationPage = () => {
             backgroundColor: ['#10B981', '#EF4444'],
           }],
         }}
-        options={{ plugins: { legend: { position: 'top' } } }}
+        options={{ plugins: { legend: { position: 'top' } }, maintainAspectRatio: false }}
       />
     );
   };
@@ -99,36 +100,47 @@ const CdssVisualizationPage = () => {
             },
           ],
         }}
-        options={{ plugins: { legend: { position: 'top' } } }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          elements: {
+            point: {
+              radius: 4
+            },
+            line: {
+              borderWidth: 3
+            }
+          },
+          plugins: {
+            legend: { position: 'top' }
+          }
+        }}
       />
     );
   };
 
   return (
-    <div style={{ padding: '2rem', backgroundColor: '#f9fafb' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '1rem' }}>🧾 CDSS 시각화</h1>
+    <div className="cdss-page">
+      <h1>🧾 CDSS 시각화</h1>
 
-      <label htmlFor="sample-select" style={{ display: 'block', marginBottom: '0.5rem' }}>샘플을 선택하세요:</label>
-      <select
-        id="sample-select"
-        value={selectedSample}
-        onChange={e => setSelectedSample(e.target.value)}
-        style={{ padding: '0.5rem', marginBottom: '2rem', minWidth: '200px' }}
-      >
-        <option value=''>-- 샘플 선택 --</option>
-        {sampleList.map(id => (
-          <option key={id} value={id}>{id}</option>
-        ))}
-      </select>
+      <div className="cdss-sample-selector">
+        <label htmlFor="sample-select" className="cdss-label">샘플을 선택하세요:</label>
+        <select
+          id="sample-select"
+          value={selectedSample}
+          onChange={e => setSelectedSample(e.target.value)}
+        >
+          <option value=''>-- 샘플 선택 --</option>
+          {sampleList.map(id => (
+            <option key={id} value={id}>{id}</option>
+          ))}
+        </select>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+      <div className="cdss-grid">
+
         {/* 샘플 결과 카드 */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-        }}>
+        <div className="cdss-card">
           <h2>🧬 샘플 결과 ({selectedSample || '선택 안 됨'})</h2>
           {sampleDetail ? (
             <>
@@ -139,10 +151,8 @@ const CdssVisualizationPage = () => {
                 testType={sampleDetail?.test_type}
                 initialValues={
                   sampleDetail?.results
-                    ? Object.fromEntries(
-                        sampleDetail.results.map(r => [r.component_name, parseFloat(r.value)])
-                     )
-                  : {}
+                    ? Object.fromEntries(sampleDetail.results.map(r => [r.component_name, parseFloat(r.value)]))
+                    : {}
                 }
                 statMax={
                   stats?.mean_values
@@ -155,33 +165,25 @@ const CdssVisualizationPage = () => {
               <SampleImportanceChart sampleId={selectedSample} />
             </>
           ) : (
-            <p style={{ color: '#6b7280' }}>예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
-          )}
-        </div>
-        
-        {/* 전체 시각화 카드 */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '1rem',
-          padding: '1.5rem',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-        }}>
-          <h2 style={{ marginBottom: '1rem' }}>📊 전체 시각화</h2>
-          {loading ? (
-            <p>불러오는 중...</p>
-          ) : stats ? (
-            <>
-              {renderDonutChart()}
-              {renderBarChart()}
-              {renderLineChart()}
-              <VariableImportanceChart />
-            </>
-          ) : (
-            <p>📉 통계 데이터를 불러오는 중이거나 존재하지 않습니다.</p>
+            <p className="cdss-loading">예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
           )}
         </div>
 
-        
+        {/* 전체 시각화 카드 */}
+        <div className="cdss-card">
+          <h2>📊 전체 시각화</h2>
+          <div className="cdss-chart-row">
+            <div className="cdss-doughnut-wrapper">{renderDonutChart()}</div>
+            <div>{renderLineChart()}</div>
+          </div>
+
+          <div className="cdss-chart-full">
+            {renderBarChart()}
+          </div>
+
+          <VariableImportanceChart />
+        </div>
+
       </div>
     </div>
   );

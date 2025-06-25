@@ -1,0 +1,115 @@
+/* cdss_visualization.css */
+
+.cdss-page {
+  padding: 2rem;
+  background-color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+}
+
+.cdss-page h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.cdss-sample-selector {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cdss-sample-selector select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font-size: 1rem;
+}
+
+.cdss-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.cdss-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.cdss-card h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cdss-chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.cdss-chart-full {
+  width: 100%;
+}
+
+.cdss-doughnut-wrapper {
+  width: 100%;
+  max-width: 360px;
+  height: 360px;
+  margin: 0 auto;
+}
+
+.cdss-chart-compact canvas {
+  height: 240px !important;
+}
+
+.cdss-doughnut-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.cdss-loading {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+@media (max-width: 1024px) {
+  .cdss-chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 커스텀 라벨 스타일 */
+.cdss-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+/* Chart 색상 통일 */
+:root {
+  --cdss-blue: #3B82F6;
+  --cdss-orange: #F59E0B;
+  --cdss-green: #10B981;
+  --cdss-red: #EF4444;
+  --cdss-purple: #6366F1;
+  --cdss-gray: #6B7280;
+}
+
+canvas {
+  width: 100% !important;
+  height: 360px !important;
+  max-width: 100%;
+}

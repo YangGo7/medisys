@@ -50,7 +50,9 @@ export default function MainPage() {
 
   const handleMenuClick = (itemId) => {
     if (itemId === 'RISPage') {
-      window.open('/ris', '_blank', 'noopener,noreferrer');
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      window.open(`${protocol}//${hostname}:3020/ris`, '_blank', 'noopener,noreferrer');
     } else if (itemId === 'lis') {
       window.open('/lis', '_blank', 'noopener,noreferrer');
     } else {

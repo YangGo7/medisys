@@ -153,6 +153,7 @@ def receive_model_result(request):
             response_data = CDSSResultSerializer(instance).data
             response_data['shap_data'] = shap_data
             response_data['prediction'] = prediction
+            response_data['lfs_saved'] = True
 
             return Response(response_data, status=201)
 
