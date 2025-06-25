@@ -1,0 +1,175 @@
+/* lis_layout.css */
+
+.lis-dashboard-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  grid-template-rows: auto 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f9f9fb;
+  box-sizing: border-box;
+}
+
+/* 좌측 일정 */
+.lis-sidebar {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: fit-content;
+}
+
+.lis-schedule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.8;
+}
+
+/* 중앙 영역 */
+.lis-center {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 이전 titlepage 버튼 스타일 유지 */
+.lis-menu-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.lis-menu-bar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1.5rem;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.lis-menu-bar button:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  background: rgba(52, 152, 219, 0.05);
+}
+
+.lis-main-content {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  min-height: 500px;
+}
+
+/* 우측 영역 */
+.lis-rightbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: fit-content;
+}
+
+.calendar-box,
+.chat-widget,
+.system-status {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.calendar-box h4,
+.chat-widget h4,
+.system-status h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.chat-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.chat-btn:hover {
+  background: #27ae60;
+}
+
+.system-status ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.8;
+}
+
+/* 캘린더 */
+.custom-calendar {
+  width: 100%;
+  font-family: inherit;
+  border: none;
+}
+
+.custom-calendar .react-calendar__tile {
+  border-radius: 8px;
+  padding: 0.6rem 0.3rem;
+  transition: background 0.2s ease;
+}
+
+.custom-calendar .react-calendar__tile--now {
+  background: rgba(52, 152, 219, 0.15);
+  font-weight: 600;
+}
+
+.custom-calendar .react-calendar__tile--active {
+  background: #3498db !important;
+  color: white;
+}
+
+.custom-calendar .react-calendar__tile:hover {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .lis-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .lis-sidebar,
+  .lis-rightbar {
+    display: none;
+  }
+  .lis-center {
+    width: 100%;
+  }
+}

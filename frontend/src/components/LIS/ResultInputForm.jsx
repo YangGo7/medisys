@@ -113,11 +113,24 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
           }; 
           console.log("CDSS 전송 payload 확인:", payload);
           return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/predict/`, payload)
-          .catch(err => {
-            console.log('CDSS POST error:', err?.response?.data);
-            throw err;
-          });
-      }));
+            .then(res => {
+              console.log("✅ CDSS 응답:", res.data);
+              if (res.data.lfs_saved) {
+                console.log("🧬 LiverFunctionSample 저장됨 (기여도 분석 가능)");
+              }
+              if (res.data.prediction !== undefined) {
+                console.log("🔍 예측 결과:", res.data.prediction);
+              }
+              if (res.data.shap_data) {
+                console.log("📊 SHAP 데이터 있음");
+              }
+            })
+            .catch(err => {
+              console.error('❌ CDSS POST error:', err?.response?.data || err);
+              throw err;
+            });
+        })
+      );
 
       // 로그 저장
       try {

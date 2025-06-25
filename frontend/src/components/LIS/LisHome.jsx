@@ -1,72 +1,61 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import LISSidebar from './LISSidebar';
+import { Outlet, useNavigate } from 'react-router-dom';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import './LisHome.css';
 
-const LisHome = () => {
+export default function LisLayout() {
+  const navigate = useNavigate();
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6', overflowX: 'hidden' }}>
-      
-      {/* ✅ 상단 전체 헤더 */}
-      <header
-        style={{
-          width: '100%',
-          height: '64px',
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e5e7eb',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 2rem',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          boxSizing: 'border-box'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span role="img" aria-label="icon" style={{ fontSize: '24px', marginRight: '0.6rem' }}>🧪</span>
-          <span style={{ fontSize: '20px', fontWeight: 600, color: '#1f2937' }}>LIS 시스템</span>
-        </div>
-        <div style={{ fontSize: '14px', color: '#6b7280' }}>
-          1조 메디컬
-        </div>
-      </header>
+    <div className="lis-dashboard-grid">
 
-      {/* ✅ 콘텐츠 영역 */}
-      <div style={{
-        display: 'flex',
-        width: '100%',
-        boxSizing: 'border-box',
-      }}>
-        <LISSidebar />
+      {/* 좌측: 검사 일정 등 */}
+      <aside className="lis-sidebar">
+        <h3>검사 일정</h3>
+        <ul className="lis-schedule-list">
+          <li>🧪 10:30 혈액 검사 - 김철수</li>
+          <li>🧪 14:00 간기능 검사 - 이영희</li>
+        </ul>
+      </aside>
 
-        <main
-          style={{
-            flex: 1,
-            padding: '2rem',
-            backgroundColor: '#f3f4f6',
-            minHeight: 'calc(100vh - 64px)',
-            overflowX: 'auto',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-              padding: '2rem',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}
-          >
-            <Outlet />
-          </div>
+      {/* 중앙: 메뉴 + 콘텐츠 */}
+      <div className="lis-center">
+        <div className="lis-menu-bar">
+          <button onClick={() => navigate('/lis/orders')}>오더 목록</button>
+          <button onClick={() => navigate('/lis/sample/new')}>샘플 생성</button>
+          <button onClick={() => navigate('/lis/samples')}>샘플 목록</button>
+          <button onClick={() => navigate('/lis/result-list')}>결과 목록</button>
+          <button onClick={() => navigate('/lis/cdss/results')}>결과 시각화</button>
+        </div>
+
+        <main className="lis-main-content">
+          <Outlet />
         </main>
       </div>
+
+      {/* 우측: 달력 + 채팅 + 시스템 상태 */}
+      <aside className="lis-rightbar">
+        <div className="calendar-box">
+          <h4>📅 달력</h4>
+          <Calendar className="custom-calendar" />
+        </div>
+
+        <div className="chat-widget">
+          <h4>💬 채팅</h4>
+          <p>2개의 메시지</p>
+          <button className="chat-btn">채팅 열기</button>
+        </div>
+
+        <div className="system-status">
+          <h4>🔧 시스템 상태</h4>
+          <ul>
+            <li>🟢 LIS: 정상</li>
+            <li>🟢 CDSS: 연결됨</li>
+          </ul>
+        </div>
+      </aside>
+
     </div>
   );
-};
-
-export default LisHome;
+}
