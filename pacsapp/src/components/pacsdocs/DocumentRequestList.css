@@ -1,0 +1,232 @@
+/* pacsapp/src/components/pacsdocs/DocumentRequestList.css */
+/* 근데 코드 짤렷음 */
+
+.document-request-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.section-header {
+  background: #4a5568;
+  color: white;
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.filter-section {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-input {
+  padding: 0.4rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+.patient-filter {
+  min-width: 150px;
+}
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background: #3182ce;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2c5aa0;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover {
+  background: #d1d9e0;
+}
+
+.btn-success {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #38a169;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-message, .error-message, .empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  color: #e53e3e;
+  background: #fed7d7;
+  border: 1px solid #feb2b2;
+  border-radius: 4px;
+  margin: 1rem;
+}
+
+.table-container {
+  flex: 1;
+  overflow: auto;
+}
+
+.worklist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.worklist-table th,
+.worklist-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.worklist-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.worklist-table tr:hover {
+  background: #f8f9fa;
+}
+
+.urgent {
+  background: #fed7d7 !important;
+}
+
+.consent-section {
+  text-align: center;
+  min-width: 100px;
+}
+
+.consent-item {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #ed8936;
+  font-weight: 500;
+  font-size: 0.8rem;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.consent-item:hover {
+  background: #fef5e7;
+}
+
+.consent-item.completed {
+  color: #2f855a;
+  background: #c6f6d5;
+  cursor: default;
+}
+
+.required-docs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 200px;
+}
+
+.doc-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.doc-checkbox-item:hover {
+  background: #f8f9fa;
+}
+
+.doc-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.doc-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.doc-label {
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex: 1;
+  color: #2d3748;
+}
+
+.doc-label:hover {
+  color: #3182ce;
+  text-decoration: underline;
+}
+
+.doc-status {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  min-width: 50px;
+  text-align: center;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.status-pending {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.status-selected {
+  background: #bee3f8;
+  color: #2c5282;
+}

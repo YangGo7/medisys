@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/ai/', include('ai_analysis.urls')),
     path('api/annotations/', include('dr_annotations.urls')),
     path('api/reports/', include('dr_reports.urls')),
+    path('api/pacsdocs/', include('pacsdocs.urls')),
     # stt
     path('api/stt/', include('stt_service.urls')),
     path('api/statisticsboard/', include('statisticsboard.urls')),
