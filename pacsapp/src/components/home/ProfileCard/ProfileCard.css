@@ -272,7 +272,7 @@
 }
 
 .action-btn {
-  padding: 1rem 1.5rem;
+  padding: 1rem 5rem !important;
   border: none;
   border-radius: 6px;
   font-size: 0.85rem !important;

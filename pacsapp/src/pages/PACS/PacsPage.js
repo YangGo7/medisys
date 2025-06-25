@@ -3,7 +3,7 @@ import './PacsPage.css';
 
 const PacsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [orthancUrl, setOrthancUrl] = useState('http://35.221.63.41:8042');
+  const [orthancUrl, setOrthancUrl] = useState('http://35.225.63.41:8042');
   const [showSettings, setShowSettings] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
 

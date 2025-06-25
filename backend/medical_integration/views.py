@@ -1933,13 +1933,14 @@ def calculate_wait_time(mapping):
 @api_view(['POST']) 
 def complete_treatment(request):
     """
-    🔥 진료 완료 처리 - 대기 등록 완전 종료
+    🔥 진료 완료 처리 - 완료 목록 이동 보장
     
     진료 완료 시 처리사항:
     1. 상태를 'complete'로 변경
     2. 진료실 배정 해제 (assigned_room = None)
-    3. 대기 등록 종료 (is_active = False) ← 핵심!
+    3. 대기 등록 종료 (is_active = False) 
     4. 완료 시간 기록
+    5. 완료 목록에 나타나도록 보장
     """
     try:
         patient_id = request.data.get('patient_id')  # mapping_id
@@ -1957,11 +1958,12 @@ def complete_treatment(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # 활성 상태인 환자 매핑 찾기
+            # 활성 상태인 환자 매핑 찾기 (진료실에 배정된 환자)
             mapping = PatientMapping.objects.get(
                 mapping_id=target_mapping_id,
                 is_active=True,  # 현재 대기 중인 환자만
-                mapping_type='IDENTIFIER_BASED'
+                mapping_type='IDENTIFIER_BASED',
+                assigned_room__isnull=False  # 🔥 진료실에 배정된 환자만 완료 가능
             )
             
             # 기존 상태 저장
@@ -1971,12 +1973,15 @@ def complete_treatment(request):
             
             # 🔥 진료 완료 시 모든 처리를 한 번에
             mapping.status = 'complete'           # 상태: 진료 완료
-            mapping.assigned_room = None          # 진료실 배정 해제
-            mapping.is_active = False             # 🔥 대기 등록 완전 종료!
-            mapping.last_sync = timezone.now()   # 마지막 업데이트 시간
+            mapping.assigned_room = None          # 진료실 배정 해제  
+            mapping.is_active = False             # 🔥 대기 등록 완전 종료
+            mapping.last_sync = timezone.now()   # 완료 시간 기록
+            
+            # 🔥 완료 목록에 나타나도록 추가 필드 설정
+            mapping.completion_date = timezone.now()  # 완료 날짜 별도 기록
             
             # 모든 변경사항 저장
-            mapping.save(update_fields=['status', 'assigned_room', 'is_active', 'last_sync'])
+            mapping.save(update_fields=['status', 'assigned_room', 'is_active', 'last_sync', 'completion_date'])
             
             # 상세 로그 기록
             logger.info(f"✅ 진료 완료 처리 상세:")
@@ -1988,16 +1993,24 @@ def complete_treatment(request):
             logger.info(f"   - 완료 시간: {mapping.last_sync}")
             
             # 🔥 대기 목록에서 완전히 제거 확인
-            waiting_count_before = PatientMapping.objects.filter(
+            remaining_waiting = PatientMapping.objects.filter(
                 is_active=True,
                 mapping_type='IDENTIFIER_BASED',
                 assigned_room__isnull=True,
                 created_date__date=timezone.now().date()
             ).count()
             
+            # 🔥 완료 목록에 추가 확인
+            completed_today = PatientMapping.objects.filter(
+                status='complete',
+                is_active=False,
+                mapping_type='IDENTIFIER_BASED',
+                created_date__date=timezone.now().date()
+            ).count()
+            
             return Response({
                 'success': True,
-                'message': f'{mapping.display or mapping.patient_identifier}님의 진료가 완료되어 대기 등록이 종료되었습니다.',
+                'message': f'{mapping.display or mapping.patient_identifier}님의 진료가 완료되어 완료 목록으로 이동되었습니다.',
                 'mapping_id': mapping.mapping_id,
                 'patient_name': mapping.display or mapping.patient_identifier,
                 'patient_identifier': mapping.patient_identifier,
@@ -2023,17 +2036,21 @@ def complete_treatment(request):
                 'completion_info': {
                     'completed_at': mapping.last_sync.isoformat(),
                     'total_wait_time_minutes': calculate_wait_time(mapping),
-                    'removed_from_waiting_list': True
+                    'moved_to_completed_list': True,  # 🔥 완료 목록 이동 확인
+                    'completion_date': mapping.completion_date.isoformat() if hasattr(mapping, 'completion_date') else mapping.last_sync.isoformat()
                 },
                 
-                # 현재 대기 현황
-                'current_waiting_count': waiting_count_before
+                # 현재 현황
+                'current_stats': {
+                    'remaining_waiting': remaining_waiting,
+                    'completed_today': completed_today
+                }
             })
             
         except PatientMapping.DoesNotExist:
             return Response({
                 'success': False,
-                'error': f'활성 상태인 매핑 ID {target_mapping_id}에 해당하는 환자를 찾을 수 없습니다. (이미 완료되었거나 비활성 상태일 수 있습니다)'
+                'error': f'완료 처리할 수 있는 환자를 찾을 수 없습니다. (진료실에 배정된 활성 환자만 완료 가능)'
             }, status=status.HTTP_404_NOT_FOUND)
             
     except Exception as e:
@@ -2103,58 +2120,42 @@ def unassign_room_by_room_number(request):
 @api_view(['GET'])
 def identifier_based_waiting_list(request):
     """
-    🔥 수정된 대기 환자 목록 - 진료 완료된 환자는 제외
-    is_active=True인 환자만 대기 목록에 표시
+    🔥 대기 환자 목록 - 완료된 환자 완전 제외
     """
     today = timezone.now().date()
     
-    # 🔥 is_active=True인 환자만 대기 목록에 포함
+    # 🔥 대기 조건: is_active=True AND status!='complete'  
     mappings = PatientMapping.objects.filter(
         created_date__date=today,
         mapping_type='IDENTIFIER_BASED',
-        is_active=True  # 🔥 핵심: 대기 등록이 활성화된 환자만
+        is_active=True  # 🔥 활성 상태
+    ).exclude(
+        status='complete'  # 🔥 완료 상태 제외
     ).order_by('-created_date')
 
     result = []
     for m in mappings:
         # 완전한 환자 정보 조회
-        from .views import get_complete_patient_info  # 기존 함수 활용
         patient_info = get_complete_patient_info(m.openmrs_patient_uuid)
         
         if patient_info:
             result.append({
                 'mapping_id': m.mapping_id,
-                'uuid': patient_info['uuid'],  # person_uuid
+                'uuid': patient_info['uuid'],
                 'patient_identifier': patient_info['patient_identifier'],
                 'name': patient_info['name'],
-                'display': f"{patient_info['patient_identifier']} - {patient_info['name']}" if patient_info['patient_identifier'] and patient_info['name'] else (patient_info['name'] or m.display),
+                'display': f"{patient_info['patient_identifier']} - {patient_info['name']}",
+                'status': m.status,
+                'assigned_room': m.assigned_room,
+                'created_at': m.created_date.isoformat(),
                 'gender': patient_info['gender'],
                 'birthdate': str(patient_info['birthdate']) if patient_info['birthdate'] else None,
                 'age': patient_info['age'],
-                'waitTime': calculate_wait_time(m),
-                'assigned_room': m.assigned_room,
-                'created_at': m.created_date.isoformat(),
-                'status': m.status,
-                'is_active': m.is_active  # 🔥 항상 True여야 함
+                'is_active': m.is_active,  # True여야 함
+                'wait_time_minutes': calculate_wait_time(m),
+                'waiting_status': 'waiting' if not m.assigned_room else 'assigned'  # 🔥 대기 상태 명시
             })
-        else:
-            # fallback
-            result.append({
-                'mapping_id': m.mapping_id,
-                'uuid': m.openmrs_patient_uuid,
-                'patient_identifier': m.patient_identifier,
-                'name': m.display,
-                'display': m.display,
-                'gender': m.gender,
-                'birthdate': str(m.birthdate) if m.birthdate else None,
-                'age': calculate_age_from_birthdate(str(m.birthdate)) if m.birthdate else None,
-                'waitTime': calculate_wait_time(m),
-                'assigned_room': m.assigned_room,
-                'created_at': m.created_date.isoformat(),
-                'status': m.status,
-                'is_active': m.is_active
-            })
-
+    
     return Response(result)
 
 
@@ -2435,7 +2436,7 @@ def create_patient_auto_id(request):
 @csrf_exempt
 @api_view(['POST', 'OPTIONS'])
 def create_patient(request):
-    """🔥 개선된 환자 생성 (자동/수동 ID 모두 지원)"""
+    """🔥 환자 생성 - 자동 대기등록 DISABLED"""
     
     if request.method == 'OPTIONS':
         response = Response(status=status.HTTP_200_OK)
@@ -2458,7 +2459,7 @@ def create_patient(request):
                 'error': 'OpenMRS 서버에 연결할 수 없습니다. 네트워크 연결과 서버 상태를 확인해주세요.'
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         
-        # 🔥 ID 처리 방식 결정
+        # ID 처리 방식 결정
         user_identifier = data.get('patient_identifier', '').strip()
         
         if user_identifier:
@@ -2471,30 +2472,13 @@ def create_patient(request):
         if result and result.get('success'):
             logger.info(f"✅ 환자 등록 성공: {result['patient']['patient_identifier']}")
             
-            # 🔥 PatientMapping 자동 생성 시도
-            try:
-                from .models import PatientMapping
-                from django.utils import timezone
-                
-                mapping = PatientMapping.create_identifier_based_mapping(
-                    orthanc_patient_id=f"REG-{timezone.now().strftime('%Y%m%d%H%M%S')}",
-                    openmrs_patient_uuid=result['patient']['uuid'],
-                    patient_identifier=result['patient']['patient_identifier']
-                )
-                
-                if mapping:
-                    logger.info(f"✅ PatientMapping 생성 성공: {mapping.mapping_id}")
-                    result['mapping_created'] = True
-                    result['mapping_id'] = mapping.mapping_id
-                
-            except Exception as mapping_error:
-                logger.error(f"⚠️ PatientMapping 생성 실패: {mapping_error}")
-                result['mapping_warning'] = str(mapping_error)
+            # 🔥 자동 대기등록 DISABLED - PatientMapping 생성하지 않음
+            logger.info("🚫 자동 대기등록 비활성화됨 - 수동 접수 필요")
             
-            # 🔥 응답 형식 통일
+            # 🔥 응답 형식 통일 (대기등록 없이)
             response_data = {
                 'success': True,
-                'message': result.get('message', '환자가 성공적으로 생성되었습니다'),
+                'message': '환자가 성공적으로 생성되었습니다. 접수 패널에서 대기등록을 진행해주세요.',
                 'patient': {
                     'uuid': result['patient']['uuid'],
                     'display': result['patient']['display'],
@@ -2504,9 +2488,8 @@ def create_patient(request):
                 },
                 'auto_generated': result.get('auto_generated', False),
                 'openmrs_idgen_used': result.get('openmrs_idgen_used', False),
-                'mapping_created': result.get('mapping_created', False),
-                'mapping_id': result.get('mapping_id'),
-                'mapping_warning': result.get('mapping_warning')
+                'mapping_created': False,  # 🔥 자동 매핑 생성 안함
+                'auto_waiting_disabled': True  # 🔥 자동 대기등록 비활성화 표시
             }
             
             return Response(response_data, status=status.HTTP_201_CREATED)
@@ -2530,6 +2513,46 @@ def create_patient(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
+@api_view(['DELETE'])
+def cancel_waiting_registration(request, mapping_id):
+    """🔥 대기등록 취소 - 완전 삭제"""
+    try:
+        logger.info(f"🗑️ 대기등록 취소 요청: mapping_id={mapping_id}")
+        
+        # 대기 중인 환자만 취소 가능 (진료실 배정 안된 환자)
+        mapping = PatientMapping.objects.get(
+            mapping_id=mapping_id,
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED',
+            assigned_room__isnull=True  # 🔥 대기 중인 환자만
+        )
+        
+        patient_name = mapping.display or mapping.patient_identifier
+        
+        # 🔥 완전 삭제 (비활성화가 아닌 실제 삭제)
+        mapping.delete()
+        
+        logger.info(f"✅ 대기등록 취소 완료: {patient_name}")
+        
+        return Response({
+            'success': True,
+            'message': f'{patient_name}님의 대기등록이 취소되었습니다.',
+            'deleted_mapping_id': mapping_id,
+            'patient_name': patient_name
+        })
+        
+    except PatientMapping.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': '취소할 수 있는 대기등록을 찾을 수 없습니다. (이미 진료실에 배정되었거나 존재하지 않음)'
+        }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        logger.error(f"❌ 대기등록 취소 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def debug_openmrs_metadata(request):
@@ -3114,6 +3137,61 @@ def get_completed_patients_today(request):
             'date': today.isoformat(),
             'completed_patients': completed_list,
             'total_completed': len(completed_list),
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"완료 환자 목록 조회 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'서버 오류: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_completed_patients_today(request):
+    """
+    🔥 오늘 진료 완료된 환자 목록 (정확한 조건)
+    """
+    try:
+        today = timezone.now().date()
+        
+        # 🔥 완료 조건: status='complete' AND is_active=False
+        completed_mappings = PatientMapping.objects.filter(
+            status='complete',        # 완료 상태
+            is_active=False,         # 대기 등록 종료됨
+            mapping_type='IDENTIFIER_BASED',
+            created_date__date=today
+        ).order_by('-last_sync')  # 완료 시간 순
+        
+        completed_list = []
+        for mapping in completed_mappings:
+            # 환자 정보 조회
+            patient_info = get_complete_patient_info(mapping.openmrs_patient_uuid)
+            
+            wait_time = calculate_wait_time(mapping)
+            
+            completed_list.append({
+                'mapping_id': mapping.mapping_id,
+                'patient_name': patient_info['name'] if patient_info else mapping.display,
+                'patient_identifier': mapping.patient_identifier,
+                'uuid': mapping.openmrs_patient_uuid,
+                'registered_at': mapping.created_date.isoformat(),
+                'completed_at': mapping.last_sync.isoformat() if mapping.last_sync else None,
+                'total_wait_time_minutes': wait_time,
+                'status': mapping.status,
+                'is_active': mapping.is_active,  # False여야 함
+                'gender': patient_info.get('gender') if patient_info else None,
+                'age': patient_info.get('age') if patient_info else None,
+                'completion_confirmed': True  # 🔥 완료 확인 플래그
+            })
+        
+        return Response({
+            'success': True,
+            'date': today.isoformat(),
+            'completed_patients': completed_list,
+            'total_completed': len(completed_list),
+            'filter_applied': 'status=complete AND is_active=False',  # 🔥 적용된 필터 명시
             'timestamp': timezone.now().isoformat()
         })
         

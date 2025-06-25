@@ -29,7 +29,6 @@ import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
 import DoctorDashboardOnly from './components/DoctorDashboardOnly';
 import './App.css';
-import CdssVisualizationPage from './components/LIS/CdssVisualizationPage';
 
 function App() {
   console.log("✅ API URL:", process.env.REACT_APP_API_URL);
