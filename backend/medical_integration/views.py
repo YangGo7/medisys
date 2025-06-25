@@ -2294,6 +2294,8 @@ def completed_patients_list(request):
     })
 
 
+
+
 @api_view(['GET'])
 def get_daily_summary_stats(request):
     """

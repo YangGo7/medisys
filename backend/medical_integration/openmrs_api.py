@@ -27,6 +27,313 @@ class OpenMRSAPI:
         self._locations = None
         self._session_checked = False
     
+    
+    def generate_unique_identifier(self):
+        """🔥 P + 순차 숫자 생성 (중복 없음)"""
+        try:
+            # 1. DB에서 현재 최대 P 번호 찾기
+            from django.db import transaction
+            from .models import PatientMapping
+            
+            with transaction.atomic():
+                # P로 시작하는 identifier 중 가장 큰 번호 찾기
+                latest_mapping = PatientMapping.objects.filter(
+                    patient_identifier__startswith='P',
+                    patient_identifier__regex=r'^P[0-9]+$',  # P + 숫자만
+                    is_active=True
+                ).extra(
+                    select={'num_part': 'CAST(SUBSTRING(patient_identifier, 2) AS UNSIGNED)'}
+                ).order_by('-num_part').first()
+                
+                if latest_mapping:
+                    try:
+                        # P123 → 123 추출 → +1
+                        current_number = int(latest_mapping.patient_identifier[1:])
+                        next_number = current_number + 1
+                        logger.info(f"🔖 현재 최대: {latest_mapping.patient_identifier}, 다음: P{next_number}")
+                    except ValueError:
+                        next_number = 1
+                else:
+                    next_number = 1
+                    logger.info(f"🔖 첫 번째 환자: P{next_number}")
+                
+                # 2. 중복 확인 (혹시 모를 상황 대비)
+                max_attempts = 10
+                for attempt in range(max_attempts):
+                    candidate = f"P{next_number + attempt}"
+                    
+                    # DB에서 중복 확인
+                    if not PatientMapping.objects.filter(
+                        patient_identifier=candidate, 
+                        is_active=True
+                    ).exists():
+                        
+                        # OpenMRS API에서도 중복 확인
+                        if not self.check_identifier_exists_simple(candidate):
+                            logger.info(f"✅ 고유 identifier 생성: {candidate}")
+                            return candidate
+                    
+                    logger.warning(f"⚠️ {candidate} 중복, 다음 번호 시도...")
+                
+                # 최대 시도 후에도 실패하면 타임스탬프 기반
+                timestamp = datetime.now().strftime("%m%d%H%M")
+                fallback = f"P{timestamp}"
+                logger.warning(f"🚨 fallback identifier: {fallback}")
+                return fallback
+                
+        except Exception as e:
+            logger.error(f"❌ P+숫자 생성 실패: {e}")
+            # 최후의 수단
+            import random
+            emergency = f"P{random.randint(1000, 9999)}"
+            logger.error(f"🆘 긴급 identifier: {emergency}")
+            return emergency
+    
+    def create_patient_with_auto_openmrs_id(self, patient_data, custom_identifier=None):
+        """🔥 안전 모드 환자 생성"""
+        try:
+            logger.info(f"🔄 안전 모드 환자 생성 시작...")
+            
+            # 1. 상세 연결 테스트
+            connection_test = self.test_connection_detailed()
+            if not connection_test['success']:
+                return {
+                    'success': False,
+                    'error': connection_test['error']
+                }
+            
+            logger.info("✅ 연결 및 메타데이터 테스트 통과")
+            
+            # 2. 환자 데이터 검증
+            required_fields = ['givenName', 'familyName', 'gender', 'birthdate']
+            for field in required_fields:
+                if not patient_data.get(field):
+                    return {
+                        'success': False,
+                        'error': f'필수 필드 누락: {field}'
+                    }
+            
+            # 3. 식별자 처리
+            if custom_identifier and custom_identifier.strip():
+                patient_identifier = custom_identifier.strip()
+                logger.info(f"🔖 사용자 지정 식별자: {patient_identifier}")
+            else:
+                patient_identifier = self.generate_unique_identifier()
+                logger.info(f"🔖 자동 생성 식별자: {patient_identifier}")
+            
+            # 4. 메타데이터 가져오기
+            identifier_type = self.get_default_identifier_type()
+            location = self.get_default_location()
+            
+            # 🔥 핵심: 메타데이터 검증
+            if not identifier_type:
+                return {
+                    'success': False,
+                    'error': 'OpenMRS에서 유효한 식별자 타입을 찾을 수 없습니다. OpenMRS 설정을 확인해주세요.'
+                }
+                
+            if not location:
+                return {
+                    'success': False,
+                    'error': 'OpenMRS에서 유효한 위치를 찾을 수 없습니다. OpenMRS 설정을 확인해주세요.'
+                }
+            
+            # 5. 최소한의 안전한 데이터 구성
+            openmrs_patient_data = {
+                'person': {
+                    'names': [{
+                        'givenName': str(patient_data['givenName']).strip(),
+                        'familyName': str(patient_data['familyName']).strip(),
+                        'preferred': True
+                    }],
+                    'gender': str(patient_data['gender']).upper(),
+                    'birthdate': str(patient_data['birthdate'])
+                },
+                'identifiers': [{
+                    'identifier': patient_identifier,
+                    'identifierType': identifier_type,
+                    'location': location,
+                    'preferred': True
+                }]
+            }
+            
+            # middleName 추가 (있는 경우에만)
+            if patient_data.get('middleName'):
+                openmrs_patient_data['person']['names'][0]['middleName'] = str(patient_data['middleName']).strip()
+            
+            logger.info(f"📤 최종 전송 데이터: {openmrs_patient_data}")
+            
+            # 6. 환자 생성 API 호출
+            response = requests.post(
+                f"{self.api_url}/patient",
+                json=openmrs_patient_data,
+                auth=self.auth,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                timeout=30
+            )
+            
+            logger.info(f"📥 OpenMRS 응답: {response.status_code}")
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                logger.info(f"✅ 환자 생성 성공: {result.get('uuid')}")
+                
+                return {
+                    'success': True,
+                    'message': '환자가 성공적으로 생성되었습니다',
+                    'patient': {
+                        'uuid': result.get('uuid'),
+                        'display': result.get('display'),
+                        'identifiers': result.get('identifiers', []),
+                        'patient_identifier': patient_identifier
+                    },
+                    'auto_generated': not bool(custom_identifier)
+                }
+            else:
+                # 🔥 상세 에러 로깅
+                error_content = response.text
+                logger.error(f"❌ 환자 생성 실패: {response.status_code}")
+                logger.error(f"❌ 응답 내용 (처음 1000자): {error_content[:1000]}")
+                
+                # HTML 에러 페이지인 경우 간단한 메시지로 변환
+                if 'Internal Server Error' in error_content:
+                    error_msg = 'OpenMRS 서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.'
+                else:
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get('error', {}).get('message', '알 수 없는 오류')
+                    except:
+                        error_msg = f'OpenMRS API 오류 (코드: {response.status_code})'
+                
+                return {
+                    'success': False,
+                    'error': error_msg
+                }
+                
+        except requests.exceptions.Timeout:
+            logger.error("❌ OpenMRS API 타임아웃")
+            return {
+                'success': False,
+                'error': 'OpenMRS 서버 응답 시간이 초과되었습니다'
+            }
+        except requests.exceptions.ConnectionError:
+            logger.error("❌ OpenMRS 연결 실패")
+            return {
+                'success': False,
+                'error': 'OpenMRS 서버에 연결할 수 없습니다'
+            }
+        except Exception as e:
+            logger.error(f"❌ 예상치 못한 오류: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return {
+                'success': False,
+                'error': f'예상치 못한 오류가 발생했습니다: {str(e)}'
+            }
+
+    def create_patient_with_manual_id(self, patient_data, patient_identifier):
+        """🔥 수동 지정 ID로 환자 생성"""
+        try:
+            logger.info(f"🔄 수동 ID 환자 생성: {patient_identifier}")
+            
+            # 기본 환자 데이터 준비
+            prepared_data = self._prepare_patient_data(patient_data, patient_identifier)
+            
+            # OpenMRS API 호출
+            response = requests.post(
+                f"{self.api_url}/patient",
+                json=prepared_data,
+                auth=self.auth,
+                headers={'Content-Type': 'application/json'},
+                timeout=30
+            )
+            
+            if response.status_code in [200, 201]:
+                patient_response = response.json()
+                logger.info(f"✅ 환자 생성 성공: {patient_identifier}")
+                
+                return {
+                    'success': True,
+                    'message': '환자가 성공적으로 생성되었습니다.',
+                    'patient': {
+                        'uuid': patient_response['uuid'],
+                        'display': patient_response.get('display', ''),
+                        'identifiers': patient_response.get('identifiers', []),
+                        'patient_identifier': patient_identifier
+                    }
+                }
+            else:
+                error_msg = self._parse_error_response(response)
+                logger.error(f"❌ 환자 생성 실패: {error_msg}")
+                return {
+                    'success': False,
+                    'error': f'환자 생성 실패: {error_msg}'
+                }
+                
+        except Exception as e:
+            logger.error(f"❌ 수동 ID 환자 생성 실패: {e}")
+            return {
+                'success': False,
+                'error': f'환자 생성 중 오류: {str(e)}'
+            }
+
+    def _generate_patient_identifier(self):
+        """🔥 OpenMRS IdGen 서비스를 사용한 ID 생성"""
+        try:
+            logger.info("🔄 IdGen 서비스로 Patient ID 생성 시도...")
+            
+            # OpenMRS IdGen 모듈의 기본 엔드포인트들 시도
+            idgen_endpoints = [
+                f"{self.api_url}/idgen/nextIdentifier",
+                f"{self.api_url}/idgen/identifiersource/1/identifier",  # 기본 소스
+                f"{self.api_url.replace('/ws/rest/v1', '')}/module/idgen/generateIdentifier.form"
+            ]
+            
+            for endpoint in idgen_endpoints:
+                try:
+                    logger.info(f"🔄 IdGen 엔드포인트 시도: {endpoint}")
+                    
+                    response = requests.get(
+                        endpoint,
+                        auth=self.auth,
+                        headers={'Accept': 'application/json'},
+                        timeout=10
+                    )
+                    
+                    if response.status_code == 200:
+                        # JSON 응답 처리
+                        try:
+                            data = response.json()
+                            if isinstance(data, dict):
+                                identifier = data.get('identifier') or data.get('value') or data.get('id')
+                            else:
+                                identifier = str(data).strip()
+                            
+                            if identifier and identifier != 'null':
+                                logger.info(f"✅ IdGen ID 생성 성공: {identifier}")
+                                return identifier
+                                
+                        except:
+                            # 텍스트 응답 처리
+                            identifier = response.text.strip().strip('"')
+                            if identifier and len(identifier) > 0 and identifier != 'null':
+                                logger.info(f"✅ IdGen ID 생성 성공 (텍스트): {identifier}")
+                                return identifier
+                    
+                except Exception as endpoint_error:
+                    logger.debug(f"⚠️ IdGen 엔드포인트 실패 ({endpoint}): {endpoint_error}")
+                    continue
+            
+            logger.warning("⚠️ 모든 IdGen 엔드포인트 실패")
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ IdGen 서비스 오류: {e}")
+            return None
+    
     def _format_openmrs_datetime(self, dt=None):
         """OpenMRS가 요구하는 정확한 datetime 형식으로 변환"""
         if dt is None:
