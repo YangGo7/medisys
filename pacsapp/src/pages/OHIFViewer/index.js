@@ -174,16 +174,17 @@
 
 // src/components/OHIFViewer/index.js
 import React, { useState, useCallback, useEffect } from 'react';
-import ViewerIframe from './ViewerIframe/ViewerIframe';
-import AnalysisPanel from './AnalysisPanel/AnalysisPanel';
-import LabelModal from './AnnotationTools/LabelModal';
-import ReportModal from './ReportModal/ReportModal';
+import ViewerIframe from './ViewerIframe/ViewerIframe.js';
+
+import AnalysisPanel from './AnalysisPanel/AnalysisPanel.js';
+import LabelModal from './AnnotationTools/LabelModal.js';
+import ReportModal from './ReportModal/ReportModal.js';
 
 // 커스텀 훅들
-import useAIAnalysis from '../../hooks/useAIAnalysis';
-import useAnnotations from '../../hooks/useAnnotations';
-import useReports from '../../hooks/useReports';
-import usePACS from '../../hooks/usePACS';
+import useAIAnalysis from '../../hooks/useAIAnalysis.js';
+import useAnnotations from '../../hooks/useAnnotations.js';
+import useReports from '../../hooks/useReports.js';
+import usePACS from '../../hooks/usePACS.js';
 
 import styles from './OHIFViewer.module.css';
 

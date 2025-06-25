@@ -27,7 +27,7 @@ import NoticeBoard from './components/Main_page/Notics_page'; // 새로 추가
 // ThemeContext, ReceptionContext 추가
 import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
-import DoctorDashboardOnly from './components/DoctorDashboardOnly';
+import DocDashBoard from './components/DocDashBoard/DocDashBoard';
 import './App.css';
 
 function App() {
@@ -54,7 +54,7 @@ function App() {
             <Route path="/emr/waiting" element={<PatientWaitingList />} />
             <Route path="/emr/patient-status" element={<PatientStatusBoard />} />
             <Route path="/emr/completed-patients" element={<CompletedPatients />} />
-            <Route path="/doctor-dashboard" element={<DoctorDashboardOnly />} />
+            <Route path="/doctor-dashboard" element={<DocDashBoard />} />
             {/* LIS 관련 페이지 */}
             <Route path="/lis" element={<LisHome />}>
               <Route path="orders" element={<OrderListPage />} />

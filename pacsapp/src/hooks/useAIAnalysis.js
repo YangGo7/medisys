@@ -518,7 +518,7 @@ const useAIAnalysis = (currentStudyUID) => {
 
     const deleteIndividualResult = useCallback(async (resultId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/ai/result/${resultId}/`, {
+            const response = await fetch(`http://http://35.225.63.41/:8000/api/ai/result/${resultId}/`, {
                 method: 'DELETE'
             });
             
@@ -553,7 +553,7 @@ const useAIAnalysis = (currentStudyUID) => {
         try {
             showToast('삭제 중...');
             
-            const response = await fetch(`http://localhost:8000/api/ai/result/${resultId}/`, {
+            const response = await fetch(`http://http://35.225.63.41/:8000/api/ai/result/${resultId}/`, {
                 method: 'DELETE'
             });
             

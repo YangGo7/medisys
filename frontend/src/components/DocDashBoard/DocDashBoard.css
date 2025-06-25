@@ -608,7 +608,7 @@
   }
 }
 
-@media (max-width: 1200px) {
+/* @media (max-width: 1200px) {
   .main-container {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
@@ -630,7 +630,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
-}
+} */
 
 @media (max-width: 768px) {
   .main-container {

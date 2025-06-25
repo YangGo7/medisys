@@ -1,3 +1,5 @@
+# /home/medical_system/backend/pacsdocs/management/commands/create_document_types.py
+
 from django.core.management.base import BaseCommand
 from pacsdocs.models import DocumentType
 

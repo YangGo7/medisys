@@ -1,0 +1,619 @@
+/* pacsapp/src/components/pacsdocs/DocumentPreview.css */
+
+.document-preview {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  background: #4a5568;
+  color: white;
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* 빈 화면 스타일 */
+.empty-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #718096;
+  padding: 3rem;
+  height: 100%;
+  background: #f8fafc;
+}
+
+.empty-preview h3 {
+  margin: 1rem 0 0.5rem 0;
+  color: #4a5568;
+  font-size: 1.2rem;
+}
+
+.empty-preview p {
+  margin: 0;
+  line-height: 1.6;
+  color: #718096;
+}
+
+/* 업로드 섹션 스타일 */
+.upload-section {
+  margin-top: 1rem;
+  padding: 2rem;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.upload-section:hover {
+  border-color: #3182ce;
+  background: #ebf8ff;
+  transform: translateY(-2px);
+}
+
+.upload-section.drag-over {
+  border-color: #3182ce;
+  background: #ebf8ff;
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+}
+
+.upload-section p {
+  margin: 0.5rem 0;
+}
+
+.upload-section p:first-of-type {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.upload-section p:last-of-type {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.upload-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #f8f9fa;
+  text-align: left;
+}
+
+.upload-preview p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.upload-preview p:first-child {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.upload-preview p:last-child {
+  color: #4a5568;
+  margin-top: 0.5rem;
+}
+
+/* 문서 미리보기 스타일 */
+.preview-content {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: white;
+  min-height: 400px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.document-header {
+  text-align: center;
+  border-bottom: 2px solid #2d3748;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hospital-logo {
+  font-size: 1.5rem;
+  color: #3182ce;
+  margin-bottom: 0.5rem;
+}
+
+.document-header h1 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.5rem;
+}
+
+.document-header h2 {
+  margin: 0.5rem 0;
+  color: #718096;
+  font-size: 1.1rem;
+  font-weight: normal;
+}
+
+.patient-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.info-group h4 {
+  color: #4a5568;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.info-group p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.info-group strong {
+  color: #2d3748;
+}
+
+.signature-section {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.signature-box {
+  height: 60px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0aec0;
+  background: #f7fafc;
+  font-style: italic;
+}
+
+/* 진료기록영상 프로세스 스타일 */
+.process-step {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.process-step h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.process-step p {
+  margin: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.process-step ul {
+  margin: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.process-step li {
+  margin: 0.2rem 0;
+}
+
+.step-waiting {
+  background: #f7fafc;
+  color: #a0aec0;
+  border-color: #e2e8f0;
+}
+
+.step-waiting h4 {
+  color: #a0aec0;
+}
+
+.step-waiting p,
+.step-waiting li {
+  color: #a0aec0;
+}
+
+.step-active {
+  background: #fef5e7;
+  border-color: #ed8936;
+  box-shadow: 0 2px 4px rgba(237, 137, 54, 0.1);
+}
+
+.step-active h4 {
+  color: #d69e2e;
+}
+
+.step-completed {
+  background: #c6f6d5;
+  border-color: #48bb78;
+  box-shadow: 0 2px 4px rgba(72, 187, 120, 0.1);
+}
+
+.step-completed h4 {
+  color: #2f855a;
+}
+
+.step-completed::before {
+  content: '✅ ';
+  margin-right: 0.5rem;
+}
+
+/* 액션 버튼 스타일 */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  margin-top: auto;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: #3182ce;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2c5aa0;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #d1d9e0;
+}
+
+.btn-success {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #38a169;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 로딩 상태 */
+.btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 스크롤바 커스터마이징 */
+.preview-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.preview-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.preview-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .patient-info {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .btn {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .preview-content {
+    padding: 1rem;
+    min-height: 300px;
+  }
+  
+  .document-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .document-header h2 {
+    font-size: 1rem;
+  }
+  
+  .upload-section {
+    padding: 1.5rem;
+  }
+  
+  .process-step {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .empty-preview {
+    padding: 2rem 1rem;
+  }
+  
+  .preview-content {
+    padding: 0.75rem;
+    min-height: 250px;
+  }
+  
+  .patient-info {
+    padding: 0.5rem;
+  }
+  
+  .info-group h4 {
+    font-size: 0.85rem;
+  }
+  
+  .info-group p {
+    font-size: 0.8rem;
+  }
+  
+  .upload-section {
+    padding: 1rem;
+  }
+  
+  .process-step {
+    padding: 0.5rem;
+  }
+  
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* 접근성 개선 */
+.btn:focus,
+.upload-section:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.3);
+}
+
+.upload-section[tabindex="0"]:focus {
+  border-color: #3182ce;
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .section-header,
+  .action-buttons,
+  .upload-section,
+  .process-step .btn {
+    display: none !important;
+  }
+  
+  .preview-content {
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .document-preview {
+    height: auto;
+  }
+  
+  .patient-info {
+    background: white;
+    border: 1px solid #000;
+  }
+  
+  .signature-box {
+    border: 1px solid #000;
+    background: white;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .document-preview {
+    background: #2d3748;
+    color: #e2e8f0;
+  }
+  
+  .preview-content {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .empty-preview {
+    background: #1a202c;
+    color: #a0aec0;
+  }
+  
+  .upload-section {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .upload-section:hover {
+    background: #374151;
+    border-color: #60a5fa;
+  }
+  
+  .upload-preview {
+    background: #374151;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .patient-info {
+    background: #374151;
+  }
+  
+  .signature-section {
+    background: #374151;
+    border-color: #4a5568;
+  }
+  
+  .signature-box {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #718096;
+  }
+  
+  .action-buttons {
+    background: #374151;
+    border-color: #4a5568;
+  }
+}
+
+/* 애니메이션 효과 */
+.document-preview {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.process-step {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 파일 드래그 앤 드롭 효과 */
+.upload-section.dragging {
+  border-color: #3182ce;
+  background: #ebf8ff;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);
+}
+
+/* 에러 상태 */
+.upload-error {
+  color: #e53e3e;
+  background: #fed7d7;
+  border-color: #feb2b2;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* 성공 상태 */
+.upload-success {
+  color: #2f855a;
+  background: #c6f6d5;
+  border: 1px solid #9ae6b4;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}

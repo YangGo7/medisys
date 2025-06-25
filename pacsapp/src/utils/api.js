@@ -1,7 +1,7 @@
 // src/utils/api.js
 
 // API 기본 설정
-const API_BASE_URL = 'http://http://35.225.63.41:8000';
+const API_BASE_URL = 'http://35.225.63.41:8000';
 
 /**
  * API 응답을 처리하는 공통 함수
