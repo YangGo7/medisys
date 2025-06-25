@@ -173,7 +173,14 @@ def receive_full_sample(request):
         test_type = request.data.get('test_type')
         components = request.data.get('components', [])
 
-        input_dict = {comp['component_name']: float(comp['value']) for comp in components}
+        input_dict = {}
+        for comp in components:
+            try:
+                input_dict[comp['component_name']] = float(comp['value'])
+            except Exception as e:
+                print("❌ float 변환 실패:", comp['component_name'], comp['value'], e)
+                return Response({'error': f"입력값 변환 실패: {comp['component_name']} = {comp['value']}"}, status=400)
+
         features = ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin']
         df = pd.DataFrame([[input_dict.get(f, 0.0) for f in features]], columns=features)
 
@@ -184,8 +191,13 @@ def receive_full_sample(request):
         prob = model.predict_proba(df)[0][1]
         pred = int(prob >= 0.5)
 
-        explainer = shap.Explainer(model.predict_proba, df)
-        shap_values = explainer(df)
+        try:
+            explainer = shap.Explainer(model.predict_proba, df)
+            shap_values = explainer(df)
+            shap_output = shap_values.values[0][1].tolist()
+        except Exception as e:
+            print(f"⚠️ SHAP 계산 실패: {e}")
+            shap_output = [0.0] * len(features)  # 또는 None
 
         response = {
             'sample': sample_id,
@@ -194,7 +206,7 @@ def receive_full_sample(request):
             'prediction_prob': prob,
             'shap_data': {
                 'features': features,
-                'shap_values': shap_values.values[0][1].tolist()
+                'shap_values': shap_output
             }
         }
         return Response(response, status=200)
@@ -202,6 +214,7 @@ def receive_full_sample(request):
     except Exception as e:
         print("❌ CDSS 시뮬레이션 에러:", e)
         return Response({'error': str(e)}, status=500)
+
 
 @api_view(['GET'])
 def lft_statistics_summary(request):

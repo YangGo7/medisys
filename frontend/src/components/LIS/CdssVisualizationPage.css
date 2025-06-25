@@ -101,9 +101,9 @@
 /* Chart 색상 통일 */
 :root {
   --cdss-blue: #3B82F6;
-  --cdss-orange: #F59E0B;
-  --cdss-green: #10B981;
-  --cdss-red: #EF4444;
+  --cdss-orange: #faf880;
+  --cdss-green: #5fd8b0;
+  --cdss-red: #e6a07e;
   --cdss-purple: #6366F1;
   --cdss-gray: #6B7280;
 }

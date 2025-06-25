@@ -416,7 +416,7 @@ class OHIFViewerService {
             🏥 Medical Platform DICOM Viewer v1.0
           </div>
           <div style="opacity: 0.7;">
-            📡 Connected to Orthanc (localhost:8042)
+            📡 Connected to Orthanc (35.221.63.41:8042)
           </div>
         </div>
       </div>
