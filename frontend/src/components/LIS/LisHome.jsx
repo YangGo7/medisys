@@ -23,7 +23,6 @@ export default function LisLayout() {
       <div className="lis-center">
         <div className="lis-menu-bar">
           <button onClick={() => navigate('/lis/orders')}>오더 목록</button>
-          <button onClick={() => navigate('/lis/sample/new')}>샘플 생성</button>
           <button onClick={() => navigate('/lis/samples')}>샘플 목록</button>
           <button onClick={() => navigate('/lis/result-list')}>결과 목록</button>
           <button onClick={() => navigate('/lis/cdss/results')}>결과 시각화</button>

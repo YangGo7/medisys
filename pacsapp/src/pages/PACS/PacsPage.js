@@ -3,7 +3,7 @@ import './PacsPage.css';
 
 const PacsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [orthancUrl, setOrthancUrl] = useState('http://localhost:8042');
+  const [orthancUrl, setOrthancUrl] = useState('http://35.221.63.41:8042');
   const [showSettings, setShowSettings] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
 
@@ -102,7 +102,7 @@ const PacsPage = () => {
               type="text" 
               value={orthancUrl}
               onChange={(e) => setOrthancUrl(e.target.value)}
-              placeholder="http://localhost:8042"
+              placeholder="http://35.221.63.41:8042"
             />
             <button 
               onClick={() => handleUrlChange(orthancUrl)}
@@ -113,13 +113,13 @@ const PacsPage = () => {
           </div>
           
           <div className="preset-buttons">
-            <button onClick={() => handleUrlChange('http://localhost:8042')}>
+            <button onClick={() => handleUrlChange('http://35.221.63.41:8042')}>
               기본 포트 (8042)
             </button>
-            <button onClick={() => handleUrlChange('http://localhost:4242')}>
+            <button onClick={() => handleUrlChange('http://35.221.63.41:4242')}>
               대체 포트 (4242)
             </button>
-            <button onClick={() => handleUrlChange('http://localhost:8080')}>
+            <button onClick={() => handleUrlChange('http://35.221.63.41:8080')}>
               대체 포트 (8080)
             </button>
           </div>
@@ -129,7 +129,7 @@ const PacsPage = () => {
             <ol>
               <li>Orthanc 실행파일을 다운로드하여 실행하거나</li>
               <li>명령 프롬프트에서 <code>orthanc</code> 명령 실행</li>
-              <li>기본 접속: <code>http://localhost:8042</code></li>
+              <li>기본 접속: <code>http://35.221.63.41:8042</code></li>
               <li>기본 로그인: ID/PW 모두 <code>orthanc</code></li>
             </ol>
           </div>

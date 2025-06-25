@@ -121,7 +121,7 @@ const CdssVisualizationPage = () => {
 
   return (
     <div className="cdss-page">
-      <h1>🧾 CDSS 시각화</h1>
+      <h1>🧾 검사 결과 시각화</h1>
 
       <div className="cdss-sample-selector">
         <label htmlFor="sample-select" className="cdss-label">샘플을 선택하세요:</label>

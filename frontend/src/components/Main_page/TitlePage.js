@@ -33,17 +33,17 @@ class MainPageAPI {
 
   // 메인 페이지 데이터 조회
   static async getMainPageData(doctorId = 'default_doctor') {
-    return await this.request(`/main-page-function/main-data/?doctor_id=${doctorId}`);
+    return await this.request(`main-page-function/main-data/?doctor_id=${doctorId}`);
   }
 
   // 공지사항 조회
   static async getNotices(pageSize = 5) {
-    return await this.request(`/main-page-function/notices/?page_size=${pageSize}`);
+    return await this.request(`main-page-function/notices/?page_size=${pageSize}`);
   }
 
   // 의사 상태 업데이트
   static async updateDoctorStatus(doctorId, status) {
-    return await this.request(`/main-page-function/doctor/${doctorId}/status/`, {
+    return await this.request(`main-page-function/doctor/${doctorId}/status/`, {
       method: 'PUT',
       body: JSON.stringify({ status })
     });

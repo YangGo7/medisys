@@ -23,18 +23,24 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
   const handleSimulate = async () => {
     setLoading(true);
     try {
-      const components = Object.entries(formValues).map(([name, value]) => ({
+      const components = Object.entries(formValues)
+        .filter(([_, value]) => value !== null && value !== undefined && !isNaN(value))
+        .map(([name, value]) => ({
         component_name: name,
         value: value.toString(),
       }));
 
+      const payload = {
+        sample: sampleId,
+        test_type: testType,
+        components,
+      };
+
+      console.log("🚀 시뮬레이션 전송 데이터", payload);
+
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}cdss/receive_full_sample/`,
-        {
-          sample: sampleId,
-          test_type: testType,
-          components,
-        }
+        payload
       );
 
       setPrediction(res.data.prediction_prob);
@@ -44,7 +50,6 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
       setLoading(false);
     }
   };
-
   if (!initialValues || Object.keys(initialValues).length === 0) {
     return <p>🔧 시뮬레이션 패널 준비 중입니다.</p>;
   }

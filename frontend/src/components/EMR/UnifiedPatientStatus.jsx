@@ -232,7 +232,7 @@ const UnifiedPatientStatus = ({
         <WaitingRoom
           assignedPatients={assignedPatients}
           onAssign={handleAssign}
-          onUnassign={handleUnassign}
+          unassignFromRoom={handleUnassign}
           onComplete={handleComplete}
           selectedPatient={selectedPatient}
         />

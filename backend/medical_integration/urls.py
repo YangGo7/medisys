@@ -1,20 +1,32 @@
+# backend/medical_integration/urls.py
+# 🔥 대기 종료 관련 URL 패턴 추가
+
 from django.urls import path
 from . import views
 from .views import (
+    # 기존 imports
     get_all_openmrs_patients,
     proxy_openmrs_providers,
     identifier_based_waiting_list,
     create_identifier_based_mapping,
-    reception_list_view,             # ✅ 추가
+    reception_list_view,
     UrgentAlertList,
     UrgentAlertCount,
     AlertMarkRead,
-    unassign_room,
     get_patient_mapping,
     assign_room,
-    completed_patients_list          # ✅ 완료 환자 리스트 view
+    
+    # 🔥 새로 추가된 함수들 (대기 종료 관련)
+    unassign_room,
+    complete_treatment,                    # 진료 완료 + 대기 종료
+    unassign_room_by_room_number,
+    get_room_status,
+    batch_update_status,
+    assign_room,
+    get_waiting_statistics,               # 🔥 대기 통계
+    get_completed_patients_today, 
+    completed_patients_list, # 🔥 완료 환자 목록
 )
-# from .views import update_patient_status  # ✅ 진료 상태 업데이트 API <-- 이 줄을 삭제합니다.
 
 app_name = 'medical_integration'
 
@@ -24,8 +36,8 @@ urlpatterns = [
     path('test-connections/', views.test_all_connections, name='test_connections'),
 
     # OCS 매핑관련
-    path('openmrs/patients/map/',   views.list_openmrs_patients_map,     name='list_openmrs_patients_map'),
-    path('openmrs/providers/map/',  views.list_openmrs_providers_map,    name='list_openmrs_providers_map'),
+    path('openmrs/patients/map/', views.list_openmrs_patients_map, name='list_openmrs_patients_map'),
+    path('openmrs/providers/map/', views.list_openmrs_providers_map, name='list_openmrs_providers_map'),
 
     # OpenMRS 환자 관리
     path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
@@ -33,6 +45,7 @@ urlpatterns = [
     path('openmrs/patients/<str:uuid>/', views.get_patient, name='get_openmrs_patient'),
     path('openmrs/patients/', views.get_all_patients_simple, name='get_all_patients'),
     path('person-uuid-by-identifier/<str:identifier>/', views.get_person_uuid_by_identifier, name='get_person_uuid_by_identifier'),
+    
     # Orthanc 환자 관리
     path('orthanc/studies/', views.get_orthanc_studies, name='get_orthanc_studies'),
     path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),
@@ -53,7 +66,8 @@ urlpatterns = [
     path('patient-mappings/<int:mapping_id>/', views.get_patient_mapping, name='get_patient_mapping'),
     path('patient-mappings/<int:mapping_id>/delete/', views.delete_patient_mapping, name='delete_patient_mapping'),
     path('patient-mappings/<int:mapping_id>/sync/', views.sync_patient_mapping, name='sync_patient_mapping'),
-
+    path('completed-patients-list/', views.completed_patients_list, name='completed_patients_list'),
+    
     # 매핑되지 않은 환자 관리
     path('orthanc/unmapped-patients/', views.get_unmapped_orthanc_patients, name='get_unmapped_orthanc_patients'),
     path('mappings/batch-auto-mapping/', views.batch_auto_mapping, name='batch_auto_mapping'),
@@ -64,33 +78,34 @@ urlpatterns = [
     path('mappings/test-status/', views.get_mapping_test_status, name='get_mapping_test_status'),
     path('openmrs/providers/', proxy_openmrs_providers, name='openmrs_providers'),
     path('openmrs-patients/', get_all_openmrs_patients, name='get_all_openmrs_patients'),
-    path('identifier-waiting/', identifier_based_waiting_list, name='identifier_based_waiting'),
-    path('reception-list/', reception_list_view, name='reception_list'),                 # ✅ 오늘 접수 리스트
+    
+    # 🔥 대기 관리 (수정된 버전)
+    path('identifier-waiting/', identifier_based_waiting_list, name='identifier_based_waiting'),           # 기존 버전
+    path('reception-list/', reception_list_view, name='reception_list'),
     path('identifier-based/', create_identifier_based_mapping, name='create_identifier_based_mapping'),
+    
+    # 🔥 대기 통계 및 완료 환자 관리
+    path('waiting-statistics/', get_waiting_statistics, name='waiting_statistics'),                      # 🔥 대기 현황 통계
+    path('completed-patients-today/', get_completed_patients_today, name='completed_patients_today'),    # 🔥 완료 환자 목록
+    path('waiting-board/', views.waiting_board_view, name='waiting_board'),
 
     # 알림 API
     path('alerts/urgent/', UrgentAlertList.as_view(), name='urgent_alert_list'),
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
     path('alerts/<int:pk>/mark-read/', AlertMarkRead.as_view(), name='alert_mark_read'),
 
-    # 환자 배정
+    # 🔥 진료실 배정 관리 (완전한 버전)
     path('assign-room/', assign_room, name='assign_room'),
-    path('unassign-room/', unassign_room, name='unassign-room'),
+    path('unassign-room/', unassign_room, name='unassign_room'),
+    path('complete-treatment/', complete_treatment, name='complete_treatment'),                          # 🔥 진료 완료 + 대기 종료
+    path('unassign-room-by-number/', unassign_room_by_room_number, name='unassign_room_by_number'),
+    
+    # 🔥 진료실 상태 관리
+    path('room-status/', get_room_status, name='get_room_status'),
+    path('batch-update-status/', batch_update_status, name='batch_update_status'),
+    
+    # 기존 환자 관리
     path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),
-    path('waiting-board/', views.waiting_board_view, name='waiting_board'),
     path('patients/create-auto-id/', views.create_patient_auto_id, name='create_patient_auto_id'),
-    path('patients/create/', views.create_patient, name='create_patient'),  # 기존 함수 (자동/수동 모두 지원)
-    
-    # OpenMRS 환자 관리 (기존)
-    path('openmrs/patients/create/', views.create_patient, name='create_openmrs_patient'),
-
-    # 진료 상태 업데이트 <-- 이 섹션 전체를 삭제합니다.
-    # path('patient-mappings/update-status/', update_patient_status, name='update_patient_status'),
-
-    # 완료된 환자 리스트 조회
-    path('completed-patients/', completed_patients_list, name='completed_patients_list'),
-    
-    path('daily-summary-stats/', views.get_daily_summary_stats, name='daily_summary_stats'),
-    path('debug/openmrs-metadata/', views.debug_openmrs_metadata, name='debug_openmrs_metadata'),
-    path('debug/test-minimal-patient/', views.test_minimal_patient_creation, name='test_minimal_patient'),
-]
+    path('patients/create/', views.create_patient, name='create_patient'),
+]   
