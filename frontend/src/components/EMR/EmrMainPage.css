@@ -1,475 +1,740 @@
-/* frontend/src/components/EMR/DoctorDashboard.css */
+/* src/components/EMR/EmrMainPage.css - 개선된 버전 */
 
-.doctor-dashboard {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #f8f9fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* ============================================================================
+   기본 리셋 및 전체 레이아웃
+============================================================================ */
 
-/* 🔥 대시보드 헤더 */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.header-icon {
-  width: 2rem;
-  height: 2rem;
-}
-
-.dashboard-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+html, body, #root, .App {
   margin: 0;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.time-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.current-time {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-/* 🔥 메인 컨테이너 */
-.dashboard-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-/* 🔥 좌측 사이드바 */
-.dashboard-sidebar {
-  width: 400px;
-  background-color: white;
-  border-right: 1px solid #e9ecef;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sidebar-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f3f7;
-}
-
-.section-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #667eea;
-}
-
-.section-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-  flex: 1;
-}
-
-/* 검색 모드 토글 */
-.search-mode-toggle {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6c757d;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.radio-label:hover {
-  color: #495057;
-}
-
-.radio-label input[type="radio"] {
-  accent-color: #667eea;
-}
-
-/* 검색 컨트롤 */
-.search-controls {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.search-input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  transition: border-color 0.2s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.search-button {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.search-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-/* 검색 결과 */
-.search-results {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.all-patients-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 100%;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-.patient-card {
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.patient-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
-}
-
-.patient-card.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
-}
-
-.patient-name {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-.patient-id {
-  font-size: 0.875rem;
-  color: #667eea;
-  font-family: 'Courier New', monospace;
-  margin-bottom: 0.5rem;
-}
-
-.patient-details {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-bottom: 1rem;
-}
-
-.assign-button {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.assign-button:hover {
-  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-  transform: translateY(-1px);
-}
-
-/* 메시지 스타일 */
-.loading-message,
-.error-message,
-.no-results,
-.search-prompt {
-  text-align: center;
-  padding: 2rem;
-  color: #6c757d;
-  font-size: 0.875rem;
-}
-
-.error-message {
-  color: #dc3545;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 6px;
-}
-
-/* 🔥 메인 콘텐츠 영역 */
-.dashboard-content {
-  flex: 1;
-  padding: 2rem;
-  overflow: hidden;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 2rem;
-  height: 100%;
-  overflow-y: auto;
-}
-
-/* 콘텐츠 카드 레이아웃 */
-.patient-info-card {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.history-card {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.lis-card {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.imaging-card {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.diagnosis-card {
-  grid-column: 1 / -1;
-  grid-row: 3;
-}
-
-/* 콘텐츠 카드 스타일 */
-.content-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-}
-
-.content-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.5rem 2rem 1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 1px solid #e9ecef;
-}
-
-.card-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #667eea;
-}
-
-.card-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-}
-
-.card-content {
-  flex: 1;
   padding: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
-/* 환자 미선택 상태 */
-.no-patient-selected {
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+.emr-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 100%에서 100vh로 변경 */
+  background-color: #f6f8fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh; /* 최소 높이 보장 */
+}
+
+/* ============================================================================
+   헤더 영역
+============================================================================ */
+
+.emr-header {
+  height: 60px; /* 50px에서 60px로 증가 */
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* 그림자 강화 */
+  z-index: 1000; /* z-index 증가 */
+  position: relative;
 }
 
-.empty-state {
-  text-align: center;
-  color: #6c757d;
-  max-width: 400px;
+.logo {
+  font-size: 20px; /* 18px에서 20px로 증가 */
+  font-weight: 600; /* bold에서 600으로 변경 */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: #1f2937;
 }
 
-.empty-icon {
-  width: 4rem;
-  height: 4rem;
-  color: #dee2e6;
-  margin: 0 auto 1.5rem;
+.logo:hover {
+  transform: scale(1.05);
+  color: #3b82f6;
 }
 
-.empty-state h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #495057;
-  margin: 0 0 1rem;
+/* ============================================================================
+   메인 컨텐츠 영역
+============================================================================ */
+
+.emr-content {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 60px); /* 헤더 높이 변경에 맞춰 조정 */
+  overflow: hidden; /* visible에서 hidden으로 변경 */
 }
 
-.empty-state p {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0;
+/* ============================================================================
+   사이드바
+============================================================================ */
+
+.sidebar-col {
+  flex: 0 0 240px; /* 220px에서 240px로 증가 */
+  width: 240px;
+  background-color: #f8fafc; /* 배경색 개선 */
+  border-right: 1px solid #e2e8f0;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.06); /* 그림자 강화 */
+  position: relative;
+  padding: 1rem; /* padding-left에서 전체 padding으로 변경 */
+  transition: width 0.3s ease; /* 애니메이션 추가 */
 }
 
-/* 스크롤바 스타일 */
-.all-patients-grid::-webkit-scrollbar,
-.content-grid::-webkit-scrollbar {
+.sidebar-col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-col::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.sidebar-col::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.sidebar-col::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================================================
+   메인 컨텐츠 컬럼
+============================================================================ */
+
+.content-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0; /* flex item이 줄어들 수 있도록 */
+}
+
+.page-container-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f6f8fa;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
+  box-sizing: border-box;
+}
+
+.page-title {
+  font-size: 28px; /* 24px에서 28px로 증가 */
+  font-weight: 700; /* bold에서 700으로 변경 */
+  margin-bottom: 24px; /* 16px에서 24px로 증가 */
+  color: #1f2937;
+  padding: 0 4px; /* 16px에서 0 4px로 변경 */
+}
+
+/* ============================================================================
+   카드 공통 스타일
+============================================================================ */
+
+.card {
+  background: white;
+  border-radius: 16px; /* 12px에서 16px로 증가 */
+  padding: 32px; /* 24px에서 32px로 증가 */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* 그림자 개선 */
+  height: calc(100% - 32px);
+  overflow-y: auto;
+  margin: 16px;
+  border: 1px solid #f1f5f9; /* 테두리 추가 */
+  transition: box-shadow 0.2s ease; /* 호버 효과를 위한 트랜지션 */
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.card::-webkit-scrollbar {
   width: 8px;
 }
 
-.all-patients-grid::-webkit-scrollbar-thumb,
-.content-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.card::-webkit-scrollbar-track {
+  background: #f8fafc;
   border-radius: 4px;
 }
 
-.all-patients-grid::-webkit-scrollbar-track,
-.content-grid::-webkit-scrollbar-track {
-  background: #f8f9fa;
+.card::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
-/* 반응형 디자인 */
+/* ============================================================================
+   홈 화면 2열 레이아웃
+============================================================================ */
+
+.home-container {
+  display: flex;
+  height: 100%;
+  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
+  padding: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
+  box-sizing: border-box;
+}
+
+.left-column {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
+  height: 100%;
+}
+
+.right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ============================================================================
+   새로운 진료 탭 레이아웃 (5열 그리드)
+============================================================================ */
+
+.clinical-container-new {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 모든 5개 열이 동일한 크기 */
+  gap: 20px; /* 16px에서 20px로 증가 */
+  padding: 20px; /* 16px에서 20px로 증가 */
+  box-sizing: border-box;
+  height: calc(100vh - 60px - 3rem); /* 정확한 높이 계산 */
+  background-color: #f6f8fa;
+  overflow: hidden; /* 추가 */
+}
+
+.tab-col {
+  background-color: #fff;
+  border-radius: 16px; /* 12px에서 16px로 증가 */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 20px; /* 16px에서 20px로 증가 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 그림자 개선 */
+  border: 1px solid #f1f5f9; /* 테두리 추가 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* 애니메이션 추가 */
+  min-height: 0; /* flex item이 줄어들 수 있도록 */
+}
+
+.tab-col:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.tab-col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-col::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 3px;
+}
+
+.tab-col::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* 개별 탭 위치 설정 */
+.tab1-new { 
+  grid-column: 1; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.tab2 { 
+  grid-column: 2; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.tab3-combined { 
+  grid-column: 3; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.tab4-ai { 
+  grid-column: 4; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.tab5-empty { 
+  grid-column: 5; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+/* ============================================================================
+   섹션 타이틀 및 공통 요소
+============================================================================ */
+
+.section-title {
+  font-size: 18px; /* 16px에서 18px로 증가 */
+  font-weight: 600; /* bold에서 600으로 변경 */
+  margin-bottom: 16px; /* 12px에서 16px로 증가 */
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb; /* 색상 개선 */
+  padding-bottom: 12px; /* 8px에서 12px로 증가 */
+}
+
+.empty-text {
+  font-style: italic;
+  color: #6b7280; /* 색상 개선 */
+  font-size: 14px;
+  text-align: center;
+  padding: 24px; /* 20px에서 24px로 증가 */
+  background-color: #f9fafb; /* 배경색 개선 */
+  border-radius: 12px; /* 8px에서 12px로 증가 */
+  margin: 12px 0; /* 8px에서 12px로 증가 */
+  border: 1px dashed #d1d5db; /* 점선 테두리 추가 */
+}
+
+/* ============================================================================
+   모달 스타일
+============================================================================ */
+
+.overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0,0,0,0.4); /* 투명도 증가 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* z-index 증가 */
+  backdrop-filter: blur(2px); /* 배경 블러 효과 추가 */
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px; /* 8px에서 16px로 증가 */
+  padding: 2rem 2.5rem; /* 패딩 증가 */
+  max-width: 600px; /* 500px에서 600px로 증가 */
+  width: 90%;
+  max-height: 85vh; /* 80vh에서 85vh로 증가 */
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15); /* 그림자 강화 */
+  border: 1px solid #f1f5f9; /* 테두리 추가 */
+}
+
+.modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+/* ============================================================================
+   공통 테이블 스타일
+============================================================================ */
+
+.common-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 14px; /* 폰트 크기 추가 */
+  border-radius: 8px; /* 테이블 모서리 둥글게 */
+  overflow: hidden; /* 테두리 둥글게 효과 */
+}
+
+.common-table th {
+  background-color: #f1f5f9; /* 색상 개선 */
+  color: #374151; /* 색상 개선 */
+  padding: 1rem 0.75rem; /* 패딩 증가 */
+  border-bottom: 2px solid #e5e7eb; /* 테두리 강화 */
+  font-weight: 600; /* 폰트 굵기 추가 */
+  font-size: 13px; /* 폰트 크기 조정 */
+  text-transform: uppercase; /* 대문자 변환 */
+  letter-spacing: 0.5px; /* 자간 추가 */
+}
+
+.common-table td {
+  padding: 1rem 0.75rem; /* 패딩 증가 */
+  border-bottom: 1px solid #f3f4f6; /* 색상 개선 */
+  transition: background-color 0.2s ease; /* 호버 효과 */
+}
+
+.common-table tr:hover td {
+  background-color: #f9fafb; /* 호버 시 배경색 */
+}
+
+/* ============================================================================
+   버튼 스타일
+============================================================================ */
+
+.status-next-btn {
+  padding: 0.5rem 1rem; /* 패딩 증가 */
+  font-size: 0.875rem; /* 폰트 크기 조정 */
+  background: transparent;
+  border: 2px solid #3b82f6; /* 테두리 두께 증가, 색상 개선 */
+  border-radius: 8px; /* 모서리 둥글게 */
+  color: #3b82f6;
+  cursor: pointer;
+  transition: all 0.2s ease; /* 모든 속성 애니메이션 */
+  font-weight: 500; /* 폰트 굵기 추가 */
+}
+
+.status-next-btn:hover:not(:disabled) {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-1px); /* 살짝 위로 이동 */
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); /* 그림자 추가 */
+}
+
+.status-next-btn:disabled {
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6; /* 투명도 추가 */
+}
+
+/* ============================================================================
+   의사 대시보드 전용 그리드
+============================================================================ */
+
+.doctor-dashboard-container {
+  display: grid;
+  grid-template-columns: 1.5fr 0.75fr 0.75fr; /* 세 번째 컬럼 너비 조정 */
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "schedule stats    waittime"
+    "schedule urgent   summary";
+  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
+  background-color: #f6f8fa;
+  height: calc(100vh - 60px - 3rem); /* 정확한 높이 계산 */
+  padding: 1.5rem; /* 패딩 추가 */
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   대시보드 개별 카드 스타일
+============================================================================ */
+
+.dashboard-card {
+  background: #fff;
+  border: 1px solid #e5e7eb; /* 테두리 색상 개선 */
+  border-radius: 16px; /* 12px에서 16px로 증가 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 그림자 개선 */
+  padding: 1rem; /* 0.75rem에서 1rem으로 증가 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* visible에서 hidden으로 변경 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* 애니메이션 추가 */
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* 대시보드 카드 내부 스크롤 */
+.card--schedule { overflow-y: auto; } /* visible에서 auto로 변경 */
+.card--urgent { overflow-y: auto; }
+.card--stats { overflow-y: auto; } /* 추가 */
+.card--waittime { overflow-y: auto; } /* 추가 */
+.card--summary { overflow-y: auto; } /* 추가 */
+
+/* 내부 컴포넌트 배경·테두리 제거 */
+.card--schedule .today-schedule,
+.card--stats .waiting-stats-panel,
+.card--waittime .current-waittime,
+.card--urgent .urgent-widget,
+.card--summary .daily-summary {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important; /* 마진 제거 */
+  padding: 0 !important; /* 패딩 제거 */
+}
+
+/* 긴급 처리 내부 아이템 스타일 개선 */
+.card--urgent .urgent-widget .urgent-item {
+  background-color: #fef3f2 !important; /* 연한 빨간색 배경 */
+  border-color: #fecaca !important;
+  border-radius: 8px !important; /* 모서리 둥글게 */
+  margin-bottom: 8px !important; /* 아이템 간 간격 */
+}
+
+/* 개별 카드 영역 지정 */
+.card--schedule { grid-area: schedule; }
+.card--stats    { grid-area: stats; }
+.card--waittime { grid-area: waittime; }
+.card--urgent   { grid-area: urgent; }
+.card--summary  { grid-area: summary; }
+
+/* ============================================================================
+   반응형 디자인
+============================================================================ */
+
+/* 태블릿 크기 (1400px 이하) */
 @media (max-width: 1400px) {
-  .content-grid {
+  .clinical-container-new {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .tab1-new { 
+    grid-column: 1; 
+    grid-row: 1; 
+  }
+  
+  .tab2 { 
+    grid-column: 2; 
+    grid-row: 1; 
+  }
+  
+  .tab3-combined { 
+    grid-column: 3; 
+    grid-row: 1 / span 2; 
+  }
+  
+  .tab4-ai { 
+    grid-column: 1 / span 2; 
+    grid-row: 2; 
+  }
+  
+  .tab5-empty { 
+    grid-column: 1 / span 3; 
+    grid-row: 3; 
+  }
+
+  .sidebar-col {
+    flex: 0 0 200px;
+    width: 200px;
+  }
+}
+
+/* 소형 태블릿 크기 (1200px 이하) */
+@media (max-width: 1200px) {
+  .clinical-container-new {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto;
+    gap: 12px;
+    padding: 12px;
   }
   
-  .patient-info-card {
+  .tab1-new, .tab2, .tab3-combined, .tab4-ai, .tab5-empty {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: auto;
   }
-  
-  .history-card {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  
-  .lis-card {
-    grid-column: 1;
-    grid-row: 3;
-  }
-  
-  .imaging-card {
-    grid-column: 1;
-    grid-row: 4;
-  }
-  
-  .diagnosis-card {
-    grid-column: 1;
-    grid-row: 5;
-  }
-}
 
-@media (max-width: 1024px) {
-  .dashboard-main {
-    flex-direction: column;
+  .emr-content {
+    flex-direction: column; /* 세로 방향으로 변경 */
   }
-  
-  .dashboard-sidebar {
+
+  .sidebar-col {
+    flex: 0 0 auto;
     width: 100%;
-    max-height: 40vh;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
   }
-  
-  .dashboard-content {
-    padding: 1rem;
+
+  .page-title {
+    font-size: 24px;
   }
-  
-  .content-grid {
-    gap: 1rem;
+
+  .card {
+    margin: 8px;
+    padding: 20px;
   }
 }
 
+/* 모바일 크기 (768px 이하) */
 @media (max-width: 768px) {
-  .dashboard-header {
+  .doctor-dashboard-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(5, auto);
+    grid-template-areas:
+      "schedule"
+      "stats"
+      "waittime"
+      "urgent"
+      "summary";
+    height: auto;
+    gap: 1rem;
     padding: 1rem;
   }
-  
-  .dashboard-title {
-    font-size: 1.25rem;
-  }
-  
-  .sidebar-section {
-    padding: 1rem;
-  }
-  
-  .search-mode-toggle {
+
+  .home-container {
     flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .content-card {
-    margin: 0;
-  }
-  
-  .card-header {
+    gap: 1rem;
     padding: 1rem;
+  }
+
+  .left-column,
+  .right-column {
+    flex: none;
+  }
+
+  .page-container-full {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .modal {
+    padding: 1.5rem;
+    margin: 1rem;
+    width: calc(100% - 2rem);
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .tab-col {
+    padding: 16px;
+  }
+
+  .common-table th,
+  .common-table td {
+    padding: 0.5rem;
+    font-size: 12px;
+  }
+}
+
+/* 초소형 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .emr-header {
+    height: 50px;
+  }
+
+  .logo {
+    font-size: 16px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .clinical-container-new {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .tab-col {
+    padding: 12px;
+  }
+
+  .modal {
+    padding: 1rem;
+    margin: 0.5rem;
+    width: calc(100% - 1rem);
+  }
+}
+
+/* ============================================================================
+   접근성 및 포커스 스타일
+============================================================================ */
+
+/* 포커스 가능한 요소들의 공통 포커스 스타일 */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+.status-next-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid #374151;
+  }
+  
+  .section-title {
+    border-bottom-color: #374151;
+  }
+  
+  .common-table th {
+    background-color: #374151;
+    color: white;
+  }
+}
+
+/* 애니메이션 줄이기 설정 지원 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .tab-col:hover,
+  .dashboard-card:hover,
+  .status-next-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   다크 모드 지원 (선택사항)
+============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .emr-page {
+    background-color: #111827;
+    color: #f9fafb;
+  }
+  
+  .emr-header {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+  }
+  
+  .logo {
+    color: #f9fafb;
+  }
+  
+  .sidebar-col {
+    background-color: #1f2937;
+    border-right-color: #374151;
+  }
+  
+  .card,
+  .tab-col,
+  .dashboard-card {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .section-title {
+    color: #f9fafb;
+    border-bottom-color: #4b5563;
+  }
+  
+  .common-table th {
+    background-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .common-table tr:hover td {
+    background-color: #374151;
+  }
+  
+  .empty-text {
+    background-color: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
   }
 }

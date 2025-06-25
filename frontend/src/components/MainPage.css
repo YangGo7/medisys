@@ -2,6 +2,7 @@
 
 .main-container {
   min-height: 100vh;
+  display: flex;
   background: linear-gradient(135deg, #fefefe 0%, #f8f8f6 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   position: relative;
@@ -173,19 +174,20 @@
 .main-panel {
   min-height: 100vh;
   background: transparent;
+  flex: 1;
+  width: calc(100% - 220px); /* optional fallback */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  margin-left: 220px; /* 기본적으로 사이드바 너비만큼 여백 */
+  overflow-y: visible; /* hidden에서 visible로 변경 */
+  overflow-x: auto;
+  margin-left: 220px;
 }
 
-/* 사이드바가 열려있을 때 */
 .main-panel.with-sidebar {
-  margin-left: 220px; /* 사이드바 너비만큼 여백 */
+  margin-left: 220px;
 }
 
-/* 사이드바가 닫혀있을 때 */
 .main-panel.full-width {
-  margin-left: 0; /* 전체 너비 사용 */
+  margin-left: 0;
 }
 
 /* 플로팅 토글 버튼 - 사이드바가 닫혔을 때만 표시 */
@@ -218,8 +220,10 @@
 
 /* 탭 콘텐츠 */
 .tab-content {
-  min-height: 100vh;
+  /*min-height: 100vh;*/
   width: 100%;
+  display: block;
+  min-width: 0;
 }
 
 /* 차트 헤더 (기존 유지) */
@@ -261,7 +265,7 @@
 
 /* 캘린더 컨테이너 */
 .calendar-container {
-  width: 300px;
+  width: 200px;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);

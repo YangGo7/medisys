@@ -187,7 +187,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pacs" element={<PacsPage />} />
             <Route path="/pacsdocs" element={<PacsDocs />} />
-            <Route path="/ohif" element={<OHIF />} />
+            <Route path="/ohifviewer" element={<OHIFViewer />} />
             
             {/* 🆕 새로운 라우트들 추가 */}
             <Route path="/emr" element={
