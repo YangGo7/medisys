@@ -170,7 +170,26 @@ const ExamCard = ({
   onCancelExam,
   roomId
 }) => {
-  // 🔍 디버깅용 로그
+
+  // ✅ 1. 시간 보정 함수
+  const normalizeTime = (timeStr) => {
+    if (!timeStr || timeStr === '00:00' || timeStr === '시간 없음') return '09:00';
+    const [h, m] = timeStr.split(':').map(Number);
+    if (h < 6 || h > 18) return '09:00';
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+
+  // ✅ 2. 종료 시간 계산 함수
+  const getEndTime = (startTime, duration = 30) => {
+    const [h, m] = startTime.split(':').map(Number);
+    const startDate = new Date(0, 0, 0, h, m);
+    const endDate = new Date(startDate.getTime() + duration * 60000);
+    const hh = String(endDate.getHours()).padStart(2, '0');
+    const mm = String(endDate.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  };
+
+  // ✅ 3. 디버깅 로그
   console.log('🔍 ExamCard 렌더링:', { 
     patientName: exam.patientName, 
     time: exam.time, 
@@ -180,21 +199,22 @@ const ExamCard = ({
     roomId 
   });
 
+
   // 🔧 필수 데이터 검증
   if (!exam || !exam.patientName) {
     console.warn('⚠️ ExamCard: 필수 데이터 누락', exam);
     return null;
   }
-
+  const normalizedTime = normalizeTime(exam.time);
   // 🔧 안전한 기본값 설정
   const safeExam = {
-    patientName: exam.patientName || '환자명 없음',
-    examType: exam.examType || exam.type || '검사명 없음',
-    time: exam.time || '시간 없음',
-    status: exam.status || '검사대기',
-    examId: exam.examId || exam.id || `temp-${Date.now()}`,
-    duration: exam.duration || 30
-  };
+  patientName: exam.patientName || '환자명 없음',
+  examType: exam.examType || exam.type || '검사명 없음',
+  time: normalizedTime,
+  status: exam.status || '검사대기',
+  examId: exam.examId || exam.id || `temp-${Date.now()}`,
+  duration: exam.duration || 30
+};
 
   const safeRadiologist = radiologist || { 
     name: '미배정', 

@@ -1,4 +1,52 @@
-/* src/components/EMR/EmrMainPage.css - 개선된 버전 */
+/* src/components/EMR/EmrMainPage.css - 현대적 UI 개선 버전 */
+
+/* ============================================================================
+   전역 설정 및 CSS 변수
+============================================================================ */
+
+:root {
+  /* 🎨 모던 컬러 팔레트 */
+  --primary-blue: #2563eb;
+  --primary-blue-light: #3b82f6;
+  --primary-blue-dark: #1d4ed8;
+  
+  --secondary-purple: #7c3aed;
+  --secondary-purple-light: #8b5cf6;
+  --secondary-purple-dark: #6d28d9;
+  
+  /* 🌈 배경 그라디언트 */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-card: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  
+  /* 🎯 중성 컬러 */
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* 📏 간격 및 크기 */
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+  --border-radius-lg: 24px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.15);
+  
+  /* 🚀 애니메이션 */
+  --transition-fast: all 0.15s ease;
+  --transition-base: all 0.2s ease;
+  --transition-slow: all 0.3s ease;
+}
 
 /* ============================================================================
    기본 리셋 및 전체 레이아웃
@@ -9,8 +57,8 @@ html, body, #root, .App {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
   box-sizing: border-box;
+  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 *, *::before, *::after {
@@ -20,66 +68,71 @@ html, body, #root, .App {
 .emr-page {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 100%에서 100vh로 변경 */
-  background-color: #f6f8fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 100vh; /* 최소 높이 보장 */
+  height: 100vh;
+  background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf0 100%);
+  position: relative;
+  overflow: hidden;
 }
 
 /* ============================================================================
-   헤더 영역
+   🎨 현대적 헤더
 ============================================================================ */
 
 .emr-header {
-  height: 60px; /* 50px에서 60px로 증가 */
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  height: 70px;
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* 그림자 강화 */
-  z-index: 1000; /* z-index 증가 */
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
   position: relative;
+  backdrop-filter: blur(10px);
 }
 
 .logo {
-  font-size: 20px; /* 18px에서 20px로 증가 */
-  font-weight: 600; /* bold에서 600으로 변경 */
+  font-size: 24px;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  color: #1f2937;
+  transition: var(--transition-base);
+  color: var(--white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logo:hover {
   transform: scale(1.05);
-  color: #3b82f6;
+  filter: brightness(1.1);
 }
 
 /* ============================================================================
-   메인 컨텐츠 영역
+   🔧 메인 컨텐츠 영역
 ============================================================================ */
 
 .emr-content {
   display: flex;
   flex: 1;
-  height: calc(100vh - 60px); /* 헤더 높이 변경에 맞춰 조정 */
-  overflow: hidden; /* visible에서 hidden으로 변경 */
+  height: calc(100vh - 70px);
+  overflow: hidden;
 }
 
 /* ============================================================================
-   사이드바
+   🎯 현대적 사이드바
 ============================================================================ */
 
 .sidebar-col {
-  flex: 0 0 240px; /* 220px에서 240px로 증가 */
-  width: 240px;
-  background-color: #f8fafc; /* 배경색 개선 */
-  border-right: 1px solid #e2e8f0;
+  flex: 0 0 280px;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--gray-200);
   overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.06); /* 그림자 강화 */
+  box-shadow: var(--shadow-md);
   position: relative;
-  padding: 1rem; /* padding-left에서 전체 padding으로 변경 */
-  transition: width 0.3s ease; /* 애니메이션 추가 */
+  padding: 1.5rem 1rem;
+  transition: var(--transition-slow);
 }
 
 .sidebar-col::-webkit-scrollbar {
@@ -87,654 +140,416 @@ html, body, #root, .App {
 }
 
 .sidebar-col::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.sidebar-col::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--gray-100);
   border-radius: 3px;
 }
 
+.sidebar-col::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+  transition: var(--transition-base);
+}
+
 .sidebar-col::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--gray-400);
 }
 
 /* ============================================================================
-   메인 컨텐츠 컬럼
+   📱 콘텐츠 컬럼
 ============================================================================ */
 
 .content-col {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0; /* flex item이 줄어들 수 있도록 */
-}
-
-.page-container-full {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: #f6f8fa;
-  overflow-x: hidden;
   overflow-y: auto;
-  padding: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
-  box-sizing: border-box;
-}
-
-.page-title {
-  font-size: 28px; /* 24px에서 28px로 증가 */
-  font-weight: 700; /* bold에서 700으로 변경 */
-  margin-bottom: 24px; /* 16px에서 24px로 증가 */
-  color: #1f2937;
-  padding: 0 4px; /* 16px에서 0 4px로 변경 */
-}
-
-/* ============================================================================
-   카드 공통 스타일
-============================================================================ */
-
-.card {
-  background: white;
-  border-radius: 16px; /* 12px에서 16px로 증가 */
-  padding: 32px; /* 24px에서 32px로 증가 */
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* 그림자 개선 */
-  height: calc(100% - 32px);
-  overflow-y: auto;
-  margin: 16px;
-  border: 1px solid #f1f5f9; /* 테두리 추가 */
-  transition: box-shadow 0.2s ease; /* 호버 효과를 위한 트랜지션 */
-}
-
-.card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.card::-webkit-scrollbar {
-  width: 8px;
-}
-
-.card::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 4px;
-}
-
-.card::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-/* ============================================================================
-   홈 화면 2열 레이아웃
-============================================================================ */
-
-.home-container {
-  display: flex;
-  height: 100%;
-  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
-  padding: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
-  box-sizing: border-box;
-}
-
-.left-column {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
-  height: 100%;
-}
-
-.right-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-/* ============================================================================
-   새로운 진료 탭 레이아웃 (5열 그리드)
-============================================================================ */
-
-.clinical-container-new {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 모든 5개 열이 동일한 크기 */
-  gap: 20px; /* 16px에서 20px로 증가 */
-  padding: 20px; /* 16px에서 20px로 증가 */
-  box-sizing: border-box;
-  height: calc(100vh - 60px - 3rem); /* 정확한 높이 계산 */
-  background-color: #f6f8fa;
-  overflow: hidden; /* 추가 */
-}
-
-.tab-col {
-  background-color: #fff;
-  border-radius: 16px; /* 12px에서 16px로 증가 */
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding: 20px; /* 16px에서 20px로 증가 */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 그림자 개선 */
-  border: 1px solid #f1f5f9; /* 테두리 추가 */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* 애니메이션 추가 */
-  min-height: 0; /* flex item이 줄어들 수 있도록 */
-}
-
-.tab-col:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-}
-
-.tab-col::-webkit-scrollbar {
-  width: 6px;
-}
-
-.tab-col::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 3px;
-}
-
-.tab-col::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-/* 개별 탭 위치 설정 */
-.tab1-new { 
-  grid-column: 1; 
-  display: flex; 
-  flex-direction: column; 
-}
-
-.tab2 { 
-  grid-column: 2; 
-  display: flex; 
-  flex-direction: column; 
-}
-
-.tab3-combined { 
-  grid-column: 3; 
-  display: flex; 
-  flex-direction: column; 
-}
-
-.tab4-ai { 
-  grid-column: 4; 
-  display: flex; 
-  flex-direction: column; 
-}
-
-.tab5-empty { 
-  grid-column: 5; 
-  display: flex; 
-  flex-direction: column; 
-}
-
-/* ============================================================================
-   섹션 타이틀 및 공통 요소
-============================================================================ */
-
-.section-title {
-  font-size: 18px; /* 16px에서 18px로 증가 */
-  font-weight: 600; /* bold에서 600으로 변경 */
-  margin-bottom: 16px; /* 12px에서 16px로 증가 */
-  color: #1f2937;
-  border-bottom: 2px solid #e5e7eb; /* 색상 개선 */
-  padding-bottom: 12px; /* 8px에서 12px로 증가 */
-}
-
-.empty-text {
-  font-style: italic;
-  color: #6b7280; /* 색상 개선 */
-  font-size: 14px;
-  text-align: center;
-  padding: 24px; /* 20px에서 24px로 증가 */
-  background-color: #f9fafb; /* 배경색 개선 */
-  border-radius: 12px; /* 8px에서 12px로 증가 */
-  margin: 12px 0; /* 8px에서 12px로 증가 */
-  border: 1px dashed #d1d5db; /* 점선 테두리 추가 */
-}
-
-/* ============================================================================
-   모달 스타일
-============================================================================ */
-
-.overlay {
-  position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100%; 
-  height: 100%;
-  background: rgba(0,0,0,0.4); /* 투명도 증가 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1100; /* z-index 증가 */
-  backdrop-filter: blur(2px); /* 배경 블러 효과 추가 */
-}
-
-.modal {
-  background: #fff;
-  border-radius: 16px; /* 8px에서 16px로 증가 */
-  padding: 2rem 2.5rem; /* 패딩 증가 */
-  max-width: 600px; /* 500px에서 600px로 증가 */
-  width: 90%;
-  max-height: 85vh; /* 80vh에서 85vh로 증가 */
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15); /* 그림자 강화 */
-  border: 1px solid #f1f5f9; /* 테두리 추가 */
-}
-
-.modal::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
-  border-radius: 4px;
-}
-
-/* ============================================================================
-   공통 테이블 스타일
-============================================================================ */
-
-.common-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-  font-size: 14px; /* 폰트 크기 추가 */
-  border-radius: 8px; /* 테이블 모서리 둥글게 */
-  overflow: hidden; /* 테두리 둥글게 효과 */
-}
-
-.common-table th {
-  background-color: #f1f5f9; /* 색상 개선 */
-  color: #374151; /* 색상 개선 */
-  padding: 1rem 0.75rem; /* 패딩 증가 */
-  border-bottom: 2px solid #e5e7eb; /* 테두리 강화 */
-  font-weight: 600; /* 폰트 굵기 추가 */
-  font-size: 13px; /* 폰트 크기 조정 */
-  text-transform: uppercase; /* 대문자 변환 */
-  letter-spacing: 0.5px; /* 자간 추가 */
-}
-
-.common-table td {
-  padding: 1rem 0.75rem; /* 패딩 증가 */
-  border-bottom: 1px solid #f3f4f6; /* 색상 개선 */
-  transition: background-color 0.2s ease; /* 호버 효과 */
-}
-
-.common-table tr:hover td {
-  background-color: #f9fafb; /* 호버 시 배경색 */
-}
-
-/* ============================================================================
-   버튼 스타일
-============================================================================ */
-
-.status-next-btn {
-  padding: 0.5rem 1rem; /* 패딩 증가 */
-  font-size: 0.875rem; /* 폰트 크기 조정 */
   background: transparent;
-  border: 2px solid #3b82f6; /* 테두리 두께 증가, 색상 개선 */
-  border-radius: 8px; /* 모서리 둥글게 */
-  color: #3b82f6;
-  cursor: pointer;
-  transition: all 0.2s ease; /* 모든 속성 애니메이션 */
-  font-weight: 500; /* 폰트 굵기 추가 */
+  position: relative;
 }
 
-.status-next-btn:hover:not(:disabled) {
-  background: #3b82f6;
-  color: white;
-  transform: translateY(-1px); /* 살짝 위로 이동 */
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); /* 그림자 추가 */
+.content-col::-webkit-scrollbar {
+  width: 8px;
 }
 
-.status-next-btn:disabled {
-  border-color: #d1d5db;
-  color: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.6; /* 투명도 추가 */
+.content-col::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+.content-col::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 4px;
 }
 
 /* ============================================================================
-   의사 대시보드 전용 그리드
+   🏠 홈 대시보드 그리드 레이아웃
 ============================================================================ */
 
 .doctor-dashboard-container {
   display: grid;
-  grid-template-columns: 1.5fr 0.75fr 0.75fr; /* 세 번째 컬럼 너비 조정 */
+  grid-template-columns: 1.2fr 0.8fr 0.8fr;
   grid-template-rows: 1fr 1fr;
   grid-template-areas:
-    "schedule stats    waittime"
-    "schedule urgent   summary";
-  gap: 1.5rem; /* 1rem에서 1.5rem으로 증가 */
-  background-color: #f6f8fa;
-  height: calc(100vh - 60px - 3rem); /* 정확한 높이 계산 */
-  padding: 1.5rem; /* 패딩 추가 */
+    "schedule stats waittime"
+    "schedule urgent summary";
+  gap: 2rem;
+  height: calc(100vh - 70px);
+  padding: 2rem;
   box-sizing: border-box;
 }
 
 /* ============================================================================
-   대시보드 개별 카드 스타일
+   🎨 현대적 대시보드 카드
 ============================================================================ */
 
 .dashboard-card {
-  background: #fff;
-  border: 1px solid #e5e7eb; /* 테두리 색상 개선 */
-  border-radius: 16px; /* 12px에서 16px로 증가 */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 그림자 개선 */
-  padding: 1rem; /* 0.75rem에서 1rem으로 증가 */
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* visible에서 hidden으로 변경 */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* 애니메이션 추가 */
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition-slow);
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-base);
 }
 
 .dashboard-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-color: rgba(37, 99, 235, 0.3);
 }
 
-/* 대시보드 카드 내부 스크롤 */
-.card--schedule { overflow-y: auto; } /* visible에서 auto로 변경 */
-.card--urgent { overflow-y: auto; }
-.card--stats { overflow-y: auto; } /* 추가 */
-.card--waittime { overflow-y: auto; } /* 추가 */
-.card--summary { overflow-y: auto; } /* 추가 */
-
-/* 내부 컴포넌트 배경·테두리 제거 */
-.card--schedule .today-schedule,
-.card--stats .waiting-stats-panel,
-.card--waittime .current-waittime,
-.card--urgent .urgent-widget,
-.card--summary .daily-summary {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  margin: 0 !important; /* 마진 제거 */
-  padding: 0 !important; /* 패딩 제거 */
+.dashboard-card:hover::before {
+  opacity: 1;
 }
 
-/* 긴급 처리 내부 아이템 스타일 개선 */
-.card--urgent .urgent-widget .urgent-item {
-  background-color: #fef3f2 !important; /* 연한 빨간색 배경 */
-  border-color: #fecaca !important;
-  border-radius: 8px !important; /* 모서리 둥글게 */
-  margin-bottom: 8px !important; /* 아이템 간 간격 */
+/* 🎯 카드별 특별 효과 */
+.card--schedule {
+  grid-area: schedule;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
 }
 
-/* 개별 카드 영역 지정 */
-.card--schedule { grid-area: schedule; }
-.card--stats    { grid-area: stats; }
-.card--waittime { grid-area: waittime; }
-.card--urgent   { grid-area: urgent; }
-.card--summary  { grid-area: summary; }
+.card--stats {
+  grid-area: stats;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+.card--waittime {
+  grid-area: waittime;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+}
+
+.card--urgent {
+  grid-area: urgent;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 127, 0.1) 100%);
+}
+
+.card--summary {
+  grid-area: summary;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
 
 /* ============================================================================
-   반응형 디자인
+   📅 캘린더 스타일 개선
 ============================================================================ */
 
-/* 태블릿 크기 (1400px 이하) */
-@media (max-width: 1400px) {
-  .clinical-container-new {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto auto auto;
-    gap: 16px;
-    padding: 16px;
-  }
-  
-  .tab1-new { 
-    grid-column: 1; 
-    grid-row: 1; 
-  }
-  
-  .tab2 { 
-    grid-column: 2; 
-    grid-row: 1; 
-  }
-  
-  .tab3-combined { 
-    grid-column: 3; 
-    grid-row: 1 / span 2; 
-  }
-  
-  .tab4-ai { 
-    grid-column: 1 / span 2; 
-    grid-row: 2; 
-  }
-  
-  .tab5-empty { 
-    grid-column: 1 / span 3; 
-    grid-row: 3; 
-  }
-
-  .sidebar-col {
-    flex: 0 0 200px;
-    width: 200px;
-  }
+.react-calendar {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  font-family: inherit !important;
+  color: var(--gray-700) !important;
 }
 
-/* 소형 태블릿 크기 (1200px 이하) */
+.react-calendar__navigation {
+  display: flex !important;
+  height: 44px !important;
+  margin-bottom: 1rem !important;
+}
+
+.react-calendar__navigation button {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  border-radius: var(--border-radius-sm) !important;
+  color: var(--white) !important;
+  font-weight: 600 !important;
+  transition: var(--transition-base) !important;
+  margin: 0 2px !important;
+}
+
+.react-calendar__navigation button:hover {
+  transform: scale(1.05) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.react-calendar__tile {
+  background: none !important;
+  border: none !important;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 12px 6px !important;
+  transition: var(--transition-base) !important;
+  position: relative !important;
+}
+
+.react-calendar__tile:hover {
+  background: var(--primary-blue-light) !important;
+  color: var(--white) !important;
+  transform: scale(1.1) !important;
+}
+
+.react-calendar__tile--active {
+  background: var(--gradient-primary) !important;
+  color: var(--white) !important;
+  transform: scale(1.05) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.react-calendar__tile--now {
+  background: rgba(34, 197, 94, 0.2) !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================================
+   🚀 페이지 컨테이너들
+============================================================================ */
+
+.page-container-full {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* ============================================================================
+   🎨 섹션 타이틀 스타일
+============================================================================ */
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-blue) 0%, transparent 100%);
+  margin-left: 1rem;
+}
+
+/* ============================================================================
+   🔔 상태 표시 알림
+============================================================================ */
+
+.status-indicator {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: var(--transition-base);
+}
+
+.status-indicator.warning {
+  background: rgba(249, 115, 22, 0.9);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.status-indicator.error {
+  background: rgba(239, 68, 68, 0.9);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================================
+   🎯 버튼 스타일 개선
+============================================================================ */
+
+.btn-modern {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition-slow);
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-200);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   📱 반응형 디자인
+============================================================================ */
+
 @media (max-width: 1200px) {
-  .clinical-container-new {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto auto;
-    gap: 12px;
-    padding: 12px;
-  }
-  
-  .tab1-new, .tab2, .tab3-combined, .tab4-ai, .tab5-empty {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
-  .emr-content {
-    flex-direction: column; /* 세로 방향으로 변경 */
-  }
-
-  .sidebar-col {
-    flex: 0 0 auto;
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .page-title {
-    font-size: 24px;
-  }
-
-  .card {
-    margin: 8px;
-    padding: 20px;
+  .doctor-dashboard-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "schedule stats"
+      "waittime urgent"
+      "summary summary";
+    grid-template-rows: 1fr 1fr 0.5fr;
   }
 }
 
-/* 모바일 크기 (768px 이하) */
 @media (max-width: 768px) {
+  .sidebar-col {
+    flex: 0 0 60px;
+    width: 60px;
+    padding: 1rem 0.5rem;
+  }
+  
   .doctor-dashboard-container {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(5, auto);
     grid-template-areas:
       "schedule"
       "stats"
       "waittime"
       "urgent"
       "summary";
-    height: auto;
+    grid-template-rows: repeat(5, auto);
     gap: 1rem;
     padding: 1rem;
   }
-
-  .home-container {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .left-column,
-  .right-column {
-    flex: none;
-  }
-
-  .page-container-full {
-    padding: 1rem;
-  }
-
-  .page-title {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .modal {
+  
+  .dashboard-card {
     padding: 1.5rem;
-    margin: 1rem;
-    width: calc(100% - 2rem);
   }
-
-  .section-title {
-    font-size: 16px;
-  }
-
-  .tab-col {
-    padding: 16px;
-  }
-
-  .common-table th,
-  .common-table td {
-    padding: 0.5rem;
-    font-size: 12px;
-  }
-}
-
-/* 초소형 모바일 (480px 이하) */
-@media (max-width: 480px) {
+  
   .emr-header {
-    height: 50px;
+    height: 60px;
   }
-
+  
   .logo {
-    font-size: 16px;
-  }
-
-  .page-title {
     font-size: 18px;
   }
-
-  .clinical-container-new {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .tab-col {
-    padding: 12px;
-  }
-
-  .modal {
-    padding: 1rem;
-    margin: 0.5rem;
-    width: calc(100% - 1rem);
-  }
 }
 
 /* ============================================================================
-   접근성 및 포커스 스타일
+   ✨ 애니메이션 효과
 ============================================================================ */
 
-/* 포커스 가능한 요소들의 공통 포커스 스타일 */
-button:focus,
-input:focus,
-select:focus,
-textarea:focus,
-.status-next-btn:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* 고대비 모드 지원 */
-@media (prefers-contrast: high) {
-  .card {
-    border: 2px solid #374151;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
-  .section-title {
-    border-bottom-color: #374151;
-  }
-  
-  .common-table th {
-    background-color: #374151;
-    color: white;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* 애니메이션 줄이기 설정 지원 */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
   }
-  
-  .tab-col:hover,
-  .dashboard-card:hover,
-  .status-next-btn:hover:not(:disabled) {
-    transform: none;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
+
+.dashboard-card {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.card--schedule { animation-delay: 0.1s; }
+.card--stats { animation-delay: 0.2s; }
+.card--waittime { animation-delay: 0.3s; }
+.card--urgent { animation-delay: 0.4s; }
+.card--summary { animation-delay: 0.5s; }
 
 /* ============================================================================
-   다크 모드 지원 (선택사항)
+   🌟 글로우 효과
 ============================================================================ */
 
-@media (prefers-color-scheme: dark) {
-  .emr-page {
-    background-color: #111827;
-    color: #f9fafb;
-  }
-  
-  .emr-header {
-    background-color: #1f2937;
-    border-bottom-color: #374151;
-  }
-  
-  .logo {
-    color: #f9fafb;
-  }
-  
-  .sidebar-col {
-    background-color: #1f2937;
-    border-right-color: #374151;
-  }
-  
-  .card,
-  .tab-col,
-  .dashboard-card {
-    background-color: #1f2937;
-    border-color: #374151;
-    color: #f9fafb;
-  }
-  
-  .section-title {
-    color: #f9fafb;
-    border-bottom-color: #4b5563;
-  }
-  
-  .common-table th {
-    background-color: #374151;
-    color: #f9fafb;
-  }
-  
-  .common-table tr:hover td {
-    background-color: #374151;
-  }
-  
-  .empty-text {
-    background-color: #374151;
-    color: #9ca3af;
-    border-color: #4b5563;
-  }
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-primary);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: var(--transition-base);
+}
+
+.glow-effect:hover::after {
+  opacity: 0.7;
+  filter: blur(8px);
 }

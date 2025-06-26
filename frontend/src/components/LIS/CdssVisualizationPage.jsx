@@ -145,7 +145,7 @@ const CdssVisualizationPage = () => {
           {sampleDetail ? (
             <>
               <span>{sampleDetail?.prediction === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
-              <ShapContributionChart shapValues={sampleDetail.shap_values} />
+              <ShapContributionChart shapValues={sampleDetail.shap_data} />
               <SimulationPanel
                 sampleId={selectedSample}
                 testType={sampleDetail?.test_type}

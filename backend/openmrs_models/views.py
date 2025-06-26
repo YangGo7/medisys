@@ -82,9 +82,9 @@ class SoapDiagnosisViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def bulk_create(self, request):
-        """🔥 Encounter 생성 + SOAP 진단 일괄 저장 (권한 면제)"""
+        """🔥 Encounter 생성 + SOAP 진단 실제 저장"""
         try:
-            logger.info("✅ SOAP 진단 저장 시작 (권한 + CSRF 면제)")
+            logger.info("✅ SOAP 진단 저장 시작")
 
             if not isinstance(request.data, dict):
                 return Response({
@@ -108,28 +108,115 @@ class SoapDiagnosisViewSet(viewsets.ModelViewSet):
                     'message': '저장할 SOAP 진단 데이터가 없습니다.'
                 }, status=400)
 
-            # 🎉 일단 성공 응답 (실제 저장 로직은 나중에)
-            logger.info(f"🎯 권한 문제 해결! 데이터 수신: {len(soap_diagnoses_data)}개")
+            logger.info(f"📋 저장할 데이터: {len(soap_diagnoses_data)}개")
+            
+            # 🔥 1단계: OpenMRS Encounter 생성
+            encounter_uuid = None
+            try:
+                encounter_data = {
+                    'patient': patient_uuid,
+                    'encounterType': '8b78d91c-e7d4-4b6b-a0c5-11c9e8b82dbb',  # Adult Initial
+                    'location': os.getenv('DEFAULT_LOCATION_TYPE_UUID', 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e'),
+                    'encounterDatetime': timezone.now().isoformat(),
+                    'provider': [{'provider': doctor_uuid, 'encounterRole': 'a0b03050-c99b-11e0-9572-0800200c9a66'}]
+                }
+                
+                encounter_response = requests.post(
+                    f"{OPENMRS_BASE_URL}/encounter",
+                    json=encounter_data,
+                    headers=HEADERS,
+                    timeout=30
+                )
+                
+                if encounter_response.status_code == 201:
+                    encounter_result = encounter_response.json()
+                    encounter_uuid = encounter_result.get('uuid')
+                    logger.info(f"✅ Encounter 생성 성공: {encounter_uuid}")
+                else:
+                    logger.error(f"❌ Encounter 생성 실패: {encounter_response.status_code} - {encounter_response.text}")
+                    # Encounter 생성 실패해도 Django DB에는 저장 계속 진행
+                    import uuid as uuid_lib
+                    encounter_uuid = str(uuid_lib.uuid4())
+                    logger.info(f"⚠️ 임시 Encounter UUID 사용: {encounter_uuid}")
+                    
+            except Exception as e:
+                logger.error(f"❌ OpenMRS Encounter 생성 중 오류: {e}")
+                import uuid as uuid_lib
+                encounter_uuid = str(uuid_lib.uuid4())
+                logger.info(f"⚠️ 임시 Encounter UUID 사용: {encounter_uuid}")
+
+            # 🔥 2단계: Django DB에 SOAP 진단 저장
+            created_diagnoses = []
+            errors = []
+            
+            for idx, soap_data in enumerate(soap_diagnoses_data):
+                try:
+                    # 필수 필드 보완
+                    soap_data['patient_uuid'] = patient_uuid
+                    soap_data['encounter_uuid'] = encounter_uuid
+                    soap_data['doctor_uuid'] = doctor_uuid
+                    
+                    # 자동 순서 번호 할당
+                    existing_count = SoapDiagnosis.objects.filter(
+                        patient_uuid=patient_uuid,
+                        encounter_uuid=encounter_uuid,
+                        soap_type=soap_data.get('soap_type'),
+                        is_active=True
+                    ).count()
+                    soap_data['sequence_number'] = existing_count + 1
+                    
+                    # 🔥 실제 Django DB 저장
+                    soap_diagnosis = SoapDiagnosis.objects.create(**soap_data)
+                    created_diagnoses.append(soap_diagnosis)
+                    
+                    logger.info(f"✅ SOAP 진단 저장 성공 [{idx+1}/{len(soap_diagnoses_data)}]: {soap_diagnosis.uuid}")
+                    
+                except Exception as e:
+                    error_msg = f"SOAP 진단 {idx+1} 저장 실패: {str(e)}"
+                    logger.error(f"❌ {error_msg}")
+                    errors.append(error_msg)
+            
+            # 🔥 3단계: 저장된 진단들을 OpenMRS Obs로도 저장 시도
+            openmrs_saved_count = 0
+            for diagnosis in created_diagnoses:
+                try:
+                    if diagnosis.save_to_openmrs():
+                        openmrs_saved_count += 1
+                except Exception as e:
+                    logger.warning(f"⚠️ OpenMRS Obs 저장 실패 (Django 저장은 성공): {e}")
+            
+            # 🔥 4단계: 성공 응답 반환
+            summary = {
+                'total_requested': len(soap_diagnoses_data),
+                'created_count': len(created_diagnoses),
+                'error_count': len(errors),
+                'openmrs_saved_count': openmrs_saved_count
+            }
+            
+            logger.info(f"🎯 SOAP 저장 완료 - 성공: {len(created_diagnoses)}개, 실패: {len(errors)}개")
             
             return Response({
                 'status': 'success',
-                'message': f'권한 문제 해결! {len(soap_diagnoses_data)}개 SOAP 진단 데이터 수신 성공',
-                'encounter_uuid': f'temp-encounter-{patient_uuid[-8:]}',
-                'summary': {
-                    'total_items': len(soap_diagnoses_data),
-                    'created_count': len(soap_diagnoses_data),
-                    'error_count': 0,
-                    'success_rate': '100.0%'
-                },
-                'created_diagnoses': soap_diagnoses_data,
-                'errors': []
-            }, status=201)
-
+                'message': f'SOAP 진단 {len(created_diagnoses)}개 저장 완료',
+                'encounter_uuid': encounter_uuid,
+                'summary': summary,
+                'created_diagnoses': [
+                    {
+                        'uuid': str(diag.uuid),
+                        'soap_type': diag.soap_type,
+                        'content': diag.content[:50] + '...' if len(diag.content) > 50 else diag.content,
+                        'icd10_code': diag.icd10_code
+                    }
+                    for diag in created_diagnoses
+                ],
+                'errors': errors if errors else None
+            })
+            
         except Exception as e:
-            logger.error(f"❌ SOAP 진단 저장 오류: {e}")
+            logger.error(f"❌ SOAP 저장 전체 실패: {e}")
             return Response({
-                'status': 'error', 
-                'message': f'시스템 오류: {str(e)}'
+                'status': 'error',
+                'message': f'저장 중 오류 발생: {str(e)}'
             }, status=500)
 
 # 🔥 기존 function-based view들 (필요 최소한만)

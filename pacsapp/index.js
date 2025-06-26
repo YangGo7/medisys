@@ -1,5 +1,5 @@
-// pages/Dashboard/index.js - 중복 저장 문제 해결
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+// pages/Dashboard/index.js - 최적화된 중복 저장 문제 해결
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import WorkListPanel from '../../components/dashboard/WorkListPanel';
 import SchedulePanel from '../../components/dashboard/SchedulePanel';
 import AssignmentModal from '../../components/dashboard/AssignmentModal';
@@ -9,6 +9,24 @@ import { doctorService } from '../../services/doctorService';
 import { worklistService } from '../../services/worklistService';
 import { scheduleService } from '../../services/scheduleService';
 import './Dashboard.css';
+
+// ✅ 상수 정의
+const BUSINESS_HOURS = { START: 9, END: 18 };
+const DEBOUNCE_DELAY = 500;
+const FOCUS_THROTTLE_DELAY = 2000;
+
+// ✅ 모달리티별 기본 소요시간 맵핑
+const MODALITY_DURATION_MAP = {
+  'CR': 10,   // X-ray
+  'CT': 30,   // CT
+  'MR': 60,   // MRI
+  'US': 20,   // 초음파
+  'NM': 45,   // Nuclear Medicine
+  'PT': 90,   // PET
+  'DX': 15,   // Digital Radiography
+  'XA': 45,   // Angiography
+  'MG': 20    // Mammography
+};
 
 const Dashboard = () => {
   const [leftWidth, setLeftWidth] = useState(55);
@@ -30,33 +48,115 @@ const Dashboard = () => {
   
   // 로딩 상태 및 처리 중복 방지
   const [loading, setLoading] = useState(false);
-  const isProcessingRef = useRef(false); // 🔥 중복 처리 방지
+  const isProcessingRef = useRef(false);
+  const lastProcessTimeRef = useRef(0);
   
   const workListPanelRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // ✅ 1. useEffect 의존성 배열 최적화
+  // ✅ 유틸리티 함수들 - useMemo로 최적화
+  const formatDateForAPI = useMemo(() => {
+    return (date) => {
+      if (!date) return new Date().toISOString().split('T')[0];
+      if (date instanceof Date) {
+        return date.toISOString().split('T')[0];
+      }
+      return date;
+    };
+  }, []);
+
+  const isValidWorkHour = useMemo(() => {
+    return (timeString) => {
+      if (!timeString) return false;
+      
+      try {
+        const hour = parseInt(timeString.split(':')[0]);
+        return hour >= BUSINESS_HOURS.START && hour <= BUSINESS_HOURS.END;
+      } catch {
+        return false;
+      }
+    };
+  }, []);
+
+  const getDefaultTimeForSlot = useMemo(() => {
+    return (timeSlot) => {
+      if (!timeSlot) return '09:00';
+      
+      // 드롭된 시간대의 첫 번째 정시로 기본값 설정
+      const hour = parseInt(timeSlot.split(':')[0]);
+      const validHour = Math.max(BUSINESS_HOURS.START, Math.min(hour, BUSINESS_HOURS.END));
+      return `${validHour.toString().padStart(2, '0')}:00`;
+    };
+  }, []);
+
+  const getDefaultDurationByModality = useMemo(() => {
+    return (modality) => {
+      return (MODALITY_DURATION_MAP[modality] || 30).toString();
+    };
+  }, []);
+
+  // ✅ 중복 처리 방지 개선
+  const canProcess = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTimeRef.current;
+    
+    if (isProcessingRef.current || timeSinceLastProcess < DEBOUNCE_DELAY) {
+      console.log('🔄 처리 방지:', { 
+        isProcessing: isProcessingRef.current, 
+        timeSinceLastProcess 
+      });
+      return false;
+    }
+    
+    return true;
+  }, []);
+
+  const setProcessing = useCallback((processing, delay = DEBOUNCE_DELAY) => {
+    isProcessingRef.current = processing;
+    if (processing) {
+      lastProcessTimeRef.current = Date.now();
+    }
+    
+    if (!processing && delay > 0) {
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, delay);
+    }
+  }, []);
+
+  // ✅ 초기화 useEffect 최적화
   useEffect(() => {
-    // 브라우저 알림 차단
+    // 브라우저 알림 설정
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
     
+    // Service Worker 메시지 처리
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'SKIP_WAITING') {
+      const handleSWMessage = (event) => {
+        if (event.data?.type === 'SKIP_WAITING') {
           event.preventDefault();
         }
-      });
+      };
+      
+      navigator.serviceWorker.addEventListener('message', handleSWMessage);
+      
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleSWMessage);
+      };
     }
-  }, []); // 빈 의존성 배열
+  }, []);
 
-  // ✅ 2. 모달 데이터 로딩 함수 최적화 (한 번만 실행)
+  // ✅ 초기 데이터 로딩 최적화
   useEffect(() => {
-    let isMounted = true; // cleanup 시 false로 설정
+    let isMounted = true;
     
     const loadInitialData = async () => {
+      if (!canProcess()) return;
+      
       try {
+        setProcessing(true);
+        
         const [roomsData, radiologistsData] = await Promise.all([
           roomService.getRooms(),
           doctorService.getRadiologists()
@@ -68,45 +168,37 @@ const Dashboard = () => {
           setRadiologists(radiologistsData);
 
           // 각 검사실별 빈 스케줄 초기화
-          const initialSchedules = {};
-          roomsData.forEach(room => {
-            initialSchedules[room.id] = [];
-          });
+          const initialSchedules = roomsData.reduce((acc, room) => {
+            acc[room.id] = [];
+            return acc;
+          }, {});
           setRoomSchedules(initialSchedules);
         }
       } catch (error) {
         if (isMounted) {
           console.error('초기 데이터 로드 실패:', error);
         }
+      } finally {
+        setProcessing(false);
       }
     };
 
     loadInitialData();
 
     return () => {
-      isMounted = false; // cleanup
+      isMounted = false;
     };
-  }, []); // 한 번만 실행
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ✅ 3. 날짜 형식 변환 함수 메모이제이션
-  const formatDateForAPI = useCallback((date) => {
-    if (!date) return new Date().toISOString().split('T')[0];
-    if (date instanceof Date) {
-      return date.toISOString().split('T')[0];
-    }
-    return date;
-  }, []);
-
-  // ✅ 4. 스케줄 로딩 함수 최적화 (중복 호출 방지)
+  // ✅ 스케줄 로딩 함수 최적화
   const loadTodaySchedules = useCallback(async (date = null) => {
-    // 중복 호출 방지
-    if (isProcessingRef.current) {
-      console.log('🔄 이미 스케줄 로딩 중, 중복 호출 무시');
+    if (!canProcess()) {
+      console.log('🔄 스케줄 로딩 생략 (중복 방지)');
       return;
     }
 
     try {
-      isProcessingRef.current = true;
+      setProcessing(true);
       const targetDate = date || selectedDate;
       const formattedDate = formatDateForAPI(targetDate);
       
@@ -115,82 +207,75 @@ const Dashboard = () => {
       const scheduleData = await scheduleService.getRoomSchedules(formattedDate);
       console.log('🔍 로딩된 스케줄 데이터:', scheduleData);
       
-      if (scheduleData.room_schedules) {
+      if (scheduleData?.room_schedules) {
         setRoomSchedules(prev => {
-          console.log('📊 이전 스케줄:', Object.keys(prev).length);
-          console.log('📊 새로운 스케줄:', Object.keys(scheduleData.room_schedules).length);
+          console.log('📊 스케줄 업데이트:', {
+            이전: Object.keys(prev).length,
+            새로운: Object.keys(scheduleData.room_schedules).length
+          });
           return { ...scheduleData.room_schedules };
         });
         console.log('✅ 스케줄 로딩 완료:', Object.keys(scheduleData.room_schedules).length, '개 검사실');
       } else {
-        const initialSchedules = {};
-        rooms.forEach(room => {
-          initialSchedules[room.id] = [];
-        });
+        // 빈 스케줄 초기화
+        const initialSchedules = rooms.reduce((acc, room) => {
+          acc[room.id] = [];
+          return acc;
+        }, {});
         setRoomSchedules(initialSchedules);
         console.log('📝 빈 스케줄로 초기화');
       }
     } catch (error) {
       console.error('❌ 스케줄 로딩 실패:', error);
       
-      const initialSchedules = {};
-      rooms.forEach(room => {
-        initialSchedules[room.id] = [];
-      });
+      // 에러 시 빈 스케줄로 초기화
+      const initialSchedules = rooms.reduce((acc, room) => {
+        acc[room.id] = [];
+        return acc;
+      }, {});
       setRoomSchedules(initialSchedules);
     } finally {
-      // 최소 500ms 후에 다시 호출 가능하도록 설정
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 500);
+      setProcessing(false);
     }
-  }, [selectedDate, formatDateForAPI, rooms]);
+  }, [selectedDate, formatDateForAPI, rooms, canProcess, setProcessing]);
 
-  // ✅ 5. 스케줄 새로고침 함수 간소화
+  // ✅ 스케줄 새로고침 함수
   const refreshSchedules = useCallback(async () => {
     console.log('🔄 스케줄 수동 새로고침 요청');
-    
-    // 이미 처리 중이면 무시
-    if (isProcessingRef.current) {
-      console.log('🔄 이미 처리 중, 새로고침 무시');
-      return;
-    }
-    
     await loadTodaySchedules(selectedDate);
   }, [selectedDate, loadTodaySchedules]);
 
-  // ✅ 6. rooms 변경 시에만 스케줄 로딩 (날짜는 별도 관리)
+  // ✅ rooms 로드 완료 후 스케줄 로딩
   useEffect(() => {
-    if (rooms.length > 0 && !isProcessingRef.current) {
+    if (rooms.length > 0) {
       console.log('📋 검사실 데이터 로드 완료, 스케줄 로딩 시작');
       loadTodaySchedules(selectedDate);
     }
-  }, [rooms.length]); // rooms.length만 의존성으로 사용
+  }, [rooms.length, loadTodaySchedules, selectedDate]);
 
-  // ✅ 7. 날짜 변경 시 별도 처리
+  // ✅ 날짜 변경 시 스케줄 로딩
   useEffect(() => {
-    if (rooms.length > 0 && !isProcessingRef.current) {
+    if (rooms.length > 0) {
       console.log('📅 날짜 변경됨, 스케줄 새로 로딩');
       loadTodaySchedules(selectedDate);
     }
-  }, [selectedDate]); // selectedDate만 의존성으로 사용
+  }, [selectedDate, rooms.length, loadTodaySchedules]);
 
-  // 페이지 포커스 시 스케줄 새로고침 (throttling 적용)
+  // ✅ 페이지 포커스 시 스케줄 새로고침 (throttling)
   useEffect(() => {
     let focusTimeout = null;
     
     const handleFocus = () => {
-      // throttling: 2초 내 중복 호출 방지
       if (focusTimeout) {
         clearTimeout(focusTimeout);
       }
       
       focusTimeout = setTimeout(() => {
         console.log('🔄 페이지 포커스 - 스케줄 새로고침');
-        if (rooms.length > 0 && !isProcessingRef.current) {
+        if (rooms.length > 0) {
           loadTodaySchedules(selectedDate);
         }
-      }, 2000);
+      }, FOCUS_THROTTLE_DELAY);
     };
 
     const handleVisibilityChange = () => {
@@ -209,36 +294,66 @@ const Dashboard = () => {
         clearTimeout(focusTimeout);
       }
     };
-  }, [rooms.length, selectedDate]); // 최소한의 의존성만 사용
+  }, [rooms.length, selectedDate, loadTodaySchedules]);
 
-  // 날짜 변경 핸들러
+  // ✅ 이벤트 핸들러들
   const handleDateChange = useCallback((date) => {
     console.log('📅 Dashboard 날짜 변경:', date);
     setSelectedDate(new Date(date));
   }, []);
 
-  // 드래그 핸들러
   const handleDragStart = useCallback((exam) => {
     console.log('드래그 시작:', exam);
     setDraggedExam(exam);
   }, []);
 
-  // ✅ 8. 배정 확정 핸들러 최적화 (중복 호출 제거)
-  const confirmAssignment = useCallback(async () => {
-    if (!selectedRadiologist || !selectedTime || !estimatedDuration || !modalData) return;
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+  }, []);
 
-    // 중복 처리 방지
-    if (isProcessingRef.current) {
+  const handleExamUpdated = useCallback((eventType, data) => {
+    console.log('검사 업데이트 이벤트:', eventType, data);
+    
+    if (eventType === 'assignment_requested') {
+      // 배정 모달 열기
+      setModalData(data);
+      setSelectedRadiologist('');
+      setSelectedTime(getDefaultTimeForSlot(data.timeSlot));
+      setEstimatedDuration(getDefaultDurationByModality(data.exam.modality));
+      setShowAssignmentModal(true);
+      
+      console.log('✅ 배정 모달 기본값 설정:', {
+        timeSlot: data.timeSlot,
+        defaultTime: getDefaultTimeForSlot(data.timeSlot),
+        modality: data.exam.modality,
+        defaultDuration: getDefaultDurationByModality(data.exam.modality)
+      });
+    }
+  }, [getDefaultTimeForSlot, getDefaultDurationByModality]);
+
+  // ✅ 배정 확정 핸들러 최적화
+  const confirmAssignment = useCallback(async () => {
+    if (!selectedRadiologist || !selectedTime || !estimatedDuration || !modalData) {
+      alert('⚠️ 모든 필수 정보를 입력해주세요.');
+      return;
+    }
+
+    // 업무시간 검증
+    if (!isValidWorkHour(selectedTime)) {
+      alert(`⚠️ 업무시간(${BUSINESS_HOURS.START}:00-${BUSINESS_HOURS.END}:00) 내에서만 검사를 배정할 수 있습니다.`);
+      return;
+    }
+
+    if (!canProcess()) {
       console.log('🔄 이미 배정 처리 중, 중복 호출 무시');
       return;
     }
 
     try {
       setLoading(true);
-      isProcessingRef.current = true;
+      setProcessing(true, 1000); // 1초 간 재처리 방지
       console.log('🔥 배정 확정 시작');
 
-      // 1. Django API 호출
       const assignmentData = {
         roomId: modalData.roomId,
         radiologistId: parseInt(selectedRadiologist),
@@ -250,98 +365,100 @@ const Dashboard = () => {
       const result = await worklistService.assignExam(modalData.exam.id, assignmentData);
       console.log('📥 배정 API 결과:', result);
 
-      // 2. ✅ 단일 새로고침만 수행 (중복 제거)
-      console.log('🔄 스케줄 새로고침 시작...');
+      // 스케줄 새로고침
       await refreshSchedules();
 
-      // 3. 워크리스트 새로고침
+      // 워크리스트 새로고침
       if (workListPanelRef.current?.refreshWorklist) {
         workListPanelRef.current.refreshWorklist();
       }
 
-      // 4. ✅ 성공 메시지
+      // 성공 메시지
+      const radiologistName = radiologists.find(r => r.id === parseInt(selectedRadiologist))?.name || '선택된 의사';
+      const roomName = rooms.find(r => r.id === modalData.roomId)?.name || '선택된 검사실';
+      
       console.log('✅ 배정 완료!');
-      alert(`✅ ${modalData.exam.patientName} 환자의 검사가 성공적으로 배정되었습니다!`);
+      alert(`✅ ${modalData.exam.patientName} 환자의 ${modalData.exam.examPart} ${modalData.exam.modality} 검사가 성공적으로 배정되었습니다!\n\n📋 배정 정보:\n🏥 검사실: ${roomName}\n👨‍⚕️ 담당의: Dr. ${radiologistName}\n🕐 시간: ${selectedTime} (${estimatedDuration}분)`);
+      
       cancelAssignment();
 
     } catch (error) {
       console.error('❌ 배정 실패:', error);
-      alert(`❌ 배정 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
-      // 1초 후에 다시 처리 가능하도록 설정
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 1000);
-    }
-  }, [selectedRadiologist, selectedTime, estimatedDuration, modalData, refreshSchedules]);
-
-  // ✅ 9. 다른 핸들러들도 중복 방지 추가
-  const handleStartExam = useCallback(async (roomId, examId) => {
-    if (isProcessingRef.current) return;
-    
-    try {
-      setLoading(true);
-      isProcessingRef.current = true;
-      console.log('검사 시작:', { roomId, examId });
       
-      const result = await worklistService.startExam(examId);
-      console.log('검사 시작 결과:', result);
-      
-      await refreshSchedules();
-
-      if (workListPanelRef.current?.refreshWorklist) {
-        workListPanelRef.current.refreshWorklist();
+      let errorMessage = '❌ 배정 실패: ';
+      if (error.response?.data?.error) {
+        errorMessage += error.response.data.error;
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += '알 수 없는 오류가 발생했습니다.';
       }
-
-      alert('검사가 시작되었습니다.');
-    } catch (error) {
-      console.error('검사 시작 실패:', error);
-      alert(`검사 시작 실패: ${error.response?.data?.error || error.message}`);
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 500);
+      setProcessing(false);
     }
-  }, [refreshSchedules]);
+  }, [
+    selectedRadiologist, 
+    selectedTime, 
+    estimatedDuration, 
+    modalData, 
+    isValidWorkHour,
+    canProcess,
+    setProcessing,
+    refreshSchedules,
+    radiologists,
+    rooms
+  ]);
 
-  const handleCompleteExam = useCallback(async (roomId, examId) => {
-    if (isProcessingRef.current) return;
-    
-    try {
-      setLoading(true);
-      isProcessingRef.current = true;
-      console.log('검사 완료:', { roomId, examId });
+  // ✅ 검사 상태 변경 핸들러들 최적화
+  const createExamHandler = useCallback((actionName, apiCall) => {
+    return async (roomId, examId) => {
+      if (!canProcess()) return;
       
-      const result = await worklistService.completeExam(examId);
-      console.log('검사 완료 결과:', result);
-      
-      await refreshSchedules();
+      try {
+        setLoading(true);
+        setProcessing(true);
+        console.log(`${actionName}:`, { roomId, examId });
+        
+        const result = await apiCall(examId);
+        console.log(`${actionName} 결과:`, result);
+        
+        await refreshSchedules();
 
-      if (workListPanelRef.current?.refreshWorklist) {
-        workListPanelRef.current.refreshWorklist();
+        if (workListPanelRef.current?.refreshWorklist) {
+          workListPanelRef.current.refreshWorklist();
+        }
+
+        alert(`${actionName}이(가) 완료되었습니다.`);
+      } catch (error) {
+        console.error(`${actionName} 실패:`, error);
+        alert(`${actionName} 실패: ${error.response?.data?.error || error.message}`);
+      } finally {
+        setLoading(false);
+        setProcessing(false);
       }
+    };
+  }, [canProcess, setProcessing, refreshSchedules]);
 
-      alert('검사가 완료되었습니다.');
-    } catch (error) {
-      console.error('검사 완료 실패:', error);
-      alert(`검사 완료 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 500);
-    }
-  }, [refreshSchedules]);
+  const handleStartExam = useMemo(() => 
+    createExamHandler('검사 시작', worklistService.startExam),
+    [createExamHandler]
+  );
+
+  const handleCompleteExam = useMemo(() => 
+    createExamHandler('검사 완료', worklistService.completeExam),
+    [createExamHandler]
+  );
 
   const handleCancelExam = useCallback(async (examId) => {
     if (!window.confirm('정말로 검사를 취소하시겠습니까?')) return;
-    if (isProcessingRef.current) return;
+    if (!canProcess()) return;
     
     try {
       setLoading(true);
-      isProcessingRef.current = true;
+      setProcessing(true);
       console.log('검사 취소:', examId);
       
       const result = await worklistService.cancelExam(examId);
@@ -359,11 +476,9 @@ const Dashboard = () => {
       alert(`검사 취소 실패: ${error.response?.data?.error || error.message}`);
     } finally {
       setLoading(false);
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 500);
+      setProcessing(false);
     }
-  }, [refreshSchedules]);
+  }, [canProcess, setProcessing, refreshSchedules]);
 
   const cancelAssignment = useCallback(() => {
     setShowAssignmentModal(false);
@@ -374,23 +489,7 @@ const Dashboard = () => {
     setEstimatedDuration('');
   }, []);
 
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-  }, []);
-
-  const handleExamUpdated = useCallback((eventType, data) => {
-    console.log('검사 업데이트 이벤트:', eventType, data);
-    
-    if (eventType === 'assignment_requested') {
-      setModalData(data);
-      setSelectedRadiologist('');
-      setSelectedTime(data.timeSlot);
-      setEstimatedDuration(getTodayKST(data.exam.modality).toString());
-      setShowAssignmentModal(true);
-    }
-  }, []);
-
-  // 리사이즈 핸들링
+  // ✅ 리사이즈 핸들링 최적화
   const handleMouseDown = useCallback((e) => {
     isDragging.current = true;
     
@@ -415,6 +514,19 @@ const Dashboard = () => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, []);
+
+  // ✅ 디버깅 정보 메모이제이션
+  const debugInfo = useMemo(() => ({
+    roomsCount: rooms.length,
+    radiologistsCount: radiologists.length,
+    selectedDateStr: formatDateForAPI(selectedDate),
+    schedulesCount: Object.keys(roomSchedules).length,
+    isProcessing: isProcessingRef.current,
+    scheduleDetails: Object.entries(roomSchedules).map(([roomId, schedules]) => ({
+      roomId,
+      examCount: schedules?.length || 0
+    }))
+  }), [rooms.length, radiologists.length, formatDateForAPI, selectedDate, roomSchedules]);
 
   return (
     <div 
@@ -509,14 +621,14 @@ const Dashboard = () => {
           maxWidth: '300px',
           zIndex: 1000
         }}>
-          <div>🏥 검사실: <strong>{rooms.length}개</strong></div>
-          <div>👨‍⚕️ 영상전문의: <strong>{radiologists.length}명</strong></div>
-          <div>📅 선택된 날짜: <strong>{formatDateForAPI(selectedDate)}</strong></div>
-          <div>📊 스케줄: <strong>{Object.keys(roomSchedules).length}개 검사실</strong></div>
-          <div>🔒 처리 중: <strong>{isProcessingRef.current ? '예' : '아니오'}</strong></div>
-          {Object.entries(roomSchedules).map(([roomId, schedules]) => (
+          <div>🏥 검사실: <strong>{debugInfo.roomsCount}개</strong></div>
+          <div>👨‍⚕️ 영상전문의: <strong>{debugInfo.radiologistsCount}명</strong></div>
+          <div>📅 선택된 날짜: <strong>{debugInfo.selectedDateStr}</strong></div>
+          <div>📊 스케줄: <strong>{debugInfo.schedulesCount}개 검사실</strong></div>
+          <div>🔒 처리 중: <strong>{debugInfo.isProcessing ? '예' : '아니오'}</strong></div>
+          {debugInfo.scheduleDetails.map(({ roomId, examCount }) => (
             <div key={roomId} style={{fontSize: '0.7rem', color: '#94a3b8'}}>
-              Room {roomId}: {schedules?.length || 0}개 검사
+              Room {roomId}: {examCount}개 검사
             </div>
           ))}
         </div>

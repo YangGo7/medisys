@@ -1919,7 +1919,6 @@ def openmrs_patients_with_mapping(request):
     return Response(result)
 
 
-
 # backend/medical_integration/views.py - assign_room 함수 수정
 
 @api_view(['POST'])

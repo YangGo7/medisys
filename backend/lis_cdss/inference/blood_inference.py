@@ -17,14 +17,18 @@ MODELS = {name: joblib.load(path) for name, path in MODEL_PATHS.items()}
 def run_blood_model(test_type, input_dict):
     test_type = test_type.upper()
     if test_type not in MODELS:
-        return "모델 없음"
+        return None, None
 
     try:
         model = MODELS[test_type]
         input_vector = [float(input_dict.get(comp, 0)) for comp in PANEL_ORDER[test_type]]
         
         df = pd.DataFrame([input_vector], columns=PANEL_ORDER[test_type])
-        return int(model.predict(df)[0])
+        
+        pred = int(model.predict(df)[0])
+        prob = float(model.predict_proba(df)[0][1]) 
+        
+        return pred, prob
     except Exception as e:
         print(f"❌ 예측 실패: {e}")
-        return None 
+        return None, None

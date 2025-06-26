@@ -153,12 +153,13 @@ def receive_model_result(request):
             }
 
             model = MODELS.get(test_type.upper())
-            prediction = run_blood_model(test_type, values) if model else None
+            prediction, probability = run_blood_model(test_type, values) if model else (None, None)
             related.update(prediction=prediction)
             
             print(f"📌 계산된 prediction: {prediction}")
             
             instance.prediction = prediction
+            instance.prediction_prob = probability
             instance.save()
         
 

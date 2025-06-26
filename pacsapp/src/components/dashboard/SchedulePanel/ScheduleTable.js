@@ -319,7 +319,8 @@
 // export default ScheduleTable;
 
 
-// ScheduleTable.js - 중복 검사 표시 문제 해결
+// ScheduleTable.js
+// ScheduleTable.js
 
 import React from 'react';
 import ExamCard from './ExamCard';
@@ -335,28 +336,24 @@ const ScheduleTable = ({
   onCancelExam,
   getEndTime
 }) => {
-  // 🔍 디버깅 로그
   console.log('🔍 ScheduleTable 렌더링 데이터:');
   console.log('🔍 - roomSchedules:', roomSchedules);
   console.log('🔍 - roomSchedules keys:', Object.keys(roomSchedules || {}));
   console.log('🔍 - rooms:', rooms);
   console.log('🔍 - radiologists:', radiologists);
 
-  // 🔧 키 매칭 함수 개선
   const findRoomData = (room) => {
     if (!roomSchedules) return null;
-
-    // 가능한 모든 키 형태 시도
     const possibleKeys = [
-      room.id,                           // 원본 ID
-      String(room.id),                   // 문자열 변환
-      room.name,                         // 원본 이름
-      String(room.name),                 // 문자열 변환
-      room.name?.replace('실', ''),       // '실' 제거
-      room.name?.replace(/\D/g, ''),      // 숫자만 추출
-      `ROOM${room.id}`,                  // ROOM 접두사
-      `room${room.id}`,                  // room 접두사 (소문자)
-    ].filter(Boolean); // null/undefined 제거
+      room.id,
+      String(room.id),
+      room.name,
+      String(room.name),
+      room.name?.replace('실', ''),
+      room.name?.replace(/\D/g, ''),
+      `ROOM${room.id}`,
+      `room${room.id}`,
+    ].filter(Boolean);
 
     console.log(`🔍 Room ${room.id} (${room.name}) 키 후보:`, possibleKeys);
 
@@ -373,32 +370,6 @@ const ScheduleTable = ({
 
   return (
     <div className="schedule-table-container">
-      {/* 🔍 디버그 정보 패널 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          background: '#fffbeb',
-          border: '1px solid #f59e0b',
-          padding: '0.5rem',
-          margin: '0.5rem',
-          borderRadius: '0.25rem',
-          fontSize: '0.75rem'
-        }}>
-          <strong>🔍 디버그 정보:</strong><br/>
-          검사실 수: {rooms.length} | 
-          스케줄 키: [{Object.keys(roomSchedules || {}).join(', ')}] |
-          전체 검사 수: {Object.values(roomSchedules || {}).flat().length}
-          <details style={{ marginTop: '0.25rem' }}>
-            <summary>상세 정보</summary>
-            <pre style={{ fontSize: '0.625rem', background: '#f3f4f6', padding: '0.25rem', marginTop: '0.25rem' }}>
-              {JSON.stringify({ roomSchedules, rooms }, null, 2)}
-            </pre>
-          </details>
-        </div>
-      )}
-
       <table 
         className="schedule-table"
         style={{
@@ -409,239 +380,66 @@ const ScheduleTable = ({
         }}
       >
         <thead>
-          <tr style={{ display: 'table-row' }}>
-            <th 
-              className="time-header"
-              style={{
-                width: '80px',
-                minWidth: '80px',
-                maxWidth: '80px',
-                whiteSpace: 'nowrap',
-                display: 'table-cell',
-                background: '#f8fafc',
-                padding: '0.75rem 0.5rem',
-                textAlign: 'center',
-                fontWeight: 600,
-                color: '#374151',
-                borderBottom: '1px solid #e5e7eb',
-                fontSize: '0.75rem',
-                position: 'sticky',
-                top: 0,
-                zIndex: 10
-              }}
-            >
-              시간
-            </th>
+          <tr>
+            <th style={{ width: '80px' }}>시간</th>
             {rooms.map(room => (
-              <th 
-                key={room.id} 
-                className="room-header"
-                style={{
-                  width: `calc((100% - 80px) / ${rooms.length})`,
-                  minWidth: '150px',
-                  whiteSpace: 'nowrap',
-                  display: 'table-cell',
-                  background: '#f8fafc',
-                  padding: '0.75rem 0.5rem',
-                  textAlign: 'center',
-                  fontWeight: 600,
-                  color: '#374151',
-                  borderBottom: '1px solid #e5e7eb',
-                  fontSize: '0.75rem',
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 10,
-                  verticalAlign: 'middle'
-                }}
-              >
+              <th key={room.id} style={{ minWidth: '150px' }}>
                 검사실 {room.name}<br/>
-                <span 
-                  className="room-type"
-                  style={{
-                    fontSize: '0.75rem',
-                    color: '#6b7280',
-                    display: 'block',
-                    marginTop: '2px'
-                  }}
-                >
-                  ({room.type})
-                </span>
+                <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>({room.type})</span>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: 10 }, (_, i) => {
-            const hour = 9 + i;
-            const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
-            
-            // 🔧 행 높이 계산 - 이 시간대에 시작하는 검사만 고려
-            let maxRequiredHeight = 120; // 기본 높이
-            
-            rooms.forEach(room => {
-              const roomData = findRoomData(room);
-              
-              if (roomData && Array.isArray(roomData)) {
-                // ✅ 이 시간대에 시작하는 검사만 필터링 (중복 방지의 핵심)
-                const examsStartingInThisHour = roomData.filter(exam => {
-                  if (!exam.time) return false;
-                  const examStartHour = parseInt(exam.time.split(':')[0]);
-                  return examStartHour === hour; // 정확히 이 시간대에 시작하는 검사만
-                });
-                
-                examsStartingInThisHour.forEach(exam => {
-                  const examStartMinute = parseInt(exam.time.split(':')[1]);
-                  const examDuration = exam.duration || 30;
-                  
-                  const pixelsPerMinute = 120 / 60; // 2px per minute
-                  const topPosition = examStartMinute * pixelsPerMinute;
-                  const cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
-                  
-                  const requiredHeight = topPosition + cardHeight + 20; // 여백 포함
-                  maxRequiredHeight = Math.max(maxRequiredHeight, requiredHeight);
-                });
-              }
-            });
-            
-            const rowHeight = Math.max(maxRequiredHeight, 120);
-            
-            return (
-              <tr key={timeSlot} style={{ height: `${rowHeight}px` }}>
-                <td 
-                  className="time-cell" 
-                  style={{ 
-                    height: `${rowHeight}px`,
-                    background: '#f8fafc',
-                    padding: '0.75rem',
-                    textAlign: 'center',
-                    fontWeight: 600,
-                    color: '#374151',
-                    borderRight: '1px solid #e5e7eb',
-                    width: '80px',
-                    minWidth: '80px',
-                    maxWidth: '80px'
-                  }}
-                >
-                  {timeSlot}
-                </td>
-                {rooms.map(room => {
-                  const roomData = findRoomData(room);
-                  
-                  // ✅ 핵심 수정: 이 시간대에 시작하는 검사만 표시 (중복 제거)
-                  const examsToShow = [];
-                  
-                  if (roomData && Array.isArray(roomData)) {
-                    roomData.forEach(exam => {
-                      if (!exam.time) return;
-                      
-                      const examStartHour = parseInt(exam.time.split(':')[0]);
-                      
-                      // ✅ 중요: 정확히 이 시간대에 시작하는 검사만 표시
-                      if (examStartHour === hour) {
-                        const examStartMinute = parseInt(exam.time.split(':')[1]);
-                        const examDuration = exam.duration || 30;
-                        
-                        const pixelsPerMinute = 120 / 60;
-                        const topPosition = examStartMinute * pixelsPerMinute;
-                        const cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
-                        
-                        examsToShow.push({
-                          ...exam,
-                          topPosition,
-                          cardHeight
-                        });
-                      }
-                    });
-                  }
-
-                  // 🔍 상세 디버깅 로그
-                  console.log(`🔍 검사실 ${room.id} (${room.name}), 시간 ${hour}:00`);
-                  console.log(`🔍 - roomData 길이: ${roomData ? roomData.length : 0}`);
-                  console.log(`🔍 - 이 시간대 시작 검사들:`, examsToShow);
-
+          <tr>
+            <td style={{ width: '80px', background: '#f8fafc' }}>
+              <div style={{ position: 'relative', height: '1080px' }}>
+                {Array.from({ length: 10 }, (_, i) => {
+                  const hour = 9 + i;
+                  const label = `${hour.toString().padStart(2, '0')}:00`;
                   return (
-                    <td 
-                      key={room.id} 
-                      className="room-cell"
-                      style={{ 
-                        height: `${rowHeight}px`, 
-                        minHeight: '120px',
-                        padding: '0.5rem',
-                        borderRight: '1px solid #e5e7eb',
-                        borderBottom: '1px solid #f3f4f6',
-                        position: 'relative',
-                        verticalAlign: 'top',
-                        minWidth: '150px'
-                      }}
-                      onDragOver={onDragOver}
-                      onDrop={() => onDrop(room.id, timeSlot)}
-                    >
-                      {examsToShow.length > 0 ? (
-                        <div className="exam-container" style={{ 
-                          position: 'relative',
-                          height: '100%',
-                          minHeight: '120px' 
-                        }}>
-                          {examsToShow.map((exam, index) => {
-                            const radiologist = radiologists.find(r => r.id === exam.radiologistId);
-                            const endTime = getEndTime(exam.time, exam.duration);
-                            
-                            // 🔍 ExamCard 렌더링 로그
-                            console.log(`🔍 ExamCard 렌더링: ${exam.patientName}, 위치: ${exam.topPosition}px, 높이: ${exam.cardHeight}px`);
-                            
-                            return (
-                              <ExamCard
-                                key={`${exam.examId || exam.id}-${exam.time}-${index}`}
-                                exam={exam}
-                                radiologist={radiologist}
-                                endTime={endTime}
-                                topPosition={exam.topPosition}
-                                cardHeight={exam.cardHeight}
-                                onStartExam={onStartExam}
-                                onCompleteExam={onCompleteExam}
-                                onCancelExam={onCancelExam}
-                                roomId={room.id}
-                              />
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="drop-zone" style={{ 
-                          minHeight: '120px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '2px dashed #d1d5db',
-                          borderRadius: '0.25rem',
-                          color: '#9ca3af',
-                          fontSize: '0.75rem'
-                        }}>
-                          <span>드롭하여 배정</span>
-                        </div>
-                      )}
-                      
-                      {/* 🔍 디버그 정보 표시 */}
-                      {process.env.NODE_ENV === 'development' && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '2px',
-                          left: '2px',
-                          background: 'rgba(0,0,0,0.7)',
-                          color: 'white',
-                          fontSize: '0.625rem',
-                          padding: '1px 3px',
-                          borderRadius: '2px',
-                          zIndex: 1000
-                        }}>
-                          {examsToShow.length}개
-                        </div>
-                      )}
-                    </td>
+                    <div key={label} style={{ height: '108px', borderBottom: '1px solid #eee', fontSize: '12px', textAlign: 'center' }}>{label}</div>
                   );
                 })}
-              </tr>
-            );
-          })}
+              </div>
+            </td>
+            {rooms.map(room => {
+              const roomData = findRoomData(room);
+              return (
+                <td
+                  key={room.id}
+                  style={{ position: 'relative', height: '1080px', borderLeft: '1px solid #e5e7eb' }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => onDrop(room.id, e)}
+                >
+                  {roomData && roomData.map((exam, index) => {
+                    if (!exam.time) return null;
+                    const [hour, minute] = exam.time.split(':').map(Number);
+                    const startMinutes = hour * 60 + minute;
+                    const top = (startMinutes - 540) * 1.8; // 9:00 기준
+                    const height = (exam.duration || 30) * 1.8;
+                    const radiologist = radiologists.find(r => r.id === exam.radiologistId);
+                    const endTime = getEndTime(exam.time, exam.duration);
+
+                    return (
+                      <ExamCard
+                        key={`${exam.examId || exam.id}-${index}`}
+                        exam={exam}
+                        radiologist={radiologist}
+                        endTime={endTime}
+                        topPosition={top}
+                        cardHeight={height}
+                        onStartExam={onStartExam}
+                        onCompleteExam={onCompleteExam}
+                        onCancelExam={onCancelExam}
+                        roomId={room.id}
+                      />
+                    );
+                  })}
+                </td>
+              );
+            })}
+          </tr>
         </tbody>
       </table>
     </div>
