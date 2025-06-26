@@ -23,7 +23,9 @@
     "react-router-dom": "6.26.2",
     "react-scripts": "5.0.1",
     "recharts": "^2.15.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "proxy": "http://35.225.63.41:8000"
+
   },
   "scripts": {
     "start": "react-scripts start",
@@ -48,5 +50,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+    
   }
+  
 }

@@ -1,12 +1,30 @@
 // auth.js
-// 로그인/자동로그인 API 호출
-
 import axios from 'axios';
-
-export async function login({username, password, code}){
-    return axios.post('/api/login/', {username, password, code});
+const axiosInstance = axios.create({
+  withCredentials: true,  // ✅ 이거 추가
+});
+export async function login({ username, password, code }) {
+    try {
+        const response = await axios.post('/api/account/login/', {
+            username,
+            password,
+            code
+        }, {
+            withCredentials: true
+        });
+        console.log("✅ 로그인 성공", response.data);
+        return response;
+    } catch (error) {
+        console.error("❌ 로그인 실패:", error.response?.data || error.message);
+        throw error;
+    }
 }
 
-export async function autoLogin({code}){
-    return axios.post('/api/auto-login/', {code});
+
+export async function autoLogin({ code }) {
+    return axios.post('/api/account/auto-login/', {
+        code
+    }, {
+        withCredentials: true  // ✅ 자동 로그인도 쿠키 필요
+    });
 }

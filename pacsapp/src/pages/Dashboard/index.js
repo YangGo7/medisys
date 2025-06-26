@@ -409,8 +409,6 @@
 // export default Dashboard;
 
 // pages/Dashboard/index.js
-// 최종 완성 버전 - selectedDate prop 전달 추가
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import WorkListPanel from '../../components/dashboard/WorkListPanel';
 import SchedulePanel from '../../components/dashboard/SchedulePanel';
@@ -435,7 +433,7 @@ const Dashboard = () => {
   const [selectedTime, setSelectedTime] = useState('');
   const [estimatedDuration, setEstimatedDuration] = useState('');
 
-  // 검사실과 방사선사 데이터
+  // 검사실과 영상전문의 데이터
   const [rooms, setRooms] = useState([]);
   const [radiologists, setRadiologists] = useState([]);
   // 스케줄 상태도 Dashboard에서 관리
@@ -450,6 +448,24 @@ const Dashboard = () => {
   // selectedDate 상태 추가
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // ✅ 브라우저 알림 차단
+  useEffect(() => {
+    // 브라우저 알림 차단
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
+    // 페이지 업데이트 알림 차단 (서비스 워커 관련)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'SKIP_WAITING') {
+          // 자동 새로고침 방지
+          event.preventDefault();
+        }
+      });
+    }
+  }, []);
+
   // 날짜 형식 변환 유틸 함수
   const formatDateForAPI = useCallback((date) => {
     if (!date) return new Date().toISOString().split('T')[0];
@@ -459,7 +475,7 @@ const Dashboard = () => {
     return date;
   }, []);
 
-  // 오늘 스케줄 로딩 함수 (useCallback으로 감싸서 의존성 해결)
+  // ✅ 스케줄 로딩 함수 개선
   const loadTodaySchedules = useCallback(async (date = null) => {
     try {
       const targetDate = date || selectedDate;
@@ -471,7 +487,12 @@ const Dashboard = () => {
       console.log('🔍 로딩된 스케줄 데이터:', scheduleData);
       
       if (scheduleData.room_schedules) {
-        setRoomSchedules(scheduleData.room_schedules);
+        // ✅ 새로운 스케줄 데이터로 완전히 교체
+        setRoomSchedules(prev => {
+          console.log('📊 이전 스케줄:', prev);
+          console.log('📊 새로운 스케줄:', scheduleData.room_schedules);
+          return { ...scheduleData.room_schedules };
+        });
         console.log('✅ 스케줄 로딩 완료:', Object.keys(scheduleData.room_schedules).length, '개 검사실');
       } else {
         // 데이터가 없으면 빈 스케줄 초기화
@@ -494,10 +515,15 @@ const Dashboard = () => {
     }
   }, [selectedDate, formatDateForAPI, rooms]);
 
-  // 스케줄 새로고침 함수 (useCallback으로 감싸기)
+  // ✅ 강화된 스케줄 새로고침 함수
   const refreshSchedules = useCallback(async () => {
-    console.log('🔄 스케줄 수동 새로고침 - 날짜:', selectedDate);
-    await loadTodaySchedules(selectedDate);
+    console.log('🔄 스케줄 강제 새로고침 시작 - 날짜:', selectedDate);
+    
+    // 작은 지연을 두고 새로고침 (서버 처리 시간 확보)
+    setTimeout(async () => {
+      await loadTodaySchedules(selectedDate);
+      console.log('✅ 스케줄 새로고침 완료');
+    }, 500);
   }, [selectedDate, loadTodaySchedules]);
 
   // 모달 데이터 로딩
@@ -576,7 +602,7 @@ const Dashboard = () => {
     setDraggedExam(exam);
   }, []);
 
-  // 모달 관련 핸들러들
+  // ✅ 배정 확정 핸들러 개선
   const confirmAssignment = useCallback(async () => {
     if (!selectedRadiologist || !selectedTime || !estimatedDuration || !modalData) return;
 
@@ -592,27 +618,39 @@ const Dashboard = () => {
         duration: parseInt(estimatedDuration)
       };
 
+      console.log('📤 배정 요청 데이터:', assignmentData);
       const result = await worklistService.assignExam(modalData.exam.id, assignmentData);
-      console.log('배정 API 결과:', result);
+      console.log('📥 배정 API 결과:', result);
 
-      // 2. API 호출 후 전체 스케줄 새로고침 (더 안전함)
+      // 2. ✅ 즉시 스케줄 새로고침 (여러 번 시도)
+      console.log('🔄 스케줄 새로고침 시작...');
+      
+      // 첫 번째 새로고침
       await refreshSchedules();
+      
+      // 1초 후 두 번째 새로고침 (확실히 하기 위해)
+      setTimeout(async () => {
+        await loadTodaySchedules(selectedDate);
+        console.log('🔄 2차 스케줄 새로고침 완료');
+      }, 1000);
 
       // 3. 워크리스트 새로고침
       if (workListPanelRef.current?.refreshWorklist) {
         workListPanelRef.current.refreshWorklist();
       }
 
-      alert('배정이 완료되었습니다!');
+      // 4. ✅ 성공 메시지를 더 명확하게
+      console.log('✅ 배정 완료!');
+      alert(`✅ ${modalData.exam.patientName} 환자의 검사가 성공적으로 배정되었습니다!`);
       cancelAssignment();
 
     } catch (error) {
-      console.error('배정 실패:', error);
-      alert(`배정 실패: ${error.response?.data?.error || error.message}`);
+      console.error('❌ 배정 실패:', error);
+      alert(`❌ 배정 실패: ${error.response?.data?.error || error.message}`);
     } finally {
       setLoading(false);
     }
-  }, [selectedRadiologist, selectedTime, estimatedDuration, modalData, refreshSchedules]);
+  }, [selectedRadiologist, selectedTime, estimatedDuration, modalData, refreshSchedules, selectedDate, loadTodaySchedules]);
 
   // 검사 시작 핸들러
   const handleStartExam = useCallback(async (roomId, examId) => {
@@ -759,8 +797,21 @@ const Dashboard = () => {
     >
       {/* 로딩 오버레이 */}
       {loading && (
-        <div className="loading-overlay">
-          <div>처리 중...</div>
+        <div className="loading-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          color: 'white',
+          fontSize: '1.2rem'
+        }}>
+          <div>⏳ 처리 중...</div>
         </div>
       )}
       
@@ -770,7 +821,7 @@ const Dashboard = () => {
           ref={workListPanelRef}
           onDragStart={handleDragStart}
           onDateChange={handleDateChange}
-          selectedDate={formatDateForAPI(selectedDate)} // ✅ 추가된 부분!
+          selectedDate={formatDateForAPI(selectedDate)}
         />
       </div>
       
@@ -813,6 +864,33 @@ const Dashboard = () => {
         onDurationChange={setEstimatedDuration}
         onConfirm={confirmAssignment}
       />
+      
+      {/* ✅ 개발용 스케줄 디버깅 정보 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(0,0,0,0.9)',
+          color: 'white',
+          padding: '0.75rem',
+          borderRadius: '0.5rem',
+          fontSize: '0.75rem',
+          lineHeight: '1.4',
+          maxWidth: '300px',
+          zIndex: 1000
+        }}>
+          <div>🏥 검사실: <strong>{rooms.length}개</strong></div>
+          <div>👨‍⚕️ 영상전문의: <strong>{radiologists.length}명</strong></div>
+          <div>📅 선택된 날짜: <strong>{formatDateForAPI(selectedDate)}</strong></div>
+          <div>📊 스케줄: <strong>{Object.keys(roomSchedules).length}개 검사실</strong></div>
+          {Object.entries(roomSchedules).map(([roomId, schedules]) => (
+            <div key={roomId} style={{fontSize: '0.7rem', color: '#94a3b8'}}>
+              Room {roomId}: {schedules?.length || 0}개 검사
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

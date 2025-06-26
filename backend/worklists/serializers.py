@@ -52,7 +52,10 @@
 #             'startTime': format_time(instance.scheduled_exam_datetime)
 #         }
         
+# worklists/serializers.py
+
 from rest_framework import serializers
+from django.utils import timezone
 from .models import StudyRequest
 
 class StudyRequestSerializer(serializers.ModelSerializer):
@@ -65,22 +68,26 @@ class StudyRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("생년월일은 필수입니다.")
         return value
 
-# 🆕 React Dashboard용 별도 시리얼라이저
+# 🆕 React Dashboard용 별도 시리얼라이저 (시간대 수정)
 class WorklistSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudyRequest
         fields = '__all__'
     
     def to_representation(self, instance):
-        """React Dashboard 컴포넌트와 일치하도록 데이터 형태 조정"""
-        # 시간 포맷팅 함수 (안전한 방법)
+        """React Dashboard 컴포넌트와 일치하도록 데이터 형태 조정 (시간대 수정)"""
+        
+        # ✅ KST 기준 시간 포맷팅 함수
         def format_datetime(dt):
             if dt:
-                year = dt.year
-                month = dt.month
-                day = dt.day
-                hour = dt.hour
-                minute = dt.minute
+                # Django의 timezone.localtime()을 사용하여 KST로 변환
+                local_dt = timezone.localtime(dt)
+                
+                year = local_dt.year
+                month = local_dt.month
+                day = local_dt.day
+                hour = local_dt.hour
+                minute = local_dt.minute
                 
                 # 12시간 형태로 변환
                 if hour == 0:
@@ -99,9 +106,12 @@ class WorklistSerializer(serializers.ModelSerializer):
                 return f"{year}. {month}. {day}. {period} {display_hour}:{minute:02d}"
             return None
         
+        # ✅ KST 기준 시간만 포맷팅 함수
         def format_time(dt):
             if dt:
-                return dt.strftime('%H:%M')
+                # Django의 timezone.localtime()을 사용하여 KST로 변환
+                local_dt = timezone.localtime(dt)
+                return local_dt.strftime('%H:%M')
             return None
         
         return {
@@ -113,15 +123,15 @@ class WorklistSerializer(serializers.ModelSerializer):
             'examPart': instance.body_part,
             'modality': instance.modality,
             'requestDoctor': instance.requesting_physician,
-            'requestDateTime': format_datetime(instance.request_datetime),
+            'requestDateTime': format_datetime(instance.request_datetime),  # ✅ KST 변환
             'reportingDoctor': instance.interpreting_physician,
-            'examDateTime': format_datetime(instance.scheduled_exam_datetime),
-            'examStatus': instance.study_status,  # 🔥 Django 상태 그대로 사용
-            'reportStatus': instance.report_status,  # 🔥 Django 상태 그대로 사용
+            'examDateTime': format_datetime(instance.scheduled_exam_datetime),  # ✅ KST 변환
+            'examStatus': instance.study_status,
+            'reportStatus': instance.report_status,
             'priority': getattr(instance, 'priority', '일반'),
             'estimatedDuration': instance.estimated_duration or 30,
             'notes': instance.notes or '',
             'radiologistId': instance.assigned_radiologist.id if instance.assigned_radiologist else None,
             'roomId': instance.assigned_room.room_id if instance.assigned_room else None,
-            'startTime': format_time(instance.scheduled_exam_datetime)
+            'startTime': format_time(instance.scheduled_exam_datetime)  # ✅ KST 변환
         }

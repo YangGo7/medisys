@@ -5,7 +5,10 @@ from .models import Notice
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from .models import UserProfile
+from django.views.decorators.csrf import csrf_exempt
 
+
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def update_notice(request):
@@ -14,6 +17,7 @@ def update_notice(request):
     Notice.objects.create(message=message)
     return Response({"message": "공지 등록 완료"})
 
+@csrf_exempt
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get("username")
@@ -34,7 +38,7 @@ def login_view(request):
     return Response({"error": "인증 실패"}, status=401)
 
 
-
+@csrf_exempt
 @api_view(['POST'])
 def auto_login_view(request):
     code = request.data.get('code')

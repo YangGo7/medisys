@@ -70,11 +70,12 @@ function LoginPage() {
         localStorage.setItem('doctor_name', user.display);
         setUserInfo(user);
         // 메인 페이지로 이동
-        // window.location.href = '/emr';
+        window.location.href = '/main';
       })
       .catch(err => {
         console.error('사용자 정보 조회 실패', err);
         alert('로그인 후 사용자 정보를 불러오는 데 실패했습니다.');
+        setError(err);
       });
   }, [userId]);
 

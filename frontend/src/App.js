@@ -43,7 +43,7 @@ function App() {
           <Routes>
             {/* 기존 메인 페이지 */} {/* 임시 세팅 TitlePage*/}
             <Route path="/" element={<Navigate to="/main" />} />
-            <Route path="/main" element={<TitlePage />} />
+            <Route path="/main" element={<LaCID />} />
 
             {/*홈페이지 소개용*/}
             <Route path="/Sever_Main_Page/LaCIDPage" element={<LaCID/>} />

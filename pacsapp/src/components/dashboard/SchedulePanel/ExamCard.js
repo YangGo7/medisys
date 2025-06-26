@@ -157,7 +157,6 @@
 
 // export default ExamCard;
 
-
 import React from 'react';
 
 const ExamCard = ({
@@ -171,46 +170,174 @@ const ExamCard = ({
   onCancelExam,
   roomId
 }) => {
-  // 디버깅용 로그
-  console.log('ExamCard props:', { exam, roomId, onStartExam, onCompleteExam, onCancelExam });
-  
+  // 🔍 디버깅용 로그
+  console.log('🔍 ExamCard 렌더링:', { 
+    patientName: exam.patientName, 
+    time: exam.time, 
+    topPosition, 
+    cardHeight,
+    exam, 
+    roomId 
+  });
+
+  // 🔧 필수 데이터 검증
+  if (!exam || !exam.patientName) {
+    console.warn('⚠️ ExamCard: 필수 데이터 누락', exam);
+    return null;
+  }
+
+  // 🔧 안전한 기본값 설정
+  const safeExam = {
+    patientName: exam.patientName || '환자명 없음',
+    examType: exam.examType || exam.type || '검사명 없음',
+    time: exam.time || '시간 없음',
+    status: exam.status || '검사대기',
+    examId: exam.examId || exam.id || `temp-${Date.now()}`,
+    duration: exam.duration || 30
+  };
+
+  const safeRadiologist = radiologist || { 
+    name: '미배정', 
+    color: 'radiologist-blue' 
+  };
+
+  // 🔧 최소 높이 보장
+  const minHeight = 80;
+  const finalHeight = Math.max(cardHeight || minHeight, minHeight);
+  const finalTopPosition = Math.max(topPosition || 0, 0);
+
+  // 🔧 상태별 스타일
+  const getStatusStyle = (status) => {
+    const baseStyle = {
+      fontSize: '0.75rem',
+      padding: '0.25rem 0.5rem',
+      borderRadius: '0.25rem',
+      fontWeight: '500',
+      whiteSpace: 'nowrap',
+      textAlign: 'center',
+      minWidth: '60px',
+      maxWidth: '60px',
+      width: '60px',
+      height: '24px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: status === '검사완료' ? 'default' : 'pointer',
+      opacity: status === '검사완료' ? 0.7 : 1,
+      transition: 'all 0.2s ease',
+      userSelect: 'none',
+      boxSizing: 'border-box',
+      border: 'none',
+      outline: 'none'
+    };
+
+    switch (status) {
+      case '검사대기':
+        return { ...baseStyle, background: '#dbeafe', color: '#2563eb' };
+      case '검사중':
+        return { ...baseStyle, background: '#dcfce7', color: '#16a34a' };
+      case '검사완료':
+        return { ...baseStyle, background: '#f3e8ff', color: '#9333ea' };
+      default:
+        return { ...baseStyle, background: '#f3f4f6', color: '#6b7280' };
+    }
+  };
+
+  const handleStatusClick = () => {
+    if (safeExam.status === '검사대기') {
+      console.log('🔄 검사대기 → 검사중:', { roomId, examId: safeExam.examId });
+      onStartExam?.(roomId, safeExam.examId);
+    } else if (safeExam.status === '검사중') {
+      console.log('🔄 검사중 → 검사완료:', { roomId, examId: safeExam.examId });
+      onCompleteExam?.(roomId, safeExam.examId);
+    }
+  };
+
+  const handleCancelClick = (e) => {
+    e.stopPropagation();
+    console.log('❌ 검사 취소:', safeExam.examId);
+    onCancelExam?.(safeExam.examId);
+  };
+
+  const handleMouseEnter = (e) => {
+    if (safeExam.status !== '검사완료') {
+      e.target.style.transform = 'translateY(-1px)';
+      e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    if (safeExam.status !== '검사완료') {
+      e.target.style.transform = 'translateY(0)';
+      e.target.style.boxShadow = 'none';
+    }
+  };
+
   return (
     <div 
-      className={`exam-card ${radiologist ? radiologist.color : ''}`}
+      className={`exam-card ${safeRadiologist.color}`}
       style={{ 
-        top: `${topPosition}px`,
-        height: `${Math.max(cardHeight, 120)}px` // 최소 높이 120px로 증가
+        position: 'absolute',
+        top: `${finalTopPosition}px`,
+        left: '0',
+        right: '0',
+        height: `${finalHeight}px`,
+        minHeight: `${minHeight}px`,
+        background: 'white',
+        borderRadius: '0.375rem',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        borderLeft: `4px solid ${
+          safeRadiologist.color === 'radiologist-blue' ? '#3b82f6' :
+          safeRadiologist.color === 'radiologist-green' ? '#10b981' :
+          safeRadiologist.color === 'radiologist-purple' ? '#8b5cf6' :
+          safeRadiologist.color === 'radiologist-orange' ? '#f59e0b' : '#6b7280'
+        }`,
+        overflow: 'hidden',
+        zIndex: 2,
+        transition: 'box-shadow 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)';
       }}
     >
-      <div className="exam-card-content" style={{
-        padding: '0.75rem', // 패딩 증가
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        gap: '0.5rem' // 간격 추가
-      }}>
-        {/* 왼쪽 정보 영역 - 세로 4줄 레이아웃 */}
-        <div className="exam-info" style={{
-          flex: 1,
-          minWidth: 0,
+      <div 
+        className="exam-card-content" 
+        style={{
+          padding: '0.75rem',
+          height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '0.25rem' // 줄 간격
-        }}>
-          {/* 1줄: 환자명 */}
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: '0.5rem'
+        }}
+      >
+        {/* 왼쪽 정보 영역 */}
+        <div 
+          className="exam-info" 
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.25rem'
+          }}
+        >
+          {/* 환자명 */}
           <div style={{
             fontWeight: '600',
             color: '#1e293b',
-            fontSize: '0.875rem', // 조금 더 크게
+            fontSize: '0.875rem',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}>
-            {exam.patientName}
+            {safeExam.patientName}
           </div>
           
-          {/* 2줄: 검사 정보 */}
+          {/* 검사 정보 */}
           <div style={{
             color: '#6b7280',
             fontSize: '0.75rem',
@@ -218,19 +345,19 @@ const ExamCard = ({
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}>
-            {exam.examType}
+            {safeExam.examType}
           </div>
           
-          {/* 3줄: 시간 정보 */}
+          {/* 시간 정보 */}
           <div style={{
             color: '#3b82f6',
             fontSize: '0.75rem',
             fontWeight: '500'
           }}>
-            {exam.time} ~ {endTime}
+            {safeExam.time} ~ {endTime || '시간 미정'}
           </div>
           
-          {/* 4줄: 판독의 */}
+          {/* 판독의 */}
           <div style={{
             color: '#374151',
             fontSize: '0.75rem',
@@ -238,7 +365,7 @@ const ExamCard = ({
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}>
-            Dr. {radiologist?.name}
+            Dr. {safeRadiologist.name}
           </div>
         </div>
         
@@ -248,76 +375,29 @@ const ExamCard = ({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-end',
-          justifyContent: 'center', // 세로 중앙 정렬
+          justifyContent: 'center',
           flexShrink: 0,
-          minWidth: '65px', // 약간 줄임
+          minWidth: '65px',
           height: '100%'
         }}>
-          {/* 상태 div (클릭 가능) */}
+          {/* 상태 버튼 */}
           <div
-            onClick={() => {
-              if (exam.status === '검사대기') {
-                console.log('검사대기 → 검사중:', { roomId, examId: exam.examId });
-                onStartExam(roomId, exam.examId);
-              } else if (exam.status === '검사중') {
-                console.log('검사중 → 검사완료:', { roomId, examId: exam.examId });
-                onCompleteExam(roomId, exam.examId);
-              }
-            }}
-            style={{
-              fontSize: '0.75rem',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '0.25rem',
-              fontWeight: '500',
-              whiteSpace: 'nowrap',
-              textAlign: 'center',
-              minWidth: '60px',
-              maxWidth: '60px',
-              width: '60px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: exam.status === '검사완료' ? 'default' : 'pointer',
-              opacity: exam.status === '검사완료' ? 0.7 : 1,
-              transition: 'all 0.2s ease',
-              background: exam.status === '검사대기' ? '#dbeafe' : 
-                         exam.status === '검사중' ? '#dcfce7' : '#f3e8ff',
-              color: exam.status === '검사대기' ? '#2563eb' : 
-                     exam.status === '검사중' ? '#16a34a' : '#9333ea',
-              userSelect: 'none',
-              boxSizing: 'border-box',
-              border: 'none',
-              outline: 'none'
-            }}
-            onMouseEnter={(e) => {
-              if (exam.status !== '검사완료') {
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (exam.status !== '검사완료') {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
-              }
-            }}
+            onClick={handleStatusClick}
+            style={getStatusStyle(safeExam.status)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
-            {exam.status}
+            {safeExam.status}
           </div>
           
-          {/* X div (절대 위치 - 우측 상단 모서리) */}
+          {/* 취소 버튼 */}
           <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('X 버튼 클릭 - 검사 취소:', exam.examId);
-              onCancelExam(exam.examId);
-            }}
+            onClick={handleCancelClick}
             title="검사 취소"
             style={{
               position: 'absolute',
-              top: '5px', // 위에서 5px
-              right: '5px', // 오른쪽에서 5px
+              top: '5px',
+              right: '5px',
               width: '18px',
               height: '18px',
               backgroundColor: '#ef4444',
@@ -349,6 +429,23 @@ const ExamCard = ({
           </div>
         </div>
       </div>
+      
+      {/* 🔍 개발 모드에서 디버그 정보 표시 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'absolute',
+          bottom: '2px',
+          left: '2px',
+          background: 'rgba(0,0,0,0.8)',
+          color: 'white',
+          fontSize: '0.625rem',
+          padding: '1px 4px',
+          borderRadius: '2px',
+          zIndex: 1000
+        }}>
+          ID: {safeExam.examId} | H: {finalHeight}px | T: {finalTopPosition}px
+        </div>
+      )}
     </div>
   );
 };

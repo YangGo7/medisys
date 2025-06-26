@@ -255,6 +255,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
+from datetime import datetime, date
 from .models import StudyRequest
 from .serializers import StudyRequestSerializer, WorklistSerializer
 
@@ -520,4 +521,106 @@ def work_list_detail(request, pk):
         return Response({
             'status': 'error',
             'message': '데이터를 불러오는데 실패했습니다.'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+def worklist_by_date(request, target_date):
+    """
+    ✅ React가 호출하는 날짜별 워크리스트 API
+    URL: /api/worklists/2025-06-26/
+    """
+    try:
+        print(f"📅 날짜별 워크리스트 요청: {target_date}")
+        
+        # 날짜 파싱
+        try:
+            target_date_obj = datetime.strptime(target_date, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({
+                'status': 'error',
+                'message': '잘못된 날짜 형식입니다. YYYY-MM-DD 형식을 사용하세요.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # ✅ 해당 날짜의 요청들 필터링
+        # request_datetime이 해당 날짜인 것들 + scheduled_exam_datetime이 해당 날짜인 것들
+        from django.db.models import Q
+        
+        study_requests = StudyRequest.objects.filter(
+            Q(request_datetime__date=target_date_obj) |  # 요청일이 해당 날짜
+            Q(scheduled_exam_datetime__date=target_date_obj)  # 예정 검사일이 해당 날짜
+        ).order_by('-request_datetime')
+        
+        print(f"📊 필터링된 데이터 개수: {study_requests.count()}")
+        
+        # 디버깅: 각 요청의 시간 정보 출력
+        for req in study_requests[:3]:  # 처음 3개만
+            print(f"ID: {req.id}, 요청일: {req.request_datetime}, 예정일: {req.scheduled_exam_datetime}")
+        
+        # ✅ WorklistSerializer 사용 (requestDateTime 포함)
+        serializer = WorklistSerializer(study_requests, many=True)
+        
+        return Response({
+            'status': 'success',
+            'date': target_date,
+            'count': len(serializer.data),
+            'data': serializer.data
+        })
+        
+    except Exception as e:
+        print(f"❌ 날짜별 워크리스트 API 에러: {e}")
+        return Response({
+            'status': 'error',
+            'message': f'데이터를 불러오는데 실패했습니다: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def worklist_by_date_specific(request, year, month, day):
+    """
+    ✅ 구체적인 날짜별 워크리스트 API (URL 충돌 방지)
+    URL: /api/worklists/2025-06-26/
+    """
+    try:
+        # 날짜 객체 생성
+        target_date_obj = date(year, month, day)
+        target_date = target_date_obj.strftime('%Y-%m-%d')
+        
+        print(f"📅 구체적 날짜별 워크리스트 요청: {target_date}")
+        
+        # ✅ 해당 날짜의 요청들 필터링
+        from django.db.models import Q
+        
+        study_requests = StudyRequest.objects.filter(
+            Q(request_datetime__date=target_date_obj) |  # 요청일이 해당 날짜
+            Q(scheduled_exam_datetime__date=target_date_obj)  # 예정 검사일이 해당 날짜
+        ).order_by('-request_datetime')
+        
+        print(f"📊 필터링된 데이터 개수: {study_requests.count()}")
+        
+        # 디버깅: 각 요청의 시간 정보 출력
+        for req in study_requests[:3]:  # 처음 3개만
+            print(f"ID: {req.id}, 요청일: {req.request_datetime}, 예정일: {req.scheduled_exam_datetime}")
+        
+        # ✅ WorklistSerializer 사용 (requestDateTime 포함)
+        serializer = WorklistSerializer(study_requests, many=True)
+        
+        return Response({
+            'status': 'success',
+            'date': target_date,
+            'count': len(serializer.data),
+            'data': serializer.data
+        })
+        
+    except ValueError as e:
+        print(f"❌ 잘못된 날짜: {year}-{month}-{day}")
+        return Response({
+            'status': 'error',
+            'message': f'잘못된 날짜입니다: {year}-{month}-{day}'
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        print(f"❌ 구체적 날짜별 워크리스트 API 에러: {e}")
+        return Response({
+            'status': 'error',
+            'message': f'데이터를 불러오는데 실패했습니다: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
