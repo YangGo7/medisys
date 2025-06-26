@@ -319,7 +319,7 @@
 // export default ScheduleTable;
 
 
-// ScheduleTable.js
+// ScheduleTable.js - 중복 검사 표시 문제 해결
 
 import React from 'react';
 import ExamCard from './ExamCard';
@@ -335,7 +335,7 @@ const ScheduleTable = ({
   onCancelExam,
   getEndTime
 }) => {
-  // 🔍 디버깅 로그 개선
+  // 🔍 디버깅 로그
   console.log('🔍 ScheduleTable 렌더링 데이터:');
   console.log('🔍 - roomSchedules:', roomSchedules);
   console.log('🔍 - roomSchedules keys:', Object.keys(roomSchedules || {}));
@@ -475,53 +475,27 @@ const ScheduleTable = ({
             const hour = 9 + i;
             const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
             
-            // 🔧 행 높이 계산 개선
+            // 🔧 행 높이 계산 - 이 시간대에 시작하는 검사만 고려
             let maxRequiredHeight = 120; // 기본 높이
             
             rooms.forEach(room => {
               const roomData = findRoomData(room);
               
               if (roomData && Array.isArray(roomData)) {
-                // 🔧 이 시간대에 겹치는 모든 검사 고려
-                const overlappingExams = roomData.filter(exam => {
+                // ✅ 이 시간대에 시작하는 검사만 필터링 (중복 방지의 핵심)
+                const examsStartingInThisHour = roomData.filter(exam => {
                   if (!exam.time) return false;
-                  
                   const examStartHour = parseInt(exam.time.split(':')[0]);
-                  const examStartMinute = parseInt(exam.time.split(':')[1]);
-                  const examDuration = exam.duration || 30; // 기본 30분
-                  
-                  // 검사 시작 시간 (분 단위)
-                  const examStartTotalMinutes = examStartHour * 60 + examStartMinute;
-                  // 검사 종료 시간 (분 단위)
-                  const examEndTotalMinutes = examStartTotalMinutes + examDuration;
-                  
-                  // 현재 시간대 (분 단위)
-                  const currentHourStart = hour * 60;
-                  const currentHourEnd = (hour + 1) * 60;
-                  
-                  // 겹치는지 확인
-                  return examStartTotalMinutes < currentHourEnd && examEndTotalMinutes > currentHourStart;
+                  return examStartHour === hour; // 정확히 이 시간대에 시작하는 검사만
                 });
                 
-                overlappingExams.forEach(exam => {
-                  const examStartHour = parseInt(exam.time.split(':')[0]);
+                examsStartingInThisHour.forEach(exam => {
                   const examStartMinute = parseInt(exam.time.split(':')[1]);
                   const examDuration = exam.duration || 30;
                   
-                  let topPosition = 0;
-                  let cardHeight = 0;
-                  
-                  if (examStartHour === hour) {
-                    // 이 시간대에 시작하는 경우
-                    const pixelsPerMinute = 120 / 60; // 2px per minute
-                    topPosition = examStartMinute * pixelsPerMinute;
-                    cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
-                  } else if (examStartHour < hour) {
-                    // 이전 시간대에 시작해서 이어지는 경우
-                    topPosition = 0;
-                    const remainingDuration = Math.min(examDuration - ((hour - examStartHour) * 60 - examStartMinute), 60);
-                    cardHeight = Math.max(remainingDuration * (120 / 60), 40);
-                  }
+                  const pixelsPerMinute = 120 / 60; // 2px per minute
+                  const topPosition = examStartMinute * pixelsPerMinute;
+                  const cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
                   
                   const requiredHeight = topPosition + cardHeight + 20; // 여백 포함
                   maxRequiredHeight = Math.max(maxRequiredHeight, requiredHeight);
@@ -553,7 +527,7 @@ const ScheduleTable = ({
                 {rooms.map(room => {
                   const roomData = findRoomData(room);
                   
-                  // 🔧 이 시간대에 표시할 검사들 찾기 (겹치는 모든 검사)
+                  // ✅ 핵심 수정: 이 시간대에 시작하는 검사만 표시 (중복 제거)
                   const examsToShow = [];
                   
                   if (roomData && Array.isArray(roomData)) {
@@ -561,30 +535,15 @@ const ScheduleTable = ({
                       if (!exam.time) return;
                       
                       const examStartHour = parseInt(exam.time.split(':')[0]);
-                      const examStartMinute = parseInt(exam.time.split(':')[1]);
-                      const examDuration = exam.duration || 30;
                       
-                      const examStartTotalMinutes = examStartHour * 60 + examStartMinute;
-                      const examEndTotalMinutes = examStartTotalMinutes + examDuration;
-                      
-                      const currentHourStart = hour * 60;
-                      const currentHourEnd = (hour + 1) * 60;
-                      
-                      if (examStartTotalMinutes < currentHourEnd && examEndTotalMinutes > currentHourStart) {
-                        let topPosition = 0;
-                        let cardHeight = 0;
+                      // ✅ 중요: 정확히 이 시간대에 시작하는 검사만 표시
+                      if (examStartHour === hour) {
+                        const examStartMinute = parseInt(exam.time.split(':')[1]);
+                        const examDuration = exam.duration || 30;
                         
-                        if (examStartHour === hour) {
-                          // 이 시간대에 시작
-                          const pixelsPerMinute = 120 / 60;
-                          topPosition = examStartMinute * pixelsPerMinute;
-                          cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
-                        } else if (examStartHour < hour) {
-                          // 이전 시간대에서 시작해서 이어짐
-                          topPosition = 0;
-                          const remainingDuration = Math.min(examDuration - ((hour - examStartHour) * 60 - examStartMinute), 60);
-                          cardHeight = Math.max(remainingDuration * (120 / 60), 40);
-                        }
+                        const pixelsPerMinute = 120 / 60;
+                        const topPosition = examStartMinute * pixelsPerMinute;
+                        const cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
                         
                         examsToShow.push({
                           ...exam,
@@ -598,7 +557,7 @@ const ScheduleTable = ({
                   // 🔍 상세 디버깅 로그
                   console.log(`🔍 검사실 ${room.id} (${room.name}), 시간 ${hour}:00`);
                   console.log(`🔍 - roomData 길이: ${roomData ? roomData.length : 0}`);
-                  console.log(`🔍 - 표시할 검사들:`, examsToShow);
+                  console.log(`🔍 - 이 시간대 시작 검사들:`, examsToShow);
 
                   return (
                     <td 

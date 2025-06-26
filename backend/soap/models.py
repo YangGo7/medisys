@@ -58,7 +58,6 @@ class SoapDiagnosis(models.Model):
         # 🔥 이 부분이 중요! managed = True (기본값)으로 설정
         managed = True  # 명시적으로 설정
         db_table = 'soap_diagnosis'
-        app_label = 'openmrs_models'  # 명시적으로 앱 지정
         ordering = ['created_date', 'soap_type', 'sequence_number']
         indexes = [
             models.Index(fields=['patient_uuid', 'encounter_uuid'], name='idx_soap_patient_encounter'),

@@ -1,7 +1,7 @@
 # openmrs_models/serializers.py - SOAP 진단 시리얼라이저
 
 from rest_framework import serializers
-from .models import SoapDiagnosis, PatientVisitHistory, DiagnosisImageMapping
+from soap.models import SoapDiagnosis, PatientVisitHistory, DiagnosisImageMapping
 from django.utils import timezone
 
 class DiagnosisImageMappingSerializer(serializers.ModelSerializer):
