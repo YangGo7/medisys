@@ -74,12 +74,22 @@ def delete_cdss_result(request, sample_id):
 
 # ✅ 검사 항목별 개별 등록 → 전체 결과 갱신 및 SHAP 생성 포함
 
+def normalize_component_name(raw_name):
+    """
+    예: 'Sample 3 - 혈액 - LFT - ALP' → 'ALP'
+    """
+    if not raw_name:
+        return None
+    parts = raw_name.strip().split(" - ")
+    # 마지막 항목을 반환 (대부분 검사 항목이 마지막)
+    return parts[-1].strip()
+
 @api_view(['POST'])
 def receive_model_result(request):
     data = request.data
     sample = data.get("sample")
     test_type = data.get("test_type")
-    component_name = data.get("component_name")
+    component_name = normalize_component_name(data.get("component_name"))  # 🔍 정제 적용
 
     # 기존 항목 수정 또는 새로 생성
     existing = CDSSResult.objects.filter(
@@ -87,6 +97,9 @@ def receive_model_result(request):
         test_type=test_type,
         component_name=component_name
     ).first()
+    
+    request_data = request.data.copy()
+    request_data["component_name"] = component_name
 
     if existing:
         serializer = CDSSResultSerializer(existing, data=request.data)
@@ -104,7 +117,9 @@ def receive_model_result(request):
             ).order_by('component_name')
 
             # 항목별 값 dictionary로 구성
-            values = {r.component_name: r.value for r in related}
+            values = {
+                normalize_component_name(r.component_name): r.value
+                for r in related}
 
             # 예측 및 SHAP 생성
             model = MODELS.get(test_type)
@@ -115,7 +130,7 @@ def receive_model_result(request):
             related.update(prediction=prediction)
 
             # ✅ LFT일 경우 LiverFunctionSample에 저장
-            if test_type == "LFT":
+            if test_type.strip().lower() == "lft":
                 lft_components = {
                     "ALT": None,
                     "AST": None,
@@ -126,6 +141,7 @@ def receive_model_result(request):
                 }
 
                 for comp in related:
+                    cname = normalize_component_name(comp.component_name)
                     if comp.component_name in lft_components:
                         lft_components[comp.component_name] = comp.value
 

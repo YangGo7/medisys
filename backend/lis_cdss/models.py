@@ -19,6 +19,8 @@ class CDSSResult(models.Model):
         db_table = "lis_cdss_cdssresult"  # 원하는 테이블 이름 지정 (실제 테이블명이 이걸로 생김)
 
 class LiverFunctionSample(models.Model):
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, null=True, blank=True)  # ✅ optional 연결
+    
     # 입력값들
     ALT = models.FloatField()
     AST = models.FloatField()
