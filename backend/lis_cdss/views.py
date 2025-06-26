@@ -210,7 +210,7 @@ def receive_model_result(request):
 
             # ✅ 기여도 계산 대체 방식
             background_df = pd.read_csv("lis_cdss/inference/lft_background.csv")
-            contribution_result = get_manual_contributions(model, value, background_df)
+            contribution_result = get_manual_contributions(model, values, background_df)
             
             response_data = CDSSResultSerializer(instance).data
             response_data['shap_data'] = contribution_result  # ← SHAP 대체

@@ -225,15 +225,15 @@ const ProfileCard = () => {
       
       <div className="profile-stats">
         <div className="stat-item">
-            <div className="stat-number">42</div>
+            <div className="stat-number">5</div>
             <div className="stat-label">금일 영상 검사</div>
         </div>
         <div className="stat-item">
-            <div className="stat-number">5/12</div>
+            <div className="stat-number">2/5</div>
             <div className="stat-label">검사현황</div>
         </div>
         <div className="stat-item">
-            <div className="stat-number">8/15</div>
+            <div className="stat-number">0/5</div>
             <div className="stat-label">레포트 현황</div>
         </div>
       </div>

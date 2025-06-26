@@ -335,14 +335,70 @@ const ScheduleTable = ({
   onCancelExam,
   getEndTime
 }) => {
-  // 🔍 디버깅 로그 추가
+  // 🔍 디버깅 로그 개선
   console.log('🔍 ScheduleTable 렌더링 데이터:');
   console.log('🔍 - roomSchedules:', roomSchedules);
+  console.log('🔍 - roomSchedules keys:', Object.keys(roomSchedules || {}));
   console.log('🔍 - rooms:', rooms);
   console.log('🔍 - radiologists:', radiologists);
 
+  // 🔧 키 매칭 함수 개선
+  const findRoomData = (room) => {
+    if (!roomSchedules) return null;
+
+    // 가능한 모든 키 형태 시도
+    const possibleKeys = [
+      room.id,                           // 원본 ID
+      String(room.id),                   // 문자열 변환
+      room.name,                         // 원본 이름
+      String(room.name),                 // 문자열 변환
+      room.name?.replace('실', ''),       // '실' 제거
+      room.name?.replace(/\D/g, ''),      // 숫자만 추출
+      `ROOM${room.id}`,                  // ROOM 접두사
+      `room${room.id}`,                  // room 접두사 (소문자)
+    ].filter(Boolean); // null/undefined 제거
+
+    console.log(`🔍 Room ${room.id} (${room.name}) 키 후보:`, possibleKeys);
+
+    for (const key of possibleKeys) {
+      if (roomSchedules[key] && Array.isArray(roomSchedules[key])) {
+        console.log(`✅ 매칭된 키: ${key}, 데이터:`, roomSchedules[key]);
+        return roomSchedules[key];
+      }
+    }
+
+    console.log(`❌ Room ${room.id}에 대한 데이터 없음`);
+    return null;
+  };
+
   return (
     <div className="schedule-table-container">
+      {/* 🔍 디버그 정보 패널 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          background: '#fffbeb',
+          border: '1px solid #f59e0b',
+          padding: '0.5rem',
+          margin: '0.5rem',
+          borderRadius: '0.25rem',
+          fontSize: '0.75rem'
+        }}>
+          <strong>🔍 디버그 정보:</strong><br/>
+          검사실 수: {rooms.length} | 
+          스케줄 키: [{Object.keys(roomSchedules || {}).join(', ')}] |
+          전체 검사 수: {Object.values(roomSchedules || {}).flat().length}
+          <details style={{ marginTop: '0.25rem' }}>
+            <summary>상세 정보</summary>
+            <pre style={{ fontSize: '0.625rem', background: '#f3f4f6', padding: '0.25rem', marginTop: '0.25rem' }}>
+              {JSON.stringify({ roomSchedules, rooms }, null, 2)}
+            </pre>
+          </details>
+        </div>
+      )}
+
       <table 
         className="schedule-table"
         style={{
@@ -419,44 +475,61 @@ const ScheduleTable = ({
             const hour = 9 + i;
             const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
             
-            // 이 시간대에 시작하는 검사들의 최대 높이 계산
-            let maxRequiredHeight = 150; // 기본 높이 150px로 증가
+            // 🔧 행 높이 계산 개선
+            let maxRequiredHeight = 120; // 기본 높이
             
             rooms.forEach(room => {
-              // 🔧 여러 가능한 키로 데이터 찾기
-              const possibleKeys = [
-                String(room.id),
-                room.id,
-                String(room.name).replace('실', ''),
-                room.name.replace('실', ''),
-              ];
+              const roomData = findRoomData(room);
               
-              let roomData = null;
-              for (const key of possibleKeys) {
-                if (roomSchedules[key]) {
-                  roomData = roomSchedules[key];
-                  break;
-                }
-              }
-              
-              const examsStartingInThisHour = roomData ? roomData.filter(exam => {
-                const examHour = parseInt(exam.time.split(':')[0]);
-                return examHour === hour; // 이 시간대에 시작하는 검사만
-              }) : [];
-              
-              examsStartingInThisHour.forEach(exam => {
-                const examMinute = parseInt(exam.time.split(':')[1]);
-                const examDuration = exam.duration;
-                const pixelsPerMinute = 150 / 60; // 2.5px per minute
+              if (roomData && Array.isArray(roomData)) {
+                // 🔧 이 시간대에 겹치는 모든 검사 고려
+                const overlappingExams = roomData.filter(exam => {
+                  if (!exam.time) return false;
+                  
+                  const examStartHour = parseInt(exam.time.split(':')[0]);
+                  const examStartMinute = parseInt(exam.time.split(':')[1]);
+                  const examDuration = exam.duration || 30; // 기본 30분
+                  
+                  // 검사 시작 시간 (분 단위)
+                  const examStartTotalMinutes = examStartHour * 60 + examStartMinute;
+                  // 검사 종료 시간 (분 단위)
+                  const examEndTotalMinutes = examStartTotalMinutes + examDuration;
+                  
+                  // 현재 시간대 (분 단위)
+                  const currentHourStart = hour * 60;
+                  const currentHourEnd = (hour + 1) * 60;
+                  
+                  // 겹치는지 확인
+                  return examStartTotalMinutes < currentHourEnd && examEndTotalMinutes > currentHourStart;
+                });
                 
-                const topPosition = examMinute * pixelsPerMinute;
-                const cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
-                const requiredHeight = topPosition + cardHeight + 16; // 패딩 증가
-                maxRequiredHeight = Math.max(maxRequiredHeight, requiredHeight);
-              });
+                overlappingExams.forEach(exam => {
+                  const examStartHour = parseInt(exam.time.split(':')[0]);
+                  const examStartMinute = parseInt(exam.time.split(':')[1]);
+                  const examDuration = exam.duration || 30;
+                  
+                  let topPosition = 0;
+                  let cardHeight = 0;
+                  
+                  if (examStartHour === hour) {
+                    // 이 시간대에 시작하는 경우
+                    const pixelsPerMinute = 120 / 60; // 2px per minute
+                    topPosition = examStartMinute * pixelsPerMinute;
+                    cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
+                  } else if (examStartHour < hour) {
+                    // 이전 시간대에 시작해서 이어지는 경우
+                    topPosition = 0;
+                    const remainingDuration = Math.min(examDuration - ((hour - examStartHour) * 60 - examStartMinute), 60);
+                    cardHeight = Math.max(remainingDuration * (120 / 60), 40);
+                  }
+                  
+                  const requiredHeight = topPosition + cardHeight + 20; // 여백 포함
+                  maxRequiredHeight = Math.max(maxRequiredHeight, requiredHeight);
+                });
+              }
             });
             
-            const rowHeight = Math.max(maxRequiredHeight, 150); // 최소 150px
+            const rowHeight = Math.max(maxRequiredHeight, 120);
             
             return (
               <tr key={timeSlot} style={{ height: `${rowHeight}px` }}>
@@ -478,49 +551,54 @@ const ScheduleTable = ({
                   {timeSlot}
                 </td>
                 {rooms.map(room => {
-                  // 🔧 여러 가능한 키로 데이터 찾기
-                  const possibleKeys = [
-                    String(room.id),        // "ROOM1", "ROOM2", "ROOM3"
-                    room.id,               // "ROOM1", "ROOM2", "ROOM3"
-                    String(room.name).replace('실', ''),  // "1", "2", "3"
-                    room.name.replace('실', ''),          // "1", "2", "3"
-                  ];
+                  const roomData = findRoomData(room);
                   
-                  let roomData = null;
-                  let matchedKey = null;
+                  // 🔧 이 시간대에 표시할 검사들 찾기 (겹치는 모든 검사)
+                  const examsToShow = [];
                   
-                  for (const key of possibleKeys) {
-                    if (roomSchedules[key] && roomSchedules[key].length > 0) {
-                      roomData = roomSchedules[key];
-                      matchedKey = key;
-                      break;
-                    }
-                  }
-                  
-                  // 🔍 키 매핑 확인
-                  console.log(`🔍 room 정보:`, room);
-                  console.log(`🔍 시도한 키들:`, possibleKeys);
-                  console.log(`🔍 매칭된 키: ${matchedKey}`);
-                  console.log(`🔍 roomSchedules 전체 키들:`, Object.keys(roomSchedules));
-                  
-                  // 이 시간대에 시작하는 검사들만 찾기
-                  const examsStartingInThisHour = roomData ? roomData.filter(exam => {
-                    const examHour = parseInt(exam.time.split(':')[0]);
-                    return examHour === hour;
-                  }) : [];
-
-                  // 🔍 상세 디버깅 로그 추가
-                  console.log(`🔍 검사실 ${room.id} (${room.name}), 시간 ${hour}:00`);
-                  console.log(`🔍 - 매칭된 키: ${matchedKey}`);
-                  console.log(`🔍 - roomData:`, roomData);
-                  console.log(`🔍 - 이 시간대 검사들:`, examsStartingInThisHour);
-                  
-                  if (roomData && roomData.length > 0) {
+                  if (roomData && Array.isArray(roomData)) {
                     roomData.forEach(exam => {
-                      const examHour = parseInt(exam.time.split(':')[0]);
-                      console.log(`🔍   - 검사: ${exam.patientName}, 시간: ${exam.time} (시간=${examHour}), ${hour}시와 매치: ${examHour === hour}`);
+                      if (!exam.time) return;
+                      
+                      const examStartHour = parseInt(exam.time.split(':')[0]);
+                      const examStartMinute = parseInt(exam.time.split(':')[1]);
+                      const examDuration = exam.duration || 30;
+                      
+                      const examStartTotalMinutes = examStartHour * 60 + examStartMinute;
+                      const examEndTotalMinutes = examStartTotalMinutes + examDuration;
+                      
+                      const currentHourStart = hour * 60;
+                      const currentHourEnd = (hour + 1) * 60;
+                      
+                      if (examStartTotalMinutes < currentHourEnd && examEndTotalMinutes > currentHourStart) {
+                        let topPosition = 0;
+                        let cardHeight = 0;
+                        
+                        if (examStartHour === hour) {
+                          // 이 시간대에 시작
+                          const pixelsPerMinute = 120 / 60;
+                          topPosition = examStartMinute * pixelsPerMinute;
+                          cardHeight = Math.max(examDuration * pixelsPerMinute, 40);
+                        } else if (examStartHour < hour) {
+                          // 이전 시간대에서 시작해서 이어짐
+                          topPosition = 0;
+                          const remainingDuration = Math.min(examDuration - ((hour - examStartHour) * 60 - examStartMinute), 60);
+                          cardHeight = Math.max(remainingDuration * (120 / 60), 40);
+                        }
+                        
+                        examsToShow.push({
+                          ...exam,
+                          topPosition,
+                          cardHeight
+                        });
+                      }
                     });
                   }
+
+                  // 🔍 상세 디버깅 로그
+                  console.log(`🔍 검사실 ${room.id} (${room.name}), 시간 ${hour}:00`);
+                  console.log(`🔍 - roomData 길이: ${roomData ? roomData.length : 0}`);
+                  console.log(`🔍 - 표시할 검사들:`, examsToShow);
 
                   return (
                     <td 
@@ -528,7 +606,7 @@ const ScheduleTable = ({
                       className="room-cell"
                       style={{ 
                         height: `${rowHeight}px`, 
-                        minHeight: '150px',
+                        minHeight: '120px',
                         padding: '0.5rem',
                         borderRight: '1px solid #e5e7eb',
                         borderBottom: '1px solid #f3f4f6',
@@ -539,39 +617,27 @@ const ScheduleTable = ({
                       onDragOver={onDragOver}
                       onDrop={() => onDrop(room.id, timeSlot)}
                     >
-                      {examsStartingInThisHour.length > 0 ? (
-                        <div className="exam-container" style={{ minHeight: '150px' }}>
-                          {examsStartingInThisHour.map((exam) => {
+                      {examsToShow.length > 0 ? (
+                        <div className="exam-container" style={{ 
+                          position: 'relative',
+                          height: '100%',
+                          minHeight: '120px' 
+                        }}>
+                          {examsToShow.map((exam, index) => {
                             const radiologist = radiologists.find(r => r.id === exam.radiologistId);
                             const endTime = getEndTime(exam.time, exam.duration);
                             
                             // 🔍 ExamCard 렌더링 로그
-                            console.log(`🔍 ExamCard 렌더링: ${exam.patientName}, 시간: ${exam.time}`);
-                            
-                            // 이 시간대 내에서의 위치 및 크기 계산 (정확한 시간 비례)
-                            const examMinute = parseInt(exam.time.split(':')[1]);
-                            const examDuration = exam.duration; // 분 단위
-                            
-                            // 시간당 150px이므로 1분당 2.5px
-                            const pixelsPerMinute = 150 / 60; // 2.5px per minute
-                            
-                            // 시작 위치: 분 단위로 정확히 계산
-                            const topPosition = examMinute * pixelsPerMinute;
-                            
-                            // 카드 높이: 실제 소요시간에 비례
-                            const cardHeight = examDuration * pixelsPerMinute;
-                            
-                            // 최소 높이 보장 (너무 작으면 안 보임)
-                            const finalCardHeight = Math.max(cardHeight, 30);
+                            console.log(`🔍 ExamCard 렌더링: ${exam.patientName}, 위치: ${exam.topPosition}px, 높이: ${exam.cardHeight}px`);
                             
                             return (
                               <ExamCard
-                                key={`${exam.examId}-${exam.time}`}
+                                key={`${exam.examId || exam.id}-${exam.time}-${index}`}
                                 exam={exam}
                                 radiologist={radiologist}
                                 endTime={endTime}
-                                topPosition={topPosition}
-                                cardHeight={finalCardHeight}
+                                topPosition={exam.topPosition}
+                                cardHeight={exam.cardHeight}
                                 onStartExam={onStartExam}
                                 onCompleteExam={onCompleteExam}
                                 onCancelExam={onCancelExam}
@@ -581,8 +647,34 @@ const ScheduleTable = ({
                           })}
                         </div>
                       ) : (
-                        <div className="drop-zone" style={{ minHeight: '150px' }}>
+                        <div className="drop-zone" style={{ 
+                          minHeight: '120px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '2px dashed #d1d5db',
+                          borderRadius: '0.25rem',
+                          color: '#9ca3af',
+                          fontSize: '0.75rem'
+                        }}>
                           <span>드롭하여 배정</span>
+                        </div>
+                      )}
+                      
+                      {/* 🔍 디버그 정보 표시 */}
+                      {process.env.NODE_ENV === 'development' && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '2px',
+                          left: '2px',
+                          background: 'rgba(0,0,0,0.7)',
+                          color: 'white',
+                          fontSize: '0.625rem',
+                          padding: '1px 3px',
+                          borderRadius: '2px',
+                          zIndex: 1000
+                        }}>
+                          {examsToShow.length}개
                         </div>
                       )}
                     </td>

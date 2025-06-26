@@ -53,7 +53,7 @@ urlpatterns = [
     path('api/schedules/', include('schedules.urls')),
     path('api/doctors/', include('doctors.urls')),
     path('api/notices/', include('notices.urls')),
-    path('api/worklists', include('worklists.urls')),
+    path('api/worklists/', include('worklists.urls')),
     path('api/health/', health_check_view, name='health_check'),
     
     # 🔧 Frontend API 호출 경로에 맞춰 수정

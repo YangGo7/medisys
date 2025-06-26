@@ -240,44 +240,44 @@
 
 // export default WorkListPanel;
 
-// WorkListPanel/index.js - 최종 완성 버전
-
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import FilterSection from './FilterSection';
 import WorkListTable from './WorkListTable';
 import { worklistService } from '../../../services/worklistService';
+import { getTodayKST } from '../../../utils/timeUtils';
 import './WorkListPanel.css';
 
 const WorkListPanel = forwardRef((props, ref) => {
-  const { onDragStart, onDateChange, selectedDate } = props; // ✅ selectedDate prop 추가
+  const { onDragStart, onDateChange, selectedDate } = props;
   
   // 상태 관리
   const [worklist, setWorklist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' }));
+  
+  // ✅ 날짜 초기값을 일관성 있게 처리
+  const getInitialDate = () => {
+    if (selectedDate) {
+      if (selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return selectedDate;
+      }
+    }
+    return getTodayKST();
+  };
+  
+  const [currentDate, setCurrentDate] = useState(getInitialDate());
   const [filters, setFilters] = useState({
     patientId: '',
     patientName: '',
     modality: '',
     examPart: '',
     requestDoctor: '',
+    reportingDoctor: '',
     examStatus: '',
     reportStatus: ''
   });
 
-  // ✅ worklistService의 parseKoreanDate 함수 사용
-  const parseKoreanDate = useCallback((koreanStr) => {
-    if (!koreanStr) return null;
-    const match = koreanStr.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\./);
-    if (match) {
-      const [, year, month, day] = match;
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    }
-    return null;
-  }, []);
-
-  // ✅ 날짜별 데이터 로딩 함수 (간단하게 수정)
+  // ✅ 간단한 데이터 로딩 함수 (시간 변환 없음)
   const loadWorklist = useCallback(async (date = null) => {
     try {
       setLoading(true);
@@ -286,38 +286,24 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
       const targetDate = date || currentDate;
       console.log('📅 워크리스트 로딩 시작 - 목표 날짜:', targetDate);
       
+      // 날짜 형식 검증
+      if (!targetDate || !targetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        throw new Error(`잘못된 날짜 형식: ${targetDate}`);
+      }
+      
       // 날짜별 API 호출
       const data = await worklistService.getWorklistByDate(targetDate);
       console.log('✅ API 성공:', data?.length || 0, '개');
+      console.log('원본 데이터:', data);
       
-      // ✅ 데이터 변환 (간단하게)
-      let transformedData = [];
+      // ✅ 데이터를 그대로 사용 (Django에서 이미 변환된 상태)
       if (Array.isArray(data)) {
-        transformedData = data.map(item => ({
-          id: item.id,
-          patientId: item.patientId || item.patient_id || '-',
-          patientName: item.patientName || item.patient_name || '-',
-          birthDate: item.birthDate || item.birth_date || '-',
-          gender: item.gender || (item.sex === 'M' ? '남' : item.sex === 'F' ? '여' : '-'),
-          examPart: item.examPart || item.body_part || '-',
-          modality: item.modality || '-',
-          requestDoctor: item.requestDoctor || item.requesting_physician || '-',
-          requestDateTime: item.requestDateTime || item.request_datetime || '-',
-          reportingDoctor: item.reportingDoctor || item.interpreting_physician || '-',
-          examDateTime: item.examDateTime || item.scheduled_exam_datetime || null,
-          examStatus: item.examStatus || item.study_status || '대기',
-          reportStatus: item.reportStatus || item.report_status || '대기',
-          priority: item.priority || '일반',
-          estimatedDuration: item.estimatedDuration || item.estimated_duration || 30,
-          notes: item.notes || '',
-          radiologistId: item.radiologistId || item.assigned_radiologist || null,
-          roomId: item.roomId || item.assigned_room || null,
-          startTime: item.startTime || null
-        }));
+        console.log('📊 최종 데이터:', data.length, '개');
+        setWorklist(data);  // 변환 없이 그대로 사용
+      } else {
+        console.warn('⚠️ 데이터가 배열이 아님:', typeof data);
+        setWorklist([]);
       }
-      
-      console.log('📊 최종 변환된 데이터:', transformedData.length, '개');
-      setWorklist(transformedData);
       
     } catch (err) {
       console.error('❌ 워크리스트 로드 실패:', err);
@@ -332,13 +318,24 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
   useEffect(() => {
     if (selectedDate && selectedDate !== currentDate) {
       console.log('📅 상위에서 날짜 변경됨:', selectedDate);
-      setCurrentDate(selectedDate);
+      if (selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        setCurrentDate(selectedDate);
+      } else {
+        console.warn('⚠️ 잘못된 날짜 형식:', selectedDate);
+      }
     }
   }, [selectedDate, currentDate]);
 
   // ✅ 날짜 변경 핸들러
   const handleDateChange = useCallback((date) => {
     console.log('📅 WorkListPanel 날짜 변경:', date);
+    
+    // 날짜 형식 검증
+    if (!date || !date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      console.warn('⚠️ 잘못된 날짜 형식, 오늘 날짜로 설정');
+      date = getTodayKST();
+    }
+    
     setCurrentDate(date);
     
     // 부모 컴포넌트에 알림
@@ -355,23 +352,42 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
     },
     setDate: (date) => handleDateChange(date),
     getCurrentDate: () => currentDate,
-    getWorklistCount: () => worklist.length
+    getWorklistCount: () => worklist.length,
+    clearData: () => {
+      console.log('🧹 워크리스트 데이터 초기화');
+      setWorklist([]);
+      setError(null);
+    }
   }), [currentDate, loadWorklist, handleDateChange, worklist.length]);
 
   // ✅ 날짜 변경시 데이터 로딩
   useEffect(() => {
+    console.log('📅 useEffect - 날짜 변경 감지:', currentDate);
     loadWorklist(currentDate);
   }, [currentDate, loadWorklist]);
 
   // ✅ 필터링된 워크리스트
   const filteredWorklist = worklist.filter(exam => {
-    return (!filters.patientId || exam.patientId?.toLowerCase().includes(filters.patientId.toLowerCase())) &&
-           (!filters.patientName || exam.patientName?.toLowerCase().includes(filters.patientName.toLowerCase())) &&
-           (!filters.modality || exam.modality === filters.modality) &&
-           (!filters.examPart || exam.examPart?.toLowerCase().includes(filters.examPart.toLowerCase())) &&
-           (!filters.requestDoctor || exam.requestDoctor?.toLowerCase().includes(filters.requestDoctor.toLowerCase())) &&
-           (!filters.examStatus || exam.examStatus === filters.examStatus) &&
-           (!filters.reportStatus || exam.reportStatus === filters.reportStatus);
+    try {
+      return (!filters.patientId || (exam.patientId && exam.patientId.toLowerCase().includes(filters.patientId.toLowerCase()))) &&
+             (!filters.patientName || (exam.patientName && exam.patientName.toLowerCase().includes(filters.patientName.toLowerCase()))) &&
+             (!filters.modality || exam.modality === filters.modality) &&
+             (!filters.examPart || (exam.examPart && exam.examPart.toLowerCase().includes(filters.examPart.toLowerCase()))) &&
+             (!filters.requestDoctor || (exam.requestDoctor && exam.requestDoctor.toLowerCase().includes(filters.requestDoctor.toLowerCase()))) &&
+             (!filters.examStatus || exam.examStatus === filters.examStatus) &&
+             (!filters.reportStatus || exam.reportStatus === filters.reportStatus);
+    } catch (filterError) {
+      console.error('❌ 필터링 오류:', filterError, exam);
+      return false;
+    }
+  });
+
+  // 디버깅 로그 추가
+  console.log('📊 현재 상태:', {
+    worklist: worklist.length,
+    filteredWorklist: filteredWorklist.length,
+    loading,
+    error
   });
 
   // 필터 변경 핸들러
@@ -392,6 +408,7 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
       modality: '',
       examPart: '',
       requestDoctor: '',
+      reportingDoctor: '',
       examStatus: '',
       reportStatus: ''
     });
@@ -471,6 +488,7 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
         filteredCount={filteredWorklist.length}
         selectedDate={currentDate}
         onDateChange={handleDateChange}
+        worklist={worklist}
       />
       
       <WorkListTable
@@ -490,12 +508,17 @@ const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLoca
           borderRadius: '0.5rem',
           fontSize: '0.75rem',
           lineHeight: '1.4',
-          maxWidth: '350px'
+          maxWidth: '350px',
+          zIndex: 1000
         }}>
           <div>📅 선택된 날짜: <strong>{currentDate}</strong></div>
           <div>📊 원본 데이터: <strong>{worklist.length}개</strong></div>
           <div>📊 필터링된 데이터: <strong>{filteredWorklist.length}개</strong></div>
           <div>🔄 로딩: {loading ? '중' : '완료'}</div>
+          {error && <div style={{color: '#fca5a5'}}>❌ 에러: {error}</div>}
+          {worklist.length > 0 && (
+            <div>✅ 첫 번째 환자: <strong>{worklist[0]?.patientName}</strong></div>
+          )}
         </div>
       )}
     </div>

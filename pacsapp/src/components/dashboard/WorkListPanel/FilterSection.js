@@ -108,7 +108,7 @@
 // E:\250619\radiology-system\frontend\src\components\dashboard\WorkListPanel\FilterSection.js
 // 날짜 변경 기능 수정 버전
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const FilterSection = ({
   filters,
@@ -116,9 +116,10 @@ const FilterSection = ({
   onClearFilters,
   filteredCount,
   selectedDate,
-  onDateChange
+  onDateChange,
+  worklist = []  // ✅ 전체 워크리스트 데이터를 props로 받기
 }) => {
-  // ✅ 날짜 변경 핸들러 (로그 추가)
+  // ✅ 날짜 변경 핸들러
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     console.log('📅 FilterSection 날짜 변경:', newDate);
@@ -130,6 +131,43 @@ const FilterSection = ({
     }
   };
 
+  // ✅ 실제 데이터에서 의사 목록 추출
+  const doctorOptions = useMemo(() => {
+    const requestDoctors = new Set();
+    const reportingDoctors = new Set();
+    const examParts = new Set();
+    const modalities = new Set();
+
+    worklist.forEach(exam => {
+      // 요청의 추출
+      if (exam.requestDoctor && exam.requestDoctor !== '-') {
+        requestDoctors.add(exam.requestDoctor);
+      }
+      
+      // 판독의 추출
+      if (exam.reportingDoctor && exam.reportingDoctor !== '-' && exam.reportingDoctor !== null) {
+        reportingDoctors.add(exam.reportingDoctor);
+      }
+      
+      // 검사부위 추출
+      if (exam.examPart && exam.examPart !== '-') {
+        examParts.add(exam.examPart);
+      }
+      
+      // 모달리티 추출
+      if (exam.modality && exam.modality !== '-') {
+        modalities.add(exam.modality);
+      }
+    });
+
+    return {
+      requestDoctors: Array.from(requestDoctors).sort(),
+      reportingDoctors: Array.from(reportingDoctors).sort(),
+      examParts: Array.from(examParts).sort(),
+      modalities: Array.from(modalities).sort()
+    };
+  }, [worklist]);
+
   // ✅ 오늘 날짜를 기본값으로
   const today = new Date().toISOString().split('T')[0];
   const currentDate = selectedDate || today;
@@ -138,7 +176,7 @@ const FilterSection = ({
     <div className="filter-section">
       <h3>검사 필터</h3>
       
-      {/* ✅ 날짜 선택 영역 (수정됨) */}
+      {/* ✅ 날짜 선택 영역 */}
       <div className="date-filter-row">
         <div className="date-picker-container">
           <span className="calendar-icon">📅</span>
@@ -174,8 +212,8 @@ const FilterSection = ({
         </button>
       </div>
       
-      {/* ✅ 필터 입력 영역 */}
-      <div className="filter-grid-top" style={{
+      {/* ✅ 첫 번째 행: 환자 정보 */}
+      <div className="filter-grid-row1" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: '0.5rem',
@@ -219,19 +257,73 @@ const FilterSection = ({
           }}
         >
           <option value="">모든 모달리티</option>
-          <option value="CR">CR (X-ray)</option>
-          <option value="CT">CT</option>
-          <option value="MR">MR (MRI)</option>
-          <option value="US">US (초음파)</option>
-          <option value="NM">NM</option>
-          <option value="PT">PT</option>
-          <option value="DX">DX</option>
-          <option value="XA">XA</option>
-          <option value="MG">MG</option>
+          {doctorOptions.modalities.map(modality => (
+            <option key={modality} value={modality}>{modality}</option>
+          ))}
         </select>
       </div>
       
-      <div className="filter-grid-bottom" style={{
+      {/* ✅ 두 번째 행: 검사 부위 + 의사 정보 (드롭다운) */}
+      <div className="filter-grid-row2" style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: '0.5rem',
+        marginBottom: '0.5rem'
+      }}>
+        <select
+          value={filters.examPart}
+          onChange={(e) => onFilterChange('examPart', e.target.value)}
+          className="filter-select"
+          style={{
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          <option value="">모든 검사 부위</option>
+          {doctorOptions.examParts.map(part => (
+            <option key={part} value={part}>{part}</option>
+          ))}
+        </select>
+        
+        <select
+          value={filters.requestDoctor}
+          onChange={(e) => onFilterChange('requestDoctor', e.target.value)}
+          className="filter-select"
+          style={{
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          <option value="">모든 요청의</option>
+          {doctorOptions.requestDoctors.map(doctor => (
+            <option key={doctor} value={doctor}>{doctor}</option>
+          ))}
+        </select>
+        
+        <select
+          value={filters.reportingDoctor}
+          onChange={(e) => onFilterChange('reportingDoctor', e.target.value)}
+          className="filter-select"
+          style={{
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          <option value="">모든 판독의</option>
+          {doctorOptions.reportingDoctors.map(doctor => (
+            <option key={doctor} value={doctor}>{doctor}</option>
+          ))}
+        </select>
+      </div>
+      
+      {/* ✅ 세 번째 행: 상태 정보 */}
+      <div className="filter-grid-row3" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: '0.5rem',
@@ -287,6 +379,15 @@ const FilterSection = ({
           <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>
             (📅 {selectedDate})
           </span>
+        )}
+        
+        {/* ✅ 개발용 디버그 정보 */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
+            요청의: {doctorOptions.requestDoctors.length}명 | 
+            판독의: {doctorOptions.reportingDoctors.length}명 | 
+            검사부위: {doctorOptions.examParts.length}개
+          </div>
         )}
       </div>
     </div>

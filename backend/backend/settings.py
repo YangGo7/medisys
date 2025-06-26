@@ -180,37 +180,28 @@ REST_FRAMEWORK = {
 ########################################
 # CORS 설정
 ########################################
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41:3000",
-    "http://0.0.0.0:3000",
-    "http://35.225.63.41:8000",
-    "http://127.0.0.1:3000",
-    "http://35.225.63.41:3020",
-    "http://localhost:3020",
-    "http://127.0.0.1:3020",
-
+    "http://35.225.63.41",
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept', 'accept-encoding', 'authorization', 'content-type', 'dnt', 'origin',
     'user-agent', 'x-csrftoken', 'x-requested-with',
 ]
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
-
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
+      "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41:3000",
-    "http://35.225.63.41:8000",
-    'http://localhost', 
-    'http://127.0.0.1',
-    'http://35.225.63.41',
-    "http://35.225.63.41:3020",
-    "http://localhost:3020",
+    "http://35.225.63.41",
+      "http://localhost:3020",
     "http://127.0.0.1:3020",
+      "http://localhost:8000",
+    "http://127.0.0.1:8000",
+
 ]
 
 ########################################
