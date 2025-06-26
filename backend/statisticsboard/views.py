@@ -10,7 +10,7 @@ import logging
 
 # 기존 모델들 import
 from openmrs_models.models import Patient, Person, Encounter, PersonName
-from openmrs_models.obs_models import Obs, Concept
+from openmrs_models.obs_models import Obs, ObsManager
 from worklist.models import StudyRequest
 from orders_emr.models import Order
 

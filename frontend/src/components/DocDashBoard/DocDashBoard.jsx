@@ -48,7 +48,9 @@ const DocDashBoard = () => {
   const [allSearchError, setAllSearchError] = useState(null);
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
   const [assignedPatients, setAssignedPatients] = useState({});
-
+  const [personUUID, setPersonUUID] = useState(null);
+  const [uuidLoading, setUuidLoading] = useState(false);
+  const [uuidError, setUuidError] = useState(null);
   // 🔥 드롭다운 상태 관리
   const [dropdownStates, setDropdownStates] = useState({
     consultation: false, // 진단 결과 및 전문 내용
@@ -185,6 +187,7 @@ const DocDashBoard = () => {
     }
   }, [searchTerm, searchMode]);
 
+
   // 🔥 접을 수 있는 환자 카드 컴포넌트
   const CollapsiblePatientCard = ({ 
     patient, 
@@ -228,6 +231,44 @@ const DocDashBoard = () => {
     };
 
     const { status, label } = getPatientStatus();
+
+
+
+
+    // 👇 2. 환자 선택 시 UUID 조회
+    useEffect(() => {
+      const fetchPersonUUID = async () => {
+        if (!selectedPatient || !selectedPatient.patient_identifier) {
+          setPersonUUID(null);
+          return;
+        }
+
+        setUuidLoading(true);
+        setUuidError(null);
+
+        try {
+          const res = await axios.get(
+            `${API_BASE}patient-uuid-by-identifier/${selectedPatient.patient_identifier}/`
+          );
+
+          if (res.data.success) {
+            setPersonUUID(res.data.person_uuid);
+          } else {
+            setUuidError(res.data.error || 'UUID 조회 실패');
+            setPersonUUID(null);
+          }
+        } catch (err) {
+          console.error('UUID 조회 실패:', err);
+          setUuidError('서버와의 통신에 실패했습니다.');
+          setPersonUUID(null);
+        } finally {
+          setUuidLoading(false);
+        }
+      };
+
+      fetchPersonUUID();
+    }, [selectedPatient]);
+
 
     return (
       <div className={`collapsible-patient-card ${isSelected ? 'selected' : ''} ${!isExpanded ? 'collapsed' : ''}`}>
@@ -635,11 +676,18 @@ const DocDashBoard = () => {
             </div>
             <div className="control-content">
               {selectedPatient ? (
-                <LisRequestPanel 
-                  patient={selectedPatient} 
-                  doctorId={DEFAULT_DOCTOR_ID}
-                  compact={true}
-                />
+                uuidLoading ? (
+                  <div style={{ color: 'gray' }}>UUID 조회 중...</div>
+                ) : uuidError ? (
+                  <div style={{ color: 'red' }}>⚠️ {uuidError}</div>
+                ) : (
+                  <LisRequestPanel
+                    patient={selectedPatient}
+                    doctorId={DEFAULT_DOCTOR_ID}
+                    personUuid={personUUID} // 👈 넘길 수 있다면 이렇게
+                    compact={true}
+                  />
+                )
               ) : (
                 <div style={{ color: 'var(--text-gray)', fontSize: '0.85rem' }}>
                   환자 선택 후<br />이용 가능

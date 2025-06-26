@@ -1,16 +1,39 @@
+// E:\250619\radiology-system\frontend\src\components\dashboard\WorkListPanel\FilterSection.js
+
 import React from 'react';
 
 const FilterSection = ({
   filters,
   onFilterChange,
   onClearFilters,
-  filteredCount
+  filteredCount,
+  selectedDate,      // 🆕 추가
+  onDateChange      // 🆕 추가
 }) => {
+  // 오늘 날짜를 기본값으로
+  const today = new Date().toISOString().split('T')[0];
+
   return (
     <div className="filter-section">
-      <div className="filter-header">
-        <h2>검색 필터</h2>
-        <button onClick={onClearFilters} className="clear-filters-btn">
+      <h3>검사 필터</h3>
+      
+      {/* 🆕 날짜 선택 영역 */}
+      <div className="date-filter-row">
+        <div className="date-picker-container">
+          <span className="calendar-icon">📅</span>
+          <input
+            type="date"
+            value={selectedDate || today}
+            onChange={(e) => onDateChange(e.target.value)}
+            className="date-input"
+          />
+          <span className="date-label">검사 필터</span>
+        </div>
+        
+        <button 
+          onClick={onClearFilters}
+          className="clear-filters-btn"
+        >
           필터 초기화
         </button>
       </div>

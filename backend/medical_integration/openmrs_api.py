@@ -4,28 +4,45 @@ import logging
 import os
 from datetime import datetime, timezone
 from django.conf import settings
+from base64 import b64encode
 
 logger = logging.getLogger(__name__)
 
 class OpenMRSAPI:
     def __init__(self):
-        """🔥 환경변수 우선 사용 - settings 의존성 제거"""
-        # 환경변수에서 직접 로드 (settings.py 문제 회피)
+        """🔥 URL 파싱 문제 완전 해결"""
+        # 환경변수에서 안전하게 로드
         self.api_host = os.getenv('OPENMRS_API_HOST', '127.0.0.1')
-        self.api_port = os.getenv('OPENMRS_API_PORT', '8082')
+        self.api_port = os.getenv('OPENMRS_API_PORT', '8082') 
         self.username = os.getenv('OPENMRS_API_USER', 'admin')
         self.password = os.getenv('OPENMRS_API_PASSWORD', 'Admin123')
         
-        # Base URL 구성
-        self.api_url = f"http://{self.api_host}:{self.api_port}/openmrs/ws/rest/v1"
+        # 🔥 URL 구성 - 이중 http 문제 해결
+        # host에 http://가 포함되어 있으면 제거
+        clean_host = self.api_host.replace('http://', '').replace('https://', '')
+        
+        # 올바른 URL 구성
+        self.base_url = f"http://{clean_host}:{self.api_port}"
+        self.api_url = f"{self.base_url}/openmrs/ws/rest/v1"
+        
+        # 인증 설정
         self.auth = (self.username, self.password)
+        self.auth_header = b64encode(f"{self.username}:{self.password}".encode()).decode()
         
-        logger.info(f"🏥 OpenMRS API 초기화: {self.api_url}")
-        logger.info(f"👤 인증 사용자: {self.username}")
+        # 기본 헤더
+        self.headers = {
+            'Authorization': f'Basic {self.auth_header}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
         
-        self._identifier_types = None
-        self._locations = None
-        self._session_checked = False
+        logger.info(f"🏥 OpenMRS API 초기화 완료")
+        logger.info(f"🌐 Base URL: {self.base_url}")
+        logger.info(f"🔗 API URL: {self.api_url}")
+        logger.info(f"👤 사용자: {self.username}")
+        
+        # 연결 테스트
+        self.test_connection()
     
     
     def generate_unique_identifier(self):

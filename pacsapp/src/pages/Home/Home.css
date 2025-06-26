@@ -1,13 +1,13 @@
 .home-container {
   display: grid;
-  grid-template-columns: 400px 1fr 400px;
-  grid-template-rows: 450px 1fr; 
+  grid-template-columns: 360px 1fr 440px;
+  grid-template-rows: 350px auto; 
   grid-template-areas: 
     "profile notices calendar"
     "profile bottom calendar";
   gap: 1rem;
-  height: 100%;
-  min-height: calc(100vh - 140px);
+  height: auto;
+  min-height: unset;
 }
 
 .profile-section {
@@ -61,6 +61,7 @@
   display: grid;
   grid-template-columns: 4fr 6fr; 
   gap: 1rem;
+  height: 460px;
 }
 
 .carousel-section {

@@ -3277,3 +3277,29 @@ def get_completed_patients_today(request):
             'success': False,
             'error': f'서버 오류: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@api_view(['POST'])
+def receive_cdss_result(request):
+    try:
+        data = request.data
+        patient_id = data.get('patient_id')
+        prediction = data.get('prediction')
+        panel = data.get('panel')
+        results = data.get('results', {})
+
+        logger.info(f"📥 CDSS 결과 수신: patient_id={patient_id}, panel={panel}, prediction={prediction}")
+
+        mapping = PatientMapping.objects.filter(patient_identifier=patient_id, is_active=True).first()
+        if not mapping:
+            return Response({'error': '환자 정보가 없습니다.'}, status=404)
+
+        # 예시 처리: 진료 상태 업데이트
+        mapping.status = 'in_progress' if prediction == 'abnormal' else 'waiting'
+        mapping.last_sync = timezone.now()
+        mapping.save(update_fields=['status', 'last_sync'])
+
+        return Response({'message': 'CDSS 결과가 성공적으로 반영되었습니다.'}, status=200)
+
+    except Exception as e:
+        logger.error(f"❌ CDSS 결과 수신 실패: {e}")
+        return Response({'error': str(e)}, status=500)
