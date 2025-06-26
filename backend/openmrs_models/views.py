@@ -14,7 +14,6 @@ import os
 from medical_integration.openmrs_api import OpenMRSAPI
 logger = logging.getLogger(__name__)
 
-encounter_datetime = timezone.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0900'
 
 def get_clean_openmrs_config():
     """OpenMRS 설정"""
