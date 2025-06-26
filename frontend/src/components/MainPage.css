@@ -1,4 +1,4 @@
-/* MainPage.css - 사이드바 완전 좌측 고정 + 메인 콘텐츠 자동 조절 */
+/* MainPage.css - 사이드바 레이아웃 수정 버전 */
 
 .main-container {
   min-height: 100vh;
@@ -19,11 +19,10 @@
   backdrop-filter: blur(20px);
   border-right: 1px solid rgba(230, 230, 228, 0.8);
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 1000;
-  transform: translateX(0); /* 기본 상태에서 보임 */
 }
 
 /* 사이드바 열림 상태 */
@@ -170,24 +169,29 @@
   transform: translateX(4px) !important;
 }
 
-/* 메인 패널 - 사이드바 상태에 따라 자동 조절 */
+/* 메인 패널 - 핵심 수정 부분 */
 .main-panel {
   min-height: 100vh;
   background: transparent;
   flex: 1;
-  width: calc(100% - 220px); /* optional fallback */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: visible; /* hidden에서 visible로 변경 */
-  overflow-x: auto;
+  /* 기본적으로 사이드바가 열려있다고 가정하고 margin 설정 */
   margin-left: 220px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: visible;
+  overflow-x: auto;
+  width: calc(100% - 220px); /* 사이드바 열림 상태에서의 너비 */
 }
 
+/* 사이드바가 열려있을 때 */
 .main-panel.with-sidebar {
   margin-left: 220px;
+  width: calc(100% - 220px);
 }
 
+/* 사이드바가 닫혀있을 때 */
 .main-panel.full-width {
   margin-left: 0;
+  width: 100%;
 }
 
 /* 플로팅 토글 버튼 - 사이드바가 닫혔을 때만 표시 */
@@ -210,6 +214,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 기본적으로 숨김 - 사이드바가 닫혔을 때만 표시 */
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 사이드바가 닫혔을 때 플로팅 버튼 표시 */
+.sidebar.closed + .main-panel .sidebar-toggle-floating,
+.main-panel.full-width .sidebar-toggle-floating {
+  opacity: 1;
+  pointer-events: all;
 }
 
 .sidebar-toggle-floating:hover {
@@ -220,7 +234,6 @@
 
 /* 탭 콘텐츠 */
 .tab-content {
-  /*min-height: 100vh;*/
   width: 100%;
   display: block;
   min-width: 0;
@@ -297,22 +310,36 @@
   background: rgba(52, 152, 219, 0.5);
 }
 
-/* 반응형 디자인 */
+/* 반응형 디자인 - 핵심 수정 부분 */
 @media (max-width: 1024px) {
-  .sidebar.closed {
+  /* 태블릿에서는 기본적으로 사이드바 숨김 */
+  .sidebar {
     transform: translateX(-220px);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
   }
   
   .main-panel {
     margin-left: 0;
+    width: 100%;
   }
   
   .main-panel.with-sidebar {
     margin-left: 0;
+    width: 100%;
   }
   
   .main-panel.full-width {
     margin-left: 0;
+    width: 100%;
+  }
+  
+  /* 플로팅 버튼 항상 표시 */
+  .sidebar-toggle-floating {
+    opacity: 1;
+    pointer-events: all;
   }
 }
 
@@ -339,10 +366,12 @@
   
   .main-panel {
     margin-left: 0;
+    width: 100%;
   }
   
   .main-panel.with-sidebar {
     margin-left: 0;
+    width: 100%;
   }
 }
 

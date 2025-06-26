@@ -83,6 +83,9 @@ urlpatterns = [
     path('identifier-waiting/', identifier_based_waiting_list, name='identifier_based_waiting'),           # 기존 버전
     path('reception-list/', reception_list_view, name='reception_list'),
     path('identifier-based/', create_identifier_based_mapping, name='create_identifier_based_mapping'),
+    path('reception/active-list/', views.get_active_waiting_list, name='get_active_waiting_list'),
+    path('reception/cancel-waiting/<int:mapping_id>/', views.cancel_waiting_registration, name='cancel_waiting_registration'),
+    
     
     # 🔥 대기 통계 및 완료 환자 관리
     path('waiting-statistics/', get_waiting_statistics, name='waiting_statistics'),                      # 🔥 대기 현황 통계

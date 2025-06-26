@@ -1,7 +1,5 @@
-# pacsdocs/apps.py
-
+# /home/medical_system/backend/pacsdocs/apps.py
 from django.apps import AppConfig
-
 
 class PacsdocsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -11,7 +9,7 @@ class PacsdocsConfig(AppConfig):
     def ready(self):
         """앱이 준비되면 시그널 등록"""
         try:
-            # 시그널 import (앱 로딩 시점에 등록됨)
-            import pacsdocs.signals
-        except ImportError:
-            pass
+            import pacsdocs.signals  # ✅ 이 줄이 중요!
+            print("✅ PACS Docs signals registered successfully")
+        except ImportError as e:
+            print(f"❌ Failed to import pacsdocs.signals: {e}")
