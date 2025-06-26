@@ -1,7 +1,7 @@
 .home-container {
   display: grid;
   grid-template-columns: 360px 1fr 440px;
-  grid-template-rows: 350px auto; 
+  grid-template-rows: 440px auto; 
   grid-template-areas: 
     "profile notices calendar"
     "profile bottom calendar";

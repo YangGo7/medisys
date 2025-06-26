@@ -1,6 +1,9 @@
+// components/home/CalendarSection/index.js - 시간 표시 수정
+
 import React, { useState, useEffect } from 'react';
 import { useDoctor } from '../../../contexts/DoctorContext';
 import { scheduleService } from '../../../services/scheduleService';
+import { formatServerTimeToKST, extractTimeFromDateTime } from '../../../utils/timeUtils'; // 🔧 추가
 import './CalendarSection.css';
 
 const CalendarSection = () => {
@@ -32,7 +35,6 @@ const CalendarSection = () => {
       
       console.log('📅 Loading month schedules for:', year, month);
       
-      // Context 함수가 없으면 직접 서비스 호출
       let summary;
       if (getMonthSchedulesSummary) {
         summary = await getMonthSchedulesSummary(year, month);
@@ -61,7 +63,6 @@ const CalendarSection = () => {
       
       console.log('🗓️ Clicked date:', dateString);
       
-      // Context 함수가 없으면 직접 서비스 호출
       let schedules;
       if (getSchedulesByDate) {
         schedules = await getSchedulesByDate(dateString);
@@ -186,6 +187,22 @@ const CalendarSection = () => {
       case 'personal': return '개인';
       default: return '';
     }
+  };
+
+  // 🔧 시간 표시 함수 개선
+  const getDisplayTime = (schedule) => {
+    // 1. time_display가 있으면 우선 사용
+    if (schedule.time_display) {
+      return schedule.time_display;
+    }
+    
+    // 2. datetime이 있으면 KST로 변환하여 시간만 추출
+    if (schedule.datetime) {
+      return extractTimeFromDateTime(schedule.datetime);
+    }
+    
+    // 3. 둘 다 없으면 기본값
+    return '시간 미정';
   };
 
   // 개인일정 수정
@@ -315,15 +332,7 @@ const CalendarSection = () => {
                     <div className="schedule-date-time">
                       <div className="schedule-type-badge">{getScheduleTypeText(schedule.type)}</div>
                       <div className="schedule-time">
-                        {schedule.time_display || (
-                          schedule.datetime
-                            ? new Date(schedule.datetime).toLocaleTimeString('ko-KR', {
-                              timeZone: 'Asia/Seoul',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : '시간 미정'
-                        )}
+                        {getDisplayTime(schedule)} {/* 🔧 개선된 시간 표시 함수 사용 */}
                       </div>
                     </div>
                     <div className="schedule-details">
@@ -365,6 +374,27 @@ const CalendarSection = () => {
           )}
         </div>
       </div>
+      
+      {/* 🔧 개발 모드에서 시간 디버깅 정보 표시 */}
+      {process.env.NODE_ENV === 'development' && selectedDateSchedules && (
+        <div style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(0,0,0,0.8)',
+          color: 'white',
+          padding: '0.5rem',
+          borderRadius: '0.25rem',
+          fontSize: '0.75rem',
+          maxWidth: '300px',
+          zIndex: 1000
+        }}>
+          <div>시간대 디버깅:</div>
+          <div>브라우저 시간대: {Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
+          <div>현재 KST: {new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</div>
+          <div>일정 수: {getCurrentSchedules().length}</div>
+        </div>
+      )}
     </div>
   );
 };

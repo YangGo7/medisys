@@ -415,7 +415,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import WorkListPanel from '../../components/dashboard/WorkListPanel';
 import SchedulePanel from '../../components/dashboard/SchedulePanel';
 import AssignmentModal from '../../components/dashboard/AssignmentModal';
-import { getDefaultDuration } from '../../utils/timeUtils';
+import { getTodayKST } from '../../utils/timeUtils';
 import { roomService } from '../../services/roomService';
 import { doctorService } from '../../services/doctorService';
 import { worklistService } from '../../services/worklistService';
@@ -717,7 +717,7 @@ const Dashboard = () => {
       setModalData(data);
       setSelectedRadiologist('');
       setSelectedTime(data.timeSlot);
-      setEstimatedDuration(getDefaultDuration(data.exam.modality).toString());
+      setEstimatedDuration(getTodayKST(data.exam.modality).toString());
       setShowAssignmentModal(true);
     }
   }, []);

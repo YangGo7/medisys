@@ -42,7 +42,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  min-height: 120px;
+  min-height: 50px !important;
   user-select: none;
 }
 
