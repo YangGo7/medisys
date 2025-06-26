@@ -185,7 +185,7 @@ function LoginPage() {
 
       <div className="medisys-footer">
         <p className="medisys-footer-text">
-          © 2025 메디시스. 모든 권리 보유. | 개인정보처리방침 | 이용약관
+          © 2025 LaCID. 모든 권리 보유. | 개인정보처리방침 | 이용약관
         </p>
       </div>
     </div>

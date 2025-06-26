@@ -319,11 +319,16 @@ const ProfileCard = () => {
 // 🆕 간단한 일정 모달 컴포넌트
 const ScheduleModal = ({ isOpen, onClose, editingSchedule, onSave }) => {
   const [formData, setFormData] = useState({
-    title: editingSchedule?.title || '',
-    datetime: editingSchedule?.datetime ? new Date(editingSchedule.datetime).toISOString().slice(0, 16) : '',
-    end_datetime: editingSchedule?.end_datetime ? new Date(editingSchedule.end_datetime).toISOString().slice(0, 16) : '',
-    description: editingSchedule?.description || ''
-  });
+  title: editingSchedule?.title || '',
+  datetime: editingSchedule?.datetime
+    ? editingSchedule.datetime.slice(0, 16) // ✅ 그냥 자르기만
+    : '',
+  end_datetime: editingSchedule?.end_datetime
+    ? editingSchedule.end_datetime.slice(0, 16)
+    : '',
+  description: editingSchedule?.description || ''
+});
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

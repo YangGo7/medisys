@@ -377,8 +377,8 @@
 //   console.log('🔧 사용법: window.scheduleService.debugCurrentTime()');
 // }
 
-
 import axios from 'axios';
+import { getTodayKST } from '../utils/timeUtils';
 
 const API_BASE_URL = 'http://35.225.63.41:8000/api';
 
@@ -403,6 +403,9 @@ api.interceptors.response.use(
 );
 
 export const scheduleService = {
+  // ✅ timeUtils의 getTodayKST 함수 사용
+  getTodayKST,
+
   // 전체 일정 조회
   getCommonSchedules: async () => {
     try {
@@ -565,7 +568,7 @@ export const scheduleService = {
   getTodaySchedules: async () => {
     try {
       console.log('Getting today schedules');
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayKST(); // timeUtils 함수 사용
       return await scheduleService.getSchedulesByDate(today);
     } catch (error) {
       console.error('Error getting today schedules:', error);
@@ -597,7 +600,7 @@ export const scheduleService = {
       
       // 에러 시 빈 데이터 반환
       return {
-        date: date || new Date().toISOString().split('T')[0],
+        date: date || getTodayKST(),
         room_schedules: {},
         total_count: 0
       };
@@ -619,7 +622,7 @@ export const scheduleService = {
       
       // 에러 시 빈 데이터 반환
       return {
-        date: date || new Date().toISOString().split('T')[0],
+        date: date || getTodayKST(),
         room_statistics: []
       };
     }
@@ -647,3 +650,9 @@ export const scheduleService = {
     }
   }
 };
+
+// ✅ 개발환경에서 전역 노출 (추가됨)
+if (process.env.NODE_ENV === 'development') {
+  window.scheduleService = scheduleService;
+  console.log('🔧 scheduleService가 window.scheduleService로 노출됨');
+}

@@ -24,6 +24,13 @@
   gap: 0.5rem;
 }
 
+.section-header {
+  font-size: 20px;        /* 더 큰 글씨 */
+  font-weight: bold;
+  margin-top: 15px;    /* 위쪽 여백도 추가 */      
+  margin-bottom: 5px;    /* 아래쪽 여백도 추가 */
+}
+
 .hospital-icon {
   font-size: 1.4rem;
 }
@@ -56,6 +63,10 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   overflow: hidden;
   border-left: 1px solid #e2e8f0;
+  padding-top: 50px;
+  text-align: center;        /* 수평 가운데 정렬 */
+  display: flex;             /* flexbox 사용 */
+  justify-content: center;   /* 수평 가운데 정렬 (flexbox) */
 }
 
 .resize-handle {

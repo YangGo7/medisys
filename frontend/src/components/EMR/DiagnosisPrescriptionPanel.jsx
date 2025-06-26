@@ -18,12 +18,11 @@ import {
 } from 'lucide-react';
 
 const DiagnosisPrescriptionPanel = ({ 
-  patientUuid, 
-  encounterUuid, 
-  doctorUuid,
-  onSave,
+  patient, // 🔥 patient 객체로 변경 (기존 patientUuid, encounterUuid, doctorUuid 대신)
+  onSaveSuccess, // 🔥 저장 성공 콜백 (onSave에서 변경)
   initialData = null 
 }) => {
+  const API_BASE = 'http://35.225.63.41:8000';
   const [activeTab, setActiveTab] = useState('S');
   const [soapData, setSoapData] = useState({
     S: [], // Subjective
@@ -32,6 +31,11 @@ const DiagnosisPrescriptionPanel = ({
     P: []  // Plan
   });
   
+  // 🔥 환자 정보 추출
+  const patientUuid = patient?.person?.uuid || patient?.uuid || patient?.openmrs_patient_uuid;
+  const patientName = patient?.name || patient?.display || patient?.patient_name;
+  const doctorUuid = 'admin'; // 실제로는 로그인한 의사 UUID
+
   // currentEntry를 activeTab에 따라 초기화하되, 불필요한 렌더링 방지
   const getInitialEntry = useCallback((soapType) => ({
     soap_type: soapType,
@@ -74,7 +78,7 @@ const DiagnosisPrescriptionPanel = ({
     const newTimeout = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`/api/openmrs/icd10-search/?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`${API_BASE}/api/openmrs/icd10-search/?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         setIcd10Results(data.results || []);
         setShowIcd10Search(true);
@@ -132,17 +136,25 @@ const DiagnosisPrescriptionPanel = ({
     }));
   }, []);
 
-  // 전체 저장 (최적화)
+  // 🔥 핵심: Encounter 생성 + SOAP 진단 저장 (통합 버전)
   const handleSave = useCallback(async () => {
+    if (!patientUuid) {
+      alert('환자 정보가 없습니다.');
+      return;
+    }
+
+    // 모든 SOAP 데이터 수집
     const allEntries = [];
     Object.keys(soapData).forEach(soapType => {
       soapData[soapType].forEach(entry => {
         allEntries.push({
-          ...entry,
-          patient_uuid: patientUuid,
-          encounter_uuid: encounterUuid,
-          doctor_uuid: doctorUuid,
-          soap_type: soapType
+          soap_type: soapType,
+          content: entry.content,
+          clinical_notes: entry.clinical_notes || '',
+          icd10_code: entry.icd10_code || '',
+          icd10_name: entry.icd10_name || '',
+          diagnosis_type: entry.diagnosis_type || 'PRIMARY',
+          sequence_number: entry.sequence_number || 1
         });
       });
     });
@@ -152,30 +164,72 @@ const DiagnosisPrescriptionPanel = ({
       return;
     }
 
+    // 🔥 새로운 데이터 구조: Encounter + SOAP 진단들
+    const requestData = {
+      patient_uuid: patientUuid,
+      doctor_uuid: doctorUuid,
+      soap_diagnoses: allEntries
+    };
+
+    console.log('📝 저장할 데이터:', requestData);
+
     setIsSaving(true);
     try {
-      const response = await fetch('/api/openmrs/soap-diagnoses/bulk_create/', {
+      const response = await fetch(`${API_BASE}/api/openmrs/soap-diagnoses/bulk_create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(allEntries)
+        body: JSON.stringify(requestData)
       });
+      console.log('📡 호출 URL:', `${API_BASE}/api/openmrs/soap-diagnoses/bulk_create/`);
+      console.log('응답 상태:', response.status, response.statusText);
 
-      if (response.ok) {
-        const result = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('응답 에러:', errorText);
+        
+        if (errorText.includes('<!DOCTYPE')) {
+          throw new Error(`서버 에러 (${response.status}): API 엔드포인트를 찾을 수 없습니다.`);
+        }
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.message || `서버 에러 (${response.status})`);
+        } catch (parseError) {
+          throw new Error(`서버 에러 (${response.status}): ${errorText}`);
+        }
+      }
+
+      const result = await response.json();
+      console.log('저장 성공:', result);
+
+      if (result.status === 'success') {
+        // 🔥 성공 메시지에 Encounter 정보 포함
+        alert(`저장 완료!\n- Encounter UUID: ${result.encounter_uuid}\n- SOAP 진단: ${result.summary.created_count}개 저장`);
+        
+        // 에러가 있다면 표시
+        if (result.summary.error_count > 0) {
+          console.warn('일부 항목 저장 실패:', result.errors);
+          alert(`주의: ${result.summary.error_count}개 항목 저장 실패`);
+        }
         
         // 성공 시 폼 초기화
         setSoapData({S: [], O: [], A: [], P: []});
         setCurrentEntry(getInitialEntry(activeTab));
         
-        // 콜백 호출
-        onSave?.(result);
+        // 🔥 콜백 호출 (내원이력 새로고침용)
+        if (onSaveSuccess) {
+          onSaveSuccess({
+            encounter_uuid: result.encounter_uuid,
+            created_count: result.summary.created_count,
+            patient_uuid: patientUuid
+          });
+        }
         
-        alert(`${result.created_count}개의 진단 정보가 저장되었습니다.`);
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '저장 실패');
+        throw new Error(result.message || '저장에 실패했습니다.');
       }
     } catch (error) {
       console.error('저장 실패:', error);
@@ -183,14 +237,15 @@ const DiagnosisPrescriptionPanel = ({
     } finally {
       setIsSaving(false);
     }
-  }, [soapData, patientUuid, encounterUuid, doctorUuid, onSave, getInitialEntry, activeTab]);
+  }, [soapData, patientUuid, doctorUuid, onSaveSuccess, getInitialEntry, activeTab]);
 
   // ICD-10 선택 (최적화)
   const selectIcd10 = useCallback((icd10) => {
     setCurrentEntry(prev => ({
       ...prev,
       icd10_code: icd10.code,
-      icd10_name: icd10.name
+      icd10_name: icd10.name,
+      content: prev.content || icd10.name // 🔥 진단명도 content에 자동 입력
     }));
     setShowIcd10Search(false);
     setIcd10Results([]);
@@ -249,6 +304,36 @@ const DiagnosisPrescriptionPanel = ({
     }
   }, [activeTab]);
 
+  // 🔥 환자 정보가 없는 경우
+  if (!patient || !patientUuid) {
+    return (
+      <div className="diagnosis-prescription-panel">
+        <style jsx>{`
+          .diagnosis-prescription-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 2rem;
+            text-align: center;
+          }
+          .error-message {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #dc2626;
+            font-weight: 500;
+          }
+        `}</style>
+        <div className="error-message">
+          <AlertCircle size={20} />
+          환자가 선택되지 않았습니다.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="diagnosis-prescription-panel">
       <style jsx>{`
@@ -278,6 +363,19 @@ const DiagnosisPrescriptionPanel = ({
         .panel-subtitle {
           opacity: 0.9;
           font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .patient-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+          padding: 0.5rem;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
         }
 
         .soap-tabs {
@@ -468,13 +566,18 @@ const DiagnosisPrescriptionPanel = ({
           font-size: 0.9rem;
         }
 
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
         .btn-primary {
           background: #3b82f6;
           color: white;
           border: none;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
           background: #2563eb;
         }
 
@@ -484,7 +587,7 @@ const DiagnosisPrescriptionPanel = ({
           border: none;
         }
 
-        .btn-success:hover {
+        .btn-success:hover:not(:disabled) {
           background: #059669;
         }
 
@@ -494,7 +597,7 @@ const DiagnosisPrescriptionPanel = ({
           border: none;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
           background: #4b5563;
         }
 
@@ -509,6 +612,7 @@ const DiagnosisPrescriptionPanel = ({
           padding: 1rem;
           position: relative;
           transition: all 0.2s;
+          margin-bottom: 1rem;
         }
 
         .soap-entry:hover {
@@ -517,7 +621,7 @@ const DiagnosisPrescriptionPanel = ({
 
         .entry-header {
           display: flex;
-          justify-content: between;
+          justify-content: space-between;
           align-items: center;
           margin-bottom: 0.75rem;
         }
@@ -591,6 +695,18 @@ const DiagnosisPrescriptionPanel = ({
           margin: 0 auto 1rem;
           color: #d1d5db;
         }
+
+        .save-section {
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+        }
+
+        .btn-large {
+          padding: 1rem 2rem;
+          font-size: 1rem;
+        }
       `}</style>
 
       {/* 헤더 */}
@@ -601,6 +717,13 @@ const DiagnosisPrescriptionPanel = ({
         </div>
         <div className="panel-subtitle">
           체계적인 진단 정보 작성 및 관리
+        </div>
+        <div className="patient-info">
+          <User size={16} />
+          <span>
+            {patientName} 
+            <small> ({patientUuid.slice(0, 8)}...)</small>
+          </span>
         </div>
       </div>
 
@@ -788,11 +911,11 @@ const DiagnosisPrescriptionPanel = ({
           )}
         </div>
 
-        {/* 전체 저장 버튼 */}
+        {/* 🔥 전체 저장 버튼 - Encounter + SOAP 진단 저장 */}
         {canSave && (
-          <div style={{marginTop: '2rem', textAlign: 'center'}}>
+          <div className="save-section">
             <button
-              className="btn btn-success"
+              className="btn btn-success btn-large"
               onClick={handleSave}
               disabled={isSaving}
               type="button"
@@ -805,10 +928,13 @@ const DiagnosisPrescriptionPanel = ({
               ) : (
                 <>
                   <Save size={16} />
-                  모든 진단 정보 저장
+                  Encounter + SOAP 진단 저장
                 </>
               )}
             </button>
+            <div style={{marginTop: '0.5rem', fontSize: '0.85rem', color: '#6b7280'}}>
+              총 {Object.values(soapData).reduce((sum, entries) => sum + entries.length, 0)}개 항목이 저장됩니다
+            </div>
           </div>
         )}
       </div>

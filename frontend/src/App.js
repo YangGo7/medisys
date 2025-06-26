@@ -15,7 +15,7 @@ import OpenMRSPatientList from './components/LIS/tests';
 import OCSLogPage from './components/OCS/OCSLogPage';
 import MainPage from './components/MainPage';
 import EmrMainPage from './components/EMR/EmrMainPage';
-import PatientList from './components/patientsList';
+import PatientList from './components/Main_page/patientsList.jsx';
 import SettingsPage from './components/EMR/SettingsPage';
 import ReceptionPanel from './components/EMR/ReceptionPanel';
 import PatientWaitingList from './components/EMR/PatientWaitingList';
@@ -28,6 +28,9 @@ import NoticeBoard from './components/Main_page/Notics_page'; // 새로 추가
 import { ThemeProvider } from './components/EMR/contexts/ThemeContext';
 import { ReceptionProvider } from './components/EMR/contexts/ReceptionContext';
 import DocDashBoard from './components/DocDashBoard/DocDashBoard';
+import TitlePage from  './components/Main_page/TitlePage.js'
+import LaCID from './components/Sever_Main_Page/LaCIDPage'
+import Login from './components/login/LoginPage.jsx'
 import './App.css';
 
 function App() {
@@ -38,15 +41,18 @@ function App() {
       <ReceptionProvider>
         <Router>
           <Routes>
-            {/* 기존 메인 페이지 */}
+            {/* 기존 메인 페이지 */} {/* 임시 세팅 TitlePage*/}
             <Route path="/" element={<Navigate to="/main" />} />
-            <Route path="/main" element={<MainPage />} />
+            <Route path="/main" element={<TitlePage />} />
+
+            {/*홈페이지 소개용*/}
+            <Route path="/Sever_Main_Page/LaCIDPage" element={<LaCID/>} />
             
             {/* 메인 페이지 기능들 */}
             <Route path="/Main_page/StatisticsBoard" element={<StatisticsBoard />} />
             <Route path="/Main_page/main_page_function" element={<MainPageFunction />} />
             <Route path="/Main_page/notices" element={<NoticeBoard />} /> {/* 새로 추가 */}
-
+            <Route path="/login" element={<Login />} />
             {/* EMR 페이지 */}
             <Route path="/emr" element={<EmrMainPage />} />
             <Route path="/emr/Settings" element={<SettingsPage />} />
@@ -72,7 +78,7 @@ function App() {
             <Route path="/logs" element={<OCSLogPage />} />
 
             {/* 기존 환자 목록 페이지 */}
-            <Route path="/patients" element={<PatientList />} /> 
+            <Route path="/Main_page/patients" element={<PatientList />} /> 
 
             {/* 예외 경로는 메인으로 */}
             <Route path="*" element={<Navigate to="/main" />} />

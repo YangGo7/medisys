@@ -10,8 +10,8 @@ import {
 
 // 기존 컴포넌트들을 import (실제로는 이렇게 import해야 함)
 import NoticeBoard from './Notics_page';              // ❗ 오타 확인: Notics vs Notices
-import PatientList from '../patientsList';           // ✅ 파일명 정확히 확인
-import ProviderList from '../Medicalemployee';     // ✅ 대소문자 일치 확인
+import PatientList from './patientsList';           // ✅ 파일명 정확히 확인
+import ProviderList from './Medicalemployee';     // ✅ 대소문자 일치 확인
 import OCSLogPage from '../OCS/OCSLogPage';          // ✅ 상위 폴더로 이동
 import StatisticsBoard from './StatisticsBoard';     // ✅ 동일 폴더 내
 

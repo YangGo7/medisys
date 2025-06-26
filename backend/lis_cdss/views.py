@@ -239,13 +239,13 @@ def receive_full_sample(request):
         prob = model.predict_proba(df)[0][1]
         pred = int(prob >= 0.5)
 
-        try:
-            explainer = shap.Explainer(model.predict_proba, df)
-            shap_values = explainer(df)
-            shap_output = shap_values.values[0][1].tolist()
-        except Exception as e:
-            print(f"⚠️ SHAP 계산 실패: {e}")
-            shap_output = [0.0] * len(features)  # 또는 None
+        # try:
+        #     explainer = shap.Explainer(model.predict_proba, df)
+        #     shap_values = explainer(df)
+        #     shap_output = shap_values.values[0][1].tolist()
+        # except Exception as e:
+        #     print(f"⚠️ SHAP 계산 실패: {e}")
+        #     shap_output = [0.0] * len(features)  # 또는 None
 
         response = {
             'sample': sample_id,
