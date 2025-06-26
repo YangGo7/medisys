@@ -85,7 +85,6 @@ class SoapDiagnosisViewSet(viewsets.ModelViewSet):
             patient_uuid = request.data.get('patient_uuid')
             soap_diagnoses_data = request.data.get('soap_diagnoses', [])
             doctor_uuid = request.data.get('doctor_uuid', 'admin')
-            encounter_datetime = request.data.get('encounter_datetime') or timezone.now().isoformat()
 
             if not patient_uuid:
                 return Response({'status': 'error', 'message': 'patient_uuid가 필요합니다.'}, status=400)
@@ -95,9 +94,9 @@ class SoapDiagnosisViewSet(viewsets.ModelViewSet):
             # 1. Encounter 생성 API 호출
             encounter_data = {
                 'patient': patient_uuid,
-                'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # 필요에 따라 변경
+                'encounterType': '5021b1a1-e7f6-44b4-ba02-da2f2bcf8718',  # 필요에 따라 변경
                 'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',      # 필요에 따라 변경
-                'encounterDatetime': encounter_datetime,
+                'encounterDatetime': '2025-06-26T08:44:01.440Z',
                 'encounterProviders': [
                     {
                         'provider': 'f9badd80-ab76-11e2-9e96-0800200c9a66',
