@@ -205,22 +205,42 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
 
   // 동의서 클릭 핸들러
   const handleConsentClick = (study, docRequest) => {
+    console.log('📝 동의서 클릭:', { study, docRequest });
+    
     if (onShowUpload) {
       onShowUpload(docRequest.document_type.code, study.patient_name, study.modality, study.body_part);
     }
   };
 
-  // 필요서류 클릭 핸들러
+  // ✅ 수정: 필요서류 클릭 핸들러 - studyId 추가
   const handleDocumentClick = (study, docRequest) => {
+    console.log('🔍 서류 클릭된 데이터:', { study, docRequest });
+    
     if (docRequest.document_type.code === 'imaging_cd' || docRequest.document_type.code === 'imaging_dvd') {
       // 진료기록영상은 특별 프로세스
+      console.log('💿 진료기록영상 프로세스 시작');
       if (onShowImagingProcess) {
         onShowImagingProcess(study.patient_name, study.modality, study.body_part);
       }
     } else {
       // 일반 서류는 미리보기
+      console.log('📄 문서 미리보기 요청:', {
+        docType: docRequest.document_type.code,
+        patientName: study.patient_name,
+        modality: study.modality,
+        bodyPart: study.body_part,
+        studyId: study.id  // ✅ 디버깅용 로그
+      });
+      
       if (onShowDocument) {
-        onShowDocument(docRequest.document_type.code, study.patient_name, study.modality, study.body_part);
+        // ✅ 수정: study.id 추가!
+        onShowDocument(
+          docRequest.document_type.code, 
+          study.patient_name, 
+          study.modality, 
+          study.body_part,
+          study.id  // ✅ 이게 핵심! studyId 전달
+        );
       }
     }
   };

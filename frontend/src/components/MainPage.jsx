@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import OrderForm from './LIS/OrderForm';
 import SampleForm from './LIS/SampleForm';
@@ -18,7 +18,28 @@ import DocDashBoard from './DocDashBoard/DocDashBoard';
 export default function MainPage() {
   const [currentTab, setCurrentTab] = useState('TitlePage');
   const [username, setUsername] = useState('홍길동');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // 화면 크기에 따라 초기 사이드바 상태 결정
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  // 화면 크기 변화 감지
+  useEffect(() => {
+    const handleResize = () => {
+      // 1024px 미만에서는 자동으로 사이드바 닫기
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const renderTab = () => {
     switch (currentTab) {
@@ -60,6 +81,10 @@ export default function MainPage() {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <div className="main-container">
       {/* 사이드바 */}
@@ -69,7 +94,7 @@ export default function MainPage() {
             🔷 메디시스 v3.0
             <button
               className="sidebar-toggle-inline"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
               aria-label="사이드바 토글"
             >
               {sidebarOpen ? '◀' : '▶'}
@@ -102,10 +127,11 @@ export default function MainPage() {
 
       {/* 메인 콘텐츠 */}
       <main className={`main-panel ${sidebarOpen ? 'with-sidebar' : 'full-width'}`}>
+        {/* 플로팅 토글 버튼 - 사이드바가 닫혔을 때만 표시 */}
         {!sidebarOpen && (
           <button
             className="sidebar-toggle-floating"
-            onClick={() => setSidebarOpen(true)}
+            onClick={toggleSidebar}
             aria-label="사이드바 열기"
           >
             ☰

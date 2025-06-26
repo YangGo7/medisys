@@ -4,15 +4,13 @@
 // import './PacsDocs.css';
 
 // const PacsDocs = () => {
-//   const [leftWidth, setLeftWidth] = useState(65); // 서류목록이 좀 더 넓게
+//   const [leftWidth, setLeftWidth] = useState(65);
 //   const containerRef = useRef(null);
 //   const isDragging = useRef(false);
 
-//   // 문서 상태 관리
 //   const [currentDocument, setCurrentDocument] = useState(null);
 //   const [currentPatient, setCurrentPatient] = useState(null);
 
-//   // 리사이즈 핸들링 (Dashboard와 동일한 로직)
 //   const handleMouseDown = (e) => {
 //     isDragging.current = true;
 //     document.addEventListener('mousemove', handleMouseMove);
@@ -21,12 +19,11 @@
 
 //   const handleMouseMove = (e) => {
 //     if (!isDragging.current || !containerRef.current) return;
-    
+
 //     const container = containerRef.current;
 //     const containerRect = container.getBoundingClientRect();
 //     const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-    
-//     // 최소/최대 크기 제한 (30% ~ 80%)
+
 //     if (newLeftWidth >= 30 && newLeftWidth <= 80) {
 //       setLeftWidth(newLeftWidth);
 //     }
@@ -38,13 +35,11 @@
 //     document.removeEventListener('mouseup', handleMouseUp);
 //   };
 
-//   // 문서 미리보기 표시 핸들러
 //   const handleShowDocument = (docType, patientName, modality, bodyPart) => {
 //     setCurrentDocument(docType);
 //     setCurrentPatient({ name: patientName, modality, bodyPart });
 //   };
 
-//   // 미리보기 닫기 핸들러
 //   const handleClosePreview = () => {
 //     setCurrentDocument(null);
 //     setCurrentPatient(null);
@@ -52,49 +47,42 @@
 
 //   return (
 //     <div className="pacsdocs-container">
-//       {/* 메인 그리드 레이아웃 */}
-//       <div 
-//         className="pacsdocs-main" 
+//       <div
+//         className="pacsdocs-main"
 //         ref={containerRef}
 //         style={{
-//           gridTemplateColumns: `${leftWidth}% 4px ${100 - leftWidth}%`
+//           gridTemplateColumns: `${leftWidth}% 4px ${100 - leftWidth}%`,
 //         }}
 //       >
-//         {/* 서류 요청 목록 섹션 */}
+//         {/* 왼쪽: 요청 목록 */}
 //         <div className="request-list-section">
-//           {/* 임시 컨텐츠 - 나중에 <DocumentRequestList onShowDocument={handleShowDocument} />로 교체 */}
-//           <div style={{ padding: '2rem', textAlign: 'center' }}>
-//             <h3>📋 서류 요청 목록</h3>
-//             <p>DocumentRequestList 컴포넌트가 여기에 들어갑니다.</p>
-//             <div style={{ marginTop: '2rem', color: '#666' }}>
-//               컴포넌트 파일을 생성하면 실제 기능이 동작합니다.
-//             </div>
-//           </div>
+//           <DocumentRequestList onShowDocument={handleShowDocument} />
 //         </div>
-        
-//         {/* 드래그 핸들 */}
-//         <div 
-//           className="resize-handle"
-//           onMouseDown={handleMouseDown}
-//         >
+
+//         {/* 중간: 리사이즈 핸들 */}
+//         <div className="resize-handle" onMouseDown={handleMouseDown}>
 //           <div className="resize-line"></div>
 //         </div>
-        
-//         {/* 서류 미리보기 섹션 */}
+
+//         {/* 오른쪽: 미리보기 */}
 //         <div className="preview-section">
-//           {/* 임시 컨텐츠 - 나중에 DocumentPreview 컴포넌트로 교체 */}
-//           <div style={{ padding: '2rem', textAlign: 'center' }}>
-//             <h3>📄 생성서류 미리보기</h3>
-//             <p>DocumentPreview 컴포넌트가 여기에 들어갑니다.</p>
-//             <div style={{ marginTop: '2rem', color: '#666' }}>
-//               리사이즈 핸들을 드래그해서 크기를 조절해보세요!
+//           <DocumentPreview
+//             documentType={currentDocument}
+//             patientInfo={currentPatient}
+//             onClose={handleClosePreview}
+//           />
+//           {currentDocument && (
+//             <div
+//               style={{
+//                 marginTop: '1rem',
+//                 padding: '1rem',
+//                 background: '#f0f8ff',
+//                 borderRadius: '8px',
+//               }}
+//             >
+//               현재 선택된 문서: {currentDocument}
 //             </div>
-//             {currentDocument && (
-//               <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f8ff', borderRadius: '8px' }}>
-//                 현재 선택된 문서: {currentDocument}
-//               </div>
-//             )}
-//           </div>
+//           )}
 //         </div>
 //       </div>
 //     </div>
@@ -115,6 +103,8 @@ const PacsDocs = () => {
 
   const [currentDocument, setCurrentDocument] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
+  const [currentStudyId, setCurrentStudyId] = useState(null); // ✅ 추가: studyId 상태
+  const [viewMode, setViewMode] = useState('empty'); // ✅ 추가: viewMode 상태
 
   const handleMouseDown = (e) => {
     isDragging.current = true;
@@ -140,14 +130,58 @@ const PacsDocs = () => {
     document.removeEventListener('mouseup', handleMouseUp);
   };
 
-  const handleShowDocument = (docType, patientName, modality, bodyPart) => {
+  // ✅ 수정: studyId 파라미터 추가
+  const handleShowDocument = (docType, patientName, modality, bodyPart, studyId) => {
+    console.log('📄 PacsDocs: 문서 미리보기 요청', {
+      docType,
+      patientName,
+      modality,
+      bodyPart,
+      studyId
+    });
+
     setCurrentDocument(docType);
     setCurrentPatient({ name: patientName, modality, bodyPart });
+    setCurrentStudyId(studyId); // ✅ studyId 저장
+    setViewMode('document'); // ✅ viewMode 설정
+  };
+
+  // ✅ 추가: 동의서 업로드 핸들러
+  const handleShowUpload = (docType, patientName, modality, bodyPart) => {
+    console.log('📝 PacsDocs: 동의서 업로드 요청', {
+      docType,
+      patientName,
+      modality,
+      bodyPart
+    });
+
+    setCurrentDocument(docType);
+    setCurrentPatient({ name: patientName, modality, bodyPart });
+    setCurrentStudyId(null); // 업로드는 studyId 불필요
+    setViewMode('upload'); // ✅ 업로드 모드
+  };
+
+  // ✅ 추가: 진료기록영상 프로세스 핸들러
+  const handleShowImagingProcess = (patientName, modality, bodyPart) => {
+    console.log('💿 PacsDocs: 진료기록영상 프로세스 요청', {
+      patientName,
+      modality,
+      bodyPart
+    });
+
+    setCurrentDocument('imaging_cd');
+    setCurrentPatient({ name: patientName, modality, bodyPart });
+    setCurrentStudyId(null); // 프로세스는 studyId 불필요
+    setViewMode('imaging'); // ✅ 진료기록영상 모드
   };
 
   const handleClosePreview = () => {
+    console.log('✅ PacsDocs: 미리보기 닫기');
+    
     setCurrentDocument(null);
     setCurrentPatient(null);
+    setCurrentStudyId(null); // ✅ studyId 초기화
+    setViewMode('empty'); // ✅ viewMode 초기화
   };
 
   return (
@@ -161,7 +195,11 @@ const PacsDocs = () => {
       >
         {/* 왼쪽: 요청 목록 */}
         <div className="request-list-section">
-          <DocumentRequestList onShowDocument={handleShowDocument} />
+          <DocumentRequestList 
+            onShowDocument={handleShowDocument} // ✅ studyId 포함된 핸들러
+            onShowUpload={handleShowUpload} // ✅ 동의서 업로드 핸들러
+            onShowImagingProcess={handleShowImagingProcess} // ✅ 진료기록영상 핸들러
+          />
         </div>
 
         {/* 중간: 리사이즈 핸들 */}
@@ -172,20 +210,31 @@ const PacsDocs = () => {
         {/* 오른쪽: 미리보기 */}
         <div className="preview-section">
           <DocumentPreview
-            documentType={currentDocument}
-            patientInfo={currentPatient}
-            onClose={handleClosePreview}
+            currentDocument={currentDocument} // ✅ prop 이름 수정
+            currentPatient={currentPatient} // ✅ prop 이름 수정
+            studyId={currentStudyId} // ✅ studyId 전달
+            viewMode={viewMode} // ✅ viewMode 전달
+            onClosePreview={handleClosePreview} // ✅ prop 이름 수정
           />
-          {currentDocument && (
+          
+          {/* ✅ 디버깅용 정보 표시 */}
+          {(currentDocument || currentStudyId) && (
             <div
               style={{
-                marginTop: '1rem',
-                padding: '1rem',
+                position: 'absolute',
+                bottom: '10px',
+                right: '10px',
+                padding: '0.5rem',
                 background: '#f0f8ff',
-                borderRadius: '8px',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                color: '#4a5568',
+                border: '1px solid #e2e8f0'
               }}
             >
-              현재 선택된 문서: {currentDocument}
+              현재 선택된 문서: {currentDocument || 'none'}<br/>
+              Study ID: {currentStudyId || 'none'}<br/>
+              View Mode: {viewMode}
             </div>
           )}
         </div>

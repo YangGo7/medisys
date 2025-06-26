@@ -4,19 +4,24 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: #ffffff;
+  font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
-.section-header {
-  background: #4a5568;
-  color: white;
-  padding: 1rem;
-  font-weight: bold;
-  font-size: 1.1rem;
+/* 헤더 섹션 */
+.preview-header {
+  padding: 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
+}
+
+.preview-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
 }
 
 /* 빈 화면 스타일 */
@@ -26,313 +31,348 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #718096;
-  padding: 3rem;
   height: 100%;
-  background: #f8fafc;
+  background: #ffffff;
+  padding: 40px;
 }
 
 .empty-preview h3 {
-  margin: 1rem 0 0.5rem 0;
-  color: #4a5568;
-  font-size: 1.2rem;
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
 }
 
 .empty-preview p {
   margin: 0;
-  line-height: 1.6;
-  color: #718096;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
 }
 
-/* 업로드 섹션 스타일 */
+/* 업로드 섹션 */
 .upload-section {
-  margin-top: 1rem;
-  padding: 2rem;
-  border: 2px dashed #cbd5e0;
+  margin: 20px;
+  padding: 40px;
+  border: 2px dashed #d1d5db;
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: #f8fafc;
+  transition: all 0.2s ease;
+  background: #fafafa;
 }
 
 .upload-section:hover {
-  border-color: #3182ce;
-  background: #ebf8ff;
-  transform: translateY(-2px);
-}
-
-.upload-section.drag-over {
-  border-color: #3182ce;
-  background: #ebf8ff;
-  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+  border-color: #9ca3af;
+  background: #f5f5f5;
 }
 
 .upload-section p {
-  margin: 0.5rem 0;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
 }
 
 .upload-section p:first-of-type {
-  font-weight: 500;
-  color: #4a5568;
+  font-weight: 600;
+  color: #111827;
 }
 
 .upload-section p:last-of-type {
-  font-size: 0.8rem;
-  color: #718096;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: normal;
 }
 
 .upload-preview {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  background: #f8f9fa;
-  text-align: left;
+  margin: 20px;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
 }
 
 .upload-preview p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 13px;
 }
 
 .upload-preview p:first-child {
-  font-weight: 500;
-  color: #2d3748;
+  font-weight: 600;
+  color: #111827;
 }
 
 .upload-preview p:last-child {
-  color: #4a5568;
-  margin-top: 0.5rem;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
-/* 문서 미리보기 스타일 */
+/* 문서 미리보기 컨텐츠 */
 .preview-content {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  background: white;
-  min-height: 400px;
-  overflow-y: auto;
   flex: 1;
+  overflow-y: auto;
+  background: white;
+  padding: 30px;
+  margin: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-family: 'Malgun Gothic', sans-serif;
+  line-height: 1.6;
+  min-height: 500px;
 }
 
+/* 문서 헤더 */
 .document-header {
   text-align: center;
-  border-bottom: 2px solid #2d3748;
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .hospital-logo {
-  font-size: 1.5rem;
-  color: #3182ce;
-  margin-bottom: 0.5rem;
+  font-size: 20px;
+  color: #374151;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .document-header h1 {
   margin: 0;
-  color: #2d3748;
-  font-size: 1.5rem;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.5px;
 }
 
 .document-header h2 {
-  margin: 0.5rem 0;
-  color: #718096;
-  font-size: 1.1rem;
-  font-weight: normal;
+  margin: 8px 0 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
 }
 
+/* 환자 정보 */
 .patient-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #f8fafc;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
 }
 
 .info-group h4 {
-  color: #4a5568;
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 6px;
 }
 
 .info-group p {
-  margin: 0.3rem 0;
-  font-size: 0.9rem;
+  margin: 6px 0;
+  font-size: 13px;
+  color: #374151;
   line-height: 1.4;
 }
 
 .info-group strong {
-  color: #2d3748;
+  font-weight: 600;
+  color: #111827;
 }
 
+/* 서명 섹션 */
 .signature-section {
-  margin-top: 2rem;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+  margin-top: 40px;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
   text-align: center;
-  background: #f8fafc;
+  background: #f9fafb;
+}
+
+.signature-section h4 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .signature-box {
-  height: 60px;
-  border: 1px solid #cbd5e0;
+  height: 80px;
+  border: 1px solid #9ca3af;
   border-radius: 4px;
-  margin: 1rem 0;
+  margin: 16px 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a0aec0;
-  background: #f7fafc;
+  background: white;
+  color: #6b7280;
   font-style: italic;
+  font-size: 12px;
 }
 
-/* 진료기록영상 프로세스 스타일 */
+/* 프로세스 스텝 */
 .process-step {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  margin: 16px 20px;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  transition: all 0.2s ease;
 }
 
 .process-step h4 {
-  margin: 0 0 0.5rem 0;
-  color: #2d3748;
-  font-size: 1rem;
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .process-step p {
-  margin: 0.5rem 0;
-  color: #4a5568;
-  font-size: 0.9rem;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #374151;
 }
 
 .process-step ul {
-  margin: 0.5rem 0;
-  color: #4a5568;
-  font-size: 0.9rem;
+  margin: 12px 0;
+  padding-left: 20px;
 }
 
 .process-step li {
-  margin: 0.2rem 0;
+  margin: 6px 0;
+  font-size: 13px;
+  color: #374151;
 }
 
 .step-waiting {
-  background: #f7fafc;
-  color: #a0aec0;
-  border-color: #e2e8f0;
+  background: #f9fafb;
+  opacity: 0.7;
 }
 
 .step-waiting h4 {
-  color: #a0aec0;
+  color: #6b7280;
 }
 
 .step-waiting p,
 .step-waiting li {
-  color: #a0aec0;
+  color: #9ca3af;
 }
 
 .step-active {
-  background: #fef5e7;
-  border-color: #ed8936;
-  box-shadow: 0 2px 4px rgba(237, 137, 54, 0.1);
+  background: #fffbeb;
+  border-color: #f59e0b;
 }
 
 .step-active h4 {
-  color: #d69e2e;
+  color: #d97706;
 }
 
 .step-completed {
-  background: #c6f6d5;
-  border-color: #48bb78;
-  box-shadow: 0 2px 4px rgba(72, 187, 120, 0.1);
+  background: #f0fdf4;
+  border-color: #10b981;
 }
 
 .step-completed h4 {
-  color: #2f855a;
+  color: #059669;
 }
 
 .step-completed::before {
-  content: '✅ ';
-  margin-right: 0.5rem;
+  content: '✓ ';
+  color: #059669;
+  font-weight: bold;
+  margin-right: 8px;
 }
 
-/* 액션 버튼 스타일 */
+/* 액션 버튼들 */
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 1rem 0;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
   margin-top: auto;
 }
 
 .btn {
-  padding: 0.5rem 1rem;
-  border: none;
+  padding: 10px 20px;
+  border: 1px solid;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 500;
+  font-family: 'Malgun Gothic', sans-serif;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  min-width: 100px;
+  gap: 6px;
+  min-width: 120px;
   justify-content: center;
 }
 
 .btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn:active {
-  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-  background: #3182ce;
+  background: #374151;
   color: white;
+  border-color: #374151;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2c5aa0;
+  background: #1f2937;
+  border-color: #1f2937;
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d9e0;
+  background: #4b5563;
+  border-color: #4b5563;
 }
 
 .btn-success {
-  background: #48bb78;
+  background: #10b981;
   color: white;
+  border-color: #10b981;
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #38a169;
+  background: #059669;
+  border-color: #059669;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
+  background: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+  color: #9ca3af !important;
 }
 
 /* 로딩 상태 */
@@ -350,7 +390,7 @@
   height: 16px;
   margin: -8px 0 0 -8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid currentColor;
+  border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -360,36 +400,16 @@
   100% { transform: rotate(360deg); }
 }
 
-/* 스크롤바 커스터마이징 */
-.preview-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.preview-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.preview-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.preview-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .patient-info {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-    padding: 0.75rem;
+    gap: 16px;
   }
   
   .action-buttons {
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 8px;
   }
   
   .btn {
@@ -398,222 +418,96 @@
   }
   
   .preview-content {
-    padding: 1rem;
-    min-height: 300px;
+    padding: 20px;
+    margin: 10px;
   }
   
   .document-header h1 {
-    font-size: 1.2rem;
-  }
-  
-  .document-header h2 {
-    font-size: 1rem;
+    font-size: 20px;
   }
   
   .upload-section {
-    padding: 1.5rem;
+    padding: 30px 20px;
+    margin: 10px;
   }
   
   .process-step {
-    padding: 0.75rem;
+    padding: 16px;
+    margin: 12px 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .section-header {
-    padding: 0.75rem;
-    font-size: 1rem;
-  }
-  
-  .empty-preview {
-    padding: 2rem 1rem;
+  .preview-header {
+    padding: 16px;
   }
   
   .preview-content {
-    padding: 0.75rem;
-    min-height: 250px;
+    padding: 16px;
+    margin: 8px;
   }
   
   .patient-info {
-    padding: 0.5rem;
-  }
-  
-  .info-group h4 {
-    font-size: 0.85rem;
-  }
-  
-  .info-group p {
-    font-size: 0.8rem;
+    padding: 16px;
   }
   
   .upload-section {
-    padding: 1rem;
+    padding: 24px 16px;
+    margin: 8px;
   }
   
   .process-step {
-    padding: 0.5rem;
+    padding: 12px;
+    margin: 8px;
   }
   
   .btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 8px 16px;
+    font-size: 13px;
   }
 }
 
-/* 접근성 개선 */
+/* 스크롤바 */
+.preview-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.preview-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.preview-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.preview-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 접근성 */
 .btn:focus,
 .upload-section:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.3);
-}
-
-.upload-section[tabindex="0"]:focus {
-  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* 인쇄 스타일 */
 @media print {
-  .section-header,
+  .preview-header,
   .action-buttons,
-  .upload-section,
-  .process-step .btn {
+  .upload-section {
     display: none !important;
   }
   
   .preview-content {
-    border: none;
+    margin: 0;
     padding: 0;
+    border: none;
     box-shadow: none;
   }
   
   .document-preview {
     height: auto;
   }
-  
-  .patient-info {
-    background: white;
-    border: 1px solid #000;
-  }
-  
-  .signature-box {
-    border: 1px solid #000;
-    background: white;
-  }
-}
-
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-  .document-preview {
-    background: #2d3748;
-    color: #e2e8f0;
-  }
-  
-  .preview-content {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-  
-  .empty-preview {
-    background: #1a202c;
-    color: #a0aec0;
-  }
-  
-  .upload-section {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-  
-  .upload-section:hover {
-    background: #374151;
-    border-color: #60a5fa;
-  }
-  
-  .upload-preview {
-    background: #374151;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-  
-  .patient-info {
-    background: #374151;
-  }
-  
-  .signature-section {
-    background: #374151;
-    border-color: #4a5568;
-  }
-  
-  .signature-box {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #718096;
-  }
-  
-  .action-buttons {
-    background: #374151;
-    border-color: #4a5568;
-  }
-}
-
-/* 애니메이션 효과 */
-.document-preview {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.process-step {
-  animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 파일 드래그 앤 드롭 효과 */
-.upload-section.dragging {
-  border-color: #3182ce;
-  background: #ebf8ff;
-  transform: scale(1.02);
-  box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);
-}
-
-/* 에러 상태 */
-.upload-error {
-  color: #e53e3e;
-  background: #fed7d7;
-  border-color: #feb2b2;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
-/* 성공 상태 */
-.upload-success {
-  color: #2f855a;
-  background: #c6f6d5;
-  border: 1px solid #9ae6b4;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
 }
