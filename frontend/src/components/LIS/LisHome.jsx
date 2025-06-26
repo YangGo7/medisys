@@ -14,8 +14,8 @@ export default function LisLayout() {
       <aside className="lis-sidebar">
         <h3>검사 일정</h3>
         <ul className="lis-schedule-list">
-          <li>🧪 10:30 혈액 검사 - 김철수</li>
-          <li>🧪 14:00 간기능 검사 - 이영희</li>
+          <li>🧪 10:30 혈액 검사 - 이나영</li>
+          <li>🧪 14:00 간기능 검사 - 부승관</li>
         </ul>
       </aside>
 

@@ -97,7 +97,7 @@ import DocumentPreview from '../../components/pacsdocs/DocumentPreview';
 import './PacsDocs.css';
 
 const PacsDocs = () => {
-  const [leftWidth, setLeftWidth] = useState(65);
+  const [leftWidth, setLeftWidth] = useState(70);
   const containerRef = useRef(null);
   const isDragging = useRef(false);
 

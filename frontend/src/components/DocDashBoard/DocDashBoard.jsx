@@ -267,6 +267,7 @@ const DocDashBoard = () => {
       };
 
       fetchPersonUUID();
+      console.log('선택된 환자:', selectedPatient);
     }, [selectedPatient]);
 
 

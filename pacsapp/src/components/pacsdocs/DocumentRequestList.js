@@ -426,6 +426,7 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
                       >
                         {loading ? '처리중...' : '선택 발급'}
                       </button>
+                      <br />
                       <small style={{ color: '#718096' }}>
                         {selectedIds.length}개 선택
                       </small>

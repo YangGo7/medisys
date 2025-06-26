@@ -50,7 +50,7 @@ class MainPageAPI {
   }
 }
 
-export default function TitlePage({ setCurrentTab }) {
+export default function TitlePage() {
   const navigate = useNavigate();
   
   // 상태 관리
@@ -205,27 +205,30 @@ export default function TitlePage({ setCurrentTab }) {
     console.log('Quick action clicked:', action);
     switch(action) {
       case 'RIS':
-        console.log('Switching to RIS');
-        setCurrentTab('RISPage');
+        console.log('Opening RIS');
+        const risURL = `${window.location.protocol}//${window.location.hostname}:3020/ris`;
+        window.open(risURL, '_blank', 'noopener,noreferrer');
         break;
       case 'LIS':
-        console.log('Switching to LIS');
-        setCurrentTab('lis');
+        console.log('Opening LIS');
+        const lisURL = `${window.location.protocol}//${window.location.hostname}:3002/lis`;
+        window.open(lisURL, '_blank', 'noopener,noreferrer');
         break;
       case 'EMR':
         console.log('Navigating to EMR');
         navigate('/emr');
         break;
       case '설정':
-        console.log('설정 페이지로 이동');
+        console.log('Navigating to Settings');
+        navigate('/emr/Settings');
         break;
       case '통계':
-        console.log('Switching to Statistics');
-        setCurrentTab('statistics');
+        console.log('Navigating to Statistics Board');
+        navigate('/Main_page/StatisticsBoard');
         break;
       case '메인페이지기능':
-        console.log('Switching to Main Page Function');
-        setCurrentTab('main_page_function');
+        console.log('Navigating to Main Page Function');
+        navigate('/Main_page/main_page_function');
         break;
       case '공지사항':
         console.log('Navigating to Notice Board');
@@ -236,6 +239,7 @@ export default function TitlePage({ setCurrentTab }) {
         break;
     }
   };
+
 
   // 공지사항 클릭 핸들러
   const handleNoticeClick = () => {

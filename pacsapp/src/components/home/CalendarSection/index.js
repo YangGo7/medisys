@@ -315,7 +315,15 @@ const CalendarSection = () => {
                     <div className="schedule-date-time">
                       <div className="schedule-type-badge">{getScheduleTypeText(schedule.type)}</div>
                       <div className="schedule-time">
-                        {schedule.time_display || (schedule.datetime ? new Date(schedule.datetime).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'}) : '시간 미정')}
+                        {schedule.time_display || (
+                          schedule.datetime
+                            ? new Date(schedule.datetime).toLocaleTimeString('ko-KR', {
+                              timeZone: 'Asia/Seoul',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : '시간 미정'
+                        )}
                       </div>
                     </div>
                     <div className="schedule-details">

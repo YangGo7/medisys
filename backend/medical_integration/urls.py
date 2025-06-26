@@ -112,5 +112,5 @@ urlpatterns = [
     path('patients/create/', views.create_patient, name='create_patient'),
     
     # lis 결과 받아오기
-    path('api/emr/receive_cdss_result/', receive_cdss_result),
+    path('emr/receive_cdss_result/', receive_cdss_result),
 ]   

@@ -221,7 +221,7 @@ export const formatForDateTimeInput = (serverTime) => {
     const date = new Date(serverTime);
     
     // 한국 시간대 기준으로 변환
-    const kstDate = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+    const kstDate = new Date(date.toLocaleString("ko-KR", {timeZone: "Asia/Seoul"}));
     
     // "YYYY-MM-DDTHH:MM" 형식으로 변환
     const year = kstDate.getFullYear();
@@ -246,7 +246,7 @@ export const formatForDateTimeInput = (serverTime) => {
  */
 export const getCurrentKSTForInput = () => {
   const now = new Date();
-  const kstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+  const kstNow = new Date(now.toLocaleString("ko-KR", {timeZone: "Asia/Seoul"}));
   
   const year = kstNow.getFullYear();
   const month = String(kstNow.getMonth() + 1).padStart(2, '0');

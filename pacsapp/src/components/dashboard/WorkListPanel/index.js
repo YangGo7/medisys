@@ -240,7 +240,7 @@
 
 // export default WorkListPanel;
 
-// WorkListPanel - 날짜 파싱 문제 해결 버전
+// WorkListPanel/index.js - 최종 완성 버전
 
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import FilterSection from './FilterSection';
@@ -249,13 +249,13 @@ import { worklistService } from '../../../services/worklistService';
 import './WorkListPanel.css';
 
 const WorkListPanel = forwardRef((props, ref) => {
-  const { onDragStart, onDateChange } = props;
+  const { onDragStart, onDateChange, selectedDate } = props; // ✅ selectedDate prop 추가
   
   // 상태 관리
   const [worklist, setWorklist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+const [currentDate, setCurrentDate] = useState(selectedDate || new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' }));
   const [filters, setFilters] = useState({
     patientId: '',
     patientName: '',
@@ -266,114 +266,54 @@ const WorkListPanel = forwardRef((props, ref) => {
     reportStatus: ''
   });
 
-  // ✅ 한국 형식 날짜 파싱 함수
-  const parseKoreanDate = useCallback((dateStr, selectedDate) => {
-    if (!dateStr || typeof dateStr !== 'string') return null;
-    
-    console.log('🔍 날짜 파싱 시도:', dateStr);
-    
-    try {
-      // "26. 오전 5:45" 형태 파싱
-      const dayMatch = dateStr.match(/(\d{1,2})\./);
-      if (dayMatch) {
-        const day = parseInt(dayMatch[1]);
-        
-        // 선택된 날짜의 연월을 사용
-        const selectedDateObj = new Date(selectedDate);
-        const year = selectedDateObj.getFullYear();
-        const month = selectedDateObj.getMonth(); // 0-based
-        
-        // 해당 월의 해당 일자 생성
-        const parsedDate = new Date(year, month, day);
-        const resultDate = parsedDate.toISOString().split('T')[0];
-        
-        console.log(`  파싱 결과: ${dateStr} → ${resultDate}`);
-        return resultDate;
-      }
-      
-      // 일반적인 ISO 형식 시도
-      const isoDate = new Date(dateStr).toISOString().split('T')[0];
-      console.log(`  ISO 파싱: ${dateStr} → ${isoDate}`);
-      return isoDate;
-      
-    } catch (error) {
-      console.warn(`  파싱 실패: ${dateStr}`, error);
-      return null;
+  // ✅ worklistService의 parseKoreanDate 함수 사용
+  const parseKoreanDate = useCallback((koreanStr) => {
+    if (!koreanStr) return null;
+    const match = koreanStr.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\./);
+    if (match) {
+      const [, year, month, day] = match;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
+    return null;
   }, []);
 
-  // ✅ 날짜별 데이터 로딩 함수 (강화된 필터링)
+  // ✅ 날짜별 데이터 로딩 함수 (간단하게 수정)
   const loadWorklist = useCallback(async (date = null) => {
     try {
       setLoading(true);
       setError(null);
       
-      const targetDate = date || selectedDate;
+      const targetDate = date || currentDate;
       console.log('📅 워크리스트 로딩 시작 - 목표 날짜:', targetDate);
       
-      // ✅ 일단 전체 데이터를 가져와서 클라이언트에서 필터링
-      let data;
-      try {
-        console.log('🔍 날짜별 API 시도:', targetDate);
-        data = await worklistService.getWorklistByDate(targetDate);
-        console.log('✅ 날짜별 API 성공:', data?.length || 0, '개');
-      } catch (dateError) {
-        console.log('❌ 날짜별 API 실패, 전체 API로 fallback');
-        data = await worklistService.getWorklist();
-        console.log('✅ 전체 API 성공:', data?.length || 0, '개');
-      }
+      // 날짜별 API 호출
+      const data = await worklistService.getWorklistByDate(targetDate);
+      console.log('✅ API 성공:', data?.length || 0, '개');
       
-      // ✅ 데이터 변환 및 날짜 필터링
+      // ✅ 데이터 변환 (간단하게)
       let transformedData = [];
       if (Array.isArray(data)) {
-        transformedData = data.map(item => {
-          const transformed = {
-            id: item.id,
-            patientId: item.patientId || item.patient_id || '-',
-            patientName: item.patientName || item.patient_name || '-',
-            birthDate: item.birthDate || item.birth_date || '-',
-            gender: item.gender || (item.sex === 'M' ? '남' : item.sex === 'F' ? '여' : '-'),
-            examPart: item.examPart || item.body_part || '-',
-            modality: item.modality || '-',
-            requestDoctor: item.requestDoctor || item.requesting_physician || '-',
-            requestDateTime: item.requestDateTime || item.request_datetime || '-',
-            reportingDoctor: item.reportingDoctor || item.interpreting_physician || '-',
-            examDateTime: item.examDateTime || item.scheduled_exam_datetime || null,
-            examStatus: item.examStatus || item.study_status || '대기',
-            reportStatus: item.reportStatus || item.report_status || '대기',
-            priority: item.priority || '일반',
-            estimatedDuration: item.estimatedDuration || item.estimated_duration || 30,
-            notes: item.notes || '',
-            radiologistId: item.radiologistId || item.assigned_radiologist || null,
-            roomId: item.roomId || item.assigned_room || null,
-            startTime: item.startTime || null
-          };
-          
-          // ✅ 날짜 파싱 및 필터링 체크
-          const requestDate = parseKoreanDate(transformed.requestDateTime, targetDate);
-          const examDate = parseKoreanDate(transformed.examDateTime, targetDate);
-          
-          // 디버깅 로그
-          console.log(`  환자 ${transformed.patientName}: 요청일시="${transformed.requestDateTime}" → ${requestDate}, 검사일시="${transformed.examDateTime}" → ${examDate}`);
-          
-          // 날짜 매칭 여부 저장 (나중에 필터링에 사용)
-          transformed._requestDateMatches = requestDate === targetDate;
-          transformed._examDateMatches = examDate === targetDate;
-          transformed._anyDateMatches = transformed._requestDateMatches || transformed._examDateMatches;
-          
-          return transformed;
-        });
-        
-        // ✅ 날짜 필터링 적용
-        const originalCount = transformedData.length;
-        transformedData = transformedData.filter(item => item._anyDateMatches);
-        console.log(`📊 날짜 필터링: ${originalCount}개 → ${transformedData.length}개`);
-        
-        // 날짜 매칭 정보는 제거 (UI에 불필요)
-        transformedData = transformedData.map(item => {
-          const { _requestDateMatches, _examDateMatches, _anyDateMatches, ...cleanItem } = item;
-          return cleanItem;
-        });
+        transformedData = data.map(item => ({
+          id: item.id,
+          patientId: item.patientId || item.patient_id || '-',
+          patientName: item.patientName || item.patient_name || '-',
+          birthDate: item.birthDate || item.birth_date || '-',
+          gender: item.gender || (item.sex === 'M' ? '남' : item.sex === 'F' ? '여' : '-'),
+          examPart: item.examPart || item.body_part || '-',
+          modality: item.modality || '-',
+          requestDoctor: item.requestDoctor || item.requesting_physician || '-',
+          requestDateTime: item.requestDateTime || item.request_datetime || '-',
+          reportingDoctor: item.reportingDoctor || item.interpreting_physician || '-',
+          examDateTime: item.examDateTime || item.scheduled_exam_datetime || null,
+          examStatus: item.examStatus || item.study_status || '대기',
+          reportStatus: item.reportStatus || item.report_status || '대기',
+          priority: item.priority || '일반',
+          estimatedDuration: item.estimatedDuration || item.estimated_duration || 30,
+          notes: item.notes || '',
+          radiologistId: item.radiologistId || item.assigned_radiologist || null,
+          roomId: item.roomId || item.assigned_room || null,
+          startTime: item.startTime || null
+        }));
       }
       
       console.log('📊 최종 변환된 데이터:', transformedData.length, '개');
@@ -386,60 +326,42 @@ const WorkListPanel = forwardRef((props, ref) => {
     } finally {
       setLoading(false);
     }
-  }, [selectedDate, parseKoreanDate]);
+  }, [currentDate]);
+
+  // ✅ prop으로 받은 selectedDate 변화 감지
+  useEffect(() => {
+    if (selectedDate && selectedDate !== currentDate) {
+      console.log('📅 상위에서 날짜 변경됨:', selectedDate);
+      setCurrentDate(selectedDate);
+    }
+  }, [selectedDate, currentDate]);
 
   // ✅ 날짜 변경 핸들러
   const handleDateChange = useCallback((date) => {
-    console.log('📅 날짜 변경 요청:', date);
-    console.log('📅 기존 선택된 날짜:', selectedDate);
+    console.log('📅 WorkListPanel 날짜 변경:', date);
+    setCurrentDate(date);
     
-    if (date !== selectedDate) {
-      console.log('📅 날짜 상태 업데이트 및 데이터 로딩 시작');
-      setSelectedDate(date);
-      
-      // 부모 컴포넌트에 알림
-      if (onDateChange) {
-        onDateChange(date);
-      }
-      
-      // 즉시 새 날짜로 데이터 로딩
-      loadWorklist(date);
-    } else {
-      console.log('📅 동일한 날짜, 변경 없음');
+    // 부모 컴포넌트에 알림
+    if (onDateChange) {
+      onDateChange(date);
     }
-  }, [selectedDate, onDateChange, loadWorklist]);
+  }, [onDateChange]);
 
   // ✅ ref 메서드 노출
   useImperativeHandle(ref, () => ({
     refreshWorklist: () => {
       console.log('🔄 외부에서 워크리스트 새로고침 요청');
-      return loadWorklist(selectedDate);
+      return loadWorklist(currentDate);
     },
     setDate: (date) => handleDateChange(date),
-    getCurrentDate: () => selectedDate,
-    getWorklistCount: () => worklist.length,
-    debugInfo: () => {
-      const info = {
-        selectedDate,
-        worklistCount: worklist.length,
-        loading,
-        error,
-        filters
-      };
-      console.log('🔍 WorkListPanel 디버깅 정보:', info);
-      return info;
-    },
-    // ✅ 날짜 파싱 테스트 함수
-    testDateParsing: (dateStr) => {
-      return parseKoreanDate(dateStr, selectedDate);
-    }
-  }), [selectedDate, loadWorklist, handleDateChange, worklist.length, loading, error, filters, parseKoreanDate]);
+    getCurrentDate: () => currentDate,
+    getWorklistCount: () => worklist.length
+  }), [currentDate, loadWorklist, handleDateChange, worklist.length]);
 
-  // ✅ 초기 로딩
+  // ✅ 날짜 변경시 데이터 로딩
   useEffect(() => {
-    console.log('🚀 WorkListPanel 초기 로딩');
-    loadWorklist(selectedDate);
-  }, []);
+    loadWorklist(currentDate);
+  }, [currentDate, loadWorklist]);
 
   // ✅ 필터링된 워크리스트
   const filteredWorklist = worklist.filter(exam => {
@@ -488,8 +410,8 @@ const WorkListPanel = forwardRef((props, ref) => {
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
     console.log('🔄 재시도 버튼 클릭');
-    loadWorklist(selectedDate);
-  }, [selectedDate, loadWorklist]);
+    loadWorklist(currentDate);
+  }, [currentDate, loadWorklist]);
 
   // 로딩 상태
   if (loading) {
@@ -502,7 +424,7 @@ const WorkListPanel = forwardRef((props, ref) => {
           height: '200px',
           color: '#6b7280'
         }}>
-          📅 {selectedDate} 데이터를 불러오는 중...
+          📅 {currentDate} 데이터를 불러오는 중...
         </div>
       </div>
     );
@@ -547,7 +469,7 @@ const WorkListPanel = forwardRef((props, ref) => {
         onFilterChange={handleFilterChange}
         onClearFilters={clearFilters}
         filteredCount={filteredWorklist.length}
-        selectedDate={selectedDate}
+        selectedDate={currentDate}
         onDateChange={handleDateChange}
       />
       
@@ -556,7 +478,7 @@ const WorkListPanel = forwardRef((props, ref) => {
         onDragStart={handleDragStart}
       />
       
-      {/* ✅ 강화된 디버그 정보 */}
+      {/* ✅ 개발용 디버그 정보 */}
       {process.env.NODE_ENV === 'development' && (
         <div style={{
           position: 'fixed',
@@ -570,15 +492,10 @@ const WorkListPanel = forwardRef((props, ref) => {
           lineHeight: '1.4',
           maxWidth: '350px'
         }}>
-          <div>📅 선택된 날짜: <strong>{selectedDate}</strong></div>
-          <div>📊 필터링된 워크리스트: <strong>{filteredWorklist.length}개</strong></div>
+          <div>📅 선택된 날짜: <strong>{currentDate}</strong></div>
+          <div>📊 원본 데이터: <strong>{worklist.length}개</strong></div>
+          <div>📊 필터링된 데이터: <strong>{filteredWorklist.length}개</strong></div>
           <div>🔄 로딩: {loading ? '중' : '완료'}</div>
-          {error && <div>❌ 에러: {error}</div>}
-          <div style={{fontSize: '0.7rem', marginTop: '0.5rem', opacity: 0.8}}>
-            필터: {Object.values(filters).filter(v => v).length > 0 ? 
-              Object.entries(filters).filter(([k,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ') : 
-              '없음'}
-          </div>
         </div>
       )}
     </div>

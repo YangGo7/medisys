@@ -5,8 +5,8 @@ import SampleForm from './LIS/SampleForm';
 import LisHome from './LIS/LisHome';
 import OCSLogPage from './OCS/OCSLogPage';
 import LoginPage from './login/LoginPage';
-import PatientsList from './patientsList';
-import Medicalemployee from './Medicalemployee';
+import PatientsList from './Main_page/patientsList';
+import Medicalemployee from './Main_page/Medicalemployee';
 import DicomViewer from './OHIF/OHIFViewer';
 
 import TitlePage from './Main_page/TitlePage';

@@ -14,7 +14,7 @@ const OrderListPage = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [showSamplePanel, setShowSamplePanel] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+    new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })
     ).toISOString().split('T')[0]);
 
   useEffect(() => {
