@@ -38,7 +38,7 @@ PRESCRIPTION_CONCEPTS = {
 }
 
 def get_openmrs_config():
-    """OpenMRS 설정을 환경변수에서 안전하게 가져오기"""
+    """OpenMRS 설정을 환경변수에서 안전하게 가져오기 - URL 문제 해결"""
     try:
         # 환경 변수에서 각각 분리해서 가져오기
         host = os.getenv('OPENMRS_API_HOST', '127.0.0.1')
@@ -46,49 +46,87 @@ def get_openmrs_config():
         username = os.getenv('OPENMRS_API_USER', 'admin')
         password = os.getenv('OPENMRS_API_PASSWORD', 'Admin123')
         
-        # 🔥 올바른 URL 형식으로 조합 - 이중 http 방지
-        if host.startswith('http://') or host.startswith('https://'):
-            base_url = f"{host}:{port}/openmrs/ws/rest/v1"
-        else:
-            base_url = f"http://{host}:{port}/openmrs/ws/rest/v1"
+        # 🔥 URL 이중 프로토콜 문제 완전 해결
+        # host에서 프로토콜 제거
+        clean_host = host.replace('http://', '').replace('https://', '')
+        
+        # 올바른 URL 형식으로 조합
+        base_url = f"http://{clean_host}:{port}/openmrs/ws/rest/v1"
         
         # 인증 문자열 생성
         auth_string = f"{username}:{password}"
         auth_header = b64encode(auth_string.encode()).decode()
         
-        logger.info(f"OpenMRS 설정 - Host: {host}, Port: {port}, Base URL: {base_url}")
-        
-        return {
-            'base_url': base_url,
-            'host': host,
-            'port': port,
-            'username': username,
-            'password': password,
-            'auth': auth_header,
-            'headers': {
-                'Authorization': f'Basic {auth_header}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
+        headers = {
+            'Authorization': f'Basic {auth_header}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
+        
+        logger.info(f"✅ OpenMRS 설정 완료: {base_url}")
+        return base_url, headers
         
     except Exception as e:
-        logger.error(f"OpenMRS 설정 로드 실패: {e}")
-        # 기본값으로 폴백
-        return {
-            'base_url': 'http://127.0.0.1:8082/openmrs/ws/rest/v1',
-            'host': '127.0.0.1',
-            'port': '8082',
-            'username': 'admin',
-            'password': 'Admin123',
-            'auth': b64encode(b'admin:Admin123').decode(),
-            'headers': {
-                'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
+        logger.error(f"❌ OpenMRS 설정 오류: {e}")
+        # 기본값 반환
+        return 'http://127.0.0.1:8082/openmrs/ws/rest/v1', {
+            'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',  # admin:Admin123
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
 
+# 전역 설정 초기화
+OPENMRS_BASE_URL, HEADERS = get_openmrs_config()
+
+@api_view(['GET'])
+def openmrs_encounters(request):
+    """환자 encounter 목록 조회 - URL 오류 수정"""
+    uuid = request.GET.get('uuid')
+    if not uuid:
+        return Response({"error": "Missing uuid"}, status=400)
+
+    try:
+        # 🔥 올바른 URL 사용 (이중 http:// 방지)
+        url = f"{OPENMRS_BASE_URL}/encounter"
+        params = {'patient': uuid}
+        
+        logger.info(f"🔗 OpenMRS 요청: {url}")
+        
+        response = requests.get(
+            url, 
+            headers=HEADERS, 
+            params=params,
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            logger.error(f"❌ OpenMRS 응답 오류: {response.status_code}")
+            return Response({"error": f"OpenMRS API 오류: {response.status_code}"}, status=response.status_code)
+        
+        data = response.json()
+        
+        # 응답 데이터 가공
+        history = []
+        for encounter in data.get('results', []):
+            history.append({
+                'uuid': encounter.get('uuid', ''),
+                'display': encounter.get('display', ''),
+                'encounterDatetime': encounter.get('encounterDatetime', ''),
+                'provider': encounter.get('provider', {}).get('display', 'N/A'),
+            })
+
+        return Response(history)
+        
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"❌ OpenMRS 연결 실패: {e}")
+        return Response({"error": "OpenMRS 서버 연결 실패"}, status=503)
+    except requests.exceptions.Timeout as e:
+        logger.error(f"❌ OpenMRS 타임아웃: {e}")
+        return Response({"error": "OpenMRS 응답 시간 초과"}, status=504)
+    except Exception as e:
+        logger.error(f"❌ 예상치 못한 오류: {e}")
+        return Response({"error": f"서버 오류: {str(e)}"}, status=500)
+    
 @api_view(['GET'])
 def openmrs_vitals(request):
     uuid = request.GET.get('uuid')
@@ -208,9 +246,12 @@ def openmrs_encounters(request):
 
 @api_view(['POST'])
 def create_encounter_with_data(request, patient_uuid):
-    """새 Encounter 생성 및 진단/처방 데이터 저장"""
+    """새 Encounter 생성 및 진단/처방 데이터 저장 - URL 오류 수정"""
     try:
-        # OpenMRS API로 Encounter 생성
+        # 🔥 올바른 URL 사용
+        encounter_url = f"{OPENMRS_BASE_URL}/encounter"
+        
+        # Encounter 데이터 준비
         encounter_data = {
             'patient': patient_uuid,
             'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # 실제 encounter type UUID
@@ -218,70 +259,96 @@ def create_encounter_with_data(request, patient_uuid):
             'encounterDatetime': timezone.now().isoformat(),
         }
 
+        logger.info(f"🔗 Encounter 생성 요청: {encounter_url}")
+        
         response = requests.post(
-            f'{OPENMRS_BASE_URL}/encounter',
+            encounter_url,
             headers=HEADERS,
             json=encounter_data,
-            timeout=10
+            timeout=30
         )
 
         if response.status_code != 201:
-            return Response({'error': 'Encounter 생성 실패'}, status=400)
+            logger.error(f"❌ Encounter 생성 실패: {response.status_code} - {response.text}")
+            return Response({'error': f'Encounter 생성 실패: {response.status_code}'}, status=400)
 
         encounter_uuid = response.json()['uuid']
+        logger.info(f"✅ Encounter 생성 성공: {encounter_uuid}")
 
         # 진단 데이터 저장
         diagnoses = request.data.get('diagnoses', [])
+        saved_diagnoses = []
+        
         for diagnosis in diagnoses:
             obs_data = {
                 'person': patient_uuid,
-                'concept': diagnosis.get('concept_uuid', DIAGNOSIS_CONCEPTS['primary_diagnosis']),
+                'concept': diagnosis.get('concept_uuid', '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'),  # 기본 진단 concept
                 'encounter': encounter_uuid,
                 'obsDatetime': timezone.now().isoformat(),
                 'value': diagnosis.get('value', ''),
                 'comment': diagnosis.get('notes', '')
             }
 
-            requests.post(
-                f'{OPENMRS_BASE_URL}/obs',
+            obs_url = f"{OPENMRS_BASE_URL}/obs"
+            obs_response = requests.post(
+                obs_url,
                 headers=HEADERS,
                 json=obs_data,
-                timeout=10
+                timeout=30
             )
+            
+            if obs_response.status_code == 201:
+                saved_diagnoses.append(obs_response.json())
+                logger.info(f"✅ 진단 저장 성공: {diagnosis.get('value')}")
+            else:
+                logger.error(f"❌ 진단 저장 실패: {obs_response.status_code}")
 
         # 처방 데이터 저장
         prescriptions = request.data.get('prescriptions', [])
+        saved_prescriptions = []
+        
         for prescription in prescriptions:
             # Drug Order 생성
             drug_order_data = {
                 'patient': patient_uuid,
                 'encounter': encounter_uuid,
                 'orderType': '131168f4-15f5-102d-96e4-000c29c2a5d7',  # Drug Order Type UUID
-                'concept': prescription.get('drug_concept_uuid'),
+                'concept': prescription.get('drug_uuid'),
                 'dose': prescription.get('dosage', ''),
-                'doseUnits': prescription.get('dose_units', ''),
                 'frequency': prescription.get('frequency', ''),
-                'route': prescription.get('route', ''),
                 'duration': prescription.get('duration', ''),
-                'instructions': prescription.get('instructions', ''),
+                'instructions': f"{prescription.get('drug_name', '')} - {prescription.get('dosage', '')}",
                 'dateActivated': timezone.now().isoformat(),
             }
 
-            requests.post(
-                f'{OPENMRS_BASE_URL}/drugorder',
+            order_url = f"{OPENMRS_BASE_URL}/drugorder"
+            order_response = requests.post(
+                order_url,
                 headers=HEADERS,
                 json=drug_order_data,
-                timeout=10
+                timeout=30
             )
+            
+            if order_response.status_code == 201:
+                saved_prescriptions.append(order_response.json())
+                logger.info(f"✅ 처방 저장 성공: {prescription.get('drug_name')}")
+            else:
+                logger.error(f"❌ 처방 저장 실패: {order_response.status_code}")
 
         return Response({
             'success': True,
             'encounter_uuid': encounter_uuid,
+            'saved_diagnoses': len(saved_diagnoses),
+            'saved_prescriptions': len(saved_prescriptions),
             'message': '진료 기록이 저장되었습니다.'
         })
 
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"❌ OpenMRS 연결 실패: {e}")
+        return Response({'error': 'OpenMRS 서버 연결 실패'}, status=503)
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        logger.error(f"❌ 진료 기록 저장 실패: {e}")
+        return Response({'error': f'진료 기록 저장 중 오류: {str(e)}'}, status=500)
 
 def get_person_uuid_by_identifier(request, patient_identifier):
     """
@@ -748,3 +815,178 @@ def create_encounter_with_soap(request):
             {'error': f'진료 생성 중 오류: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['POST'])
+def save_patient_clinical_data(request, patient_uuid):
+    """환자 임상 데이터 저장 (진단/처방) - 통합 버전"""
+    try:
+        # 먼저 연결 테스트
+        test_url = f"{OPENMRS_BASE_URL}/system"
+        test_response = requests.get(test_url, headers=HEADERS, timeout=10)
+        
+        if test_response.status_code != 200:
+            return Response({
+                'error': 'OpenMRS 서버에 연결할 수 없습니다.',
+                'details': f'연결 테스트 실패: {test_response.status_code}'
+            }, status=503)
+
+        # Encounter 생성
+        encounter_data = {
+            'patient': patient_uuid,
+            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',
+            'encounterDatetime': timezone.now().isoformat(),
+        }
+
+        encounter_response = requests.post(
+            f"{OPENMRS_BASE_URL}/encounter",
+            headers=HEADERS,
+            json=encounter_data,
+            timeout=30
+        )
+
+        if encounter_response.status_code != 201:
+            return Response({
+                'error': 'Encounter 생성 실패',
+                'details': encounter_response.text
+            }, status=400)
+
+        encounter_uuid = encounter_response.json()['uuid']
+
+        # 요청 데이터 처리
+        diagnoses = request.data.get('diagnoses', [])
+        prescriptions = request.data.get('prescriptions', [])
+        notes = request.data.get('clinical_notes', '')
+        weight = request.data.get('weight', '')
+
+        results = {
+            'encounter_uuid': encounter_uuid,
+            'saved_items': 0,
+            'errors': []
+        }
+
+        # 진단 저장
+        for diagnosis in diagnoses:
+            try:
+                obs_data = {
+                    'person': patient_uuid,
+                    'concept': diagnosis.get('concept_uuid', '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'),
+                    'encounter': encounter_uuid,
+                    'obsDatetime': timezone.now().isoformat(),
+                    'value': diagnosis.get('value', ''),
+                }
+
+                obs_response = requests.post(
+                    f"{OPENMRS_BASE_URL}/obs",
+                    headers=HEADERS,
+                    json=obs_data,
+                    timeout=30
+                )
+
+                if obs_response.status_code == 201:
+                    results['saved_items'] += 1
+                else:
+                    results['errors'].append(f"진단 저장 실패: {diagnosis.get('value')}")
+
+            except Exception as e:
+                results['errors'].append(f"진단 처리 오류: {str(e)}")
+
+        # 처방 저장
+        for prescription in prescriptions:
+            try:
+                drug_order_data = {
+                    'patient': patient_uuid,
+                    'encounter': encounter_uuid,
+                    'orderType': '131168f4-15f5-102d-96e4-000c29c2a5d7',
+                    'concept': prescription.get('drug_uuid'),
+                    'instructions': f"{prescription.get('drug_name')} - {prescription.get('dosage')}",
+                    'dateActivated': timezone.now().isoformat(),
+                }
+
+                order_response = requests.post(
+                    f"{OPENMRS_BASE_URL}/drugorder",
+                    headers=HEADERS,
+                    json=drug_order_data,
+                    timeout=30
+                )
+
+                if order_response.status_code == 201:
+                    results['saved_items'] += 1
+                else:
+                    results['errors'].append(f"처방 저장 실패: {prescription.get('drug_name')}")
+
+            except Exception as e:
+                results['errors'].append(f"처방 처리 오류: {str(e)}")
+
+        # 몸무게 저장
+        if weight:
+            try:
+                weight_obs = {
+                    'person': patient_uuid,
+                    'concept': '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Weight concept
+                    'encounter': encounter_uuid,
+                    'obsDatetime': timezone.now().isoformat(),
+                    'value': float(weight),
+                }
+
+                weight_response = requests.post(
+                    f"{OPENMRS_BASE_URL}/obs",
+                    headers=HEADERS,
+                    json=weight_obs,
+                    timeout=30
+                )
+
+                if weight_response.status_code == 201:
+                    results['saved_items'] += 1
+                else:
+                    results['errors'].append("몸무게 저장 실패")
+
+            except Exception as e:
+                results['errors'].append(f"몸무게 처리 오류: {str(e)}")
+
+        # 임상 노트 저장
+        if notes:
+            try:
+                notes_obs = {
+                    'person': patient_uuid,
+                    'concept': '160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',  # Clinical notes concept
+                    'encounter': encounter_uuid,
+                    'obsDatetime': timezone.now().isoformat(),
+                    'value': notes,
+                }
+
+                notes_response = requests.post(
+                    f"{OPENMRS_BASE_URL}/obs",
+                    headers=HEADERS,
+                    json=notes_obs,
+                    timeout=30
+                )
+
+                if notes_response.status_code == 201:
+                    results['saved_items'] += 1
+                else:
+                    results['errors'].append("임상 노트 저장 실패")
+
+            except Exception as e:
+                results['errors'].append(f"임상 노트 처리 오류: {str(e)}")
+
+        # 성공 여부 판단
+        if results['saved_items'] > 0:
+            return Response({
+                'success': True,
+                'message': f'{results["saved_items"]}개 항목이 저장되었습니다.',
+                'encounter_uuid': encounter_uuid,
+                'errors': results['errors'] if results['errors'] else None
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': '저장된 항목이 없습니다.',
+                'errors': results['errors']
+            }, status=400)
+
+    except Exception as e:
+        logger.error(f"❌ 임상 데이터 저장 실패: {e}")
+        return Response({
+            'success': False,
+            'error': f'저장 중 오류가 발생했습니다: {str(e)}'
+        }, status=500)

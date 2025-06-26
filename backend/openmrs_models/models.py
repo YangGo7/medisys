@@ -218,7 +218,7 @@ class SoapDiagnosis(models.Model):
 
     def save_to_openmrs(self):
         """OpenMRS Obs로 저장"""
-        from .openmrs_api import OpenMRSAPI
+        from medical_integration.openmrs_api import OpenMRSAPI
         
         api = OpenMRSAPI()
         

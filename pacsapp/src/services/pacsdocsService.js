@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // API 기본 URL 설정 (올바른 URL 구조)
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000';
 const PACSDOCS_API_URL = `${API_BASE_URL}/api/pacsdocs/api`; // ✅ 이미 올바름
 
 // Axios 인스턴스 생성
