@@ -73,7 +73,7 @@ export default function MainPage() {
     if (itemId === 'RISPage') {
       const protocol = window.location.protocol;
       const hostname = window.location.hostname;
-      window.open(`${protocol}//${hostname}:3020/ris`, '_blank', 'noopener,noreferrer');
+      window.open(`${protocol}//${hostname}:3020`, '_blank', 'noopener,noreferrer');
     } else if (itemId === 'lis') {
       window.open('/lis', '_blank', 'noopener,noreferrer');
     } else {

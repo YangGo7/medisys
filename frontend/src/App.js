@@ -47,7 +47,7 @@ function App() {
 
             {/*홈페이지 소개용*/}
             <Route path="/Sever_Main_Page/LaCIDPage" element={<LaCID/>} />
-            
+            <Route path= "/Main_page/TitlePage" element={<TitlePage />} />
             {/* 메인 페이지 기능들 */}
             <Route path="/Main_page/StatisticsBoard" element={<StatisticsBoard />} />
             <Route path="/Main_page/main_page_function" element={<MainPageFunction />} />

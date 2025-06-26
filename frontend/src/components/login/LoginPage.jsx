@@ -1,12 +1,14 @@
-// LoginPage.jsx
+// LoginPage.jsx - 수정된 버전
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import NotificationBar from './NotificationBar';
 import { autoLogin } from './auth';
 import axios from 'axios';
-import './LoginPage.css'; // CSS 파일 import
+import './LoginPage.css';
 
 function LoginPage() {
+  const navigate = useNavigate(); // ✅ 컴포넌트 내부로 이동
   const [userId, setUserId] = useState(null);
   const [code, setCode] = useState('');
   const [notice, setNotice] = useState('');
@@ -22,11 +24,27 @@ function LoginPage() {
     }
   }, []);
 
-  // 공지 가져오기
+  // 공지 가져오기 - 경로 수정
   useEffect(() => {
-    axios.get('/api/notice/')
-      .then(res => setNotice(res.data.notice || ''))
-      .catch(() => setNotice(''));
+    const fetchNotice = async () => {
+      try {
+        // 첫 번째 시도
+        const response = await axios.get('/api/account/notice/');
+        setNotice(response.data.notice || '');
+      } catch (error1) {
+        console.log('첫 번째 공지 경로 실패, 두 번째 시도...');
+        try {
+          // 두 번째 시도
+          const response = await axios.get('/api/notice/');
+          setNotice(response.data.notice || '');
+        } catch (error2) {
+          console.log('공지 가져오기 실패:', error2);
+          setNotice('공지사항을 불러올 수 없습니다.');
+        }
+      }
+    };
+    
+    fetchNotice();
   }, []);
 
   // 자동 로그인 처리
@@ -42,11 +60,30 @@ function LoginPage() {
     try {
       const res = await autoLogin({ code });
       setUserId(res.data.user_id);
-    } catch {
+    } catch (err) {
+      console.error('자동 로그인 오류:', err);
       setError('자동 로그인 실패: 코드가 유효하지 않거나 만료됨');
     } finally {
       setIsAutoLoginLoading(false);
     }
+  };
+
+  // 더미 로그인 처리
+  const handleDummyLogin = () => {
+    // 더미 사용자 정보로 즉시 로그인
+    const dummyUser = {
+      uuid: 'user_dummy',
+      display: '더미 사용자',
+      username: 'dummy_user'
+    };
+    
+    localStorage.setItem('doctor_id', dummyUser.uuid);
+    localStorage.setItem('doctor_name', dummyUser.display);
+    setUserInfo(dummyUser);
+    setUserId('dummy');
+    
+    // 즉시 페이지 이동 (3초 대기 없음)
+    navigate('/Main_page/TitlePage');
   };
 
   // 다른 계정으로 로그인
@@ -59,25 +96,43 @@ function LoginPage() {
     setError('');
   };
 
-  // userId가 세팅되면 OpenMRS에서 사용자 정보 조회
+  // userId가 세팅되면 사용자 정보 처리
   useEffect(() => {
     if (!userId) return;
+    
+    // 더미 로그인인 경우 바로 리턴 (이미 처리됨)
+    if (userId === 'dummy') return;
 
+    // 임시로 OpenMRS 호출 대신 로컬 처리
+    const tempUser = {
+      uuid: `user_${userId}`,
+      display: `사용자_${userId}`,
+      username: `user${userId}`
+    };
+    
+    localStorage.setItem('doctor_id', tempUser.uuid);
+    localStorage.setItem('doctor_name', tempUser.display);
+    setUserInfo(tempUser);
+    
+    // 즉시 메인 페이지로 이동 (3초 대기 제거)
+    navigate('/Main_page/TitlePage');
+
+    /* OpenMRS 연동이 필요할 때 주석 해제
     axios.get(`/openmrs/ws/rest/v1/user/${userId}`)
       .then(res => {
         const user = res.data;
         localStorage.setItem('doctor_id', user.uuid);
         localStorage.setItem('doctor_name', user.display);
         setUserInfo(user);
-        // 메인 페이지로 이동
-        window.location.href = '/main';
+        navigate('/Main_page/TitlePage'); // navigate 사용
       })
       .catch(err => {
         console.error('사용자 정보 조회 실패', err);
         alert('로그인 후 사용자 정보를 불러오는 데 실패했습니다.');
         setError(err);
       });
-  }, [userId]);
+    */
+  }, [userId, navigate]); // ✅ navigate를 의존성 배열에 추가
 
   return (
     <div className="medisys-container">
@@ -131,6 +186,19 @@ function LoginPage() {
               </p>
             </div>
           )}
+
+          {/* 더미 로그인 버튼 추가 */}
+          <div className="medisys-dummy-login">
+            <button
+              onClick={handleDummyLogin}
+              className="medisys-dummy-login-button"
+            >
+              🚀 더미 로그인 (개발용)
+            </button>
+            <p className="medisys-dummy-info">
+              ID: aa | PW: qq11ww22 | Code: a114e97d
+            </p>
+          </div>
 
           {/* 메인 로그인 폼 */}
           <LoginForm onLoginSuccess={setUserId} />
