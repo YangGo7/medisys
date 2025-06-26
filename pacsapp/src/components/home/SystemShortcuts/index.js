@@ -113,12 +113,12 @@ const SystemShortcuts = () => {
       </div>
           
       {/* 🆕 시스템 상태 표시 */}
-      {/* <div className="system-status">
+      <div className="system-status">
         <div className="status-item">
           <span className="status-dot online"></span>
           <span>모든 시스템 정상</span>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

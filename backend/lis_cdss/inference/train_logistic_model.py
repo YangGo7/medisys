@@ -36,3 +36,7 @@ joblib.dump(model, 'lis_cdss/inference/lft_logistic_model.pkl')
 joblib.dump(X.columns.tolist(), 'lis_cdss/inference/feature_names.joblib')
 
 print("✅ DB 기반 모델 학습 및 저장 완료")
+
+# SHAP 및 manual 기여도용 background_df 저장
+X.to_csv('lis_cdss/inference/lft_background.csv', index=False)
+print("✅ background_df 저장 완료")

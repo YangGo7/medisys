@@ -391,7 +391,7 @@ const CalendarSection = () => {
         }}>
           <div>시간대 디버깅:</div>
           <div>브라우저 시간대: {Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
-          <div>현재 KST: {new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</div>
+          <div>현재 KST: {new Date().toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul' })}</div>
           <div>일정 수: {getCurrentSchedules().length}</div>
         </div>
       )}
