@@ -1,107 +1,137 @@
-// frontend/src/components/EMR/VisitHistoryPanel.jsx (수정된 버전)
+// frontend/src/components/EMR/VisitHistoryPanel.jsx (PatientVisitHistoryViewSet 사용)
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { 
+  Calendar, 
+  User, 
+  FileText, 
+  Clock, 
+  ChevronDown, 
+  ChevronUp,
+  Eye,
+  Activity,
+  Heart,
+  Brain,
+  Clipboard,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Stethoscope,
+  BarChart3
+} from 'lucide-react';
+import './EmrMainPage.css'; // EMR 스타일 사용
 
-const VisitHistoryPanel = ({ patient }) => {
+const VisitHistoryPanel = ({ patient, refreshTrigger }) => {
   const [visitHistory, setVisitHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [expandedVisit, setExpandedVisit] = useState(null);
+  const [soapDetails, setSoapDetails] = useState({});
+  const [loadingDetails, setLoadingDetails] = useState({});
+  const [statistics, setStatistics] = useState(null);
 
-  const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://35.225.63.41:8000/api';
+  // 🔥 환자 UUID 추출
+  const patientUuid = patient?.person?.uuid || patient?.uuid || patient?.openmrs_patient_uuid;
 
-  // 🔥 환자 UUID 추출 (다양한 형태 지원)
-  const patientUuid = patient?.uuid || 
-                      patient?.person?.uuid || 
-                      patient?.openmrs_patient_uuid;
-
-  console.log('🔍 VisitHistoryPanel 디버깅:', {
-    patient,
-    patientUuid,
-    patientKeys: patient ? Object.keys(patient) : 'null'
-  });
+  console.log('🔍 VisitHistoryPanel:', { patient, patientUuid });
 
   useEffect(() => {
     if (patientUuid) {
       fetchVisitHistory();
-    } else {
-      console.warn('⚠️ 환자 UUID가 없습니다:', patient);
-      setVisitHistory([]);
+      fetchStatistics();
     }
-  }, [patientUuid]);
+  }, [patientUuid, refreshTrigger]);
 
   const fetchVisitHistory = async () => {
-    if (!patientUuid) {
-      console.error('❌ 환자 UUID가 없어 내원 이력을 조회할 수 없습니다');
-      return;
-    }
+    if (!patientUuid) return;
 
     try {
       setLoading(true);
       setError(null);
       
-      console.log(`🔄 내원 이력 조회 시작: ${patientUuid}`);
+      console.log(`🔄 내원 이력 조회 (ViewSet): ${patientUuid}`);
       
-      // 🔥 올바른 API 호출
-      const response = await axios.get(
-        `${API_BASE}openmrs-clinical/patient/${patientUuid}/visits-history/`,
-        {
-          timeout: 30000,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('📡 내원 이력 API 응답:', response.data);
+      // 🔥 PatientVisitHistoryViewSet의 by_patient 액션 사용
+      const response = await fetch(`/api/openmrs/visit-history/by_patient/?patient_uuid=${patientUuid}`);
       
-      if (response.data.success) {
-        const history = response.data.visits_history || [];
-        setVisitHistory(history);
-        setLastUpdated(new Date().toLocaleTimeString());
-        console.log(`✅ ${history.length}건의 내원 이력 로드 성공`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('📡 ViewSet 내원 이력 응답:', data);
+      
+      if (data.success) {
+        setVisitHistory(data.visits || []);
+        console.log(`✅ ViewSet ${data.visit_count}건의 내원 이력 로드`);
       } else {
-        throw new Error(response.data.error || '내원 이력 조회 실패');
+        throw new Error(data.error || '내원 이력 조회 실패');
       }
       
     } catch (error) {
-      console.error('❌ 내원 기록 조회 실패:', error);
-      setError(error.message || '내원 기록을 불러올 수 없습니다');
-      
-      // 🔄 Fallback: 기존 API 시도
-      try {
-        console.log('🔄 Fallback API 시도...');
-        const fallbackResponse = await axios.get(`${API_BASE}openmrs-encounters?uuid=${patientUuid}`);
-        
-        if (fallbackResponse.data && Array.isArray(fallbackResponse.data)) {
-          const convertedHistory = fallbackResponse.data.map(encounter => ({
-            encounter_uuid: encounter.uuid,
-            encounter_datetime: encounter.encounterDatetime,
-            encounter_type: encounter.encounterType?.display || '일반 진료',
-            provider: encounter.provider?.display || 'Unknown',
-            location: encounter.location?.display || 'Unknown',
-            observations: encounter.obs || [],
-            obs_count: encounter.obs?.length || 0
-          }));
-          
-          setVisitHistory(convertedHistory);
-          setError(null);
-          console.log(`✅ Fallback으로 ${convertedHistory.length}건 로드`);
-        }
-      } catch (fallbackError) {
-        console.error('❌ Fallback API도 실패:', fallbackError);
-        setVisitHistory([]);
-      }
+      console.error('❌ ViewSet 내원 이력 조회 실패:', error);
+      setError(error.message);
+      setVisitHistory([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔄 수동 새로고침 함수
-  const handleRefresh = () => {
-    console.log('🔄 수동 새로고침 요청');
-    fetchVisitHistory();
+  const fetchStatistics = async () => {
+    if (!patientUuid) return;
+
+    try {
+      console.log(`📊 통계 조회: ${patientUuid}`);
+      
+      // 🔥 PatientVisitHistoryViewSet의 statistics 액션 사용
+      const response = await fetch(`/api/openmrs/visit-history/statistics/?patient_uuid=${patientUuid}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStatistics(data);
+        console.log('📊 통계 로드 성공:', data);
+      }
+    } catch (error) {
+      console.warn('📊 통계 로드 실패:', error);
+    }
+  };
+
+  const fetchSoapDetails = async (visitId) => {
+    const visit = visitHistory.find(v => v.uuid === visitId);
+    if (!visit) return;
+
+    if (soapDetails[visitId]) {
+      setExpandedVisit(expandedVisit === visitId ? null : visitId);
+      return;
+    }
+
+    try {
+      setLoadingDetails(prev => ({ ...prev, [visitId]: true }));
+      
+      console.log(`🔍 SOAP 상세 조회 (ViewSet): ${visitId}`);
+      
+      // 🔥 PatientVisitHistoryViewSet의 soap_summary 액션 사용
+      const response = await fetch(`/api/openmrs/visit-history/${visitId}/soap_summary/`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('📋 ViewSet SOAP 상세 응답:', data);
+      
+      setSoapDetails(prev => ({
+        ...prev,
+        [visitId]: data.soap_summary
+      }));
+      setExpandedVisit(visitId);
+      console.log(`✅ ViewSet SOAP 상세 로드 성공: ${data.total_count}개`);
+      
+    } catch (error) {
+      console.error('❌ ViewSet SOAP 상세 조회 실패:', error);
+      alert(`상세 정보 조회 실패: ${error.message}`);
+    } finally {
+      setLoadingDetails(prev => ({ ...prev, [visitId]: false }));
+    }
   };
 
   const formatDateTime = (dateStr) => {
@@ -119,286 +149,425 @@ const VisitHistoryPanel = ({ patient }) => {
     }
   };
 
-  const extractDiagnoses = (observations) => {
-    if (!Array.isArray(observations)) return [];
-    
-    return observations.filter(obs => {
-      const concept = obs.concept?.display || '';
-      return concept.toLowerCase().includes('diagnosis') ||
-             concept.includes('진단') ||
-             concept.toLowerCase().includes('visit diagnoses') ||
-             concept.includes('159947'); // Visit Diagnoses UUID
-    });
+  const getSoapIcon = (soapType) => {
+    switch (soapType) {
+      case 'S': return <Heart className="w-4 h-4" style={{ color: '#e74c3c' }} />;
+      case 'O': return <Eye className="w-4 h-4" style={{ color: '#3498db' }} />;
+      case 'A': return <Brain className="w-4 h-4" style={{ color: '#9b59b6' }} />;
+      case 'P': return <Clipboard className="w-4 h-4" style={{ color: '#27ae60' }} />;
+      default: return <FileText className="w-4 h-4" />;
+    }
   };
 
-  const extractPrescriptions = (observations) => {
-    if (!Array.isArray(observations)) return [];
-    
-    return observations.filter(obs => {
-      const concept = obs.concept?.display || '';
-      return concept.toLowerCase().includes('drug') ||
-             concept.includes('약물') ||
-             concept.toLowerCase().includes('medication') ||
-             concept.includes('처방') ||
-             concept.includes('1282'); // Drug Orders UUID
-    });
+  const getSoapTypeLabel = (soapType) => {
+    const labels = {
+      'S': '주관적 정보 (Subjective)',
+      'O': '객관적 소견 (Objective)',
+      'A': '진단 평가 (Assessment)',
+      'P': '치료 계획 (Plan)'
+    };
+    return labels[soapType] || soapType;
   };
 
-  const extractNotes = (observations) => {
-    if (!Array.isArray(observations)) return [];
-    
-    return observations.filter(obs => {
-      const concept = obs.concept?.display || '';
-      return concept.toLowerCase().includes('clinical notes') ||
-             concept.includes('메모') ||
-             concept.includes('160632'); // Clinical Notes UUID
-    });
-  };
-
-  if (!patient) {
+  if (loading) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-        <h3>📂 내원 기록</h3>
-        <p>환자가 선택되지 않았습니다.</p>
+      <div className="card">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '200px',
+          color: '#7f8c8d'
+        }}>
+          <Activity className="w-8 h-8 animate-spin mb-4" style={{ color: '#3498db' }} />
+          <div className="section-title" style={{ textAlign: 'center', border: 'none' }}>
+            내원 이력을 불러오는 중...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '200px'
+        }}>
+          <AlertCircle className="w-8 h-8 mb-4" style={{ color: '#e74c3c' }} />
+          <div className="section-title" style={{ color: '#e74c3c', textAlign: 'center', border: 'none' }}>
+            {error}
+          </div>
+          <button
+            onClick={fetchVisitHistory}
+            style={{
+              marginTop: '1rem',
+              padding: '12px 24px',
+              backgroundColor: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            <RefreshCw className="w-4 h-4" />
+            다시 시도
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!patientUuid) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: '#e74c3c' }}>
-        <h3>📂 내원 기록</h3>
-        <p>환자 UUID를 찾을 수 없습니다.</p>
-        <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
-          환자 정보: {JSON.stringify(patient, null, 2)}
+      <div className="card">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '300px'
+        }}>
+          <User className="w-12 h-12 mb-4" style={{ color: '#bdc3c7' }} />
+          <div className="section-title" style={{ color: '#95a5a6', textAlign: 'center', border: 'none' }}>
+            환자를 선택하면 내원 이력이 표시됩니다
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (visitHistory.length === 0) {
+    return (
+      <div className="card">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '300px'
+        }}>
+          <FileText className="w-12 h-12 mb-4" style={{ color: '#bdc3c7' }} />
+          <div className="section-title" style={{ color: '#7f8c8d', textAlign: 'center', border: 'none' }}>
+            아직 내원 기록이 없습니다
+          </div>
+          <div style={{ fontSize: '14px', color: '#95a5a6', textAlign: 'center', marginTop: '8px' }}>
+            진료 기록을 저장하면 여기에 표시됩니다
+          </div>
+          <button
+            onClick={fetchVisitHistory}
+            style={{
+              marginTop: '1.5rem',
+              padding: '10px 20px',
+              backgroundColor: '#27ae60',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px'
+            }}
+          >
+            <RefreshCw className="w-4 h-4" />
+            새로고침
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      padding: '1rem', 
-      height: '100%', 
-      display: 'flex', 
-      flexDirection: 'column',
-      overflow: 'hidden'
-    }}>
+    <div className="card">
       {/* 헤더 */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '1rem',
-        paddingBottom: '0.5rem',
-        borderBottom: '2px solid #e9ecef'
+        alignItems: 'center',
+        marginBottom: '24px',
+        paddingBottom: '16px',
+        borderBottom: '2px solid #f1f5f9'
       }}>
-        <h3 style={{ margin: 0 }}>📂 내원 기록</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            총 {visitHistory.length}건
-            {lastUpdated && (
-              <div>갱신: {lastUpdated}</div>
-            )}
-          </div>
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            style={{
-              padding: '4px 8px',
+        <div className="section-title" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '12px',
+          margin: 0,
+          border: 'none'
+        }}>
+          <Calendar className="w-6 h-6" style={{ color: '#3498db' }} />
+          내원 이력
+          <span style={{ 
+            backgroundColor: '#3498db', 
+            color: 'white', 
+            padding: '4px 12px', 
+            borderRadius: '12px', 
+            fontSize: '12px',
+            fontWeight: '600'
+          }}>
+            {visitHistory.length}
+          </span>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {/* 통계 요약 */}
+          {statistics && (
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              padding: '8px 12px',
+              borderRadius: '8px',
               fontSize: '12px',
-              backgroundColor: loading ? '#ccc' : '#007bff',
+              color: '#6c757d',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <BarChart3 className="w-4 h-4" />
+              완료: {statistics.completed_visits}
+            </div>
+          )}
+          
+          <button
+            onClick={fetchVisitHistory}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#27ae60',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer'
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease'
             }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#229954'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#27ae60'}
           >
-            {loading ? '⏳' : '🔄'}
+            <RefreshCw className="w-4 h-4" />
+            새로고침
           </button>
         </div>
       </div>
 
-      {/* 로딩 상태 */}
-      {loading && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '2rem',
-          color: '#666'
-        }}>
-          <div>🔄 내원 기록을 불러오는 중...</div>
-          <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
-            환자 UUID: {patientUuid}
-          </div>
-        </div>
-      )}
-
-      {/* 오류 상태 */}
-      {error && !loading && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '1rem',
-          color: '#e74c3c',
-          backgroundColor: '#fdf2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '4px',
-          marginBottom: '1rem'
-        }}>
-          <div>❌ {error}</div>
-          <button
-            onClick={handleRefresh}
-            style={{
-              marginTop: '0.5rem',
-              padding: '4px 8px',
-              fontSize: '12px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            다시 시도
-          </button>
-        </div>
-      )}
-
       {/* 내원 이력 목록 */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {!loading && !error && visitHistory.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '2rem',
-            color: '#666',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '4px'
+      <div style={{ 
+        maxHeight: 'calc(100vh - 300px)', 
+        overflowY: 'auto',
+        paddingRight: '8px'
+      }}>
+        {visitHistory.map((visit, index) => (
+          <div key={visit.uuid || index} style={{
+            border: '1px solid #e1e8ed',
+            borderRadius: '12px',
+            marginBottom: '16px',
+            backgroundColor: '#fff',
+            overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            transition: 'all 0.2s ease'
           }}>
-            <div>📋 내원 기록이 없습니다</div>
-            <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
-              진료 기록을 저장하면 여기에 표시됩니다
-            </div>
-            <button
-              onClick={handleRefresh}
+            {/* 기본 정보 헤더 */}
+            <div 
               style={{
-                marginTop: '1rem',
-                padding: '8px 16px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
+                padding: '20px',
+                backgroundColor: '#f8f9fa',
+                borderBottom: '1px solid #e1e8ed',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease'
               }}
+              onClick={() => fetchSoapDetails(visit.uuid)}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f1f3f4'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#f8f9fa'}
             >
-              새로고침
-            </button>
-          </div>
-        )}
-
-        {!loading && visitHistory.length > 0 && (
-          <div>
-            {visitHistory.map((visit, index) => {
-              const diagnoses = extractDiagnoses(visit.observations || []);
-              const prescriptions = extractPrescriptions(visit.observations || []);
-              const notes = extractNotes(visit.observations || []);
-
-              return (
-                <div key={visit.encounter_uuid || index} style={{
-                  border: '1px solid #e9ecef',
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  marginBottom: '1rem',
-                  backgroundColor: '#fff'
-                }}>
-                  {/* 기본 정보 */}
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem'
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{
+                    backgroundColor: '#3498db',
+                    borderRadius: '50%',
+                    padding: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}>
-                    <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-                      📅 {formatDateTime(visit.encounter_datetime)}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      {visit.obs_count || 0}개 기록
-                    </div>
+                    <Calendar className="w-5 h-5" style={{ color: 'white' }} />
                   </div>
                   
-                  <div style={{ fontSize: '13px', color: '#6c757d', marginBottom: '0.5rem' }}>
-                    👨‍⚕️ {visit.provider} | 📍 {visit.location} | 🏥 {visit.encounter_type}
-                  </div>
-
-                  {/* 진단 */}
-                  {diagnoses.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#28a745' }}>
-                        🩺 진단:
-                      </div>
-                      {diagnoses.map((diag, diagIndex) => (
-                        <div key={diagIndex} style={{ 
-                          fontSize: '12px', 
-                          color: '#155724',
-                          marginLeft: '1rem'
-                        }}>
-                          • {diag.value || diag.valueText || diag.concept.display}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 처방 */}
-                  {prescriptions.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#dc3545' }}>
-                        💊 처방:
-                      </div>
-                      {prescriptions.map((pres, presIndex) => (
-                        <div key={presIndex} style={{ 
-                          fontSize: '12px', 
-                          color: '#721c24',
-                          marginLeft: '1rem'
-                        }}>
-                          • {pres.value || pres.valueText || pres.concept.display}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 임상 메모 */}
-                  {notes.length > 0 && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#6c757d' }}>
-                        📝 임상 메모:
-                      </div>
-                      {notes.map((note, noteIndex) => (
-                        <div key={noteIndex} style={{ 
-                          fontSize: '12px', 
-                          color: '#495057',
-                          marginLeft: '1rem',
-                          fontStyle: 'italic'
-                        }}>
-                          "{note.value || note.valueText}"
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 전체 관찰 수 표시 */}
-                  {visit.observations && visit.observations.length > 0 && (
+                  <div>
                     <div style={{ 
-                      fontSize: '11px', 
-                      color: '#6c757d',
-                      borderTop: '1px solid #eee',
-                      paddingTop: '0.5rem',
-                      marginTop: '0.5rem'
+                      fontWeight: '600', 
+                      color: '#2c3e50',
+                      fontSize: '16px',
+                      marginBottom: '4px'
                     }}>
-                      📊 총 {visit.observations.length}개 항목 기록됨
+                      {formatDateTime(visit.visit_date)}
+                    </div>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      color: '#7f8c8d',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <Stethoscope className="w-4 h-4" />
+                      {visit.status_display || visit.status} • {visit.visit_type || 'OUTPATIENT'}
+                      {visit.total_diagnoses && ` • SOAP: ${visit.total_diagnoses}개`}
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {/* 주진단 표시 */}
+                  {visit.primary_diagnosis && (
+                    <div style={{ 
+                      fontSize: '13px', 
+                      color: '#8e44ad',
+                      backgroundColor: '#f8f4ff',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      border: '1px solid #e8d5ff',
+                      fontWeight: '500',
+                      maxWidth: '200px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {visit.primary_diagnosis}
                     </div>
                   )}
+                  
+                  {/* 로딩/펼침 아이콘 */}
+                  <div style={{
+                    backgroundColor: '#ecf0f1',
+                    borderRadius: '50%',
+                    padding: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {loadingDetails[visit.uuid] ? (
+                      <Activity className="w-4 h-4 animate-spin" style={{ color: '#3498db' }} />
+                    ) : expandedVisit === visit.uuid ? (
+                      <ChevronUp className="w-4 h-4" style={{ color: '#34495e' }} />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" style={{ color: '#34495e' }} />
+                    )}
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* 상세 SOAP 정보 */}
+            {expandedVisit === visit.uuid && soapDetails[visit.uuid] && (
+              <div style={{ padding: '24px', backgroundColor: '#fafbfc' }}>
+                {Object.entries(soapDetails[visit.uuid]).map(([soapType, items]) => 
+                  items.length > 0 && (
+                    <div key={soapType} style={{ marginBottom: '24px' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '12px', 
+                        marginBottom: '16px',
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid #e9ecef'
+                      }}>
+                        <div style={{
+                          backgroundColor: 'white',
+                          borderRadius: '8px',
+                          padding: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}>
+                          {getSoapIcon(soapType)}
+                        </div>
+                        <div style={{
+                          fontWeight: '600',
+                          color: '#34495e',
+                          fontSize: '15px'
+                        }}>
+                          {getSoapTypeLabel(soapType)}
+                        </div>
+                        <span style={{
+                          backgroundColor: '#3498db',
+                          color: 'white',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '600'
+                        }}>
+                          {items.length}
+                        </span>
+                      </div>
+                      
+                      {items.map((item, idx) => (
+                        <div key={idx} style={{
+                          marginLeft: '36px',
+                          marginBottom: '12px',
+                          padding: '16px',
+                          backgroundColor: 'white',
+                          borderRadius: '8px',
+                          borderLeft: '4px solid #3498db',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}>
+                          <div style={{ 
+                            fontSize: '14px', 
+                            lineHeight: '1.6',
+                            color: '#2c3e50',
+                            marginBottom: '8px'
+                          }}>
+                            {item.content}
+                          </div>
+                          
+                          {item.clinical_notes && (
+                            <div style={{ 
+                              fontSize: '13px', 
+                              color: '#7f8c8d', 
+                              fontStyle: 'italic',
+                              backgroundColor: '#f8f9fa',
+                              padding: '8px',
+                              borderRadius: '4px',
+                              marginBottom: '8px'
+                            }}>
+                              📝 {item.clinical_notes}
+                            </div>
+                          )}
+                          
+                          {soapType === 'A' && (item.icd10_code || item.icd10_name) && (
+                            <div style={{ 
+                              fontSize: '13px', 
+                              color: '#8e44ad', 
+                              fontWeight: '600',
+                              backgroundColor: '#f8f4ff',
+                              padding: '8px',
+                              borderRadius: '4px',
+                              border: '1px solid #e8d5ff'
+                            }}>
+                              🏥 {item.icd10_code}: {item.icd10_name}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
+            )}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

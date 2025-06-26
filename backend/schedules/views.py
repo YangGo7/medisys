@@ -941,7 +941,7 @@
 #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #         )
 
-# schedules/views.py - 시간 처리 개선
+# backend/schedules/views.py - 시간 처리 수정
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
@@ -949,12 +949,14 @@ from rest_framework.response import Response
 from datetime import datetime, date
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.db.models import Count, Q
 from .models import ScheduleCommon, ScheduleRIS, PersonalSchedule, ExamRoom
 from .serializers import ScheduleCommonSerializer, ScheduleRISSerializer, PersonalScheduleSerializer, ExamRoomSerializer
 import logging
 
 logger = logging.getLogger(__name__)
 
+# 누락된 ViewSet들 추가
 class ScheduleCommonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ScheduleCommon.objects.all().order_by('datetime')
     serializer_class = ScheduleCommonSerializer
@@ -962,6 +964,18 @@ class ScheduleCommonViewSet(viewsets.ReadOnlyModelViewSet):
 class ScheduleRISViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ScheduleRIS.objects.all().order_by('datetime')
     serializer_class = ScheduleRISSerializer
+
+class ExamRoomViewSet(viewsets.ReadOnlyModelViewSet):
+    """검사실 목록 API (읽기 전용)"""
+    queryset = ExamRoom.objects.filter(is_active=True).order_by('room_id')
+    serializer_class = ExamRoomSerializer
+    
+    @action(detail=False, methods=['get'])
+    def active_rooms(self, request):
+        """활성화된 검사실만 조회"""
+        rooms = ExamRoom.objects.filter(is_active=True).order_by('room_id')
+        serializer = self.get_serializer(rooms, many=True)
+        return Response(serializer.data)
 
 class PersonalScheduleViewSet(viewsets.ModelViewSet):
     queryset = PersonalSchedule.objects.all()
@@ -986,31 +1000,34 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
             if not doctor:
                 raise ValueError("의사 정보를 찾을 수 없습니다.")
             
-            # 🔧 간단한 datetime 처리
+            # 🔧 시간 처리 개선
             datetime_str = self.request.data.get('datetime')
             end_datetime_str = self.request.data.get('end_datetime')
             
-            logger.info(f"🕐 받은 datetime: {datetime_str}")
-            logger.info(f"🕐 받은 end_datetime: {end_datetime_str}")
+            logger.info(f"🕐 받은 datetime: {datetime_str} (type: {type(datetime_str)})")
+            logger.info(f"🕐 받은 end_datetime: {end_datetime_str} (type: {type(end_datetime_str)})")
             
-            # datetime 변환 - naive datetime으로 처리
+            # datetime 처리 - naive datetime으로 받아서 Django 설정 시간대로 해석
             datetime_value = None
             if datetime_str:
                 try:
-                    # 🔧 단순 파싱: "YYYY-MM-DDTHH:MM:SS" 또는 "YYYY-MM-DDTHH:MM"
-                    if len(datetime_str) == 16:  # "YYYY-MM-DDTHH:MM"
-                        datetime_str += ':00'  # 초 추가
+                    # 🔧 parse_datetime 사용 (Django 권장)
+                    datetime_value = parse_datetime(datetime_str)
                     
-                    # naive datetime으로 파싱
-                    datetime_value = datetime.fromisoformat(datetime_str.replace('Z', ''))
+                    if datetime_value is None:
+                        # 수동 파싱 시도
+                        if 'T' in datetime_str:
+                            datetime_value = datetime.fromisoformat(datetime_str.replace('Z', ''))
+                        else:
+                            datetime_value = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
                     
-                    # Django 설정이 KST이므로 그대로 사용
-                    if timezone.is_naive(datetime_value):
+                    # 🔧 중요: naive datetime이면 현재 시간대(Asia/Seoul)로 인식
+                    if datetime_value and timezone.is_naive(datetime_value):
                         datetime_value = timezone.make_aware(datetime_value)
                     
-                    logger.info(f"🕐 변환된 datetime: {datetime_value}")
+                    logger.info(f"🕐 변환된 datetime: {datetime_value} (timezone: {datetime_value.tzinfo})")
                     
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     logger.error(f"datetime 파싱 오류: {e}")
                     raise ValueError(f"올바르지 않은 datetime 형식: {datetime_str}")
             
@@ -1018,17 +1035,17 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
             end_datetime_value = None
             if end_datetime_str and end_datetime_str != '':
                 try:
-                    if len(end_datetime_str) == 16:
-                        end_datetime_str += ':00'
+                    end_datetime_value = parse_datetime(end_datetime_str)
                     
-                    end_datetime_value = datetime.fromisoformat(end_datetime_str.replace('Z', ''))
+                    if end_datetime_value is None and 'T' in end_datetime_str:
+                        end_datetime_value = datetime.fromisoformat(end_datetime_str.replace('Z', ''))
                     
-                    if timezone.is_naive(end_datetime_value):
+                    if end_datetime_value and timezone.is_naive(end_datetime_value):
                         end_datetime_value = timezone.make_aware(end_datetime_value)
                     
                     logger.info(f"🕐 변환된 end_datetime: {end_datetime_value}")
                     
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     logger.error(f"end_datetime 파싱 오류: {e}")
                     end_datetime_value = None
             
@@ -1059,18 +1076,18 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
             # datetime 처리
             if datetime_str:
                 try:
-                    if len(datetime_str) == 16:
-                        datetime_str += ':00'
+                    datetime_value = parse_datetime(datetime_str)
                     
-                    datetime_value = datetime.fromisoformat(datetime_str.replace('Z', ''))
+                    if datetime_value is None and 'T' in datetime_str:
+                        datetime_value = datetime.fromisoformat(datetime_str.replace('Z', ''))
                     
-                    if timezone.is_naive(datetime_value):
+                    if datetime_value and timezone.is_naive(datetime_value):
                         datetime_value = timezone.make_aware(datetime_value)
                     
                     update_data['datetime'] = datetime_value
                     logger.info(f"🕐 수정된 datetime: {datetime_value}")
                     
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     logger.error(f"datetime 수정 파싱 오류: {e}")
             
             # end_datetime 처리
@@ -1078,18 +1095,18 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
                 update_data['end_datetime'] = None
             elif end_datetime_str:
                 try:
-                    if len(end_datetime_str) == 16:
-                        end_datetime_str += ':00'
+                    end_datetime_value = parse_datetime(end_datetime_str)
                     
-                    end_datetime_value = datetime.fromisoformat(end_datetime_str.replace('Z', ''))
+                    if end_datetime_value is None and 'T' in end_datetime_str:
+                        end_datetime_value = datetime.fromisoformat(end_datetime_str.replace('Z', ''))
                     
-                    if timezone.is_naive(end_datetime_value):
+                    if end_datetime_value and timezone.is_naive(end_datetime_value):
                         end_datetime_value = timezone.make_aware(end_datetime_value)
                     
                     update_data['end_datetime'] = end_datetime_value
                     logger.info(f"🕐 수정된 end_datetime: {end_datetime_value}")
                     
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     logger.error(f"end_datetime 수정 파싱 오류: {e}")
                     update_data['end_datetime'] = None
             
@@ -1098,7 +1115,7 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error in perform_update: {e}")
             raise
-    
+
     def create(self, request, *args, **kwargs):
         try:
             logger.info(f"🕐 POST request data: {request.data}")
@@ -1246,19 +1263,6 @@ class PersonalScheduleViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error in month_summary: {e}")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
-class ExamRoomViewSet(viewsets.ReadOnlyModelViewSet):
-    """검사실 목록 API (읽기 전용)"""
-    queryset = ExamRoom.objects.filter(is_active=True).order_by('room_id')
-    serializer_class = ExamRoomSerializer
-    
-    @action(detail=False, methods=['get'])
-    def active_rooms(self, request):
-        """활성화된 검사실만 조회"""
-        rooms = ExamRoom.objects.filter(is_active=True).order_by('room_id')
-        serializer = self.get_serializer(rooms, many=True)
-        return Response(serializer.data)
 
 
 # 검사실별 스케줄 API
@@ -1355,7 +1359,6 @@ def get_room_schedules_summary(request):
     """
     try:
         from worklists.models import StudyRequest
-        from django.db.models import Count, Q
         
         # 날짜 파라미터
         date_param = request.GET.get('date', timezone.now().date())

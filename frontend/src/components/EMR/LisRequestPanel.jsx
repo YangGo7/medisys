@@ -22,7 +22,7 @@ const LisRequestPanel = ({ patient }) => {
     
     return {
       uuid: patient.uuid,
-      identifier: patient.identifiers?.[0]?.identifier || patient.identifier || '',
+      identifier: patient.identifiers?.[0]?.identifier || patient.identifier || patient.uuid || '',
       name: patient.display || patient.name || patient.patient_name || '',
       givenName: patient.person?.preferredName?.givenName || '',
       familyName: patient.person?.preferredName?.familyName || '',

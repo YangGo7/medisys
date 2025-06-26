@@ -29,13 +29,15 @@ const CdssResultModal = ({ data, onClose }) => {
   if (!data) return null;
 
   console.log("📦 SHAP 데이터 확인:", data.shap_data);
+  console.log("📦 prediction 확인:", data.prediction); 
 
   const uniqueResults = [...new Map(data.results.map(item => [item.component_name, item])).values()];
 
   const interpretPrediction = (value) => {
     if (value === 1 || value === true || value === "1") return '🔴 이상 소견';
     if (value === 0 || value === false || value === "0") return '🟢 정상';
-    return value || '예측값 없음';
+    if (value === null || value === undefined || value === '') return '❓ 예측값 없음';
+    return String(value); // 혹시 숫자 외 다른 값이 들어올 경우 표시
   };
 
   return (

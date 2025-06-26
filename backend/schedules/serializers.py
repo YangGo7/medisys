@@ -1,4 +1,4 @@
-# schedules/serializers.py - DateTime 처리 수정
+# backend/schedules/serializers.py - 시간 표시 문제 수정
 
 from rest_framework import serializers
 from .models import ScheduleCommon, ScheduleRIS, PersonalSchedule, ExamRoom
@@ -14,42 +14,41 @@ class PersonalScheduleSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'datetime', 'end_datetime', 'description', 'is_completed', 'time_display']
     
     def get_time_display(self, obj):
+        """시간 표시 로직 수정 - 시간대 변환 문제 해결"""
         try:
-            # datetime이 문자열인 경우 파싱
-            if isinstance(obj.datetime, str):
-                start_dt = datetime.fromisoformat(obj.datetime.replace('Z', '+00:00'))
-            else:
-                start_dt = obj.datetime
-            
-            start_time = start_dt.strftime('%H:%M')
-            
-            # end_datetime 처리
-            if obj.end_datetime:
-                if isinstance(obj.end_datetime, str):
-                    end_dt = datetime.fromisoformat(obj.end_datetime.replace('Z', '+00:00'))
-                    end_time = end_dt.strftime('%H:%M')
-                elif hasattr(obj.end_datetime, 'strftime'):
-                    end_time = obj.end_datetime.strftime('%H:%M')
-                else:
-                    # end_datetime가 다른 형태인 경우
-                    return start_time
+            # 🔧 Django의 localtime 사용하여 정확한 로컬 시간 계산
+            if obj.datetime:
+                # Django 설정 시간대(Asia/Seoul)로 변환
+                local_dt = timezone.localtime(obj.datetime)
+                start_time = local_dt.strftime('%H:%M')
                 
-                return f"{start_time} ~ {end_time}"
-            
-            return start_time
-            
-        except (ValueError, AttributeError) as e:
-            # 오류 발생 시 기본값 반환
-            return "시간 정보 없음"
+                print(f"🕐 time_display 계산:")
+                print(f"  - 원본 datetime: {obj.datetime}")
+                print(f"  - localtime 변환: {local_dt}")  
+                print(f"  - start_time: {start_time}")
+                
+                # end_datetime 처리
+                if obj.end_datetime:
+                    local_end_dt = timezone.localtime(obj.end_datetime)
+                    end_time = local_end_dt.strftime('%H:%M')
+                    print(f"  - end_time: {end_time}")
+                    return f"{start_time} ~ {end_time}"
+                
+                return start_time
+            else:
+                return "시간 정보 없음"
+                
+        except Exception as e:
+            print(f"❌ time_display 오류: {e}")
+            return "시간 계산 오류"
     
     def validate_datetime(self, value):
-        """datetime 필드 검증 및 timezone 처리"""
+        """datetime 필드 검증"""
         if isinstance(value, str):
             try:
-                # ISO 형식 문자열을 datetime 객체로 변환
-                dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                # timezone aware로 변환
-                if timezone.is_naive(dt):
+                from django.utils.dateparse import parse_datetime
+                dt = parse_datetime(value)
+                if dt and timezone.is_naive(dt):
                     dt = timezone.make_aware(dt)
                 return dt
             except ValueError:
@@ -57,19 +56,10 @@ class PersonalScheduleSerializer(serializers.ModelSerializer):
         return value
     
     def validate_end_datetime(self, value):
-        """end_datetime 필드 검증 및 timezone 처리"""
+        """end_datetime 필드 검증"""
         if not value or value == '':
             return None
-            
-        if isinstance(value, str):
-            try:
-                dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                if timezone.is_naive(dt):
-                    dt = timezone.make_aware(dt)
-                return dt
-            except ValueError:
-                raise serializers.ValidationError("올바른 datetime 형식이 아닙니다.")
-        return value
+        return self.validate_datetime(value)
 
 class ScheduleCommonSerializer(serializers.ModelSerializer):
     time_display = serializers.SerializerMethodField()
@@ -80,28 +70,19 @@ class ScheduleCommonSerializer(serializers.ModelSerializer):
     
     def get_time_display(self, obj):
         try:
-            if isinstance(obj.datetime, str):
-                start_dt = datetime.fromisoformat(obj.datetime.replace('Z', '+00:00'))
-            else:
-                start_dt = obj.datetime
-            
-            start_time = start_dt.strftime('%H:%M')
-            
-            if obj.end_datetime:
-                if isinstance(obj.end_datetime, str):
-                    end_dt = datetime.fromisoformat(obj.end_datetime.replace('Z', '+00:00'))
-                    end_time = end_dt.strftime('%H:%M')
-                elif hasattr(obj.end_datetime, 'strftime'):
-                    end_time = obj.end_datetime.strftime('%H:%M')
-                else:
-                    return start_time
+            if obj.datetime:
+                local_dt = timezone.localtime(obj.datetime)
+                start_time = local_dt.strftime('%H:%M')
                 
-                return f"{start_time} ~ {end_time}"
-            
-            return start_time
-            
-        except (ValueError, AttributeError):
+                if obj.end_datetime:
+                    local_end_dt = timezone.localtime(obj.end_datetime)
+                    end_time = local_end_dt.strftime('%H:%M')
+                    return f"{start_time} ~ {end_time}"
+                
+                return start_time
             return "시간 정보 없음"
+        except Exception:
+            return "시간 계산 오류"
 
 class ScheduleRISSerializer(serializers.ModelSerializer):
     time_display = serializers.SerializerMethodField()
@@ -112,28 +93,19 @@ class ScheduleRISSerializer(serializers.ModelSerializer):
     
     def get_time_display(self, obj):
         try:
-            if isinstance(obj.datetime, str):
-                start_dt = datetime.fromisoformat(obj.datetime.replace('Z', '+00:00'))
-            else:
-                start_dt = obj.datetime
-            
-            start_time = start_dt.strftime('%H:%M')
-            
-            if obj.end_datetime:
-                if isinstance(obj.end_datetime, str):
-                    end_dt = datetime.fromisoformat(obj.end_datetime.replace('Z', '+00:00'))
-                    end_time = end_dt.strftime('%H:%M')
-                elif hasattr(obj.end_datetime, 'strftime'):
-                    end_time = obj.end_datetime.strftime('%H:%M')
-                else:
-                    return start_time
+            if obj.datetime:
+                local_dt = timezone.localtime(obj.datetime)
+                start_time = local_dt.strftime('%H:%M')
                 
-                return f"{start_time} ~ {end_time}"
-            
-            return start_time
-            
-        except (ValueError, AttributeError):
+                if obj.end_datetime:
+                    local_end_dt = timezone.localtime(obj.end_datetime)
+                    end_time = local_end_dt.strftime('%H:%M')
+                    return f"{start_time} ~ {end_time}"
+                
+                return start_time
             return "시간 정보 없음"
+        except Exception:
+            return "시간 계산 오류"
 
 class DoctorSerializer(serializers.ModelSerializer):
     today_personal_schedules = serializers.SerializerMethodField()
@@ -151,7 +123,6 @@ class DoctorSerializer(serializers.ModelSerializer):
         ).order_by('datetime')
         return PersonalScheduleSerializer(schedules, many=True).data
     
-    
 class ExamRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExamRoom
@@ -160,11 +131,10 @@ class ExamRoomSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """React에서 사용하기 쉽도록 데이터 형태 조정"""
         data = super().to_representation(instance)
-        # React 코드와 일치하도록 필드명 조정
         return {
-            'id': data['room_id'],  # React에서 사용하는 id
+            'id': data['room_id'],
             'name': data['name'],
-            'type': data['room_type'],  # React에서 사용하는 type
+            'type': data['room_type'],
             'is_active': data['is_active'],
             'description': data['description']
         }

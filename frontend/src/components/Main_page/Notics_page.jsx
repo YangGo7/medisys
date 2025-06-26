@@ -8,7 +8,7 @@ class NoticeAPI {
   static async request(endpoint, options = {}) {
     try {
       // ✅ 슬래시 처리 개선 - main-page-function/ 으로 수정
-      const url = `${this.BASE_URL.replace(/\/$/, '')}/main-page-function${endpoint}`;
+      const url = `${this.BASE_URL.replace(/\/$/, '')}main-page-function${endpoint}`;
       console.log('🔍 API 요청 URL:', url); // 디버깅용
       
       const response = await fetch(url, {

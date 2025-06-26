@@ -183,7 +183,7 @@ class PatientVisitHistorySerializer(serializers.ModelSerializer):
         return obj.get_soap_diagnoses().exclude(
             study_instance_uid__isnull=True
         ).count()
-
+    
 
 class SoapDiagnosisCreateSerializer(serializers.ModelSerializer):
     """SOAP 진단 생성용 간소화 시리얼라이저"""
