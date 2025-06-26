@@ -616,6 +616,261 @@
   max-height: 450px;
 }
 
+/* 🔥 영상검사 결과 패널 스타일 */
+.imaging-results-panel {
+  padding: 1rem;
+}
+
+.studies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.study-card {
+  background: var(--white-tone-5);
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.study-card:hover {
+  border-color: var(--secondary-marine-blue);
+  box-shadow: 0 4px 12px rgba(9, 129, 209, 0.1);
+}
+
+.study-info {
+  flex: 1;
+}
+
+.study-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.study-modality {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-marine-blue) 100%);
+  color: var(--white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.study-date {
+  color: var(--text-gray);
+  font-size: 0.85rem;
+}
+
+.study-description {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.study-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-gray);
+}
+
+.study-status {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.study-status.completed {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--success-green);
+}
+
+.study-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-study-btn,
+.download-study-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-study-btn {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-marine-blue) 100%);
+  color: var(--white);
+}
+
+.view-study-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(9, 129, 209, 0.3);
+}
+
+.download-study-btn {
+  background: linear-gradient(135deg, var(--text-gray) 0%, #495057 100%);
+  color: var(--white);
+}
+
+.download-study-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* 🔥 코너스톤 뷰어 모달 스타일 */
+.viewer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.viewer-modal {
+  width: 90vw;
+  height: 90vh;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewer-header {
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--primary-purple) 100%);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--primary-marine-blue);
+}
+
+.viewer-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.viewer-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.viewer-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewer-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.viewer-close-btn {
+  padding: 0.5rem;
+  background: rgba(231, 76, 60, 0.2);
+  color: var(--white);
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.viewer-close-btn:hover {
+  background: rgba(231, 76, 60, 0.4);
+  border-color: var(--danger-red);
+}
+
+.viewer-content {
+  flex: 1;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.cornerstone-viewport {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.mock-dicom-viewer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: var(--white);
+}
+
+.dicom-image-placeholder {
+  text-align: center;
+  padding: 2rem;
+}
+
+.dicom-image-placeholder h3 {
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  color: var(--secondary-marine-blue);
+}
+
+.dicom-image-placeholder p {
+  margin: 0.5rem 0;
+  color: #ccc;
+}
+
+.viewer-info {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(9, 129, 209, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(9, 129, 209, 0.3);
+}
+
+.viewer-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--secondary-marine-blue);
+}
+
 /* 🔥 진료 종료 버튼 */
 .end-consultation-btn {
   position: fixed;
@@ -762,6 +1017,11 @@
     width: 200px;
     z-index: 999;
   }
+
+  .viewer-modal {
+    width: 95vw;
+    height: 95vh;
+  }
 }
 
 @media (max-width: 768px) {
@@ -807,5 +1067,22 @@
   
   .detail-value {
     text-align: left;
+  }
+
+  .viewer-modal {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .study-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .study-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

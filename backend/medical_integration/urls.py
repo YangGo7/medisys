@@ -15,7 +15,7 @@ from .views import (
     AlertMarkRead,
     get_patient_mapping,
     assign_room,
-    
+    cancel_waiting_registration,
     # 🔥 새로 추가된 함수들 (대기 종료 관련)
     unassign_room,
     complete_treatment,                    # 진료 완료 + 대기 종료
@@ -84,7 +84,6 @@ urlpatterns = [
     path('reception-list/', reception_list_view, name='reception_list'),
     path('identifier-based/', create_identifier_based_mapping, name='create_identifier_based_mapping'),
     path('reception/active-list/', views.get_active_waiting_list, name='get_active_waiting_list'),
-    path('reception/cancel-waiting/<int:mapping_id>/', views.cancel_waiting_registration, name='cancel_waiting_registration'),
     
     
     # 🔥 대기 통계 및 완료 환자 관리
@@ -96,7 +95,7 @@ urlpatterns = [
     path('alerts/urgent/', UrgentAlertList.as_view(), name='urgent_alert_list'),
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
     path('alerts/<int:pk>/mark-read/', AlertMarkRead.as_view(), name='alert_mark_read'),
-    path('cancel-waiting/<int:mapping_id>/', views.cancel_waiting_registration, name='cancel_waiting_registration'),
+    path('cancel-waiting/<int:mapping_id>/', cancel_waiting_registration, name='cancel_waiting_registration'),
     # 🔥 진료실 배정 관리 (완전한 버전)
     path('assign-room/', assign_room, name='assign_room'),
     path('unassign-room/', unassign_room, name='unassign_room'),
@@ -108,7 +107,6 @@ urlpatterns = [
     path('batch-update-status/', batch_update_status, name='batch_update_status'),
     
     # 기존 환자 관리
-    path('delete-mapping/<str:mapping_id>/', views.delete_patient_mapping, name='delete_patient_mapping'),
     path('patients/create-auto-id/', views.create_patient_auto_id, name='create_patient_auto_id'),
     path('patients/create/', views.create_patient, name='create_patient'),
 ]   
