@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import CDSSResult, LiverFunctionSample
 from .serializers import CDSSResultSerializer
+from lis_cdss.inference.manual_contributions import get_manual_contributions
 from lis_cdss.inference.blood_inference import run_blood_model, MODELS
-from lis_cdss.inference.shap_lis import generate_shap_values  
+# from lis_cdss.inference.shap_lis import generate_shap_values  
 from django.db.models import Avg, Count
 from django.utils.timezone import localtime
 from collections import defaultdict
@@ -14,6 +15,7 @@ import numpy as np
 import pandas as pd
 import shap
 import requests
+import joblib
 from datetime import datetime
 
 # ✅ 최근 결과 리스트 조회
@@ -122,7 +124,7 @@ def receive_model_result(request):
         test_type=test_type,
         component_name=component_name
     ).first()
-    
+
     request_data = request.data.copy()
     request_data["component_name"] = component_name
 
@@ -130,9 +132,14 @@ def receive_model_result(request):
         serializer = CDSSResultSerializer(existing, data=request_data)
     else:
         serializer = CDSSResultSerializer(data=request_data)
+        
+    prediction = None
 
     if serializer.is_valid():
         instance = serializer.save()
+        
+        print("✅ 응답에 포함될 prediction:", prediction)
+        print("✅ 저장된 instance.prediction:", instance.prediction)
 
         try:
             related = CDSSResult.objects.filter(
@@ -145,11 +152,15 @@ def receive_model_result(request):
                 for r in related
             }
 
-            model = MODELS.get(test_type)
+            model = MODELS.get(test_type.upper())
             prediction = run_blood_model(test_type, values) if model else None
-            shap_data = generate_shap_values(model, values) if model else None
-
             related.update(prediction=prediction)
+            
+            print(f"📌 계산된 prediction: {prediction}")
+            
+            instance.prediction = prediction
+            instance.save()
+        
 
             # ✅ LFT 저장
             if test_type.strip().lower() == "lft":
@@ -184,7 +195,7 @@ def receive_model_result(request):
             try:
                 sample_obj = instance.sample
                 patient_id = getattr(sample_obj, 'patient_id', None)
-                created_at = getattr(sample_obj, 'created_at', datetime.now())  # 없으면 현재 시간
+                created_at = getattr(sample_obj, 'created_at', datetime.now())
 
                 send_result_to_emr(
                     patient_id=patient_id,
@@ -197,9 +208,12 @@ def receive_model_result(request):
             except Exception as e:
                 print(f"❌ EMR 전송 오류: {e}")
 
-            # ✅ 응답
+            # ✅ 기여도 계산 대체 방식
+            background_df = pd.read_csv("lis_cdss/inference/lft_background.csv")
+            contribution_result = get_manual_contributions(model, value, background_df)
+            
             response_data = CDSSResultSerializer(instance).data
-            response_data['shap_data'] = shap_data
+            response_data['shap_data'] = contribution_result  # ← SHAP 대체
             response_data['prediction'] = prediction
             response_data['lfs_saved'] = True
 
@@ -212,33 +226,50 @@ def receive_model_result(request):
     print("❌ CDSSResult 저장 실패:", serializer.errors)
     return Response(serializer.errors, status=400)
 
-
 # ✅ 슬라이더 기반 전체 시뮬레이션 입력 처리 (시각화용)
 @api_view(['POST'])
 def receive_full_sample(request):
     try:
-        sample_id = request.data.get('sample')
-        test_type = request.data.get('test_type')
-        components = request.data.get('components', [])
+        sample_id = request.data.get("sample")
+        test_type = request.data.get("test_type")
+        components = request.data.get("components", [])
 
-        input_dict = {}
-        for comp in components:
-            try:
-                input_dict[comp['component_name']] = float(comp['value'])
-            except Exception as e:
-                print("❌ float 변환 실패:", comp['component_name'], comp['value'], e)
-                return Response({'error': f"입력값 변환 실패: {comp['component_name']} = {comp['value']}"}, status=400)
+        # 입력값 구성
+        input_dict = {
+            comp["component_name"]: float(comp["value"])
+            for comp in components
+            if comp["value"] not in [None, "", "NaN"]
+        }
 
-        features = ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin']
-        df = pd.DataFrame([[input_dict.get(f, 0.0) for f in features]], columns=features)
+        feature_names = joblib.load("lis_cdss/inference/lft_feature_names.joblib")
+        model = joblib.load("lis_cdss/inference/lft_logistic_model.pkl")
+        background_df = pd.read_csv("lis_cdss/inference/lft_background.csv")
 
-        model = MODELS.get(test_type)
-        if not model:
-            return Response({'error': '해당 test_type 모델이 없습니다.'}, status=400)
-
+        # 예측
+        df = pd.DataFrame([input_dict], columns=feature_names)
         prob = model.predict_proba(df)[0][1]
         pred = int(prob >= 0.5)
 
+        # 기여도 계산
+        contrib_result = get_manual_contributions(model, input_dict, background_df)
+        if not contrib_result:
+            contrib_result = {
+                "features": feature_names,
+                "contributions": [0.0] * len(feature_names)
+            }
+
+        return Response({
+            "sample": sample_id,
+            "test_type": test_type,
+            "prediction": pred,
+            "prediction_prob": prob,
+            "shap_data": contrib_result
+        }, status=200)
+
+    except Exception as e:
+        print("❌ 시뮬레이션 오류:", e)
+        return Response({"error": str(e)}, status=500)
+    
         # try:
         #     explainer = shap.Explainer(model.predict_proba, df)
         #     shap_values = explainer(df)
@@ -246,22 +277,8 @@ def receive_full_sample(request):
         # except Exception as e:
         #     print(f"⚠️ SHAP 계산 실패: {e}")
         #     shap_output = [0.0] * len(features)  # 또는 None
-
-        response = {
-            'sample': sample_id,
-            'test_type': test_type,
-            'prediction': pred,
-            'prediction_prob': prob,
-            'shap_data': {
-                'features': features,
-                'shap_values': shap_output
-            }
-        }
-        return Response(response, status=200)
-
-    except Exception as e:
-        print("❌ CDSS 시뮬레이션 에러:", e)
-        return Response({'error': str(e)}, status=500)
+        
+        
 
 
 @api_view(['GET'])

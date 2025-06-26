@@ -34,6 +34,7 @@ import ImagingRequestPanel from '../EMR/ImagingRequestPanel';
 import VisitHistoryPanel from '../EMR/VisitHistoryPanel';
 import DiagnosisPrescriptionPanel from '../EMR/DiagnosisPrescriptionPanel';
 import { DEFAULT_DOCTOR_ID } from '../EMR/lisConfig';
+import ResultModal from '../LIS/ResultModal';
 
 // CSS 파일 import
 import './DocDashBoard.css';
@@ -51,6 +52,7 @@ const DocDashBoard = () => {
   const [personUUID, setPersonUUID] = useState(null);
   const [uuidLoading, setUuidLoading] = useState(false);
   const [uuidError, setUuidError] = useState(null);
+  const [cdssResult, setCdssResult] = useState(null);
   // 🔥 드롭다운 상태 관리
   const [dropdownStates, setDropdownStates] = useState({
     consultation: false, // 진단 결과 및 전문 내용
@@ -270,6 +272,20 @@ const DocDashBoard = () => {
       console.log('선택된 환자:', selectedPatient);
     }, [selectedPatient]);
 
+    useEffect(() => {
+      const fetchCdssResult = async () => {
+        if (!selectedPatient || !selectedPatient.patient_identifier) return;
+        try {
+          const res = await axios.get(`${API_BASE}cdss/predict/${selectedPatient.patient_identifier}/`);
+          setCdssResult(res.data);
+        } catch (err) {
+          console.error('❌ CDSS 결과 가져오기 실패:', err);
+          setCdssResult(null);
+        }
+      };
+
+      fetchCdssResult();
+    }, [selectedPatient]);
 
     return (
       <div className={`collapsible-patient-card ${isSelected ? 'selected' : ''} ${!isExpanded ? 'collapsed' : ''}`}>
@@ -607,6 +623,10 @@ const DocDashBoard = () => {
                     <Brain size={18} />
                     AI 분석 결과
                   </h4>
+                  {cdssResult ? (
+                    <ResultModal data={cdssResult} />
+                    // 또는 <LogisticContributionChart data={cdssResult} />
+                  ) : (
                   <div style={{ 
                     padding: '2rem',
                     background: 'var(--white-tone-5)',
@@ -617,6 +637,7 @@ const DocDashBoard = () => {
                     <Activity size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />
                     <p>AI 분석이 진행 중입니다...</p>
                   </div>
+                  )}
                 </div>
               </div>
             </DropdownCard>

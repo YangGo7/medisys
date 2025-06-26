@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, timedelta
+import uuid
 import json
 import logging
 from datetime import datetime
@@ -104,7 +105,7 @@ def order_list_create(request):
             
             # 🔥 실제 DB에 저장할 데이터 준비
             order_data = {
-                'patient_id': data.get('patient_id'),
+                'patient_id': uuid.UUID(data.get('patient_id')),
                 'doctor_id': data.get('doctor_id', 'system_user'),
                 'panel': data.get('test_type'),
                 'tests': PANEL_COMPONENTS[test_type],

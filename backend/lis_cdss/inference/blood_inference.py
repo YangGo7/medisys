@@ -15,6 +15,7 @@ PANEL_ORDER = {
 MODELS = {name: joblib.load(path) for name, path in MODEL_PATHS.items()}
 
 def run_blood_model(test_type, input_dict):
+    test_type = test_type.upper()
     if test_type not in MODELS:
         return "모델 없음"
 
@@ -25,4 +26,5 @@ def run_blood_model(test_type, input_dict):
         df = pd.DataFrame([input_vector], columns=PANEL_ORDER[test_type])
         return int(model.predict(df)[0])
     except Exception as e:
-        return f"오류: {e}"
+        print(f"❌ 예측 실패: {e}")
+        return None 

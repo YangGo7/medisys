@@ -22,7 +22,7 @@ const DiagnosisPrescriptionPanel = ({
   onSaveSuccess, // 🔥 저장 성공 콜백 (onSave에서 변경)
   initialData = null 
 }) => {
-  const API_BASE = 'http://35.225.63.41:8000';
+  const API_BASE = '';
   const [activeTab, setActiveTab] = useState('S');
   const [soapData, setSoapData] = useState({
     S: [], // Subjective
@@ -78,7 +78,7 @@ const DiagnosisPrescriptionPanel = ({
     const newTimeout = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`${API_BASE}/api/openmrs/icd10-search/?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/openmrs/icd10-search/?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         setIcd10Results(data.results || []);
         setShowIcd10Search(true);
@@ -175,7 +175,7 @@ const DiagnosisPrescriptionPanel = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch(`${API_BASE}/api/openmrs/soap-diagnoses/bulk_create/`, {
+      const response = await fetch(`/api/openmrs/soap-diagnoses/bulk_create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ const DiagnosisPrescriptionPanel = ({
         },
         body: JSON.stringify(requestData)
       });
-      console.log('📡 호출 URL:', `${API_BASE}/api/openmrs/soap-diagnoses/bulk_create/`);
+      console.log('📡 호출 URL:', `/api/openmrs/soap-diagnoses/bulk_create/`);
       console.log('응답 상태:', response.status, response.statusText);
 
       if (!response.ok) {

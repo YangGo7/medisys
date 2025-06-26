@@ -335,177 +335,249 @@
 // };
 
 // utils/timeUtils.js - timezone 처리 완전 수정
+// src/utils/timeUtils.js - 시간대 처리 완전 수정
 
 /**
- * KST 기준 현재 날짜를 YYYY-MM-DD 형식으로 반환
- */
-// utils/timeUtils.js - 완전히 새로운 접근 방식
-
-/**
- * 🚨 CRITICAL: 사용자가 입력한 시간을 그대로 Django에 전송
- * timezone 변환을 전혀 하지 않고, Django 설정에 맡김
- */
-
-/**
- * KST 기준 현재 날짜를 YYYY-MM-DD 형식으로 반환
+ * KST 기준 현재 날짜 반환 (YYYY-MM-DD 형식)
  */
 export const getTodayKST = () => {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  
+  // 🔧 Intl API를 사용하여 정확한 KST 시간 계산
+  const kstDate = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+  
+  const year = kstDate.getFullYear();
+  const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+  const day = String(kstDate.getDate()).padStart(2, '0');
+  
+  const result = `${year}-${month}-${day}`;
+  
+  console.log('🕐 getTodayKST:', result);
+  return result;
 };
 
 /**
- * 🔥 사용자 입력을 그대로 서버에 전송 (timezone 변환 없음)
- * @param {string} dateTimeValue - datetime-local input 값
- * @returns {string} 그대로 반환
+ * 브라우저 로컬 시간을 서버로 보낼 형식으로 변환
+ * Django는 TIME_ZONE='Asia/Seoul'로 설정되어 있으므로 
+ * naive datetime으로 보내면 자동으로 KST로 해석됨
  */
-export const formatDateTimeForServer = (dateTimeValue) => {
-  if (!dateTimeValue) return null;
+export const formatDateTimeForServer = (dateTimeInput) => {
+  if (!dateTimeInput) return null;
   
-  console.log('🕐 사용자 입력 시간 (변환 없이 그대로):', dateTimeValue);
+  console.log('🕐 formatDateTimeForServer 입력:', dateTimeInput, typeof dateTimeInput);
   
-  // datetime-local 값을 완전히 그대로 반환
-  if (typeof dateTimeValue === 'string') {
-    // "YYYY-MM-DDTHH:mm" 형태라면 초만 추가
-    if (dateTimeValue.includes('T') && dateTimeValue.length === 16) {
-      const result = dateTimeValue + ':00';
-      console.log('🕐 서버로 보낼 값:', result);
-      return result;
+  try {
+    let dt;
+    
+    if (typeof dateTimeInput === 'string') {
+      // "2025-06-26T15:30" 형식의 문자열
+      if (dateTimeInput.includes('T')) {
+        // 'Z'나 '+09:00' 등의 시간대 정보 제거
+        const cleanStr = dateTimeInput.replace(/[Z\+\-]\d{2}:?\d{0,2}$/, '');
+        dt = new Date(cleanStr);
+      } else {
+        dt = new Date(dateTimeInput);
+      }
+    } else if (dateTimeInput instanceof Date) {
+      dt = dateTimeInput;
+    } else {
+      console.error('❌ 지원하지 않는 날짜 형식:', dateTimeInput);
+      return null;
     }
     
-    // 다른 형태라면 그대로 반환
-    console.log('🕐 서버로 보낼 값 (그대로):', dateTimeValue);
-    return dateTimeValue;
-  }
-  
-  return dateTimeValue;
-};
-
-/**
- * 🔥 서버에서 받은 시간을 그대로 표시 (timezone 변환 없음)
- * @param {string} serverDateTime - 서버에서 받은 시간
- * @returns {string} 로컬 시간으로 표시
- */
-export const formatServerTimeToKST = (serverDateTime) => {
-  if (!serverDateTime) return '';
-  
-  try {
-    const date = new Date(serverDateTime);
-    console.log('🕐 서버에서 받은 시간:', serverDateTime);
-    console.log('🕐 Date 객체:', date);
+    // NaN 체크
+    if (isNaN(dt.getTime())) {
+      console.error('❌ 잘못된 날짜:', dateTimeInput);
+      return null;
+    }
     
-    // 🔥 timezone 변환 없이 그냥 로컬 시간으로 표시
-    const localString = new Date(date).toLocaleString('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-
+    // 🔧 중요: 브라우저의 로컬 시간을 그대로 사용
+    // Django TIME_ZONE='Asia/Seoul'이므로 naive datetime으로 보내면 KST로 해석됨
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    const seconds = String(dt.getSeconds()).padStart(2, '0');
     
-    console.log('🕐 최종 표시:', localString);
-    return localString;
-  } catch (error) {
-    console.error('시간 표시 오류:', error);
-    return serverDateTime;
-  }
-};
-
-/**
- * 🔥 서버 시간을 datetime-local input용으로 변환 (timezone 변환 없음)
- * @param {string} serverDateTime - 서버에서 받은 시간
- * @returns {string} "YYYY-MM-DDTHH:MM" 형식
- */
-export const formatForDateTimeInput = (serverDateTime) => {
-  if (!serverDateTime) return '';
-  
-  try {
-    const date = new Date(serverDateTime);
-    console.log('🕐 Input 변환 - 원본:', serverDateTime);
+    const result = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     
-    // 🔥 timezone 변환 없이 로컬 시간으로 변환
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    const result = `${year}-${month}-${day}T${hours}:${minutes}`;
-    console.log('🕐 Input 변환 결과:', result);
+    console.log('🕐 formatDateTimeForServer 결과:', result);
     return result;
+    
   } catch (error) {
-    console.error('Input 변환 오류:', error);
-    return '';
+    console.error('❌ formatDateTimeForServer 오류:', error);
+    return null;
   }
 };
 
 /**
- * 시간 문자열에서 HH:MM 형식만 추출
+ * 서버에서 받은 시간을 브라우저 표시용으로 변환
  */
-export const extractTimeFromDateTime = (dateTimeString) => {
-  if (!dateTimeString) return '';
+export const formatServerTimeToLocal = (serverTime) => {
+  if (!serverTime) return null;
   
   try {
-    const date = new Date(dateTimeString);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
+    // 서버에서 받은 시간은 이미 KST 기준
+    const dt = new Date(serverTime);
+    
+    if (isNaN(dt.getTime())) {
+      console.error('❌ 잘못된 서버 시간:', serverTime);
+      return null;
+    }
+    
+    return dt;
   } catch (error) {
-    console.error('시간 추출 오류:', error);
+    console.error('❌ formatServerTimeToLocal 오류:', error);
+    return null;
+  }
+};
+
+/**
+ * datetime-local input용 형식 변환
+ */
+export const formatForDateTimeInput = (dateTime) => {
+  if (!dateTime) return '';
+  
+  try {
+    const dt = dateTime instanceof Date ? dateTime : new Date(dateTime);
+    
+    if (isNaN(dt.getTime())) {
+      return '';
+    }
+    
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error('❌ formatForDateTimeInput 오류:', error);
     return '';
   }
 };
 
 /**
- * 검사 종료 시간 계산
+ * 종료 시간 계산
  */
 export const getEndTime = (startTime, durationMinutes) => {
+  if (!startTime || !durationMinutes) return '';
+  
   try {
     const [hours, minutes] = startTime.split(':').map(Number);
-    const startMinutes = hours * 60 + minutes;
-    const endMinutes = startMinutes + durationMinutes;
-    
-    const endHours = Math.floor(endMinutes / 60) % 24;
-    const endMins = endMinutes % 60;
+    const totalMinutes = hours * 60 + minutes + parseInt(durationMinutes);
+    const endHours = Math.floor(totalMinutes / 60);
+    const endMins = totalMinutes % 60;
     
     return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
   } catch (error) {
-    console.error('종료 시간 계산 오류:', error);
-    return startTime;
+    console.error('❌ getEndTime 오류:', error);
+    return '';
   }
 };
 
 /**
- * 디버깅 함수 - 현재 설정 확인
+ * 모달리티별 기본 소요시간 반환
  */
-export const debugTimezone = () => {
-  const now = new Date();
+export const getDefaultDuration = (modality) => {
+  const durations = {
+    'CR': 10,  // X-ray
+    'CT': 30,  // CT
+    'MR': 60,  // MRI
+    'US': 20,  // 초음파
+    'NM': 45,  // Nuclear Medicine
+    'PT': 90,  // PET
+    'DX': 15,  // Digital Radiography
+    'XA': 45,  // Angiography
+    'MG': 20   // Mammography
+  };
   
-  console.log('🕐 === 시간대 디버깅 정보 ===');
-  console.log('브라우저 로컬 시간:', now.toString());
-  console.log('브라우저 timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
-  console.log('브라우저 offset:', now.getTimezoneOffset());
-  console.log('현재 UTC:', now.toISOString());
-  console.log('현재 KST 명시적:', now.toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul' }));
-  console.log('========================');
+  return durations[modality] || 30;
 };
 
 /**
- * 테스트 함수 - 시간 변환 테스트
+ * DateTime에서 시간 부분만 추출 (HH:MM 형식)
  */
-export const testTimeConversion = (inputTime = "2025-06-26T12:38") => {
-  console.log('🧪 === 시간 변환 테스트 ===');
-  console.log('입력:', inputTime);
-  console.log('서버용:', formatDateTimeForServer(inputTime));
-  console.log('표시용:', formatServerTimeToKST(inputTime));
-  console.log('Input용:', formatForDateTimeInput(inputTime));
-  console.log('========================');
+export const extractTimeFromDateTime = (dateTime) => {
+  if (!dateTime) return '';
+  
+  try {
+    const dt = dateTime instanceof Date ? dateTime : new Date(dateTime);
+    
+    if (isNaN(dt.getTime())) {
+      return '';
+    }
+    
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
+  } catch (error) {
+    console.error('❌ extractTimeFromDateTime 오류:', error);
+    return '';
+  }
+};
+
+/**
+ * 날짜를 YYYY-MM-DD 형식으로 포맷
+ */
+export const formatDate = (date) => {
+  if (!date) return '';
+  
+  try {
+    const dt = date instanceof Date ? date : new Date(date);
+    
+    if (isNaN(dt.getTime())) {
+      return '';
+    }
+    
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('❌ formatDate 오류:', error);
+    return '';
+  }
+};
+
+/**
+ * 시간을 HH:MM 형식으로 포맷
+ */
+export const formatTime = (date) => {
+  if (!date) return '';
+  
+  try {
+    const dt = date instanceof Date ? date : new Date(date);
+    
+    if (isNaN(dt.getTime())) {
+      return '';
+    }
+    
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
+  } catch (error) {
+    console.error('❌ formatTime 오류:', error);
+    return '';
+  }
+};
+
+/**
+ * 시간 디버깅 함수
+ */
+export const debugTime = (time, label = '') => {
+  console.log(`🕐 [DEBUG] ${label}:`, {
+    original: time,
+    type: typeof time,
+    parsed: time instanceof Date ? time : new Date(time),
+    formatted: formatForDateTimeInput(time),
+    serverFormat: formatDateTimeForServer(time)
+  });
 };
 
 // 개발환경에서 전역 노출
@@ -513,15 +585,14 @@ if (process.env.NODE_ENV === 'development') {
   window.timeUtils = {
     getTodayKST,
     formatDateTimeForServer,
-    formatServerTimeToKST,
+    formatServerTimeToLocal,
     formatForDateTimeInput,
     extractTimeFromDateTime,
+    formatDate,
+    formatTime,
     getEndTime,
-    debugTimezone,
-    testTimeConversion
+    getDefaultDuration,
+    debugTime
   };
-  
   console.log('🔧 timeUtils가 window.timeUtils로 노출됨');
-  console.log('🔧 테스트: window.timeUtils.testTimeConversion("2025-06-26T12:38")');
-  console.log('🔧 디버깅: window.timeUtils.debugTimezone()');
 }

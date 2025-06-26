@@ -1,35 +1,33 @@
-# backend/openmrs_models/urls.py (저장 기능 완전 수정 버전)
+# backend/openmrs_models/urls.py (PatientVisitHistoryViewSet 추가)
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
-# SOAP ViewSet용 라우터
+# DRF Router 설정
 router = DefaultRouter()
 
-# SOAP 관련 ViewSet들이 있다면 등록 (선택사항)
+# 🔥 SOAP 진단 ViewSet 등록
 try:
-    router.register(r'soap-diagnoses', views.SoapDiagnosisViewSet, basename='soap-diagnosis')
-except ImportError:
-    # SOAP ViewSet이 없어도 기본 기능은 작동
-    pass
+    router.register(r'soap-diagnoses', views.SoapDiagnosisViewSet, basename='soap-diagnoses')
+    print("✅ SoapDiagnosisViewSet 등록 성공")
+except (ImportError, AttributeError) as e:
+    print(f"⚠️ SoapDiagnosisViewSet 등록 실패: {e}")
+
+# 🔥 SOAP 기반 내원 이력 ViewSet 등록 (테이블 불필요)
+try:
+    router.register(r'visit-history', views.SoapBasedVisitHistoryViewSet, basename='visit-history')
+    print("✅ SoapBasedVisitHistoryViewSet 등록 성공")
+except (ImportError, AttributeError) as e:
+    print(f"⚠️ SoapBasedVisitHistoryViewSet 등록 실패: {e}")
 
 urlpatterns = [
-    # 🏥 기존 기본 API들
+    # 🔥 함수 기반 뷰 (직접 등록)
+    
+    # 🏥 DRF Router URLs
     path('', include(router.urls)),
+    
+    # 🔥 기존 function-based views
     path('vitals/', views.openmrs_vitals, name='openmrs_vitals'),
     path('encounters/', views.openmrs_encounters, name='openmrs_encounters'),
-    
-    # 🔥 환자 정보 조회
-    path('person-uuid-by-identifier/<str:patient_identifier>/', 
-         views.get_person_uuid_by_identifier, 
-         name='get_person_uuid_by_identifier'),
-         
-    # 🔥 ICD-10 검색 (SOAP에서 사용)
-    path('icd10-search/', 
-         views.icd10_search, 
-         name='icd10_search'),
 ]
-
-# ViewSet URL들 추가 (있는 경우만)
-urlpatterns += router.urls
