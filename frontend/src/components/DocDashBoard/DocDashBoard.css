@@ -86,7 +86,7 @@
 .dashboard-main {
   flex: 1;
   display: grid;
-  grid-template-columns: 250px 1fr 200px; /* 좌측 사이드바 | 메인 | 우측 컨트롤 */
+  grid-template-columns: 350px 1fr 350px; /* 좌측 사이드바 | 메인 | 우측 컨트롤 */
   grid-template-rows: 1fr 1fr; /* 상하 2행 */
   grid-template-areas: 
     "sidebar main-top controls"
