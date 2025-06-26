@@ -12,10 +12,61 @@ from base64 import b64encode
 from .models import PatientIdentifier, Patient, Person, PersonName
 # 알림 기능 연결
 from medical_integration.models import Alert  # Alert 모델 import
-
+import os
 import logging
 logger = logging.getLogger(__name__)
 
+def get_openmrs_config():
+    """OpenMRS 설정을 환경변수에서 안전하게 가져오기"""
+    try:
+        # 환경 변수에서 각각 분리해서 가져오기
+        host = os.getenv('OPENMRS_API_HOST', '127.0.0.1')
+        port = os.getenv('OPENMRS_API_PORT', '8082')
+        username = os.getenv('OPENMRS_API_USER', 'admin')
+        password = os.getenv('OPENMRS_API_PASSWORD', 'Admin123')
+        
+        # 🔥 올바른 URL 형식으로 조합 - 이중 http 방지
+        if host.startswith('http://') or host.startswith('https://'):
+            base_url = f"{host}:{port}/openmrs/ws/rest/v1"
+        else:
+            base_url = f"http://{host}:{port}/openmrs/ws/rest/v1"
+        
+        # 인증 문자열 생성
+        auth_string = f"{username}:{password}"
+        auth_header = b64encode(auth_string.encode()).decode()
+        
+        logger.info(f"OpenMRS 설정 - Host: {host}, Port: {port}, Base URL: {base_url}")
+        
+        return {
+            'base_url': base_url,
+            'host': host,
+            'port': port,
+            'username': username,
+            'password': password,
+            'auth': auth_header,
+            'headers': {
+                'Authorization': f'Basic {auth_header}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"OpenMRS 설정 로드 실패: {e}")
+        # 기본값으로 폴백
+        return {
+            'base_url': 'http://127.0.0.1:8082/openmrs/ws/rest/v1',
+            'host': '127.0.0.1',
+            'port': '8082',
+            'username': 'admin',
+            'password': 'Admin123',
+            'auth': b64encode(b'admin:Admin123').decode(),
+            'headers': {
+                'Authorization': 'Basic YWRtaW46QWRtaW4xMjM=',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
 
 @api_view(['GET'])
 def openmrs_vitals(request):
