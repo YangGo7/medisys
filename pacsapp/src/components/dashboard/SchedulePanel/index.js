@@ -31,6 +31,7 @@
 //       setError(null);
 
 //       // 병렬로 데이터 로드
+//       const [roomsData, radiologistsData] = await Promise.all([
 //         roomService.getRooms(),
 //         doctorService.getRadiologists()
 //       ]);

@@ -13,9 +13,12 @@ const OrderListPage = () => {
   const [showDebug, setShowDebug] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [showSamplePanel, setShowSamplePanel] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(() => new Date(
-    new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })
-    ).toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset() * 60000;
+    const localISO = new Date(today.getTime() - offset).toISOString().split('T')[0];
+    return localISO;
+  });
 
   useEffect(() => {
     const fetchOrders = async () => {

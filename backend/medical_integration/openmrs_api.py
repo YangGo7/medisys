@@ -17,6 +17,8 @@ class OpenMRSAPI:
         self.username = os.getenv('OPENMRS_API_USER', 'admin')
         self.password = os.getenv('OPENMRS_API_PASSWORD', 'Admin123')
         
+        self._identifier_types = None
+        self._locations = None
         # 🔥 URL 구성 - 이중 http 문제 해결
         # host에 http://가 포함되어 있으면 제거
         clean_host = self.api_host.replace('http://', '').replace('https://', '')

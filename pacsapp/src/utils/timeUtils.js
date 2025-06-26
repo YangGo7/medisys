@@ -539,21 +539,25 @@ export const formatTime = (date) => {
 /**
  * 종료 시간 계산
  */
-export const getEndTime = (startTime, durationMinutes) => {
-  if (!startTime || !durationMinutes) return '';
-  
+export const getEndTime = (startTime, duration) => {
   try {
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes + parseInt(durationMinutes);
-    const endHours = Math.floor(totalMinutes / 60);
-    const endMins = totalMinutes % 60;
-    
-    return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
-  } catch (error) {
-    console.error('❌ getEndTime 오류:', error);
-    return '';
+    const [h, m] = startTime.split(':').map(Number);
+    const start = new Date();
+    start.setHours(h, m, 0, 0);
+
+    // duration 제한
+    const safeDuration = Math.min(duration || 30, 120); // 최대 3시간
+    const end = new Date(start.getTime() + safeDuration * 60000);
+
+    const eh = String(end.getHours()).padStart(2, '0');
+    const em = String(end.getMinutes()).padStart(2, '0');
+
+    return `${eh}:${em}`;
+  } catch (err) {
+    return '??:??';
   }
 };
+
 
 /**
  * 모달리티별 기본 소요시간 반환
@@ -571,7 +575,7 @@ export const getDefaultDuration = (modality) => {
     'MG': 20   // Mammography
   };
   
-  return durations[modality] || 30;
+  return durations[modality] || 30
 };
 
 /**
