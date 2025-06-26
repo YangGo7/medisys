@@ -5,7 +5,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from .models import SoapDiagnosis, PatientVisitHistory
+from soap.models import SoapDiagnosis, PatientVisitHistory
 from .serializers import SoapDiagnosisSerializer, SoapDiagnosisCreateSerializer,PatientVisitHistorySerializer
 from django.utils import timezone
 import requests
@@ -15,7 +15,7 @@ from medical_integration.openmrs_api import OpenMRSAPI
 logger = logging.getLogger(__name__)
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
+from rest_framework.permissions import AllowAny
 
 def get_clean_openmrs_config():
     """OpenMRS 설정"""
@@ -41,21 +41,6 @@ def get_clean_openmrs_config():
 OPENMRS_BASE_URL, HEADERS = get_clean_openmrs_config()
 
 # backend/openmrs_models/views.py 수정
-
-import logging
-from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny  # 🔥 추가
-from .models import SoapDiagnosis
-from .serializers import SoapDiagnosisSerializer, SoapDiagnosisCreateSerializer
-from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-import requests
-from base64 import b64encode
-import os
 
 logger = logging.getLogger(__name__)
 
