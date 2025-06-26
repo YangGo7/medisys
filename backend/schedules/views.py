@@ -1304,7 +1304,8 @@ def get_room_schedules(request):
         # 검사실별로 그룹화
         room_schedules = {}
         for schedule in schedules:
-            room_id = str(schedule.assigned_room.id)
+            # room_id = str(schedule.assigned_room.id)
+            room_id = f"ROOM{schedule.assigned_room.id}"
             
             if room_id not in room_schedules:
                 room_schedules[room_id] = []

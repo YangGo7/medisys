@@ -211,7 +211,7 @@ export default function TitlePage() {
         break;
       case 'LIS':
         console.log('Opening LIS');
-        const lisURL = `${window.location.protocol}//${window.location.hostname}:3002/lis`;
+        const lisURL = `${window.location.protocol}//${window.location.hostname}:3000/lis`;
         window.open(lisURL, '_blank', 'noopener,noreferrer');
         break;
       case 'EMR':

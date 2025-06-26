@@ -83,42 +83,7 @@ function App() {
               </div>
             } />
             
-            {/* 🆕 404 페이지 추가 */}
-            <Route path="*" element={
-              <div style={{
-                background: 'linear-gradient(45deg, #ef4444, #dc2626)', 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontSize: '2rem',
-                color: 'white',
-                fontWeight: 'bold',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <div>❌ 페이지를 찾을 수 없습니다</div>
-                <div style={{ fontSize: '1rem', opacity: 0.8 }}>
-                  요청하신 페이지가 존재하지 않습니다
-                </div>
-                <button 
-                  onClick={() => window.location.href = '/'}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    background: 'white',
-                    color: '#ef4444',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    marginTop: '1rem'
-                  }}
-                >
-                  홈으로 돌아가기
-                </button>
-              </div>
-            } />
+           
           </Routes>
         </MainLayout>
       </Router>
