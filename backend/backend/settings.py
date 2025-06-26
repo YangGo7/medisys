@@ -60,6 +60,7 @@ LOCAL_APPS = [
     'schedules',
     'notifications',
     'pacsdocs',
+    'soap'
 
     
 ]
