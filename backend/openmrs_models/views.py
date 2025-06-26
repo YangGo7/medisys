@@ -14,7 +14,29 @@ from .models import PatientIdentifier, Patient, Person, PersonName
 from medical_integration.models import Alert  # Alert 모델 import
 import os
 import logging
+from django.utils import timezone
+
 logger = logging.getLogger(__name__)
+
+# OpenMRS 기본 설정
+OPENMRS_BASE_URL = 'http://127.0.0.1:8082/openmrs/ws/rest/v1'
+OPENMRS_AUTH = b64encode(b'admin:Admin123').decode()
+HEADERS = {'Authorization': f'Basic {OPENMRS_AUTH}', 'Content-Type': 'application/json'}
+
+logger = logging.getLogger('openmrs_models')
+# 미리 정의된 Concept UUID들 (실제 OpenMRS 환경에 맞게 수정 필요)
+DIAGNOSIS_CONCEPTS = {
+    'primary_diagnosis': '159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'secondary_diagnosis': '159946AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'provisional_diagnosis': '159394AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+}
+
+PRESCRIPTION_CONCEPTS = {
+    'drug_order': '1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'dosage': '160856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'frequency': '160855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'duration': '159368AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+}
 
 def get_openmrs_config():
     """OpenMRS 설정을 환경변수에서 안전하게 가져오기"""
@@ -185,6 +207,82 @@ def openmrs_encounters(request):
 
     return Response(history)
 
+@api_view(['POST'])
+def create_encounter_with_data(request, patient_uuid):
+    """새 Encounter 생성 및 진단/처방 데이터 저장"""
+    try:
+        # OpenMRS API로 Encounter 생성
+        encounter_data = {
+            'patient': patient_uuid,
+            'encounterType': '61ae96f4-6afe-4351-b6f8-cd4fc383cce1',  # 실제 encounter type UUID
+            'location': '8d6c993e-c2cc-11de-8d13-0010c6dffd0f',     # 실제 location UUID
+            'encounterDatetime': timezone.now().isoformat(),
+        }
+
+        response = requests.post(
+            f'{OPENMRS_BASE_URL}/encounter',
+            headers=HEADERS,
+            json=encounter_data,
+            timeout=10
+        )
+
+        if response.status_code != 201:
+            return Response({'error': 'Encounter 생성 실패'}, status=400)
+
+        encounter_uuid = response.json()['uuid']
+
+        # 진단 데이터 저장
+        diagnoses = request.data.get('diagnoses', [])
+        for diagnosis in diagnoses:
+            obs_data = {
+                'person': patient_uuid,
+                'concept': diagnosis.get('concept_uuid', DIAGNOSIS_CONCEPTS['primary_diagnosis']),
+                'encounter': encounter_uuid,
+                'obsDatetime': timezone.now().isoformat(),
+                'value': diagnosis.get('value', ''),
+                'comment': diagnosis.get('notes', '')
+            }
+
+            requests.post(
+                f'{OPENMRS_BASE_URL}/obs',
+                headers=HEADERS,
+                json=obs_data,
+                timeout=10
+            )
+
+        # 처방 데이터 저장
+        prescriptions = request.data.get('prescriptions', [])
+        for prescription in prescriptions:
+            # Drug Order 생성
+            drug_order_data = {
+                'patient': patient_uuid,
+                'encounter': encounter_uuid,
+                'orderType': '131168f4-15f5-102d-96e4-000c29c2a5d7',  # Drug Order Type UUID
+                'concept': prescription.get('drug_concept_uuid'),
+                'dose': prescription.get('dosage', ''),
+                'doseUnits': prescription.get('dose_units', ''),
+                'frequency': prescription.get('frequency', ''),
+                'route': prescription.get('route', ''),
+                'duration': prescription.get('duration', ''),
+                'instructions': prescription.get('instructions', ''),
+                'dateActivated': timezone.now().isoformat(),
+            }
+
+            requests.post(
+                f'{OPENMRS_BASE_URL}/drugorder',
+                headers=HEADERS,
+                json=drug_order_data,
+                timeout=10
+            )
+
+        return Response({
+            'success': True,
+            'encounter_uuid': encounter_uuid,
+            'message': '진료 기록이 저장되었습니다.'
+        })
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 def get_person_uuid_by_identifier(request, patient_identifier):
     """
@@ -258,121 +356,6 @@ def get_person_uuid_by_identifier(request, patient_identifier):
         logger.error(f"❌ Error finding person UUID for {patient_identifier}: {e}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
-
-def get_patient_name_by_uuid(patient_uuid):
-    """
-    🔥 수정된 UUID 기반 환자 이름 조회
-    UUID는 Person 테이블에 있으므로 Person → Patient → PatientIdentifier 순으로 조회
-    """
-    try:
-        from openmrs_models.models import Person, Patient, PatientIdentifier, PersonName
-        
-        # 1. Person 테이블에서 UUID로 조회
-        try:
-            person = Person.objects.get(uuid=patient_uuid, voided=False)
-            logger.info(f"✅ Person 발견: {person.person_id}")
-        except Person.DoesNotExist:
-            logger.error(f"❌ Person not found for UUID: {patient_uuid}")
-            return None
-        
-        # 2. Person → Patient 관계 조회
-        try:
-            patient = Patient.objects.get(patient_id=person, voided=False)
-            logger.info(f"✅ Patient 발견: {patient.patient_id}")
-        except Patient.DoesNotExist:
-            logger.error(f"❌ Patient not found for Person: {person.person_id}")
-            return None
-        
-        # 3. Patient → PatientIdentifier 조회
-        try:
-            patient_identifier = PatientIdentifier.objects.filter(
-                patient=patient,
-                voided=False,
-                preferred=True
-            ).first()
-            
-            if not patient_identifier:
-                # preferred가 없으면 아무거나
-                patient_identifier = PatientIdentifier.objects.filter(
-                    patient=patient,
-                    voided=False
-                ).first()
-                
-            identifier_value = patient_identifier.identifier if patient_identifier else f"Patient_{person.person_id}"
-            logger.info(f"✅ Patient Identifier: {identifier_value}")
-        except Exception as e:
-            logger.warning(f"⚠️ PatientIdentifier 조회 실패: {e}")
-            identifier_value = f"Patient_{person.person_id}"
-        
-        # 4. PersonName 조회
-        try:
-            person_name = PersonName.objects.filter(
-                person=person,
-                voided=False,
-                preferred=True
-            ).first()
-            
-            if not person_name:
-                # preferred가 없으면 아무거나
-                person_name = PersonName.objects.filter(
-                    person=person,
-                    voided=False
-                ).first()
-            
-            if person_name:
-                full_name = f"{person_name.given_name or ''} {person_name.family_name or ''}".strip()
-                if not full_name:
-                    full_name = person_name.given_name or person_name.family_name or f"Patient {identifier_value}"
-            else:
-                full_name = f"Patient {identifier_value}"
-                
-            logger.info(f"✅ Person Name: {full_name}")
-        except Exception as e:
-            logger.warning(f"⚠️ PersonName 조회 실패: {e}")
-            full_name = f"Patient {identifier_value}"
-        
-        # 5. 최종 결과 반환
-        result = {
-            'uuid': patient_uuid,
-            'patient_identifier': identifier_value,
-            'name': full_name,
-            'display': f"{identifier_value} - {full_name}",
-            'gender': person.gender,
-            'birthdate': person.birthdate.isoformat() if person.birthdate else None,
-            'person_id': person.person_id,
-            'patient_id': patient.patient_id if patient else None
-        }
-        
-        logger.info(f"🎉 환자 정보 조회 성공: {result['display']}")
-        return result
-        
-    except Exception as e:
-        logger.error(f"❌ DB에서 환자 이름 조회 실패 (UUID: {patient_uuid}): {e}")
-        return None
-    
-@api_view(['GET'])
-def get_patient_info_by_uuid(request, patient_uuid):
-    """UUID 기반 환자 정보 조회 API"""
-    try:
-        patient_info = get_patient_name_by_uuid(patient_uuid)
-        
-        if patient_info:
-            return Response({
-                'success': True,
-                'patient': patient_info
-            })
-        else:
-            return Response({
-                'success': False,
-                'error': f'UUID {patient_uuid}에 해당하는 환자를 찾을 수 없습니다.'
-            }, status=404)
-            
-    except Exception as e:
-        logger.error(f"환자 정보 조회 API 실패: {e}")
         return Response({
             'success': False,
             'error': str(e)
