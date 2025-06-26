@@ -13,6 +13,8 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 import shap
+import requests
+from datetime import datetime
 
 # ✅ 최근 결과 리스트 조회
 @api_view(['GET'])
@@ -84,14 +86,37 @@ def normalize_component_name(raw_name):
     # 마지막 항목을 반환 (대부분 검사 항목이 마지막)
     return parts[-1].strip()
 
+def send_result_to_emr(patient_id, sample_id, test_type, prediction, result_dict, created_at):
+    emr_url = "http://<EMR_API_HOST>/api/emr/receive_cdss_result/"  # ⬅️ 실제 URL로 변경
+    payload = {
+        "patient_id": patient_id,
+        "sample_id": sample_id,
+        "panel": test_type,
+        "prediction": "abnormal" if prediction == 1 else "normal",
+        "results": result_dict,
+        "created_at": created_at.isoformat() if isinstance(created_at, datetime) else str(created_at)
+    }
+
+    print("📤 EMR 전송 payload:", payload)  # 디버깅 로그
+
+    try:
+        response = requests.post(emr_url, json=payload, timeout=5)
+        response.raise_for_status()
+        print(f"✅ EMR 전송 성공: {response.status_code}")
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"❌ EMR 전송 실패: {e}")
+        return False
+    
 @api_view(['POST'])
 def receive_model_result(request):
     data = request.data
     sample = data.get("sample")
     test_type = data.get("test_type")
-    component_name = normalize_component_name(data.get("component_name"))  # 🔍 정제 적용
+    component_name = normalize_component_name(data.get("component_name"))
 
-    # 기존 항목 수정 또는 새로 생성
+    print("📥 [CDSS 수신] sample:", sample, "| test_type:", test_type, "| component:", component_name)
+
     existing = CDSSResult.objects.filter(
         sample=sample,
         test_type=test_type,
@@ -102,55 +127,45 @@ def receive_model_result(request):
     request_data["component_name"] = component_name
 
     if existing:
-        serializer = CDSSResultSerializer(existing, data=request.data)
+        serializer = CDSSResultSerializer(existing, data=request_data)
     else:
-        serializer = CDSSResultSerializer(data=request.data)
+        serializer = CDSSResultSerializer(data=request_data)
 
     if serializer.is_valid():
         instance = serializer.save()
 
         try:
-            # 동일 sample, test_type에 해당하는 모든 항목 불러오기
             related = CDSSResult.objects.filter(
                 sample=sample,
                 test_type=test_type
             ).order_by('component_name')
 
-            # 항목별 값 dictionary로 구성
             values = {
                 normalize_component_name(r.component_name): r.value
-                for r in related}
+                for r in related
+            }
 
-            # 예측 및 SHAP 생성
             model = MODELS.get(test_type)
             prediction = run_blood_model(test_type, values) if model else None
             shap_data = generate_shap_values(model, values) if model else None
 
-            # 예측 결과 전체 항목에 반영
             related.update(prediction=prediction)
 
-            # ✅ LFT일 경우 LiverFunctionSample에 저장
+            # ✅ LFT 저장
             if test_type.strip().lower() == "lft":
                 lft_components = {
-                    "ALT": None,
-                    "AST": None,
-                    "ALP": None,
-                    "Albumin": None,
-                    "Total Bilirubin": None,
-                    "Direct Bilirubin": None
+                    "ALT": None, "AST": None, "ALP": None,
+                    "Albumin": None, "Total Bilirubin": None, "Direct Bilirubin": None
                 }
 
                 for comp in related:
                     cname = normalize_component_name(comp.component_name)
-                    if comp.component_name in lft_components:
-                        lft_components[comp.component_name] = comp.value
+                    if cname in lft_components:
+                        lft_components[cname] = comp.value
 
-                # 모든 항목이 다 들어온 경우만 저장
                 if all(v is not None for v in lft_components.values()):
-                    # 중복 방지: 기존 sample+prediction 조합 있으면 삭제
                     LiverFunctionSample.objects.filter(
-                        sample_id=sample,
-                        prediction=prediction
+                        sample_id=sample, prediction=prediction
                     ).delete()
 
                     LiverFunctionSample.objects.create(
@@ -162,10 +177,27 @@ def receive_model_result(request):
                         Total_Bilirubin=lft_components["Total Bilirubin"],
                         Direct_Bilirubin=lft_components["Direct Bilirubin"],
                         prediction=prediction,
-                        probability=instance.prediction_prob  # 필요 시 사용
+                        probability=instance.prediction_prob
                     )
 
-            # 응답 데이터 구성
+            # ✅ EMR 전송 시도
+            try:
+                sample_obj = instance.sample
+                patient_id = getattr(sample_obj, 'patient_id', None)
+                created_at = getattr(sample_obj, 'created_at', datetime.now())  # 없으면 현재 시간
+
+                send_result_to_emr(
+                    patient_id=patient_id,
+                    sample_id=sample,
+                    test_type=test_type,
+                    prediction=prediction,
+                    result_dict=values,
+                    created_at=created_at
+                )
+            except Exception as e:
+                print(f"❌ EMR 전송 오류: {e}")
+
+            # ✅ 응답
             response_data = CDSSResultSerializer(instance).data
             response_data['shap_data'] = shap_data
             response_data['prediction'] = prediction
@@ -174,10 +206,10 @@ def receive_model_result(request):
             return Response(response_data, status=201)
 
         except Exception as e:
-            print("❌ 예측 또는 저장 오류:", e)
+            print("❌ 예측/저장 중 오류:", e)
+            return Response({'error': str(e)}, status=500)
 
-        return Response(CDSSResultSerializer(instance).data, status=201)
-
+    print("❌ CDSSResult 저장 실패:", serializer.errors)
     return Response(serializer.errors, status=400)
 
 

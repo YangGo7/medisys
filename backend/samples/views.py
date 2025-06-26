@@ -79,9 +79,11 @@ def get_loinc_by_sample_type(request):
         return Response([], status=status.HTTP_200_OK)    
     
 @api_view(['POST']) 
-def create_sample(request): # 샘플 등록 
-    loinc_code = request.data.get('loinc_code') # LOINC코드 매핑
-    order_id = request.data.get('order')  
+def create_sample(request):  # 샘플 등록
+    loinc_code = request.data.get('loinc_code')
+    order_id = request.data.get('order')
+
+    # ✅ 유효성 검사
     if not LOINCCode.objects.filter(code=loinc_code).exists():
         return Response(
             {"error": f"LOINC 코드 '{loinc_code}'는 유효하지 않습니다."},
@@ -89,18 +91,34 @@ def create_sample(request): # 샘플 등록
         )
         
     if not Order.objects.filter(order_id=order_id).exists():
-         return Response(
-             {"error": f"주문 ID '{order_id}'는 존재하지 않습니다."},
-             status=status.HTTP_400_BAD_REQUEST
-         )
+        return Response(
+            {"error": f"주문 ID '{order_id}'는 존재하지 않습니다."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    serializer = SampleSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    print("🔥 serializer errors:", serializer.errors)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
+    try:
+        # 🔍 주문 가져오기
+        order = Order.objects.get(order_id=order_id)
+        patient_id = order.patient_id
+        print(f"🧾 주문 {order_id}에서 patient_id 복사: {patient_id}")
+
+        # ✅ request.data에 patient_id 포함시켜서 SampleSerializer에 넘김
+        data = request.data.copy()
+        data['patient_id'] = patient_id  # <-- 핵심
+
+        serializer = SampleSerializer(data=data)
+        if serializer.is_valid():
+            saved_sample = serializer.save()
+            print(f"✅ Sample 생성 완료: sample_id={saved_sample.id}, patient_id={saved_sample.patient_id}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        print("🔥 Sample 생성 오류:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        print("❌ Sample 생성 중 예외:", str(e))
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET']) # 샘플 리스트 불러오기 
 def list_samples_by_order(request, order_id):
     samples = Sample.objects.filter(order_id=order_id)

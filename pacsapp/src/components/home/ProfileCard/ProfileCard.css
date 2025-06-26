@@ -196,6 +196,7 @@
 .schedule-item {
   display: flex;
   align-items: center;
+  height: 25px;
   gap: 1rem;
   padding: 0.75rem;
   background-color: #f8fafc;

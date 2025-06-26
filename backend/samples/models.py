@@ -1,8 +1,10 @@
 from django.db import models
 from orders_emr.models import Order
+from uuid import UUID
 
 class Sample(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    patient_id = models.UUIDField(null=True, blank=True)  # ✅ 환자 UUID 직접 저장
     sample_type = models.CharField(max_length=50)
     loinc_code = models.CharField(max_length=50)
     collection_date = models.DateTimeField()

@@ -26,6 +26,7 @@ from .views import (
     get_waiting_statistics,               # 🔥 대기 통계
     get_completed_patients_today, 
     completed_patients_list, # 🔥 완료 환자 목록
+    receive_cdss_result,
 )
 
 app_name = 'medical_integration'
@@ -109,4 +110,7 @@ urlpatterns = [
     # 기존 환자 관리
     path('patients/create-auto-id/', views.create_patient_auto_id, name='create_patient_auto_id'),
     path('patients/create/', views.create_patient, name='create_patient'),
+    
+    # lis 결과 받아오기
+    path('api/emr/receive_cdss_result/', receive_cdss_result),
 ]   
