@@ -12,7 +12,7 @@ import {
   Microscope
 } from 'lucide-react';
 
-const LisRequestPanel = ({ patient }) => {
+const LisRequestPanel = ({ patient, onRequestComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedPanel, setSelectedPanel] = useState('');
   const [selectedTests, setSelectedTests] = useState([]);
@@ -56,7 +56,7 @@ const LisRequestPanel = ({ patient }) => {
       name: '간기능 검사',
       icon: Calendar,
       color: '#ef4444',
-      tests: ['ALT', 'AST', 'ALP', 'GGT', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin', 'Total Protein'],
+      tests: ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin'],
     }
   ], []);
 
@@ -296,6 +296,7 @@ const LisRequestPanel = ({ patient }) => {
       await saveIntegrationLog('LIS_ORDER_SUCCESS', orderData, data);
       
       alert(`검사 주문이 성공적으로 등록되었습니다.\n주문 ID: ${data.id || data.data?.id || 'N/A'}`);
+
       
       // 요청 성공 후 폼 초기화 (원래 코드와 동일)
       setCurrentStep(0);
@@ -321,6 +322,10 @@ const LisRequestPanel = ({ patient }) => {
       
     } finally {
       setLoading(false);
+      // 더미 데이터 용,,,
+      if (typeof onRequestComplete === 'function') {
+        onRequestComplete();
+      }
     }
   };
 

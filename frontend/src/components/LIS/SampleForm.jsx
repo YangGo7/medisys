@@ -107,14 +107,14 @@ const SampleForm = ({ orderId: propOrderId, onClose }) => {
       const patient_id = orderInfo.patient_id || 'UNKNOWN';
       const doctor_id = orderInfo.doctor_id || 'UNKNOWN';
 
-      await saveLog({
-        patient_id,
-        doctor_id,
-        order_id: orderId,
-        sample_id: res.data.id,
-        step: 'sample',
-        request_detail: `샘플: ${selectedAlias}, 세부: ${selectedTestType}, LOINC: ${loincCode}`
-      }); // 
+      // await saveLog({
+      //   patient_id,
+      //   doctor_id,
+      //   order_id: orderId,
+      //   sample_id: res.data.id,
+      //   step: 'sample',
+      //   request_detail: `샘플: ${selectedAlias}, 세부: ${selectedTestType}, LOINC: ${loincCode}`
+      // }); // 
 
 
       navigate('/lis/samples');

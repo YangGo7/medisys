@@ -214,7 +214,7 @@ const CdssResultTable = () => {
     </div>
 
     {modalOpen && modalData && (
-      <CdssResultModal data={modalData} onClose={() => setModalOpen(false)} />
+      <CdssResultModal data={modalData} onClose={() => setModalOpen(false)} isModal={true} />
     )}
   </div>
 );

@@ -122,7 +122,7 @@ const MainLayout = ({ children }) => {
       {/* 사이드바 */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>메디시스 v1.0</h2>
+          <h2>LaCID</h2>
           <p>양진모 님</p>
         </div>
         <nav className="nav-menu">

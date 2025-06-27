@@ -91,7 +91,7 @@ export default function MainPage() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
           <div className="logo">
-            🔷 메디시스 v3.0
+            🔷 LaCID
             <button
               className="sidebar-toggle-inline"
               onClick={toggleSidebar}

@@ -206,6 +206,156 @@
   margin-top: var(--spacing-xs);
 }
 
+/* ⭐ STT 섹션 스타일 추가 */
+.sttSection {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.sttHeader {
+  margin: 0 0 var(--spacing-xl) 0;
+  color: var(--color-success);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.sttControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.startRecordButton {
+  background: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+}
+
+.startRecordButton:hover {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+.recordingButton {
+  background: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  animation: pulse 2s infinite;
+}
+
+.recordingButton:hover {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.recordingTime {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-danger);
+  color: var(--text-primary);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  font-family: monospace;
+  font-size: var(--font-md);
+}
+
+.recordingIndicator {
+  width: 8px;
+  height: 8px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  animation: blink 1.5s infinite;
+}
+
+.sttProcessButton {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.sttProcessButton:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.sttProcessButton:disabled {
+  background: var(--bg-quaternary) !important;
+  border-color: var(--border-secondary) !important;
+  color: var(--text-muted) !important;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.audioPlayback {
+  padding: var(--spacing-lg);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+}
+
+.audioControls {
+  width: 100%;
+  height: 30px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.audioHint {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.permissionWarning {
+  padding: var(--spacing-lg);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+}
+
+.permissionWarning strong {
+  color: var(--color-warning);
+}
+
+.permissionWarning p {
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.permissionButton {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  font-size: var(--font-sm) !important;
+  padding: var(--spacing-sm) var(--spacing-lg) !important;
+  margin-top: var(--spacing-sm);
+}
+
+.permissionButton:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
 /* 종합 소견 섹션 */
 .reportSection {
   margin-bottom: var(--spacing-xl);
@@ -220,7 +370,7 @@
 
 .reportTextarea {
   width: 100%;
-  height: 120px;
+  height: 150px; /* ⭐ 높이 증가 */
   padding: var(--spacing-lg);
   border: 2px solid var(--border-primary);
   border-radius: var(--border-radius-lg);
@@ -231,6 +381,7 @@
   color: var(--text-primary);
   transition: border-color var(--transition-normal);
   box-sizing: border-box;
+  line-height: 1.6;
 }
 
 .reportTextarea:focus {
@@ -241,6 +392,26 @@
 
 .reportTextarea::placeholder {
   color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ⭐ 텍스트 영역 하단 정보 */
+.textareaFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+.textareaFooter span:first-child {
+  color: var(--text-secondary);
+}
+
+.textareaFooter span:last-child {
+  color: var(--color-success);
+  font-weight: 500;
 }
 
 /* 버튼 섹션 */
@@ -267,13 +438,18 @@
   min-width: 120px;
 }
 
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .cancelButton {
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border-color: var(--border-primary);
 }
 
-.cancelButton:hover {
+.cancelButton:hover:not(:disabled) {
   background: var(--bg-quaternary);
   border-color: var(--border-secondary);
   color: var(--text-primary);
@@ -285,7 +461,7 @@
   border-color: var(--color-info);
 }
 
-.printButton:hover {
+.printButton:hover:not(:disabled) {
   background: #0891b2;
   border-color: #0891b2;
 }
@@ -296,12 +472,12 @@
   border-color: var(--color-success);
 }
 
-.saveButton:hover {
+.saveButton:hover:not(:disabled) {
   background: var(--color-medical-green);
   border-color: var(--color-medical-green);
 }
 
-/* 애니메이션 */
+/* ⭐ 애니메이션 */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -322,6 +498,65 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ⭐ 오디오 컨트롤 스타일링 */
+.audioControls::-webkit-media-controls {
+  background-color: var(--bg-secondary);
+}
+
+.audioControls::-webkit-media-controls-panel {
+  background-color: var(--bg-secondary);
+}
+
+.audioControls::-webkit-media-controls-play-button,
+.audioControls::-webkit-media-controls-pause-button {
+  background-color: var(--color-primary);
+  border-radius: 50%;
+}
+
+.audioControls::-webkit-media-controls-timeline {
+  background-color: var(--bg-quaternary);
+  border-radius: 25px;
+}
+
+.audioControls::-webkit-media-controls-current-time-display,
+.audioControls::-webkit-media-controls-time-remaining-display {
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
   .modalContent {
@@ -339,5 +574,52 @@
   
   .button {
     width: 100%;
+  }
+  
+  /* ⭐ STT 컨트롤 모바일 대응 */
+  .sttControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-lg);
+  }
+  
+  .sttControls .button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .recordingTime {
+    justify-content: center;
+  }
+  
+  .textareaFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    padding: var(--spacing-lg);
+  }
+  
+  .modalOverlay {
+    padding: 0;
+  }
+  
+  .reportTextarea {
+    height: 120px;
+  }
+  
+  .sttSection,
+  .aiResults,
+  .annotations,
+  .patientInfo {
+    padding: var(--spacing-lg);
   }
 }

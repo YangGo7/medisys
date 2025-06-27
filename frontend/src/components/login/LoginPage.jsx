@@ -142,7 +142,7 @@ function LoginPage() {
           <div className="medisys-logo-container">
             <div className="medisys-logo-icon">M</div>
             <div>
-              <h1 className="medisys-brand-title">메디시스 v3.0</h1>
+              <h1 className="medisys-brand-title">LaCID</h1>
               <p className="medisys-brand-subtitle">의료진 포털 시스템</p>
             </div>
           </div>

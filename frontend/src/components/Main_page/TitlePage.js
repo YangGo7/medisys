@@ -206,7 +206,7 @@ export default function TitlePage() {
     switch(action) {
       case 'RIS':
         console.log('Opening RIS');
-        const risURL = `${window.location.protocol}//${window.location.hostname}:3020/ris`;
+        const risURL = `${window.location.protocol}//${window.location.hostname}:3020`;
         window.open(risURL, '_blank', 'noopener,noreferrer');
         break;
       case 'LIS':

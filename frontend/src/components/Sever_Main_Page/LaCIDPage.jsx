@@ -40,7 +40,7 @@ const LaCIDPage = () => {
                 onClick={() => scrollToSection('overview')}
                 className={`btn-secondary ${activeSection === 'overview' ? 'active' : ''}`}
               >
-                회사 개요
+                프로젝트 개요
               </button>
               <button
                 onClick={() => scrollToSection('team')}
@@ -70,7 +70,7 @@ const LaCIDPage = () => {
 
           {/* Mobile Menu */}
           <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
-            <button onClick={() => scrollToSection('overview')} className="btn-secondary">회사 개요</button>
+            <button onClick={() => scrollToSection('overview')} className="btn-secondary">프로젝트 개요</button>
             <button onClick={() => scrollToSection('team')} className="btn-secondary">팀원 소개</button>
             <button onClick={() => scrollToSection('tech')} className="btn-secondary">기술 소개</button>
             <button onClick={handleLogin} className="btn-secondary">로그인</button>
@@ -100,7 +100,7 @@ const LaCIDPage = () => {
         {activeSection === 'overview' && (
           <section className="section">
             <div className="container">
-              <h3 className="section-title">회사 개요</h3>
+              <h3 className="section-title">프로젝트 개요</h3>
               <p className="section-subtitle">
                 흉부 AI 진단의 혁신을 이끄는 LaCID
               </p>
@@ -162,12 +162,10 @@ const LaCIDPage = () => {
 
               <div className="grid-3">
                 {[
-                  { name: '김영수', role: 'CEO & 창립자', desc: '의료 AI 분야 15년 경력의 전문가로, 흉부 영상 진단 시스템 개발을 주도하고 있습니다.', initial: '김' },
-                  { name: '박지혜', role: 'CTO', desc: '컴퓨터 비전과 딥러닝 전문가로, LaCID의 핵심 AI 알고리즘을 개발하고 있습니다.', initial: '박' },
-                  { name: '이현우', role: '의료진 파트너', desc: '흉부외과 전문의로, 임상 검증과 의료진 교육 프로그램을 담당합니다.', initial: '이' },
-                  { name: '최민정', role: '데이터 사이언티스트', desc: '의료 빅데이터 분석 전문가로, AI 모델의 성능 향상과 데이터 품질 관리를 담당합니다.', initial: '최' },
-                  { name: '정승호', role: '품질보증 매니저', desc: '의료기기 품질관리 전문가로, 시스템의 안전성과 신뢰성을 보장합니다.', initial: '정' },
-                  { name: '강수연', role: '사업개발 매니저', desc: '병원 파트너십과 사업 확장을 담당하며, 고객 관계 관리를 전담합니다.', initial: '강' }
+                  { name: '김채윤', role: '팀장', desc: 'MEMO1', initial: '김' },
+                  { name: '김상묵', role: '팀원', desc: 'MEMO2', initial: '김'},
+                  { name: '심보람', role: '팀원', desc: 'MEMO3', initial: '심'},
+                  { name: '이나영', role: '팀원', desc: 'MEMO4', initial: '이' }
                 ].map((member, index) => (
                   <div key={index} className="team-member">
                     <div className="member-avatar">{member.initial}</div>

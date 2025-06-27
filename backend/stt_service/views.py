@@ -1,4 +1,4 @@
-# views.py (Django DRF)
+# views.py (Django DRF) - SOAP 형식으로 수정
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -18,17 +18,39 @@ whisper_model = whisper.load_model("small")
 genai.configure(api_key="AIzaSyCstFaoQkLtW396t2t1rSkC_UuHweQjIbw")
 gemini_model = genai.GenerativeModel("models/learnlm-2.0-flash-experimental")
 
-# 보정 함수
-def gemini_correct(text, patient_id, study_uid):
+# SOAP 형식 보정 함수
+def gemini_correct_soap(text, patient_id, study_uid):
     prompt = f"""
-다음은 흉부 엑스레이 STT 결과입니다.
-전문적인 판독 소견으로 자연스럽게 정리하고, 아래 정보와 함께 태깅하세요:
+다음은 흉부 엑스레이 음성 판독 결과입니다.
+이를 SOAP (Subjective, Objective, Assessment, Plan) 형식의 전문적인 의료 판독 소견으로 정리해 주세요.
 
+환자 정보:
 - 환자 ID: {patient_id}
 - Study UID: {study_uid}
 - 판독 날짜: {datetime.date.today()}
 
-입력: {text}
+입력된 음성 텍스트: {text}
+
+아래 SOAP 형식으로 정리해 주세요:
+
+**S (Subjective - 주관적 소견):**
+환자가 호소하는 증상이나 병력 관련 내용
+
+**O (Objective - 객관적 소견):**
+영상에서 관찰되는 구체적인 소견들
+- 심장 크기 및 형태
+- 폐 실질 소견
+- 흉막 소견
+- 종격동 소견
+- 골격계 소견
+
+**A (Assessment - 평가/진단):**
+영상 소견을 바탕으로 한 진단적 평가
+
+**P (Plan - 계획):**
+추가 검사나 추적 관찰 권고사항
+
+각 항목별로 명확하게 구분하여 작성하고, 의료 전문 용어를 사용하여 정확하고 간결하게 표현해 주세요.
 """
     response = gemini_model.generate_content(prompt)
     return response.text.strip()
@@ -49,7 +71,9 @@ def stt_upload(request):
     try:
         result = whisper_model.transcribe(abs_path)
         original = result['text']
-        corrected = gemini_correct(original, patient_id, study_uid)
+        
+        # SOAP 형식으로 보정
+        soap_formatted = gemini_correct_soap(original, patient_id, study_uid)
 
         # DrReport에 저장 (있으면 업데이트, 없으면 생성)
         with transaction.atomic():
@@ -57,7 +81,7 @@ def stt_upload(request):
                 study_uid=study_uid,
                 defaults={
                     'patient_id': patient_id,
-                    'dr_report': corrected,
+                    'dr_report': soap_formatted,
                     'report_status': 'draft'
                 }
             )
@@ -68,7 +92,7 @@ def stt_upload(request):
     return Response({
         "status": "success",
         "original_text": original,
-        "corrected_text": corrected,
+        "corrected_text": soap_formatted,
         "report_id": report.id,
         "created": created,
     })

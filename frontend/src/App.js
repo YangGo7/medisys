@@ -63,6 +63,7 @@ function App() {
             <Route path="/doctor-dashboard" element={<DocDashBoard />} />
             {/* LIS 관련 페이지 */}
             <Route path="/lis" element={<LisHome />}>
+              <Route index element={<Navigate to="orders" replace />} />
               <Route path="orders" element={<OrderListPage />} />
               <Route path="samples" element={<SampleListPage />} />
               <Route path="order/new" element={<OrderForm />} />

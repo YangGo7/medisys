@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const StudyDetail = ({ studyId, onBack }) => {
   const [studyData, setStudyData] = useState(null);
@@ -10,11 +9,38 @@ const StudyDetail = ({ studyId, onBack }) => {
   const [reportText, setReportText] = useState('');
   const [isReporting, setIsReporting] = useState(false);
 
+  // STT 관련 상태
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [sttLoading, setSttLoading] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [hasPermission, setHasPermission] = useState(false);
+
+  // Refs
+  const mediaRecorderRef = useRef(null);
+  const recordingTimerRef = useRef(null);
+  const chunksRef = useRef([]);
+
   const API_BASE_URL = 'http://35.221.63.41:8000/api';
 
   useEffect(() => {
     fetchStudyDetail();
+    checkMicrophonePermission();
   }, [studyId]);
+
+  // 마이크 권한 확인
+  const checkMicrophonePermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setHasPermission(true);
+      stream.getTracks().forEach(track => track.stop());
+      console.log('✅ 마이크 권한 승인됨');
+    } catch (error) {
+      console.error('❌ 마이크 권한 거부됨:', error);
+      setHasPermission(false);
+    }
+  };
 
   const fetchStudyDetail = async () => {
     try {
@@ -35,6 +61,134 @@ const StudyDetail = ({ studyId, onBack }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 녹음 시작
+  const startRecording = async () => {
+    if (!hasPermission) {
+      await checkMicrophonePermission();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100
+        }
+      });
+
+      chunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+        
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+
+      console.log('🎤 녹음 시작됨');
+
+    } catch (error) {
+      console.error('❌ 녹음 시작 실패:', error);
+      alert('녹음을 시작할 수 없습니다. 마이크 권한을 확인해주세요.');
+    }
+  };
+
+  // 녹음 중지
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+      
+      console.log('⏹️ 녹음 중지됨');
+    }
+  };
+
+  // STT 처리
+  const processSTT = async () => {
+    if (!audioBlob) {
+      alert('먼저 음성을 녹음해주세요.');
+      return;
+    }
+
+    setSttLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      formData.append('patient_id', studyData?.patient_id || 'UNKNOWN');
+      formData.append('study_uid', studyData?.study_uid || 'UNKNOWN');
+
+      console.log('🔄 STT 처리 중...');
+
+      const response = await fetch('http://35.225.63.41:8000/api/stt/upload/', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`STT 요청 실패: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        const soapText = result.corrected_text || result.original_text;
+        
+        // 기존 텍스트에 SOAP 형식 결과 추가
+        const newText = reportText ? `${reportText}\n\n${soapText}` : soapText;
+        setReportText(newText);
+        
+        console.log('✅ SOAP 형식 STT 완료:', soapText);
+        alert('음성 인식이 완료되어 SOAP 형식으로 종합소견에 추가되었습니다.');
+        
+      } else {
+        throw new Error(result.message || 'STT 처리 실패');
+      }
+
+    } catch (error) {
+      console.error('❌ STT 처리 실패:', error);
+      alert(`음성 인식 실패: ${error.message}`);
+    } finally {
+      setSttLoading(false);
+    }
+  };
+
+  // 녹음 시간 포맷팅
+  const formatRecordingTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSave = async () => {
@@ -151,7 +305,7 @@ const StudyDetail = ({ studyId, onBack }) => {
 
   return (
     <div style={{ width: '100%', padding: '10px' }}>
-      {/* 헤더 - 두 번째 코드 스타일로 변경 */}
+      {/* 헤더 */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -219,7 +373,7 @@ const StudyDetail = ({ studyId, onBack }) => {
         </div>
       </div>
 
-      {/* 가로로 긴 테이블 형태의 정보 표시 - 두 번째 코드 스타일로 변경 */}
+      {/* 기존 테이블 - 변경 없음 */}
       <div style={{ marginBottom: '20px', overflowX: 'auto' }}>
         <table style={{
           width: '100%',
@@ -248,7 +402,6 @@ const StudyDetail = ({ studyId, onBack }) => {
           </thead>
           <tbody>
             <tr>
-              {/* 읽기 전용 필드들 (수정 불가) */}
               <td style={{ padding: '12px', border: '1px solid #dee2e6', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                 <strong>{studyData.patient_id}</strong>
               </td>
@@ -274,7 +427,6 @@ const StudyDetail = ({ studyId, onBack }) => {
                 {formatDateTime(studyData.request_datetime)}
               </td>
               
-              {/* 수정 가능한 필드들 */}
               <td style={{ padding: '12px', border: '1px solid #dee2e6', textAlign: 'center' }}>
                 {isEditing ? (
                   <input
@@ -363,7 +515,7 @@ const StudyDetail = ({ studyId, onBack }) => {
         </table>
       </div>
 
-      {/* 수정 버튼들 - 두 번째 코드 스타일로 변경 */}
+      {/* 수정 버튼들 */}
       {isEditing && (
         <div style={{
           marginBottom: '20px',
@@ -407,7 +559,7 @@ const StudyDetail = ({ studyId, onBack }) => {
         </div>
       )}
 
-      {/* 판독 작성 섹션 - 두 번째 코드 스타일로 변경 */}
+      {/* 판독 작성 섹션 - STT 기능 추가 */}
       {isReporting && (
         <div style={{
           marginBottom: '20px',
@@ -416,22 +568,158 @@ const StudyDetail = ({ studyId, onBack }) => {
           border: '2px solid #27ae60'
         }}>
           <h3 style={{ marginTop: 0, color: '#27ae60', marginBottom: '15px' }}>
-            판독 작성
+            판독 작성 (SOAP 형식)
           </h3>
+
+          {/* STT 컨트롤 영역 */}
+          <div style={{
+            marginBottom: '20px',
+            padding: '15px',
+            backgroundColor: '#f8f9fa',
+            border: '1px solid #dee2e6',
+            borderRadius: '4px'
+          }}>
+            <h4 style={{ margin: '0 0 15px 0', color: '#495057', fontSize: '16px' }}>
+              🎤 음성 인식 (SOAP 형식으로 자동 변환)
+            </h4>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+              {/* 녹음 버튼 */}
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={!hasPermission}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: isRecording ? '#e74c3c' : '#28a745',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: hasPermission ? 'pointer' : 'not-allowed',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  opacity: hasPermission ? 1 : 0.6
+                }}
+              >
+                {isRecording ? '🔴 녹음 중지' : '🎤 녹음 시작'}
+              </button>
+
+              {/* 녹음 시간 표시 */}
+              {isRecording && (
+                <div style={{
+                  padding: '8px 12px',
+                  backgroundColor: '#e74c3c',
+                  color: '#fff',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  fontFamily: 'monospace'
+                }}>
+                  🔴 {formatRecordingTime(recordingTime)}
+                </div>
+              )}
+
+              {/* STT 처리 버튼 */}
+              {audioBlob && (
+                <button
+                  onClick={processSTT}
+                  disabled={sttLoading}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: sttLoading ? '#6c757d' : '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: sttLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {sttLoading ? '🔄 SOAP 변환 중...' : '🤖 SOAP 변환'}
+                </button>
+              )}
+            </div>
+
+            {/* 오디오 재생 */}
+            {audioUrl && (
+              <div style={{
+                padding: '10px',
+                backgroundColor: '#e9ecef',
+                borderRadius: '4px',
+                border: '1px solid #ced4da'
+              }}>
+                <audio
+                  src={audioUrl}
+                  controls
+                  style={{ width: '100%' }}
+                />
+                <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#6c757d' }}>
+                  녹음된 음성을 확인한 후 SOAP 변환 버튼을 눌러주세요.
+                </p>
+              </div>
+            )}
+
+            {/* 권한 없음 안내 */}
+            {!hasPermission && (
+              <div style={{
+                padding: '10px',
+                backgroundColor: '#fff3cd',
+                border: '1px solid #ffeaa7',
+                borderRadius: '4px',
+                color: '#856404',
+                fontSize: '14px'
+              }}>
+                <strong>⚠️ 마이크 권한이 필요합니다</strong>
+                <p style={{ margin: '5px 0 0 0' }}>
+                  음성 인식을 사용하려면 브라우저에서 마이크 접근을 허용해야 합니다.
+                </p>
+                <button
+                  onClick={checkMicrophonePermission}
+                  style={{
+                    marginTop: '5px',
+                    padding: '5px 10px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  권한 다시 요청
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 기존 판독 텍스트 영역 */}
           <textarea
             value={reportText}
             onChange={(e) => setReportText(e.target.value)}
-            placeholder="판독 소견을 입력하세요..."
+            placeholder="SOAP 형식으로 판독 소견을 입력하세요...
+
+S (Subjective - 주관적 소견):
+환자가 호소하는 증상이나 병력
+
+O (Objective - 객관적 소견):
+영상에서 관찰되는 구체적인 소견들
+
+A (Assessment - 평가/진단):
+영상 소견을 바탕으로 한 진단적 평가
+
+P (Plan - 계획):
+추가 검사나 추적 관찰 권고사항"
             style={{
               width: '100%',
-              height: '200px',
+              height: '300px',
               padding: '10px',
               border: '1px solid #dee2e6',
               fontSize: '14px',
               resize: 'vertical',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              lineHeight: '1.5'
             }}
           />
+          
           <div style={{ marginTop: '15px', textAlign: 'center' }}>
             <button
               onClick={handleReportSave}
@@ -463,10 +751,19 @@ const StudyDetail = ({ studyId, onBack }) => {
               취소
             </button>
           </div>
+
+          <div style={{
+            marginTop: '10px',
+            fontSize: '12px',
+            color: '#6c757d',
+            textAlign: 'center'
+          }}>
+            💡 음성으로 판독하면 자동으로 SOAP 형식으로 변환되어 텍스트에 추가됩니다.
+          </div>
         </div>
       )}
 
-      {/* 기존 판독 내용 표시 - 두 번째 코드 스타일로 변경 */}
+      {/* 기존 판독 내용 표시 */}
       {studyData.report_text && !isReporting && (
         <div style={{
           padding: '20px',
@@ -475,7 +772,7 @@ const StudyDetail = ({ studyId, onBack }) => {
           marginBottom: '20px'
         }}>
           <h3 style={{ marginTop: 0, color: '#2c3e50', marginBottom: '15px' }}>
-            판독 소견
+            판독 소견 (SOAP 형식)
           </h3>
           <div style={{
             padding: '15px',
@@ -490,7 +787,7 @@ const StudyDetail = ({ studyId, onBack }) => {
         </div>
       )}
 
-      {/* AI 분석 뷰어 섹션 - 첫 번째 코드 그대로 유지 */}
+      {/* AI 분석 뷰어 섹션 - 기존 코드 그대로 유지 */}
       <div style={{
         marginTop: '20px',
         padding: '20px',

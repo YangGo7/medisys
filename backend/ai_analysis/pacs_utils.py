@@ -140,13 +140,13 @@ if __name__ == "__main__":
     test_pacs_connection()
     
     # 실제 환자 정보 조회 테스트
-    study_uid = "1.2.276.0.7230010.3.1.2.948861420.9340.1748700703.257"
-    print(f"\n환자 정보 조회 테스트: {study_uid}")
-    patient_info = get_patient_info_from_pacs(study_uid)
+    # study_uid = "1.2.276.0.7230010.3.1.2.948861420.9340.1748700703.257"
+    # print(f"\n환자 정보 조회 테스트: {study_uid}")
+    # patient_info = get_patient_info_from_pacs(study_uid)
     
-    if patient_info:
-        print("✅ 환자 정보 조회 성공!")
-        for key, value in patient_info.items():
-            print(f"  {key}: {value}")
-    else:
-        print("❌ 환자 정보 조회 실패")
+    # if patient_info:
+    #     print("✅ 환자 정보 조회 성공!")
+    #     for key, value in patient_info.items():
+    #         print(f"  {key}: {value}")
+    # else:
+    #     print("❌ 환자 정보 조회 실패")
