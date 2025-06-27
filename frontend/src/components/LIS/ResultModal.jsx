@@ -26,6 +26,7 @@ const runFullCdssAnalysis = async (sampleId, testType, components) => {
 };
 
 const CdssResultModal = ({ data, onClose }) => {
+  console.log("✅ 전달된 data:", data);
   if (!data) return null;
 
   console.log("📦 SHAP 데이터 확인:", data.shap_data);
@@ -34,10 +35,11 @@ const CdssResultModal = ({ data, onClose }) => {
   const uniqueResults = [...new Map(data.results.map(item => [item.component_name, item])).values()];
 
   const interpretPrediction = (value) => {
-    if (value === 1 || value === true || value === "1") return '🔴 이상 소견';
-    if (value === 0 || value === false || value === "0") return '🟢 정상';
-    if (value === null || value === undefined || value === '') return '❓ 예측값 없음';
-    return String(value); // 혹시 숫자 외 다른 값이 들어올 경우 표시
+    console.log("🔍 예측값 수신:", value);
+    const finalValue = value === null || value === undefined || value === '' ? 0 : value;
+    if (finalValue === 1 || finalValue === true || finalValue === "1") return '🔴 이상 소견';
+    if (finalValue === 0 || finalValue === false || finalValue === "0") return '🟢 정상';
+    return String(finalValue); // 혹시 숫자 외 다른 값이 들어올 경우 표시
   };
 
   return (
@@ -55,6 +57,7 @@ const CdssResultModal = ({ data, onClose }) => {
             <tr><th>항목</th><th>값</th><th>단위</th></tr>
           </thead>
           <tbody>
+            console.log("📊 렌더링할 결과 리스트:", uniqueResults);
             {uniqueResults.map((r, i) => (
               <tr key={i}>
                 <td>{r.component_name}</td>

@@ -263,6 +263,8 @@
 // SchedulePanel.displayName = 'SchedulePanel';
 
 // export default SchedulePanel;
+
+
 import React from 'react';
 import ScheduleHeader from './ScheduleHeader';
 import ScheduleTable from './ScheduleTable';
@@ -280,23 +282,46 @@ const SchedulePanel = ({
   onCompleteExam,      // 추가
   onCancelExam         // 추가
 }) => {
-  console.log('SchedulePanel 렌더링:', { roomSchedules, rooms, radiologists }); // 🔍 디버깅
+  // console.log('SchedulePanel 렌더링:', { roomSchedules, rooms, radiologists }); // 🔍 디버깅 - 무한 로그 방지
 
   // 드래그앤드롭 핸들러
-  const handleDrop = async (roomId, timeSlot) => {
+  const handleDrop = async (roomId, event) => {
     if (!draggedExam) {
       console.log('드래그된 검사가 없습니다.');
       return;
     }
 
-    console.log('드롭 처리:', { examId: draggedExam.id, roomId, timeSlot });
+    // ✅ 드롭 위치에서 실제 시간 계산
+    const rect = event.currentTarget.getBoundingClientRect();
+    const dropY = event.clientY - rect.top;
+    
+    // 시간 계산: 108px = 1시간, 1.8px = 1분
+    const totalMinutes = Math.floor(dropY / 1.8) + 540; // 540 = 9시 * 60분
+    const dropHour = Math.floor(totalMinutes / 60);
+    const dropMinute = Math.floor((totalMinutes % 60) / 10) * 10; // 10분 단위로 정렬
+    
+    // 운영시간 내로 제한 (9시-17시)
+    const finalHour = Math.max(9, Math.min(17, dropHour));
+    const finalMinute = Math.max(0, Math.min(50, dropMinute));
+    
+    const timeSlot = `${finalHour.toString().padStart(2, '0')}:${finalMinute.toString().padStart(2, '0')}`;
+    
+    console.log('드롭 처리:', { 
+      examId: draggedExam.id, 
+      roomId, 
+      dropY, 
+      totalMinutes, 
+      dropHour, 
+      dropMinute,
+      timeSlot 
+    });
 
     try {
       if (onExamUpdated) {
         onExamUpdated('assignment_requested', {
           exam: draggedExam,
           roomId,
-          timeSlot
+          timeSlot // ✅ 계산된 실제 시간 전달
         });
       }
     } catch (error) {
@@ -305,7 +330,7 @@ const SchedulePanel = ({
     }
   };
 
-  // 로딩 상태 (데이터가 없으면)
+  // ✅ 더 강화된 로딩 조건
   if (rooms.length === 0) {
     return (
       <div className="schedule-panel">
@@ -322,12 +347,22 @@ const SchedulePanel = ({
     );
   }
 
+  // ✅ roomSchedules가 비어있으면 빈 스케줄로 초기화
+  const hasScheduleData = roomSchedules && Object.keys(roomSchedules).length > 0;
+  const safeRoomSchedules = hasScheduleData ? roomSchedules : (() => {
+    const emptySchedules = {};
+    rooms.forEach(room => {
+      emptySchedules[room.id] = [];
+    });
+    return emptySchedules;
+  })();
+
   return (
     <div className="schedule-panel">
       <ScheduleHeader radiologists={radiologists} />
       
       <ScheduleTable
-        roomSchedules={roomSchedules}
+        roomSchedules={safeRoomSchedules}
         radiologists={radiologists}
         rooms={rooms}
         onDragOver={onDragOver}
@@ -351,9 +386,10 @@ const SchedulePanel = ({
           fontSize: '0.75rem'
         }}>
           검사실: {rooms.length} | 영상전문의: {radiologists.length} | 
-          스케줄: {Object.keys(roomSchedules).map(roomId => 
-            `${roomId}(${roomSchedules[roomId].length})`
-          ).join(', ')}
+          스케줄: {Object.keys(safeRoomSchedules).map(roomId => 
+            `${roomId}(${safeRoomSchedules[roomId].length})`
+          ).join(', ')} | 
+          원본스케줄: {hasScheduleData ? 'O' : 'X'}
         </div>
       )}
     </div>

@@ -215,6 +215,10 @@ def receive_model_result(request):
             
             response_data = CDSSResultSerializer(instance).data
             response_data['shap_data'] = contribution_result  # ← SHAP 대체
+            response_data['results'] = [
+                {"component_name": r.component_name, "value": r.value, "unit": r.unit}
+                for r in related
+            ]  # ← 프론트에서 data.results로 사용할 수 있게 추가
             response_data['prediction'] = prediction
             response_data['lfs_saved'] = True
 

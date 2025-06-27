@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SystemShortcuts.css';
 
+const BASE_URL = 'http://35.225.63.41:3000/'
 const SystemShortcuts = () => {
   const navigate = useNavigate();
 
@@ -15,10 +16,10 @@ const SystemShortcuts = () => {
       description: '전자의무기록 시스템',
       action: () => {
         console.log('🏥 EMR 시스템으로 이동');
-        navigate('/emr');
+        window.location.href = `${BASE_URL}emr`;
       },
       color: '#3b82f6',
-      external: false
+      external: true
     },
     {
       id: 'lis',
@@ -28,10 +29,10 @@ const SystemShortcuts = () => {
       description: '검사실 정보 시스템',
       action: () => {
         console.log('🧪 LIS 시스템으로 이동');
-        navigate('/lis');
+        window.location.href = `${BASE_URL}lis`;
       },
       color: '#10b981',
-      external: false
+      external: true
     },
     {
       id: 'control',
@@ -41,10 +42,10 @@ const SystemShortcuts = () => {
       description: '시스템 제어 패널',
       action: () => {
         console.log('🎛️ Control Page로 이동');
-        navigate('/control');
+        window.location.href = `${BASE_URL}Main_page/main_page_function`;
       },
       color: '#8b5cf6',
-      external: false
+      external: true
     },
     {
       id: 'main',
@@ -54,10 +55,10 @@ const SystemShortcuts = () => {
       description: '메인 대시보드',
       action: () => {
         console.log('🏠 Main으로 이동');
-        navigate('/');
+        window.location.href = `${BASE_URL}Main_page/TitlePage`;
       },
       color: '#6b7280',
-      external: false
+      external: true
     }
   ];
 

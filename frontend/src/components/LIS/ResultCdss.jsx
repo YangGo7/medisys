@@ -65,7 +65,7 @@ const CdssResultTable = () => {
     console.log("삭제 요청 sampleId:", sampleId); 
     if (!window.confirm(`샘플 ID ${sampleId}의 결과 전체를 삭제하시겠습니까?`)) return;
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}cdss/delete/${sampleId}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}cdss/delete/${sampleId}/`);
       alert('✅ 해당 샘플 결과 전체가 삭제되었습니다.');
       fetchCdssResults();
     } catch (err) {
@@ -96,127 +96,127 @@ const CdssResultTable = () => {
 
 
   return (
-    <div className="result-cdss-wrapper">
-      <h2 className="text-2xl font-bold mb-4">📊 CDSS 검사 결과</h2>
-      {error && <p className="text-red-500 font-semibold mb-4">{error}</p>}
+  <div className="result-cdss-wrapper">
+    <h2 className="text-2xl font-bold mb-4">📊 CDSS 검사 결과</h2>
+    {error && <p className="text-red-500 font-semibold mb-4">{error}</p>}
 
-      {/* 검색/필터 바 */}
-      <div className="filter-bar">
-        <label>
-          시작 날짜:
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => {
-              setSelectedDate(e.target.value);
-              setSelectedSampleId('');
-              setSearchKeyword('');
-            }}
-          />
-        </label>
+    {/* 검색/필터 바 */}
+    <div className="filter-bar">
+      <label>
+        시작 날짜:
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => {
+            setSelectedDate(e.target.value);
+            setSelectedSampleId('');
+            setSearchKeyword('');
+          }}
+        />
+      </label>
 
-        <label>
-          🔍 Sample ID 검색:
-          <input
-            type="text"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            placeholder="샘플 ID 입력"
-          />
-        </label>
+      <label>
+        🔍 Sample ID 검색:
+        <input
+          type="text"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+          placeholder="샘플 ID 입력"
+        />
+      </label>
 
-        <label>
-          🔍 Sample ID 선택:
-          <select
-            value={selectedSampleId}
-            onChange={(e) => setSelectedSampleId(e.target.value)}
-          >
-            <option value="">전체 보기</option>
-            {sampleOptions.map(id => (
-              <option key={id} value={id}>{id}</option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <label>
+        🔍 Sample ID 선택:
+        <select
+          value={selectedSampleId}
+          onChange={(e) => setSelectedSampleId(e.target.value)}
+        >
+          <option value="">전체 보기</option>
+          {sampleOptions.map(id => (
+            <option key={id} value={id}>{id}</option>
+          ))}
+        </select>
+      </label>
+    </div>
 
-      {/* 결과 테이블 */}
-      <div className="overflow-x-auto">
-        <table className="result-table">
-          <thead>
+    {/* 결과 테이블 */}
+    <div className="overflow-x-auto">
+      <table className="result-table">
+        <thead>
+          <tr>
+            <th>Sample ID</th>
+            <th>Test Type</th>
+            <th>Component</th>
+            <th>Value</th>
+            <th>Unit</th>
+            <th>Verified By</th>
+            <th>Verified Date</th>
+            <th>Prediction</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(grouped).length === 0 ? (
             <tr>
-              <th>Sample ID</th>
-              <th>Test Type</th>
-              <th>Component</th>
-              <th>Value</th>
-              <th>Unit</th>
-              <th>Verified By</th>
-              <th>Verified Date</th>
-              <th>Prediction</th>
+              <td colSpan="8" className="empty-message">
+                해당 샘플 ID에 대한 결과가 없습니다.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {Object.keys(grouped).length === 0 ? (
-              <tr>
-                <td colSpan="8" className="empty-message">
-                  해당 샘플 ID에 대한 결과가 없습니다.
-                </td>
-              </tr>
-            ) : (
-              Object.keys(grouped).map((sample) => (
-                <React.Fragment key={sample}>
-                  <tr className="group-header">
-                    <td colSpan="8">
+          ) : (
+            Object.keys(grouped).map((sample) => (
+              <React.Fragment key={sample}>
+                <tr className="group-header">
+                  <td colSpan="8">
                       <span
                         className="group-toggle-btn"
                         onClick={() => handleToggleSample(sample)}
                       >
                         {expandedSamples[sample] ? '▼' : '▶'} 샘플 ID: {sample}
                       </span>
-                      {/* ✅ 결과 보기 버튼 추가 */}
-                      <button
-                        className="view-result-btn"
-                        onClick={() => openResultModal(sample)}
-                      >
-                        분석 결과 보기
-                      </button>
-                      <span
-                        className="group-delete-btn"
-                        onClick={() => handleDeleteSample(sample)}
-                      >
-                        전체 삭제
-                      </span>
-                    </td>
-                  </tr>
+                        <button
+                          className="view-result-btn"
+                          onClick={() => openResultModal(sample)}
+                        >
+                          분석 결과 보기
+                        </button>
+                        <span
+                          className="group-delete-btn"
+                          onClick={() => handleDeleteSample(sample)}
+                        >
+                          전체 삭제
+                        </span>
+                  </td>
+                </tr>
 
-                  {expandedSamples[sample] &&
-                    grouped[sample].map((result, idx) => (
-                      <tr key={result.id || idx} className="text-center bg-white">
-                        <td>{result.sample}</td>
-                        <td>{result.test_type}</td>
-                        <td>{result.component_name}</td>
-                        <td>{result.value}</td>
-                        <td>{result.unit}</td>
-                        <td>{result.verified_by}</td>
-                        <td>{new Date(result.verified_date).toLocaleString()}</td>
-                        <td>
-                          {idx === 0 ? (
-                            result.prediction === 1 ? '🔴 이상' :
-                            result.prediction === 0 ? '🟢 정상' :
-                            result.prediction || '-'
-                          ) : ''}
-                        </td>
-                      </tr>
-                    ))}
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      {modalOpen && modalData && (
+                {expandedSamples[sample] &&
+                  grouped[sample].map((result, idx) => (
+                    <tr key={result.id || idx} className="text-center bg-white">
+                      <td>{result.sample}</td>
+                      <td>{result.test_type}</td>
+                      <td>{result.component_name}</td>
+                      <td>{result.value}</td>
+                      <td>{result.unit}</td>
+                      <td>{result.verified_by}</td>
+                      <td>{new Date(result.verified_date).toLocaleString()}</td>
+                      <td>
+                        {idx === 0 ? (
+                          result.prediction === 1 ? '🔴 이상' :
+                          result.prediction === 0 ? '🟢 정상' :
+                          result.prediction || '-'
+                        ) : ''}
+                      </td>
+                    </tr>
+                  ))}
+              </React.Fragment>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+
+    {modalOpen && modalData && (
       <CdssResultModal data={modalData} onClose={() => setModalOpen(false)} />
     )}
-    </div>
-  );
+  </div>
+);
 };
 export default CdssResultTable;

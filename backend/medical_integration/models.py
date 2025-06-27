@@ -50,7 +50,7 @@ class PatientMapping(models.Model):
     gender = models.CharField(max_length=1, choices=[('M', '남성'), ('F', '여성')], null=True, blank=True)
     birthdate = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
-    assigned_room = models.IntegerField(null=True, blank=True, help_text="배정된 진료실 번호")
+    assigned_room = models.IntegerField(null=True, blank=True, default=None, help_text="배정된 진료실 번호")
     
     # 🔥 완료 관련 새 필드 추가
     completion_date = models.DateTimeField(null=True, blank=True, help_text="진료 완료 날짜/시간")
@@ -298,6 +298,7 @@ class PatientMapping(models.Model):
                 openmrs_patient_uuid=openmrs_patient_uuid,
                 patient_identifier=patient_identifier,
                 mapping_type="IDENTIFIER_BASED",
+                assigned_room=None,
                 sync_status="PENDING",
                 display=full_name,
                 gender=gender,

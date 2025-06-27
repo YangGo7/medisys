@@ -1,5 +1,5 @@
-// frontend/src/components/EMR/ImagingRequestPanel.jsx
 import React, { useState, useEffect } from 'react';
+import { Send, AlertCircle } from 'lucide-react';
 
 const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, onUpdateLog }) => {
   const [formData, setFormData] = useState({
@@ -8,22 +8,21 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     study_description: '',
     clinical_info: '',
     priority: 'routine',
-    requesting_physician: '' // 의사 정보 자동 채우기
+    requesting_physician: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [autoFilledData, setAutoFilledData] = useState(null); // 자동 채워진 환자 정보
 
   const modalityOptions = [
-    { value: 'CR', label: 'Chest X-ray (흉부 X선)' },
-    { value: 'CT', label: 'CT Scan (컴퓨터 단층촬영)' },
-    { value: 'MR', label: 'MRI (자기공명영상)' },
-    { value: 'US', label: 'Ultrasound (초음파)' },
-    { value: 'NM', label: 'Nuclear Medicine (핵의학)' },
-    { value: 'PT', label: 'PET Scan (양전자방출단층촬영)' },
-    { value: 'MG', label: 'Mammography (유방촬영술)' },
-    { value: 'DX', label: 'Digital Radiography (디지털 X선)' },
-    { value: 'RF', label: 'Radiofluoroscopy (투시촬영)' }
+    { value: 'CR', label: 'Chest X-ray' },
+    { value: 'CT', label: 'CT Scan' },
+    { value: 'MR', label: 'MRI' },
+    { value: 'US', label: 'Ultrasound' },
+    { value: 'NM', label: 'Nuclear Medicine' },
+    { value: 'PT', label: 'PET Scan' },
+    { value: 'MG', label: 'Mammography' },
+    { value: 'DX', label: 'Digital X-ray' },
+    { value: 'RF', label: 'Fluoroscopy' }
   ];
 
   const bodyPartOptions = [
@@ -32,28 +31,25 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     'BONE', 'JOINT', 'MUSCLE', 'VESSEL'
   ];
 
-  // 🔥 환자 선택 시 자동으로 정보 구성
+  // 의사 정보 자동 설정
   useEffect(() => {
-    if (selectedPatient) {
-      const autoData = extractPatientInfo(selectedPatient);
-      setAutoFilledData(autoData);
-      
-      // 의사 정보 자동 설정
-      const doctorName = localStorage.getItem('doctor_name') || 
-                       localStorage.getItem('username') || 
-                       'Dr. Current User';
-      setFormData(prev => ({
-        ...prev,
-        requesting_physician: doctorName
-      }));
-      
-      console.log('🔥 자동 채워진 환자 정보:', autoData);
-    } else {
-      setAutoFilledData(null);
-    }
-  }, [selectedPatient]);
+    const doctorName = localStorage.getItem('doctor_name') || 
+                     localStorage.getItem('username') || 
+                     'Dr. Current User';
+    setFormData(prev => ({
+      ...prev,
+      requesting_physician: doctorName
+    }));
+  }, []);
 
-  // 🔥 환자 정보 추출 및 표준화 함수
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const extractPatientInfo = (patient) => {
     console.log('🔍 환자 원본 데이터:', patient);
 
@@ -103,7 +99,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     };
   };
 
-  // 🔥 날짜 형식 변환 함수 개선
+  // 날짜 형식 변환 함수
   const formatBirthDate = (dateString) => {
     if (!dateString) return '';
     
@@ -137,127 +133,103 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     }
   };
 
-  // 🔥 나이 계산 함수
-  const calculateAge = (birthDate) => {
+  const calculateAge = (birthdate) => {
+    if (!birthdate) return null;
     try {
-      const birth = new Date(birthDate);
+      const birth = new Date(birthdate);
       const today = new Date();
+      if (isNaN(birth.getTime())) return null;
+      
       let age = today.getFullYear() - birth.getFullYear();
       const monthDiff = today.getMonth() - birth.getMonth();
       
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
         age--;
       }
-      
       return age;
-    } catch (error) {
-      console.warn('나이 계산 오류:', error);
+    } catch {
       return null;
     }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setError(''); // 에러 메시지 클리어
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!selectedPatient) {
-      setError('환자를 먼저 선택해주세요.');
-      return;
-    }
-
-    if (!autoFilledData) {
-      setError('환자 정보를 불러올 수 없습니다.');
+      setError('환자가 선택되지 않았습니다.');
       return;
     }
 
     if (!formData.modality || !formData.body_part) {
-      setError('검사 종류와 검사 부위를 선택해주세요.');
-      return;
-    }
-
-    if (!formData.requesting_physician) {
-      setError('의사 정보를 입력해주세요.');
+      setError('검사종류와 부위를 선택해주세요.');
       return;
     }
 
     setLoading(true);
     setError('');
 
-    console.log('🚀 영상검사 요청 시작:', {
-      autoFilledData,
-      formData,
-      selectedPatient
-    });
-
-    // 🔥 완전히 자동화된 요청 데이터 구성
-    const requestData = {
-      // 🔥 자동으로 채워지는 필드들
-      patient_id: autoFilledData.patient_id,
-      patient_name: autoFilledData.patient_name,
-      birth_date: autoFilledData.birth_date,
-      sex: autoFilledData.sex,
-      
-      // 🔥 사용자가 입력하는 필드들
-      modality: formData.modality,
-      body_part: formData.body_part,
-      requesting_physician: formData.requesting_physician,
-      
-      // 선택적 필드들
-      study_description: formData.study_description || `${formData.modality} - ${formData.body_part}`,
-      clinical_info: formData.clinical_info || '진료 의뢰',
-      priority: formData.priority,
-      
-      // 메타데이터
-      created_by: 'emr_user',
-      request_source: 'EMR_SYSTEM',
-      patient_room: autoFilledData.assigned_room || null
-    };
-
-    // 🔥 fetch를 호출하기 전에 로그 객체 만들기
-    const newLog = { timestamp: new Date().toISOString(), status: 'pending', request: requestData, response: null };
-
-
-    console.log('📤 최종 전송 데이터:', requestData);
-    
     try {
-      if (onNewRequest) onNewRequest(newLog);
+      const patientInfo = extractPatientInfo(selectedPatient);
+      
+      // 🔥 실제 API에 맞춘 데이터 구조 (원본 코드 참고)
+      const requestData = {
+        // 자동으로 채워지는 필드들
+        patient_id: patientInfo.patient_id,
+        patient_name: patientInfo.patient_name,
+        birth_date: patientInfo.birth_date,
+        sex: patientInfo.sex,
+        
+        // 사용자가 입력하는 필드들
+        modality: formData.modality,
+        body_part: formData.body_part,
+        requesting_physician: formData.requesting_physician,
+        
+        // 선택적 필드들
+        study_description: formData.study_description || `${formData.modality} - ${formData.body_part}`,
+        clinical_info: formData.clinical_info || '진료 의뢰',
+        priority: formData.priority,
+        
+        // 메타데이터
+        created_by: 'emr_user',
+        request_source: 'EMR_SYSTEM',
+        patient_room: patientInfo.assigned_room || null
+      };
 
-      // 백엔드 API 호출
+      console.log('🚀 영상검사 요청 데이터:', requestData);
+
+      // 🔥 원본 코드와 동일한 API 호출
       const response = await fetch('http://meddocai.p-e.kr:8000/api/worklist/create-from-emr/', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
       });
 
       console.log('📥 응답 상태:', response.status);
 
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ 응답 오류:', errorText);
-        if (onUpdateLog) onUpdateLog({ ...newLog, status: 'error', response: errorText });
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
-      // if (!response.ok) {
-      //   const errorText = await response.text();
-      //   console.error('❌ 응답 오류:', errorText);
-      //   throw new Error(`HTTP ${response.status}: ${errorText}`);
-      // }
 
       const result = await response.json();
-      if (onUpdateLog) onUpdateLog({ ...newLog, status: 'success', response: result });
       console.log('✅ 성공 응답:', result);
 
       if (result.success) {
-        setFormData(prev => ({ modality: '', body_part: '', study_description: '', clinical_info: '', priority: 'routine', requesting_physician: prev.requesting_physician }));
-        alert(`✅ 영상검사 요청이 성공적으로 등록되었습니다!`);
+        // 폼 초기화 (의사명 제외)
+        const doctorName = formData.requesting_physician;
+        setFormData({
+          modality: '',
+          body_part: '',
+          study_description: '',
+          clinical_info: '',
+          priority: 'routine',
+          requesting_physician: doctorName
+        });
+
+        alert('✅ 영상검사 요청이 성공적으로 등록되었습니다!');
         
+        // 🔥 BroadcastChannel로 다른 컴포넌트에 알림
         try {
           const channel = new BroadcastChannel('order_channel');
           channel.postMessage('newOrderCreated');
@@ -266,7 +238,9 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
           console.error('BroadcastChannel 신호 보내기 실패:', bcError);
         }
         
-        if (onRequestSuccess) onRequestSuccess(result);
+        if (onRequestSuccess) {
+          onRequestSuccess(result);
+        }
       } else {
         throw new Error(result.error || '요청 처리 중 오류가 발생했습니다.');
       }
@@ -274,97 +248,61 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     } catch (error) {
       console.error('❌ 영상검사 요청 실패:', error);
       setError(`요청 실패: ${error.message}`);
-
-      // 부모에게 "실패" 보고
-      if (onUpdateLog) onUpdateLog({ ...newLog, status: 'error', response: error.message });
     } finally {
       setLoading(false);
     }
   };
 
-  // 환자가 선택되지 않은 경우
-  if (!selectedPatient) {
-    return (
-      <div style={styles.noPatientContainer}>
-        <div style={styles.noPatientIcon}>🏥</div>
-        <p style={styles.noPatientText}>환자를 선택하면 영상검사를 요청할 수 있습니다.</p>
-      </div>
-    );
-  }
-
-  // 자동 채워진 데이터가 없는 경우
-  if (!autoFilledData) {
-    return (
-      <div style={styles.noPatientContainer}>
-        <div style={styles.noPatientIcon}>⚠️</div>
-        <p style={styles.noPatientText}>환자 정보를 불러오는 중입니다...</p>
-      </div>
-    );
-  }
-
   return (
     <div style={styles.container}>
-      {/* 🔥 자동 채워진 환자 정보 표시 */}
-      <div style={styles.patientInfo}>
-        <div style={styles.patientCard}>
-          <div style={styles.patientHeader}>
-            <strong>👤 {autoFilledData.patient_name}</strong>
-            <span style={styles.autoFillBadge}>자동 입력됨</span>
-          </div>
-          <div style={styles.patientDetails}>
-            <div>🆔 {autoFilledData.patient_id}</div>
-            <div>
-              👥 {autoFilledData.sex === 'M' ? '남성' : autoFilledData.sex === 'F' ? '여성' : '미상'} | 
-              🎂 {autoFilledData.age ? `${autoFilledData.age}세` : '나이 미상'}
-            </div>
-            <div>📅 {autoFilledData.birth_date || '생년월일 미상'}</div>
-            {autoFilledData.assigned_room && (
-              <div>🏥 진료실 {autoFilledData.assigned_room}번</div>
-            )}
-          </div>
+      {/* 에러 메시지 */}
+      {error && (
+        <div style={styles.errorMessage}>
+          <AlertCircle size={14} style={{ marginRight: '0.25rem' }} />
+          {error}
         </div>
-      </div>
+      )}
 
-      {/* 🔥 영상검사 요청 폼 */}
-      <form onSubmit={handleSubmit} style={styles.form}>
+      {/* 영상검사 요청 폼 */}
+      <div style={styles.form}>
+        {/* 검사종류 & 검사부위 */}
         <div style={styles.formRow}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>검사 종류 *</label>
+            <label style={styles.label}>검사종류</label>
             <select
               name="modality"
               value={formData.modality}
               onChange={handleChange}
-              required
               style={styles.select}
             >
-              <option value="">선택하세요</option>
-              {modalityOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value="">선택</option>
+              <option value="CR">X-ray</option>
+              <option value="CT">CT</option>
+              <option value="MR">MRI</option>
+              <option value="US">초음파</option>
+              <option value="NM">핵의학</option>
             </select>
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>검사 부위 *</label>
+            <label style={styles.label}>부위</label>
             <select
               name="body_part"
               value={formData.body_part}
               onChange={handleChange}
-              required
               style={styles.select}
             >
-              <option value="">선택하세요</option>
-              {bodyPartOptions.map(part => (
-                <option key={part} value={part}>
-                  {part}
-                </option>
-              ))}
+              <option value="">선택</option>
+              <option value="CHEST">흉부</option>
+              <option value="ABDOMEN">복부</option>
+              <option value="HEAD">두부</option>
+              <option value="SPINE">척추</option>
+              <option value="EXTREMITY">사지</option>
             </select>
           </div>
         </div>
 
+        {/* 우선순위 & 의뢰의사 */}
         <div style={styles.formRow}>
           <div style={styles.formGroup}>
             <label style={styles.label}>우선순위</label>
@@ -376,178 +314,131 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
             >
               <option value="routine">일반</option>
               <option value="urgent">긴급</option>
-              <option value="stat">응급</option>
             </select>
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>의뢰 의사 *</label>
+            <label style={styles.label}>의사</label>
             <input
               type="text"
               name="requesting_physician"
               value={formData.requesting_physician}
               onChange={handleChange}
-              required
               style={styles.input}
-              placeholder="의사명을 입력하세요"
             />
           </div>
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>검사 설명</label>
-          <input
-            type="text"
-            name="study_description"
-            value={formData.study_description}
-            onChange={handleChange}
-            placeholder="예: Chest PA/Lateral, Brain MRI with contrast"
-            style={styles.input}
-          />
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>임상 정보</label>
-          <textarea
-            name="clinical_info"
-            value={formData.clinical_info}
-            onChange={handleChange}
-            placeholder="환자의 증상, 의심 질환, 검사 사유 등"
-            rows={3}
-            style={styles.textarea}
-          />
-        </div>
-
-        {/* 에러 메시지 */}
-        {error && (
-          <div style={styles.errorMessage}>
-            ⚠️ {error}
+        {/* 검사설명 & 임상정보 */}
+        <div style={styles.formRow}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>검사설명</label>
+            <input
+              type="text"
+              name="study_description"
+              value={formData.study_description}
+              onChange={handleChange}
+              style={styles.input}
+            />
           </div>
-        )}
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>임상정보</label>
+            <input
+              type="text"
+              name="clinical_info"
+              value={formData.clinical_info}
+              onChange={handleChange}
+              style={styles.input}
+            />
+          </div>
+        </div>
 
         {/* 제출 버튼 */}
         <button
-          type="submit"
-          disabled={loading}
+          onClick={handleSubmit}
+          disabled={loading || !formData.modality || !formData.body_part}
           style={{
             ...styles.submitButton,
-            backgroundColor: loading ? '#ccc' : '#28a745',
-            cursor: loading ? 'not-allowed' : 'pointer'
+            backgroundColor: loading ? '#ccc' : (!formData.modality || !formData.body_part) ? '#ccc' : '#3498db',
+            cursor: loading || !formData.modality || !formData.body_part ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? '⏳ 요청 중...' : '🏥 영상검사 요청'}
+          {loading ? '⏳' : '요청'}
         </button>
-      </form>
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    width: '100%'
+    width: '100%',
+    padding: '0'
   },
-  noPatientContainer: {
-    textAlign: 'center',
-    padding: '20px',
-    color: '#666'
-  },
-  noPatientIcon: {
-    fontSize: '32px',
-    marginBottom: '10px'
-  },
-  noPatientText: {
-    fontSize: '14px',
-    margin: 0
-  },
-  patientInfo: {
-    marginBottom: '15px',
-    padding: '12px',
-    backgroundColor: '#e8f5e8',
-    borderRadius: '8px',
-    border: '2px solid #4caf50'
-  },
-  patientCard: {
+  errorMessage: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  patientHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  autoFillBadge: {
-    fontSize: '10px',
-    padding: '2px 6px',
-    backgroundColor: '#4caf50',
-    color: 'white',
-    borderRadius: '4px',
-    fontWeight: 'bold'
-  },
-  patientDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    fontSize: '11px',
-    color: '#2e7d32'
+    alignItems: 'center',
+    padding: '0.25rem',
+    backgroundColor: '#fef2f2',
+    color: '#b91c1c',
+    border: '1px solid #fecaca',
+    borderRadius: '2px',
+    fontSize: '0.6rem',
+    marginBottom: '0.25rem'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '0.3rem'
   },
   formRow: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '10px'
+    gap: '0.3rem'
   },
   formGroup: {
     display: 'flex',
     flexDirection: 'column'
   },
   label: {
-    fontSize: '12px',
-    fontWeight: 'bold',
-    color: '#495057',
-    marginBottom: '4px'
+    fontSize: '0.6rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.1rem'
   },
   input: {
-    padding: '6px 8px',
-    border: '1px solid #ced4da',
-    borderRadius: '4px',
-    fontSize: '12px'
+    padding: '0.25rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '2px',
+    fontSize: '0.6rem',
+    outline: 'none',
+    height: '24px',
+    boxSizing: 'border-box'
   },
   select: {
-    padding: '6px 8px',
-    border: '1px solid #ced4da',
-    borderRadius: '4px',
-    fontSize: '12px',
-    backgroundColor: '#fff'
-  },
-  textarea: {
-    padding: '6px 8px',
-    border: '1px solid #ced4da',
-    borderRadius: '4px',
-    fontSize: '12px',
-    resize: 'vertical'
-  },
-  errorMessage: {
-    padding: '8px',
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    border: '1px solid #f5c6cb',
-    borderRadius: '4px',
-    fontSize: '12px'
+    padding: '0.25rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '2px',
+    fontSize: '0.6rem',
+    backgroundColor: '#fff',
+    outline: 'none',
+    height: '24px',
+    boxSizing: 'border-box'
   },
   submitButton: {
-    padding: '10px 16px',
-    fontSize: '14px',
-    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.3rem',
+    fontSize: '0.6rem',
+    fontWeight: '600',
     color: '#fff',
     border: 'none',
-    borderRadius: '6px',
-    marginTop: '8px',
-    transition: 'all 0.2s ease'
+    borderRadius: '2px',
+    marginTop: '0.1rem',
+    transition: 'all 0.2s ease',
+    height: '28px'
   }
 };
 
