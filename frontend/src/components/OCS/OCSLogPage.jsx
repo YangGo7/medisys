@@ -234,7 +234,7 @@ export default function OCSLogPage() {
 
         <footer className="ocs-footer">
           <p>
-            © 2025 메디시스. 모든 권리 보유. |
+            © 2025 LaCID. 모든 권리 보유. |
             <a href="#/privacy"> 개인정보처리방침</a> |
             <a href="#/terms"> 이용약관</a>
           </p>

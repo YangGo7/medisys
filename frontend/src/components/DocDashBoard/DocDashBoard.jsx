@@ -36,11 +36,11 @@ import DiagnosisPrescriptionPanel from '../EMR/DiagnosisPrescriptionPanel';
 import { DEFAULT_DOCTOR_ID } from '../EMR/lisConfig';
 import ResultModal from '../LIS/ResultModal';
 import { useParams } from 'react-router-dom';
-
+import { generateCdssDummyResult } from '../utils/dummy';
 // CSS 파일 import
 import './DocDashBoard.css';
 
-const DocDashBoard = () => {
+const DocDashBoard = ({patient  }) => {
   // 🔥 상태 관리
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,6 +54,7 @@ const DocDashBoard = () => {
   const [uuidLoading, setUuidLoading] = useState(false);
   const [uuidError, setUuidError] = useState(null);
   const [cdssResult, setCdssResult] = useState(null);
+  const [cdssDummy, setCdssDummy] = useState(null);
   const { sampleId } = useParams();
   // 🔥 드롭다운 상태 관리
   const [dropdownStates, setDropdownStates] = useState({
@@ -274,6 +275,13 @@ const DocDashBoard = () => {
     }
   };
 
+  const handleLisRequestComplete = () => {
+    setTimeout(() => {
+      const dummy = generateCdssDummyResult(selectedPatient);
+      setCdssResult(dummy);
+    }, 15000);
+  };
+
   // 검색어 변경 시 자동 검색
   useEffect(() => {
     if (searchMode === 'all') {
@@ -373,7 +381,7 @@ const DocDashBoard = () => {
       const fetchCdssResult = async () => {
         if (!selectedPatient || !selectedPatient.patient_identifier) return;
         try {
-          const res = await axios.get(`${API_BASE}cdss/predict/${sampleId}/`);
+          const res = await axios.get(`${API_BASE}cdss/results/${selectedPatient.sample_id}/`);
           setCdssResult(res.data);
         } catch (err) {
           console.error('❌ CDSS 결과 가져오기 실패:', err);
@@ -719,7 +727,7 @@ const DocDashBoard = () => {
                     AI 분석 결과
                   </h4>
                   {cdssResult ? (
-                    <ResultModal data={cdssResult} />
+                    <ResultModal data={cdssResult} onClose={() => setCdssResult(null)} isModal={false} />
                     // 또는 <LogisticContributionChart data={cdssResult} />
                   ) : (
                   <div style={{ 
@@ -803,6 +811,7 @@ const DocDashBoard = () => {
                     doctorId={DEFAULT_DOCTOR_ID}
                     personUuid={personUUID} // 👈 넘길 수 있다면 이렇게
                     compact={true}
+                    onRequestComplete={handleLisRequestComplete}
                   />
                 )
               ) : (

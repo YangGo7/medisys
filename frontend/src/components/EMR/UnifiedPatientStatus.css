@@ -1,665 +1,759 @@
-/* src/components/EMR/UnifiedPatientStatus.css */
-
-/* 통합 환자 상태 관리 컨테이너 */
-.unified-patient-container {
-  height: 100%;
-  background-color: #f6f8fa;
+:root {
+  /* 마린 블루 & 자색 컬러 팔레트 */
+  --primary-marine-blue: #1D3E59;
+  --secondary-marine-blue: #0981D1;
+  --light-marine-blue: #4A90C2;
+  --primary-purple: #5D4E75;
+  --secondary-purple: #8B5A96;
+  --light-purple: #B399C7;
+  
+  /* 베이스 컬러 */
+  --white: #FFFFFF;
+  --ivory: #FFFFF0;
+  --white-tone-5: #F8F9FA;
+  --light-gray: #F5F7FA;
+  --border-gray: #E6E9ED;
+  --text-dark: #2C3E50;
+  --text-gray: #6C757D;
+  
+  /* 포인트 컬러 */
+  --accent-blue: #3498DB;
+  --success-green: #27AE60;
+  --warning-orange: #F39C12;
+  --danger-red: #E74C3C;
 }
 
-/* 헤더 스타일 */
-.unified-header {
+/* 전체 컨테이너 */
+.merged-reception-container {
+  height: 100vh;
+  display: flex;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, var(--white-tone-5) 0%, var(--ivory) 100%);
+  color: var(--text-dark);
+}
+
+/* 왼쪽 패널 - 환자 목록 */
+.patient-list-panel {
+  width: 400px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(29, 62, 89, 0.1);
+  border: 2px solid var(--border-gray);
+  margin: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 패널 헤더 */
+.panel-header {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--light-marine-blue) 100%);
+  color: var(--white);
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 2px solid #e9ecef;
-  background: #fff;
-  margin-bottom: 0;
+  border-bottom: 2px solid var(--primary-marine-blue);
 }
 
-.unified-header h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.panel-title {
+  font-weight: 600;
+  font-size: 1.1rem;
   margin: 0;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
 }
 
-/* 검색 컨트롤 */
-.search-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.search-input-wrapper {
+.search-container {
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input-wrapper svg {
-  position: absolute;
-  left: 0.75rem;
-  color: #6c757d;
-  z-index: 1;
+  margin-top: 1rem;
+  width: 100%;
 }
 
 .search-input {
-  padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  width: 250px;
-  transition: border-color 0.2s ease;
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+  background: var(--white);
+  color: var(--text-dark);
+  border-color: var(--white);
 }
 
-/* 뷰 모드 토글 */
-.view-mode-toggle {
-  display: flex;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  overflow: hidden;
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 1;
 }
 
-.btn-toggle {
-  padding: 0.5rem 1rem;
-  border: none;
-  background: #fff;
-  color: #6c757d;
+.add-patient-btn {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.btn-toggle.active {
-  background: #1976d2;
-  color: #fff;
-}
-
-.btn-toggle:hover:not(.active) {
-  background: #f8f9fa;
-}
-
-/* 탭 네비게이션 */
-.tab-navigation {
-  display: flex;
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-  margin: 0;
-}
-
-.tab-btn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border: none;
-  background: transparent;
-  color: #6c757d;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 0.85rem;
   font-weight: 500;
-  border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.tab-btn.active {
-  color: #1976d2;
-  border-bottom-color: #1976d2;
-  background: #f8f9fa;
+.add-patient-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
-.tab-btn:hover:not(.active) {
-  color: #495057;
-  background: #f8f9fa;
+/* 환자 목록 */
+.patient-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.patient-card {
+  background: var(--white);
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(29, 62, 89, 0.08);
+}
+
+.patient-card:hover {
+  border-color: var(--secondary-marine-blue);
+  box-shadow: 0 4px 16px rgba(9, 129, 209, 0.15);
+  transform: translateY(-2px);
+}
+
+.patient-card.selected {
+  border-color: var(--secondary-marine-blue);
+  background: linear-gradient(135deg, rgba(9, 129, 209, 0.05) 0%, rgba(93, 78, 117, 0.05) 100%);
+  box-shadow: 0 4px 16px rgba(9, 129, 209, 0.2);
+}
+
+.patient-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.patient-details {
+  flex: 1;
+}
+
+.patient-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 0.25rem;
+}
+
+.patient-meta {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  line-height: 1.4;
+}
+
+.registration-btn {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  white-space: nowrap;
+}
+
+.registration-btn.available {
+  background: linear-gradient(135deg, var(--success-green) 0%, #2ECC71 100%);
+  color: var(--white);
+}
+
+.registration-btn.available:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.registration-btn.registered {
+  background: var(--light-gray);
+  color: var(--text-gray);
+  cursor: not-allowed;
+}
+
+.registration-btn.loading {
+  background: var(--warning-orange);
+  color: var(--white);
+  cursor: not-allowed;
+}
+
+/* 오른쪽 패널 - 상태 관리 */
+.status-management-panel {
+  flex: 1;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(29, 62, 89, 0.1);
+  border: 2px solid var(--border-gray);
+  margin: 1rem 1rem 1rem 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상태 탭 헤더 */
+.status-tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 2px solid var(--border-gray);
+}
+
+.status-tab {
+  flex: 1;
+  padding: 1.25rem;
+  text-align: center;
+  border-right: 1px solid var(--border-gray);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.status-tab:last-child {
+  border-right: none;
+}
+
+.status-tab.waiting {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FDEDD4 100%);
+  border-bottom: 3px solid var(--warning-orange);
+}
+
+.status-tab.assigned {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-bottom: 3px solid var(--accent-blue);
+}
+
+.status-tab.completed {
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  border-bottom: 3px solid var(--success-green);
+}
+
+.tab-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tab-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.tab-count {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 /* 선택된 환자 정보 */
 .selected-patient-info {
-  background: #e3f2fd;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  margin: 0;
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--primary-purple) 100%);
+  color: var(--white);
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--primary-marine-blue);
 }
 
-.selected-patient-info h4 {
-  margin: 0 0 0.5rem 0;
-  color: #1976d2;
-  font-size: 16px;
+.selected-patient-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
-.selected-patient-info p {
-  margin: 0 0 1rem 0;
-  color: #495057;
-  font-size: 14px;
+.selected-patient-details {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
 }
 
 .assign-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
-.assign-buttons .btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
+.assign-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.assign-buttons .btn.btn-primary {
-  background: #1976d2;
-  color: #fff;
+.assign-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
-.assign-buttons .btn.btn-primary:hover:not(:disabled) {
-  background: #1565c0;
-}
-
-.assign-buttons .btn:disabled {
-  background: #e9ecef;
-  color: #6c757d;
+.assign-btn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.tab-content {
-  background: #ffffff;
-  padding: 1.5rem;
-  min-height: 500px;
+/* 상태별 리스트 컨테이너 */
+.status-lists-container {
   flex: 1;
-  overflow-y: auto;
-}
-
-/* 환자 섹션 */
-.patient-section {
-  height: 100%;
-}
-
-.section-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f3f7;
-}
-
-.section-header h3 {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-/* 환자 그리드 (카드 뷰) */
-.patient-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-  max-height: 650px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
-
-/* 환자 카드 기본 스타일 */
-.patient-card {
-  background: #ffffff;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  position: relative;
   overflow: hidden;
 }
 
-.patient-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.status-list {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-gray);
+  background: var(--white-tone-5);
 }
 
-.patient-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+.status-list:last-child {
+  border-right: none;
+}
+
+/* 환자 상태 카드 */
+.patient-status-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(29, 62, 89, 0.08);
+  border: 2px solid transparent;
+}
+
+.patient-status-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(29, 62, 89, 0.15);
 }
 
-.patient-card:hover::before {
-  opacity: 1;
+.patient-status-card.waiting {
+  border-left: 4px solid var(--warning-orange);
 }
 
-.patient-card.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+.patient-status-card.assigned {
+  border-left: 4px solid var(--accent-blue);
 }
 
-.patient-card.selected::before {
-  opacity: 1;
+.patient-status-card.completed {
+  border-left: 4px solid var(--success-green);
 }
 
-/* 배정된 환자 카드 */
-.patient-card.assigned-card {
-  border-color: #28a745;
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 201, 151, 0.05) 100%);
+.status-card-header {
+  margin-bottom: 0.75rem;
 }
 
-.patient-card.assigned-card::before {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  opacity: 1;
+.status-card-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  margin-bottom: 0.25rem;
 }
 
-/* 완료된 환자 카드 */
-.patient-card.completed-card {
-  border-color: #6c757d;
-  background: linear-gradient(135deg, rgba(108, 117, 125, 0.05) 0%, rgba(173, 181, 189, 0.05) 100%);
+.status-card-meta {
+  font-size: 0.8rem;
+  color: var(--text-gray);
 }
 
-.patient-card.completed-card::before {
-  background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%);
-  opacity: 1;
+.status-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
-/* 환자 정보 영역 */
-.patient-info {
+.action-btn {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #2980B9 100%);
+  color: var(--white);
+}
+
+.action-btn.success {
+  background: linear-gradient(135deg, var(--success-green) 0%, #2ECC71 100%);
+  color: var(--white);
+}
+
+.action-btn.danger {
+  background: linear-gradient(135deg, var(--danger-red) 0%, #C0392B 100%);
+  color: var(--white);
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:disabled {
+  background: var(--light-gray);
+  color: var(--text-gray);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 토스트 폼 */
+.registration-toast {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 450px;
+  height: 100vh;
+  background: var(--white);
+  border-left: 2px solid var(--border-gray);
+  box-shadow: -8px 0 32px rgba(29, 62, 89, 0.15);
+  z-index: 1000;
+  overflow: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.registration-toast.show {
+  transform: translateX(0);
+}
+
+.toast-header {
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--primary-purple) 100%);
+  color: var(--white);
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--primary-marine-blue);
+}
+
+.toast-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.toast-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.toast-content {
+  padding: 1.5rem;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+/* 폼 스타일 */
+.form-notice {
+  background: linear-gradient(135deg, #E7F3FF 0%, #D1ECFF 100%);
+  border: 2px solid #B3D9FF;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.notice-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0066CC;
+  margin-bottom: 0.5rem;
+}
+
+.notice-text {
+  font-size: 0.85rem;
+  color: #004D99;
+  margin: 0;
+}
+
+.form-message {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.form-message.success {
+  background: #D4EDDA;
+  color: #155724;
+  border: 2px solid #C3E6CB;
+}
+
+.form-message.error {
+  background: #F8D7DA;
+  color: #721C24;
+  border: 2px solid #F5C6CB;
+}
+
+.form-fieldset {
+  border: 2px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-legend {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  padding: 0 0.5rem;
+}
+
+.form-group {
   margin-bottom: 1rem;
 }
 
-.patient-info h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.1rem;
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #2c3e50;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.patient-id {
-  margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
-  color: #667eea;
-  font-weight: 500;
-  font-family: 'Courier New', monospace;
-  background: rgba(102, 126, 234, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
+  color: var(--text-dark);
 }
 
-.patient-details {
-  margin: 0 0 0.5rem 0;
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-gray);
+  border-radius: 8px;
   font-size: 0.9rem;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.wait-time {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #e67e22;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--secondary-marine-blue);
+  box-shadow: 0 0 0 3px rgba(9, 129, 209, 0.1);
 }
 
-.room-info {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #28a745;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.completion-info {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-/* 🔥 환자 액션 버튼 영역 */
-.patient-actions {
+.form-buttons {
   display: flex;
   gap: 0.75rem;
-  justify-content: flex-end;
-  flex-wrap: wrap;
+  margin-top: 1.5rem;
 }
 
-/* 🔥 대기등록 취소 버튼 */
-.btn-cancel-waiting {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  color: #ffffff;
+.form-btn {
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
-}
-
-.btn-cancel-waiting:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.btn-cancel-waiting:disabled {
-  background: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* 배정 해제 버튼 */
-.btn-unassign {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
-}
-
-.btn-unassign:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-}
-
-.btn-unassign:disabled {
-  background: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* 🔥 진료 완료 버튼 */
-.btn-complete {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
-}
-
-.btn-complete:hover:not(:disabled) {
-  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-.btn-complete:disabled {
-  background: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* 완료 배지 */
-.completion-badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: #ffffff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
-}
-
-/* 테이블 뷰 스타일 */
-.order-table-wrapper {
-  background: #ffffff;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.order-table {
-  width: 100%;
-  border-collapse: collapse;
   font-size: 0.9rem;
-}
-
-.order-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.order-table th {
-  padding: 1rem;
-  text-align: left;
   font-weight: 600;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.order-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-}
-
-.order-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.order-table tbody tr:hover {
-  background-color: rgba(102, 126, 234, 0.05);
-}
-
-.clickable-row {
   cursor: pointer;
-}
-
-.selected-row {
-  background-color: rgba(102, 126, 234, 0.1) !important;
-}
-
-.selected-row:hover {
-  background-color: rgba(102, 126, 234, 0.15) !important;
-}
-
-/* 버튼 스타일 */
-.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8rem;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  margin: 0 0.25rem;
   transition: all 0.2s ease;
-  font-weight: 500;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+.form-btn.primary {
+  flex: 1;
+  background: linear-gradient(135deg, var(--success-green) 0%, #2ECC71 100%);
+  color: var(--white);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+.form-btn.secondary {
+  background: linear-gradient(135deg, var(--text-gray) 0%, #5A6C7D 100%);
+  color: var(--white);
+}
+
+.form-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.btn-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+.form-btn:disabled {
+  background: var(--light-gray);
+  color: var(--text-gray);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.btn-danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-}
-
-/* 빈 상태 메시지 */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-  font-size: 1.1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 8px;
-  border: 2px dashed #dee2e6;
-}
-
-/* 로딩 스타일 */
-.loading {
-  text-align: center;
-  padding: 4rem;
-  color: #6c757d;
-  font-size: 1.1rem;
+/* 로딩 상태 */
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-gray);
 }
 
-.loading::after {
-  content: '';
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  border: 3px solid #e9ecef;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-gray);
+  border-top: 4px solid var(--secondary-marine-blue);
   border-radius: 50%;
-  border-top-color: #667eea;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 스크롤바 스타일 */
-.patient-grid::-webkit-scrollbar,
-.order-table-wrapper::-webkit-scrollbar,
-.tab-content::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
-.patient-grid::-webkit-scrollbar-thumb,
-.order-table-wrapper::-webkit-scrollbar-thumb,
-.tab-content::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+::-webkit-scrollbar-track {
+  background: var(--white-tone-5);
   border-radius: 4px;
 }
 
-.patient-grid::-webkit-scrollbar-track,
-.order-table-wrapper::-webkit-scrollbar-track,
-.tab-content::-webkit-scrollbar-track {
-  background: #f8f9fa;
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--secondary-marine-blue) 0%, var(--primary-purple) 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-marine-blue) 0%, var(--secondary-purple) 100%);
 }
 
 /* 반응형 디자인 */
-@media (max-width: 1024px) {
-  .patient-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+@media (max-width: 1400px) {
+  .patient-list-panel {
+    width: 350px;
+  }
+  
+  .registration-toast {
+    width: 400px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .merged-reception-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .patient-list-panel {
+    width: 100%;
+    margin: 0.5rem;
+    max-height: 400px;
+  }
+  
+  .status-management-panel {
+    margin: 0.5rem;
+  }
+  
+  .status-tabs {
+    flex-direction: column;
+  }
+  
+  .status-tab {
+    border-right: none;
+    border-bottom: 1px solid var(--border-gray);
+  }
+  
+  .status-lists-container {
+    flex-direction: column;
+  }
+  
+  .status-list {
+    border-right: none;
+    border-bottom: 1px solid var(--border-gray);
+    max-height: 300px;
+  }
+  
+  .registration-toast {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
   }
 }
 
 @media (max-width: 768px) {
-  .unified-header {
+  .merged-reception-container {
+    padding: 0;
+  }
+  
+  .patient-list-panel,
+  .status-management-panel {
+    margin: 0.25rem;
+    border-radius: 8px;
+  }
+  
+  .panel-header {
+    padding: 1rem;
     flex-direction: column;
-    gap: 1rem;
     align-items: stretch;
-  }
-  
-  .search-controls {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .search-input {
-    width: 100%;
-  }
-  
-  .tab-navigation {
-    flex-wrap: wrap;
-  }
-  
-  .tab-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 0.75rem;
-    min-width: 120px;
-  }
-  
-  .patient-grid {
-    grid-template-columns: 1fr;
     gap: 1rem;
+  }
+  
+  .search-container {
+    margin-top: 0;
+  }
+  
+  .add-patient-btn {
+    align-self: flex-end;
   }
   
   .assign-buttons {
     flex-direction: column;
-    gap: 0.5rem;
   }
   
-  .patient-actions {
-    justify-content: center;
+  .status-card-actions {
+    flex-direction: column;
   }
   
-  .selected-patient-info {
-    padding: 1rem;
+  .form-buttons {
+    flex-direction: column;
   }
 }

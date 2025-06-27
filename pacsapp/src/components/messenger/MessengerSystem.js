@@ -502,7 +502,7 @@ const MessengerSystem = () => {
               >
                 {sidebarCollapsed ? '→' : '←'}
               </button>
-              <h2>메디시스 메신저</h2>
+              <h2>LaCID</h2>
             </div>
             <div className="window-controls">
               <button 

@@ -1,3 +1,24 @@
+/* 공통 스타일 */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.result-table th, .result-table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: center;
+}
+.result-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+.prediction-text {
+  font-weight: bold;
+  color: darkred;
+}
+
+/* 모달용 스타일 */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -7,7 +28,6 @@
   align-items: center;
   z-index: 50;
 }
-
 .modal-content {
   background: white;
   padding: 20px;
@@ -15,7 +35,6 @@
   border-radius: 8px;
   position: relative;
 }
-
 .modal-close {
   position: absolute;
   top: 10px; right: 10px;
@@ -24,7 +43,11 @@
   font-size: 1.5rem;
 }
 
-.prediction-text {
-  font-weight: bold;
-  color: darkred;
+/* 일반 콘텐츠(EMR)용 스타일 */
+.inline-result-content {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  box-shadow: none;
 }
