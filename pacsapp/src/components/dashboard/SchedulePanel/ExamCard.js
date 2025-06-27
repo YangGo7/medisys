@@ -448,24 +448,7 @@ const ExamCard = ({
             ×
           </div>
         </div>
-      </div>
-      
-      {/* 🔍 개발 모드에서 디버그 정보 표시 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'absolute',
-          bottom: '2px',
-          left: '2px',
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          fontSize: '0.625rem',
-          padding: '1px 4px',
-          borderRadius: '2px',
-          zIndex: 1000
-        }}>
-          ID: {safeExam.examId} | H: {finalHeight}px | T: {finalTopPosition}px
-        </div>
-      )}
+      </div>  
     </div>
   );
 };

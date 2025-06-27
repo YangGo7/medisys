@@ -24,6 +24,52 @@ const AssignmentModal = ({
   // 🔧 안전한 방식으로 검사실 찾기
   const selectedRoom = rooms.find(r => r.id === modalData.roomId) || { name: '알 수 없음' };
 
+  // ✅ timeSlot을 안전하게 처리하고 드롭된 시간대 사용
+  const getTimeOptions = () => {
+    try {
+      let baseHour = 9;
+      let baseMinute = 0;
+      
+      // modalData.timeSlot에서 드롭된 실제 시간 사용
+      if (modalData?.timeSlot && typeof modalData.timeSlot === 'string') {
+        const parts = modalData.timeSlot.split(':');
+        baseHour = parseInt(parts[0]) || 9;
+        baseMinute = parseInt(parts[1]) || 0;
+        
+        console.log('🕐 모달 기준 시간:', modalData.timeSlot, { baseHour, baseMinute });
+      }
+      
+      // 드롭된 시간 주변 ±30분 범위의 시간 옵션 생성
+      const options = [];
+      for (let i = -3; i <= 3; i++) {
+        let minute = baseMinute + (i * 10);
+        let hour = baseHour;
+        
+        // 분 단위 조정
+        if (minute >= 60) {
+          hour += Math.floor(minute / 60);
+          minute = minute % 60;
+        } else if (minute < 0) {
+          hour -= 1;
+          minute = 60 + minute;
+        }
+        
+        // 운영시간 내에서만 (9시-17시)
+        if (hour >= 9 && hour <= 17) {
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          options.push(timeString);
+        }
+      }
+      
+      console.log('🕐 생성된 시간 옵션:', options);
+      return options;
+      
+    } catch (error) {
+      console.error('시간 옵션 생성 에러:', error);
+      return ['09:00', '09:10', '09:20', '09:30', '09:40', '09:50'];
+    }
+  };
+
   return (
     <Modal 
       isOpen={isOpen} 
@@ -66,16 +112,11 @@ const AssignmentModal = ({
             required
           >
             <option value="">시간을 선택하세요</option>
-            {Array.from({ length: 6 }, (_, i) => {
-              const minute = i * 10;
-              const baseHour = parseInt(modalData?.timeSlot?.split(':')[0] || '09');
-              const timeString = `${baseHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-              return (
-                <option key={timeString} value={timeString}>
-                  {timeString}
-                </option>
-              );
-            })}
+            {getTimeOptions().map(timeString => (
+              <option key={timeString} value={timeString}>
+                {timeString}
+              </option>
+            ))}
           </select>
         </div>
 

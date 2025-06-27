@@ -160,6 +160,21 @@
   background: rgba(52, 152, 219, 0.1);
 }
 
+/* 캘린더 상단 네비게이션 영역 */
+.custom-calendar .react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* 중앙 label 스타일 */
+.custom-calendar .react-calendar__navigation__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+}
+
 /* 반응형 */
 @media (max-width: 1024px) {
   .lis-dashboard-grid {

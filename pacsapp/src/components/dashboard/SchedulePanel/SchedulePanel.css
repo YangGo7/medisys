@@ -139,8 +139,8 @@
 /* Exam Card */
 .exam-card {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 10;
+  right: 10;
   background: white;
   border-radius: 0.375rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

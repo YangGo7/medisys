@@ -409,6 +409,7 @@
 // export default Dashboard;
 
 // pages/Dashboard/index.js
+// pages/Dashboard/index.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import WorkListPanel from '../../components/dashboard/WorkListPanel';
 import SchedulePanel from '../../components/dashboard/SchedulePanel';
@@ -441,6 +442,7 @@ const Dashboard = () => {
   
   // 로딩 상태 추가
   const [loading, setLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false); // ✅ 데이터 로딩 완료 상태 추가
   
   // WorkListPanel 참조 추가
   const workListPanelRef = useRef(null);
@@ -503,6 +505,10 @@ const Dashboard = () => {
         setRoomSchedules(initialSchedules);
         console.log('📝 빈 스케줄로 초기화');
       }
+      
+      // ✅ 데이터 로딩 완료 표시
+      setDataLoaded(true);
+      
     } catch (error) {
       console.error('❌ 스케줄 로딩 실패:', error);
       
@@ -512,6 +518,7 @@ const Dashboard = () => {
         initialSchedules[room.id] = [];
       });
       setRoomSchedules(initialSchedules);
+      setDataLoaded(true); // 에러여도 로딩은 완료된 것으로 처리
     }
   }, [selectedDate, formatDateForAPI, rooms]);
 
@@ -833,20 +840,34 @@ const Dashboard = () => {
         <div className="resize-line"></div>
       </div>
       
-      {/* 스케줄 섹션 */}
+      {/* ✅ 스케줄 섹션 - 검사실 데이터만 있으면 렌더링 */}
       <div className="schedule-section">
-        <SchedulePanel 
-          draggedExam={draggedExam}
-          onDragOver={handleDragOver}
-          onExamUpdated={handleExamUpdated}
-          roomSchedules={roomSchedules}
-          rooms={rooms}
-          radiologists={radiologists}
-          onStartExam={handleStartExam}
-          onCompleteExam={handleCompleteExam}
-          onCancelExam={handleCancelExam}
-          onRefreshSchedules={refreshSchedules}
-        />
+        {rooms.length > 0 ? (
+          <SchedulePanel 
+            draggedExam={draggedExam}
+            onDragOver={handleDragOver}
+            onExamUpdated={handleExamUpdated}
+            roomSchedules={roomSchedules}
+            rooms={rooms}
+            radiologists={radiologists}
+            onStartExam={handleStartExam}
+            onCompleteExam={handleCompleteExam}
+            onCancelExam={handleCancelExam}
+            onRefreshSchedules={refreshSchedules}
+          />
+        ) : (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100%',
+            color: '#6b7280',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div>⏳ 검사실 데이터를 불러오는 중...</div>
+          </div>
+        )}
       </div>
 
       {/* 배정 모달 */}
@@ -884,6 +905,7 @@ const Dashboard = () => {
           <div>👨‍⚕️ 영상전문의: <strong>{radiologists.length}명</strong></div>
           <div>📅 선택된 날짜: <strong>{formatDateForAPI(selectedDate)}</strong></div>
           <div>📊 스케줄: <strong>{Object.keys(roomSchedules).length}개 검사실</strong></div>
+          <div>🔄 데이터 로딩: <strong>{dataLoaded ? '완료' : '진행중'}</strong></div>
           {Object.entries(roomSchedules).map(([roomId, schedules]) => (
             <div key={roomId} style={{fontSize: '0.7rem', color: '#94a3b8'}}>
               Room {roomId}: {schedules?.length || 0}개 검사

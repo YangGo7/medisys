@@ -24,7 +24,7 @@ from requests.exceptions import RequestException, ConnectionError, Timeout
 from django.utils import timezone
 from datetime import timedelta
 from medical_integration.models import PatientMapping, Alert
-
+from django.utils import timezone
 logger = logging.getLogger('medical_integration')
 
 
@@ -222,7 +222,7 @@ def get_patient_info_from_db(openmrs_uuid):
 
 @api_view(['GET'])
 def waiting_board_view(request):
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # 1. 대기 중인 환자 (진료실 미배정, 오늘자, 활성화)
     waiting_list = PatientMapping.objects.filter(
@@ -281,7 +281,7 @@ def reception_list_view(request):
     """
     🔥 접수 환자 목록 - 활성 상태만 표시 (완료 환자 제외)
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # 🔥 활성 상태인 환자만 조회 (완료 환자 제외)
     mappings = PatientMapping.objects.filter(
@@ -519,7 +519,7 @@ def get_active_waiting_list(request):
     🔥 현재 활성 상태인 대기 목록 (ReceptionPanel용)
     완료된 환자는 제외하고 현재 대기중/진료중인 환자만 반환
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # 활성 상태인 환자들만 조회
     active_mappings = PatientMapping.objects.filter(
@@ -1808,7 +1808,7 @@ def create_identifier_based_mapping(request):
             }, status=400)
 
         # 중복 확인
-        today = timezone.now().date()
+        today = timezone.localdate()
         existing = PatientMapping.objects.filter(
             patient_identifier=patient_identifier,
             is_active=True,
@@ -1852,7 +1852,9 @@ def create_identifier_based_mapping(request):
                 sync_status='success',
                 display=patient_display,
                 created_date=timezone.now(),
-                last_sync=timezone.now()
+                last_sync=timezone.now(),
+                assigned_room=None,  # 🔥 반드시 명시!
+                wait_start_time=timezone.now()
             )
             
             logger.info(f"✅ 대기등록 성공: {mapping.mapping_id}")
@@ -1917,6 +1919,7 @@ def openmrs_patients_with_mapping(request):
             result.append(patient_data)
 
     return Response(result)
+
 
 
 # backend/medical_integration/views.py - assign_room 함수 수정
@@ -2145,7 +2148,7 @@ def complete_treatment(request):
                 is_active=True,
                 mapping_type='IDENTIFIER_BASED',
                 assigned_room__isnull=True,
-                created_date__date=timezone.now().date()
+                created_date__date=timezone.localdate()
             ).count()
             
             # 🔥 완료 목록에 추가 확인
@@ -2153,7 +2156,7 @@ def complete_treatment(request):
                 status='complete',
                 is_active=False,
                 mapping_type='IDENTIFIER_BASED',
-                created_date__date=timezone.now().date()
+                created_date__date=timezone.localdate()
             ).count()
             
             return Response({
@@ -2270,7 +2273,7 @@ def identifier_based_waiting_list(request):
     """
     🔥 대기 환자 목록 - 완료된 환자 완전 제외
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # 🔥 대기 조건: is_active=True AND status!='complete'  
     mappings = PatientMapping.objects.filter(
@@ -2328,7 +2331,7 @@ def get_orthanc_studies(request):
 
 @api_view(['GET'])
 def waiting_board_view(request):
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # 1. 대기 중인 환자 (진료실 미배정, 오늘자, 활성화)
     waiting_list = PatientMapping.objects.filter(
@@ -2387,7 +2390,7 @@ def completed_patients_list(request):
     """
     🔥 완료된 환자 전용 목록 (오늘)
     """
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     completed_mappings = PatientMapping.objects.filter(
         created_date__date=today,
@@ -2450,7 +2453,7 @@ def get_daily_summary_stats(request):
     """
     오늘의 진료 요약 통계 (총 진료 건수, AI 분석 건수, 영상 검사 수)를 반환합니다.
     """
-    today = timezone.now().date() # 오늘 날짜를 가져옵니다.
+    today = timezone.localdate() # 오늘 날짜를 가져옵니다.
     
     # 1. 총 진료 건수 계산 (오늘 접수된 환자 중 진료 중이거나 완료된 환자 수)
     total_consultations_count = PatientMapping.objects.filter(
@@ -3107,7 +3110,7 @@ def get_waiting_statistics(request):
     🔥 대기 현황 통계 - 진료 완료 후 대기 목록 변화 확인용
     """
     try:
-        today = timezone.now().date()
+        today = timezone.localdate()
         
         # 현재 대기 중인 환자 (is_active=True)
         current_waiting = PatientMapping.objects.filter(
@@ -3165,7 +3168,7 @@ def get_completed_patients_today(request):
     🔥 오늘 진료 완료된 환자 목록 (대기 등록 종료된 환자들)
     """
     try:
-        today = timezone.now().date()
+        today = timezone.localdate()
         
         completed_mappings = PatientMapping.objects.filter(
             is_active=False,  # 🔥 대기 등록 종료된 환자들
@@ -3216,7 +3219,7 @@ def get_completed_patients_today(request):
     🔥 오늘 완료된 환자 목록 (재등록 상태 포함)
     """
     try:
-        today = timezone.now().date()
+        today = timezone.localdate()
         
         # 완료된 환자 목록 (status='complete' 또는 is_active=False)
         completed_mappings = PatientMapping.objects.filter(

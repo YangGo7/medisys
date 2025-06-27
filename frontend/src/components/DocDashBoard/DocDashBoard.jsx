@@ -35,6 +35,7 @@ import VisitHistoryPanel from '../EMR/VisitHistoryPanel';
 import DiagnosisPrescriptionPanel from '../EMR/DiagnosisPrescriptionPanel';
 import { DEFAULT_DOCTOR_ID } from '../EMR/lisConfig';
 import ResultModal from '../LIS/ResultModal';
+import { useParams } from 'react-router-dom';
 
 // CSS 파일 import
 import './DocDashBoard.css';
@@ -53,6 +54,7 @@ const DocDashBoard = () => {
   const [uuidLoading, setUuidLoading] = useState(false);
   const [uuidError, setUuidError] = useState(null);
   const [cdssResult, setCdssResult] = useState(null);
+  const { sampleId } = useParams();
   // 🔥 드롭다운 상태 관리
   const [dropdownStates, setDropdownStates] = useState({
     consultation: false, // 진단 결과 및 전문 내용
@@ -148,28 +150,123 @@ const DocDashBoard = () => {
   };
 
   // 🔥 진료 종료 함수
-  const handleEndConsultation = () => {
+  const handleEndConsultation = async () => {
     if (!selectedPatient) {
       alert('진료를 종료할 환자가 선택되지 않았습니다.');
       return;
     }
 
-    if (window.confirm(`${selectedPatient.name || selectedPatient.display}님의 진료를 종료하시겠습니까?`)) {
-      // 여기에 진료 종료 로직 추가
-      console.log('진료 종료:', selectedPatient);
+    // 환자 정보 확인
+    const patientName = selectedPatient.name || selectedPatient.display || selectedPatient.patient_name || '알 수 없는 환자';
+    const mappingId = selectedPatient.mapping_id || selectedPatient.id;
+    const currentRoom = selectedPatient.assigned_room;
+
+    console.log('🏥 진료 완료 처리 시작:', {
+      patient: patientName,
+      mapping_id: mappingId,
+      room: currentRoom
+    });
+
+    // 매핑 ID 확인
+    if (!mappingId) {
+      alert('환자의 매핑 정보를 찾을 수 없습니다.\n환자가 올바르게 배정되었는지 확인해주세요.');
+      return;
+    }
+
+    // 진료실 정보 확인
+    if (!currentRoom) {
+      alert('환자의 진료실 정보를 찾을 수 없습니다.\n환자가 진료실에 배정되었는지 확인해주세요.');
+      return;
+    }
+
+    // 사용자 확인
+    const confirmMessage = `${patientName}님의 진료를 완료하시겠습니까?\n\n` +
+                          `📍 진료실: ${currentRoom}번\n` +
+                          `⚠️ 진료 완료 후에는 되돌릴 수 없습니다.`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      // 로딩 상태 표시
+      console.log('📡 진료 완료 API 호출 중...');
+
+      const requestData = {
+        mapping_id: mappingId,
+        room: currentRoom
+      };
+
+      console.log('📤 진료 완료 요청 데이터:', requestData);
+
+      // 🔥 실제 진료 완료 API 호출
+      const response = await axios.post(`${API_BASE}complete-treatment/`, requestData);
+
+      console.log('📥 진료 완료 API 응답:', response.data);
+
+      if (response.data.success) {
+        // 성공 처리
+        alert(`✅ ${patientName}님의 진료가 성공적으로 완료되었습니다.\n진료실 ${currentRoom}번이 해제되었습니다.`);
+        
+        // 🔥 상태 초기화
+        setSelectedPatient(null);
+        setPersonUUID(null);
+        setUuidError(null);
+        
+        // 드롭다운 상태 초기화
+        setDropdownStates({
+          consultation: false,
+          history: false,
+          diagnosis: false
+        });
+
+        // 🔥 데이터 새로고침 트리거
+        setScheduleRefresh(prev => prev + 1);
+        
+        // 🔥 BroadcastChannel로 다른 컴포넌트들에게 알림
+        try {
+          const channel = new BroadcastChannel('patient_channel');
+          channel.postMessage({
+            type: 'TREATMENT_COMPLETED',
+            patient: patientName,
+            room: currentRoom,
+            timestamp: new Date().toISOString()
+          });
+          channel.close();
+        } catch (bcError) {
+          console.error('BroadcastChannel 알림 실패:', bcError);
+        }
+
+        console.log('✅ 진료 완료 처리 성공');
+
+      } else {
+        // API 응답은 성공이지만 비즈니스 로직 실패
+        const errorMessage = response.data.error || '진료 완료 처리에 실패했습니다.';
+        console.error('❌ 진료 완료 비즈니스 로직 실패:', errorMessage);
+        alert(`❌ 진료 완료 처리 실패:\n${errorMessage}`);
+      }
+
+    } catch (error) {
+      // 네트워크 오류 또는 서버 오류
+      console.error('❌ 진료 완료 API 호출 실패:', error);
       
-      // 상태 초기화
-      setSelectedPatient(null);
-      setDropdownStates({
-        consultation: false,
-        history: false,
-        diagnosis: false
-      });
+      let errorMessage = '진료 완료 처리 중 오류가 발생했습니다.';
       
-      alert('진료가 종료되었습니다.');
+      if (error.response) {
+        // 서버에서 응답을 받았지만 오류 상태
+        const serverError = error.response.data?.error || error.response.data?.message || '서버 오류';
+        errorMessage = `서버 오류 (${error.response.status}): ${serverError}`;
+      } else if (error.request) {
+        // 요청은 보냈지만 응답을 받지 못함
+        errorMessage = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
+      } else {
+        // 요청 설정 중 오류
+        errorMessage = `요청 오류: ${error.message}`;
+      }
+
+      alert(`❌ 진료 완료 실패:\n${errorMessage}\n\n관리자에게 문의하시거나 잠시 후 다시 시도해주세요.`);
     }
   };
-
   // 검색 실행
   const handleMainSearch = () => {
     if (searchMode === 'all') {
@@ -276,7 +373,7 @@ const DocDashBoard = () => {
       const fetchCdssResult = async () => {
         if (!selectedPatient || !selectedPatient.patient_identifier) return;
         try {
-          const res = await axios.get(`${API_BASE}cdss/predict/${selectedPatient.patient_identifier}/`);
+          const res = await axios.get(`${API_BASE}cdss/predict/${sampleId}/`);
           setCdssResult(res.data);
         } catch (err) {
           console.error('❌ CDSS 결과 가져오기 실패:', err);
@@ -609,9 +706,7 @@ const DocDashBoard = () => {
             >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 <div>
-                  <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <User size={18} />
-                    환자 정보
+                  <h4 style={{ marginBottom: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   </h4>
                   <PatientInfoPanel 
                     patient={selectedPatient} 
