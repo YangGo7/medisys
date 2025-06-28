@@ -1,17 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
   User, 
-  Calendar, 
   Image,
   RefreshCw,
   Eye,
-  ChevronRight,
   Stethoscope,
-  Play,
-  Download,
   Layers,
-  FileText
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  Move,
+  MousePointer,
+  Circle,
+  Square,
+  Ruler,
+  Pencil,
+  Type,
+  Save,
+  Download,
+  FileText,
+  Activity,
+  Camera,
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const DMViewer = () => {
@@ -19,216 +32,589 @@ const DMViewer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [assignedPatients, setAssignedPatients] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedStudy, setSelectedStudy] = useState(null);
   const [studyList, setStudyList] = useState([]);
-  const [loadingStudies, setLoadingStudies] = useState(false);
-
-  // API 기본 설정 (기존 프로젝트 구조 활용)
+  const [selectedStudy, setSelectedStudy] = useState(null);
+  const [selectedSeries, setSelectedSeries] = useState(null);
+  const [seriesList, setSeriesList] = useState([]);
+  const [instancesList, setInstancesList] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadingImages, setLoadingImages] = useState(false);
+  
+  // Cornerstone viewer states
+  const viewerRef = useRef(null);
+  const cornerstoneElement = useRef(null);
+  const [viewerInitialized, setViewerInitialized] = useState(false);
+  const [currentTool, setCurrentTool] = useState('pan');
+  const [annotations, setAnnotations] = useState([]);
+  const [currentAnnotation, setCurrentAnnotation] = useState(null);
+  const [reportData, setReportData] = useState('');
+  const [reportStatus, setReportStatus] = useState('draft');
+  const [currentImageElement, setCurrentImageElement] = useState(null);
+  
+  // API endpoints
   const API_BASE = 'http://35.225.63.41:8000/api/integration/';
   const ORTHANC_BASE = 'http://35.225.63.41:8042';
-  const OHIF_URL = 'http://35.225.63.41:3001';
+  const ANNOTATION_API = 'http://35.225.63.41:8000/api/dr_annotations/';
+  const REPORT_API = 'http://35.225.63.41:8000/api/dr_reports/';
 
-  // OpenMRS 환자 데이터 가져오기 (기존 방식)
+  // Cornerstone.js 초기화
+  useEffect(() => {
+    const initCornerstone = async () => {
+      try {
+        if (!window.cornerstone) {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/cornerstone-core@2.6.1/dist/cornerstone.min.js';
+          script.onload = () => {
+            const toolsScript = document.createElement('script');
+            toolsScript.src = 'https://unpkg.com/cornerstone-tools@6.0.10/dist/cornerstoneTools.min.js';
+            toolsScript.onload = () => initializeViewer();
+            document.head.appendChild(toolsScript);
+          };
+          document.head.appendChild(script);
+        } else {
+          initializeViewer();
+        }
+      } catch (error) {
+        console.error('Cornerstone 초기화 실패:', error);
+      }
+    };
+
+    const initializeViewer = () => {
+      if (cornerstoneElement.current && window.cornerstone) {
+        try {
+          window.cornerstone.enable(cornerstoneElement.current);
+          
+          if (window.cornerstoneTools) {
+            window.cornerstoneTools.external.cornerstone = window.cornerstone;
+            window.cornerstoneTools.init();
+            
+            // WADO Image Loader 설정
+            window.cornerstone.registerImageLoader('wadouri', function(imageId) {
+              return new Promise((resolve, reject) => {
+                const url = imageId.replace('wadouri:', '');
+                fetch(url, {
+                  headers: {
+                    'Authorization': 'Basic ' + btoa('orthanc:orthanc')
+                  }
+                })
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => {
+                  const image = {
+                    imageId: imageId,
+                    minPixelValue: 0,
+                    maxPixelValue: 255,
+                    slope: 1.0,
+                    intercept: 0,
+                    windowCenter: 127,
+                    windowWidth: 256,
+                    render: window.cornerstone.renderGrayscaleImage,
+                    getPixelData: () => new Uint8Array(arrayBuffer),
+                    rows: 512,
+                    columns: 512,
+                    height: 512,
+                    width: 512,
+                    color: false,
+                    columnPixelSpacing: 1.0,
+                    rowPixelSpacing: 1.0,
+                    invert: false,
+                    sizeInBytes: arrayBuffer.byteLength
+                  };
+                  resolve(image);
+                })
+                .catch(reject);
+              });
+            });
+            
+            const PanTool = window.cornerstoneTools.PanTool;
+            const ZoomTool = window.cornerstoneTools.ZoomTool;
+            const WwwcTool = window.cornerstoneTools.WwwcTool;
+            const LengthTool = window.cornerstoneTools.LengthTool;
+            const RectangleROITool = window.cornerstoneTools.RectangleRoiTool;
+            
+            window.cornerstoneTools.addTool(PanTool);
+            window.cornerstoneTools.addTool(ZoomTool);
+            window.cornerstoneTools.addTool(WwwcTool);
+            window.cornerstoneTools.addTool(LengthTool);
+            window.cornerstoneTools.addTool(RectangleROITool);
+            
+            window.cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
+          }
+          
+          setViewerInitialized(true);
+          console.log('✅ Cornerstone 뷰어 초기화 완료');
+        } catch (error) {
+          console.error('❌ Cornerstone 뷰어 초기화 실패:', error);
+        }
+      }
+    };
+
+    initCornerstone();
+    return () => {
+      if (cornerstoneElement.current && window.cornerstone) {
+        try {
+          window.cornerstone.disable(cornerstoneElement.current);
+        } catch (error) {
+          console.error('Cornerstone cleanup 오류:', error);
+        }
+      }
+    };
+  }, []);
+
+  // 환자 목록 가져오기
   const fetchAssignedPatients = async () => {
     try {
       setLoading(true);
-      setError(null);
-      
       const response = await fetch(`${API_BASE}identifier-waiting/`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: 서버 응답 오류`);
-      }
-      
       const data = await response.json();
       
-      // 데이터 정규화 - patient_id를 P+숫자 형태로 맞춤
-      const normalizedPatients = (data.results || data || []).map(patient => {
-        // patient_identifier에서 P+숫자 형태 추출
-        let patientId = patient.patient_identifier || patient.identifier || patient.uuid;
-        
-        // 이미 P로 시작하는 경우 그대로 사용
-        if (!patientId.startsWith('P')) {
-          // UUID나 다른 형태면 P+숫자로 변환 시도
-          const numericPart = patientId.replace(/[^0-9]/g, '');
-          if (numericPart) {
-            patientId = 'P' + numericPart;
-          } else {
-            // 숫자가 없으면 랜덤 숫자 생성
-            patientId = 'P' + Math.floor(Math.random() * 10000);
-          }
-        }
-        
-        return {
-          id: patient.mapping_id || patient.uuid || patient.id,
-          name: patient.display || patient.name || patient.patient_name || '이름없음',
-          identifier: patient.patient_identifier || patient.identifier || 'N/A',
-          patient_id: patientId, // Orthanc 조회용 Patient ID
-          birthdate: patient.person?.birthdate || patient.birthdate,
-          gender: patient.person?.gender || patient.gender,
-          assigned_room: patient.assigned_room,
-          modality: patient.modality || 'CT',
-          waiting_since: patient.waiting_since || patient.created_at
-        };
-      });
+      const normalizedPatients = (data.results || data || []).map(patient => ({
+        id: patient.mapping_id || patient.uuid || patient.id,
+        uuid: patient.patient_uuid || patient.uuid || patient.id,
+        name: patient.display || patient.name || patient.patient_name || '이름없음',
+        identifier: patient.patient_identifier || patient.identifier || 'N/A',
+        patient_id: patient.patient_identifier || patient.identifier || patient.uuid,
+        birthdate: patient.person?.birthdate || patient.birthdate,
+        gender: patient.person?.gender || patient.gender,
+        modality: patient.modality || 'CT'
+      }));
       
       setAssignedPatients(normalizedPatients);
-      console.log('✅ 환자 데이터 로드:', normalizedPatients.length, '명');
-      
-    } catch (err) {
-      console.error('❌ 환자 데이터 로드 실패:', err);
-      setError(err.message);
+    } catch (error) {
+      console.error('환자 목록 조회 실패:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Django 백엔드를 통해 Patient ID 기반으로 Studies 조회
-  const fetchPatientStudies = async (patientId) => {
+  // Patient ID로 Orthanc에서 Studies 조회
+  const fetchPatientStudiesFromOrthanc = async (patient) => {
     try {
-      setLoadingStudies(true);
-      console.log('🔍 Django API를 통한 Patient Studies 조회:', patientId);
-
-      // 1. 기존 Django API 엔드포인트 사용 (CORS 문제 해결)
-      const response = await fetch(`${API_BASE}orthanc/patients/${patientId}/studies/`, {
-        method: 'GET',
+      setStudyList([]);
+      setLoadingImages(true);
+      
+      console.log('🔍 Patient ID로 Orthanc Studies 조회:', patient.patient_id);
+      
+      // Orthanc Patient ID로 직접 Studies 조회
+      const response = await fetch(`${ORTHANC_BASE}/patients/${patient.patient_id}`, {
         headers: {
-          'Content-Type': 'application/json'
+          'Authorization': 'Basic ' + btoa('orthanc:orthanc')
         }
       });
-
+      
       if (!response.ok) {
-        // 404면 환자가 없다는 뜻
-        if (response.status === 404) {
-          console.log('❌ 해당 Patient ID로 환자를 찾을 수 없음:', patientId);
-          setStudyList([]);
-          return;
-        }
-        throw new Error(`API 응답 오류: ${response.status}`);
+        throw new Error(`Patient not found in Orthanc: ${patient.patient_id}`);
       }
-
-      const data = await response.json();
-      console.log('📋 API 응답:', data);
-
-      // 응답 데이터 구조에 따라 정규화
-      let studies = [];
-      if (data.success && data.studies) {
-        studies = data.studies;
-      } else if (data.results) {
-        studies = data.results;
-      } else if (Array.isArray(data)) {
-        studies = data;
-      }
-
-      // Studies 데이터 정규화
-      const normalizedStudies = studies.map(study => ({
-        orthanc_study_id: study.orthanc_study_id || study.study_id,
-        study_instance_uid: study.study_instance_uid || study.studyInstanceUID,
-        study_description: study.study_description || study.description || 'Unknown Study',
-        study_date: study.study_date || study.date,
-        study_time: study.study_time || study.time,
-        modality: study.modality || 'Unknown',
-        accession_number: study.accession_number,
-        referring_physician: study.referring_physician,
-        series_count: study.series_count || study.number_of_series || 0,
-        instances_count: study.instances_count || study.number_of_instances || 0,
-        patient_name: study.patient_name || patientId,
-        patient_birth_date: study.patient_birth_date
-      }));
-
-      setStudyList(normalizedStudies);
-      console.log('✅ Studies 조회 완료:', normalizedStudies.length, '개');
-
-    } catch (err) {
-      console.error('❌ Studies 조회 실패:', err);
       
-      // 백업: 기존 환자 UUID 기반 API 시도
-      try {
-        console.log('🔄 기존 API로 재시도...');
-        const backupResponse = await fetch(`${API_BASE}patients/${selectedPatient.id}/dicom-studies/`);
-        
-        if (backupResponse.ok) {
-          const backupData = await backupResponse.json();
-          if (backupData.success && backupData.studies) {
-            const normalizedStudies = backupData.studies.map(study => ({
-              orthanc_study_id: study.orthanc_study_id,
-              study_instance_uid: study.study_instance_uid,
-              study_description: study.study_description || 'Unknown Study',
-              study_date: study.study_date,
-              study_time: study.study_time,
-              modality: study.modality || 'Unknown',
-              accession_number: study.accession_number,
-              referring_physician: study.referring_physician,
-              series_count: study.series_count || 0,
-              instances_count: study.instances_count || 0,
-              patient_name: study.patient_name || patientId,
-              patient_birth_date: study.patient_birth_date
-            }));
-            setStudyList(normalizedStudies);
-            console.log('✅ 백업 API로 Studies 조회 성공:', normalizedStudies.length, '개');
-            return;
+      const patientData = await response.json();
+      console.log('📋 Orthanc Patient Data:', patientData);
+      
+      // Studies 목록 조회
+      const studies = [];
+      for (const studyId of patientData.Studies || []) {
+        try {
+          const studyResponse = await fetch(`${ORTHANC_BASE}/studies/${studyId}`, {
+            headers: {
+              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
+            }
+          });
+          
+          if (studyResponse.ok) {
+            const studyData = await studyResponse.json();
+            const mainTags = studyData.MainDicomTags || {};
+            
+            studies.push({
+              orthanc_study_id: studyId,
+              study_instance_uid: mainTags.StudyInstanceUID,
+              study_description: mainTags.StudyDescription || 'Unknown Study',
+              study_date: mainTags.StudyDate,
+              study_time: mainTags.StudyTime,
+              modality: mainTags.Modality,
+              accession_number: mainTags.AccessionNumber,
+              series_count: studyData.Series?.length || 0,
+              series_ids: studyData.Series || []
+            });
           }
+        } catch (studyError) {
+          console.warn('Study 조회 실패:', studyId, studyError);
         }
-      } catch (backupErr) {
-        console.warn('백업 API도 실패:', backupErr);
       }
-
-      // 모든 시도 실패시 목 데이터 생성
-      const mockStudies = [
-        {
-          orthanc_study_id: 'mock-study-' + patientId,
-          study_instance_uid: '1.2.840.113619.2.176.3596.3364818.7819.1234567890.' + patientId.replace('P', ''),
-          study_description: `${selectedPatient.modality} 검사`,
-          study_date: new Date().toISOString().split('T')[0].replace(/-/g, ''),
-          study_time: '140000',
-          modality: selectedPatient.modality || 'CT',
-          accession_number: 'ACC' + patientId.replace('P', ''),
-          referring_physician: 'Dr. System',
-          series_count: 3,
-          instances_count: 120,
-          patient_name: selectedPatient.name,
-          patient_birth_date: selectedPatient.birthdate?.replace(/-/g, '')
-        }
-      ];
       
-      setStudyList(mockStudies);
-      console.log('🔧 목 데이터로 대체:', mockStudies.length, '개');
+      setStudyList(studies);
+      console.log('✅ Orthanc Studies 조회 완료:', studies.length, '개');
+      
+    } catch (error) {
+      console.error('❌ Orthanc Studies 조회 실패:', error);
+      alert(`Orthanc에서 Patient ID "${patient.patient_id}"를 찾을 수 없습니다.`);
     } finally {
-      setLoadingStudies(false);
+      setLoadingImages(false);
     }
   };
 
-  // 환자 선택 처리
-  const handlePatientSelect = async (patient) => {
-    setSelectedPatient(patient);
-    setSelectedStudy(null);
-    console.log('🔍 환자 선택:', patient.name, '- Patient ID:', patient.patient_id);
+  // Series 목록 조회
+  const fetchSeriesFromStudy = async (study) => {
+    try {
+      setSeriesList([]);
+      setCurrentImageIndex(0);
+      
+      const series = [];
+      for (const seriesId of study.series_ids || []) {
+        try {
+          const seriesResponse = await fetch(`${ORTHANC_BASE}/series/${seriesId}`, {
+            headers: {
+              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
+            }
+          });
+          
+          if (seriesResponse.ok) {
+            const seriesData = await seriesResponse.json();
+            const mainTags = seriesData.MainDicomTags || {};
+            
+            series.push({
+              orthanc_series_id: seriesId,
+              series_instance_uid: mainTags.SeriesInstanceUID,
+              series_description: mainTags.SeriesDescription || 'Unknown Series',
+              series_number: mainTags.SeriesNumber,
+              modality: mainTags.Modality,
+              instances_count: seriesData.Instances?.length || 0,
+              instances_ids: seriesData.Instances || []
+            });
+          }
+        } catch (seriesError) {
+          console.warn('Series 조회 실패:', seriesId, seriesError);
+        }
+      }
+      
+      setSeriesList(series);
+      
+      // 첫 번째 Series 자동 선택
+      if (series.length > 0) {
+        await fetchInstancesFromSeries(series[0]);
+      }
+      
+    } catch (error) {
+      console.error('Series 조회 실패:', error);
+    }
+  };
+
+  // Instances 목록 조회
+  const fetchInstancesFromSeries = async (series) => {
+    try {
+      setSelectedSeries(series);
+      setInstancesList([]);
+      setCurrentImageIndex(0);
+      
+      const instances = [];
+      for (const instanceId of series.instances_ids || []) {
+        try {
+          const instanceResponse = await fetch(`${ORTHANC_BASE}/instances/${instanceId}`, {
+            headers: {
+              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
+            }
+          });
+          
+          if (instanceResponse.ok) {
+            const instanceData = await instanceResponse.json();
+            const mainTags = instanceData.MainDicomTags || {};
+            
+            instances.push({
+              orthanc_instance_id: instanceId,
+              instance_number: parseInt(mainTags.InstanceNumber) || instances.length + 1,
+              sop_instance_uid: mainTags.SOPInstanceUID,
+              image_url: `${ORTHANC_BASE}/instances/${instanceId}/preview`,
+              dicom_url: `wadouri:${ORTHANC_BASE}/instances/${instanceId}/file`
+            });
+          }
+        } catch (instanceError) {
+          console.warn('Instance 조회 실패:', instanceId, instanceError);
+        }
+      }
+      
+      // Instance Number로 정렬
+      instances.sort((a, b) => a.instance_number - b.instance_number);
+      setInstancesList(instances);
+      
+      // 첫 번째 이미지 표시
+      if (instances.length > 0) {
+        await displayDicomImage(instances[0], 0);
+      }
+      
+    } catch (error) {
+      console.error('Instances 조회 실패:', error);
+    }
+  };
+
+  // 실제 DICOM 이미지 표시
+  const displayDicomImage = async (instance, index) => {
+    if (!cornerstoneElement.current || !viewerInitialized) return;
     
-    // Patient 객체를 전달 (patient.patient_id가 아닌 patient 전체)
-    await fetchPatientStudies(patient);
+    try {
+      setCurrentImageIndex(index);
+      setCurrentImageElement(instance);
+      
+      console.log('🖼️ DICOM 이미지 로딩:', instance.dicom_url);
+      
+      // Cornerstone으로 DICOM 이미지 로드
+      const element = cornerstoneElement.current;
+      const imageId = instance.dicom_url;
+      
+      await window.cornerstone.loadAndCacheImage(imageId);
+      await window.cornerstone.displayImage(element, imageId);
+      
+      // 기존 어노테이션 그리기
+      drawAnnotationsOnCanvas();
+      
+      console.log('✅ DICOM 이미지 표시 완료');
+      
+    } catch (error) {
+      console.error('❌ DICOM 이미지 표시 실패:', error);
+      
+      // 실패시 미리보기 이미지로 대체
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = cornerstoneElement.current;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          drawAnnotationsOnCanvas();
+        };
+        img.src = instance.image_url + '?auth=' + btoa('orthanc:orthanc');
+      } catch (previewError) {
+        console.error('미리보기 이미지도 실패:', previewError);
+      }
+    }
+  };
+
+  // 어노테이션 로드
+  const loadAnnotations = async (studyUID) => {
+    try {
+      const response = await fetch(`${ANNOTATION_API}${studyUID}/`);
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setAnnotations(data.annotations || []);
+        console.log('✅ 어노테이션 로드 완료:', data.annotations?.length || 0, '개');
+        drawAnnotationsOnCanvas();
+      }
+    } catch (error) {
+      console.error('어노테이션 로드 실패:', error);
+    }
+  };
+
+  // 리포트 로드
+  const loadReport = async (studyUID) => {
+    try {
+      const response = await fetch(`${REPORT_API}${studyUID}/`);
+      const data = await response.json();
+      
+      if (data.status === 'success' && data.report) {
+        setReportData(data.report.dr_report || '');
+        setReportStatus(data.report.report_status || 'draft');
+        console.log('✅ 리포트 로드 완료');
+      } else {
+        setReportData('');
+        setReportStatus('draft');
+      }
+    } catch (error) {
+      console.error('리포트 로드 실패:', error);
+      setReportData('');
+      setReportStatus('draft');
+    }
   };
 
   // Study 선택 처리
-  const handleStudySelect = (study) => {
+  const handleStudySelect = async (study) => {
     setSelectedStudy(study);
-    console.log('📋 Study 선택:', study.study_description);
+    setCurrentImageIndex(0);
+    
+    // Series 로드
+    await fetchSeriesFromStudy(study);
+    
+    // 어노테이션과 리포트 로드
+    if (study.study_instance_uid) {
+      await loadAnnotations(study.study_instance_uid);
+      await loadReport(study.study_instance_uid);
+    }
   };
 
-  // OHIF 뷰어로 열기
-  const openInOHIF = (study) => {
-    if (!study.study_instance_uid) {
-      alert('❌ Study Instance UID가 없습니다.');
+  // Canvas에 어노테이션 그리기
+  const drawAnnotationsOnCanvas = () => {
+    if (!cornerstoneElement.current) return;
+    
+    const canvas = cornerstoneElement.current;
+    const ctx = canvas.getContext('2d');
+    
+    // 기존 어노테이션 그리기
+    annotations.forEach((annotation, index) => {
+      if (annotation.bbox && annotation.bbox.length === 4) {
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(annotation.bbox[0], annotation.bbox[1], 
+                      annotation.bbox[2] - annotation.bbox[0], 
+                      annotation.bbox[3] - annotation.bbox[1]);
+        
+        // 라벨 표시
+        ctx.fillStyle = '#ff0000';
+        ctx.font = '12px Arial';
+        ctx.fillText(annotation.label, annotation.bbox[0], annotation.bbox[1] - 5);
+      }
+    });
+    
+    // 현재 그리는 어노테이션
+    if (currentAnnotation) {
+      ctx.strokeStyle = '#00ff00';
+      ctx.lineWidth = 2;
+      const bbox = currentAnnotation;
+      ctx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
+    }
+  };
+
+  // 마우스 이벤트 처리 (어노테이션 그리기)
+  const handleMouseDown = (e) => {
+    if (currentTool !== 'rectangle') return;
+    
+    const rect = cornerstoneElement.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setCurrentAnnotation({ x, y, width: 0, height: 0, isDrawing: true });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!currentAnnotation?.isDrawing) return;
+    
+    const rect = cornerstoneElement.current.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+    
+    setCurrentAnnotation(prev => ({
+      ...prev,
+      width: currentX - prev.x,
+      height: currentY - prev.y
+    }));
+    
+    drawAnnotationsOnCanvas();
+  };
+
+  const handleMouseUp = (e) => {
+    if (!currentAnnotation?.isDrawing) return;
+    
+    const label = prompt('어노테이션 라벨을 입력하세요:');
+    if (!label) {
+      setCurrentAnnotation(null);
+      drawAnnotationsOnCanvas();
+      return;
+    }
+    
+    const bbox = [
+      currentAnnotation.x,
+      currentAnnotation.y,
+      currentAnnotation.x + currentAnnotation.width,
+      currentAnnotation.y + currentAnnotation.height
+    ];
+    
+    const newAnnotation = {
+      label,
+      bbox,
+      confidence: 1.0,
+      created: new Date().toISOString(),
+      dr_text: '',
+      doctor_name: '김영상'
+    };
+    
+    setAnnotations(prev => [...prev, newAnnotation]);
+    setCurrentAnnotation(null);
+    drawAnnotationsOnCanvas();
+  };
+
+  // 도구 변경
+  const changeTool = (toolName) => {
+    setCurrentTool(toolName);
+    setCurrentAnnotation(null);
+  };
+
+  // 어노테이션 저장
+  const saveAnnotations = async () => {
+    if (!selectedStudy || annotations.length === 0) {
+      alert('저장할 어노테이션이 없습니다.');
       return;
     }
 
-    const ohifUrl = `${OHIF_URL}/viewer?StudyInstanceUIDs=${study.study_instance_uid}`;
-    console.log('🚀 OHIF 뷰어 실행:', ohifUrl);
+    try {
+      const response = await fetch(`${ANNOTATION_API}save/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          study_uid: selectedStudy.study_instance_uid,
+          annotations: annotations.map(ann => ({
+            label: ann.label,
+            bbox: ann.bbox,
+            dr_text: ann.dr_text || ''
+          }))
+        })
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        alert(`✅ ${data.data?.saved_count || annotations.length}개 어노테이션이 저장되었습니다.`);
+      } else {
+        alert('❌ 어노테이션 저장 실패: ' + data.message);
+      }
+    } catch (error) {
+      console.error('어노테이션 저장 실패:', error);
+      alert('❌ 어노테이션 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 리포트 저장
+  const saveReport = async () => {
+    if (!selectedStudy) {
+      alert('Study가 선택되지 않았습니다.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${REPORT_API}save/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          study_uid: selectedStudy.study_instance_uid,
+          patient_id: selectedPatient.patient_id,
+          report_content: reportData,
+          report_status: reportStatus
+        })
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        alert('✅ 리포트가 저장되었습니다.');
+      } else {
+        alert('❌ 리포트 저장 실패: ' + data.message);
+      }
+    } catch (error) {
+      console.error('리포트 저장 실패:', error);
+      alert('❌ 리포트 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 이미지 네비게이션
+  const navigateImage = (direction) => {
+    if (instancesList.length === 0) return;
     
-    const newWindow = window.open(ohifUrl, '_blank', 'width=1400,height=900,scrollbars=yes,resizable=yes');
+    let newIndex = currentImageIndex;
+    if (direction === 'next' && currentImageIndex < instancesList.length - 1) {
+      newIndex = currentImageIndex + 1;
+    } else if (direction === 'prev' && currentImageIndex > 0) {
+      newIndex = currentImageIndex - 1;
+    }
     
-    if (!newWindow) {
-      alert('⚠️ 팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.');
+    if (newIndex !== currentImageIndex) {
+      displayDicomImage(instancesList[newIndex], newIndex);
     }
   };
 
@@ -239,29 +625,10 @@ const DMViewer = () => {
     patient.patient_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 날짜 포맷팅
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    if (dateString.length === 8) {
-      return `${dateString.substr(0,4)}-${dateString.substr(4,2)}-${dateString.substr(6,2)}`;
-    }
-    return dateString;
-  };
-
-  // 시간 포맷팅
-  const formatTime = (timeString) => {
-    if (!timeString) return '';
-    if (timeString.length >= 6) {
-      return `${timeString.substr(0,2)}:${timeString.substr(2,2)}`;
-    }
-    return timeString;
-  };
-
   useEffect(() => {
     fetchAssignedPatients();
   }, []);
 
-  // 스타일 객체들
   const styles = {
     container: {
       display: 'flex',
@@ -312,116 +679,156 @@ const DMViewer = () => {
       backgroundColor: '#dbeafe',
       borderLeft: '4px solid #3b82f6'
     },
-    patientName: {
-      fontWeight: 'medium',
-      color: '#1f2937',
-      marginBottom: '4px'
-    },
-    patientInfo: {
-      fontSize: '12px',
-      color: '#6b7280'
-    },
-    patientIdHighlight: {
-      fontWeight: 'bold',
-      color: '#1e40af'
-    },
     mainArea: {
+      flex: 1,
+      display: 'flex'
+    },
+    viewerArea: {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: 'white'
+      backgroundColor: '#000'
     },
-    mainHeader: {
+    toolbar: {
+      padding: '12px',
+      backgroundColor: '#1f2937',
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    },
+    toolButton: {
+      padding: '8px',
+      backgroundColor: '#374151',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+      fontSize: '12px'
+    },
+    toolButtonActive: {
+      backgroundColor: '#3b82f6'
+    },
+    viewerContainer: {
+      flex: 1,
+      position: 'relative',
+      backgroundColor: '#000',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    dicomViewer: {
+      width: '512px',
+      height: '512px',
+      backgroundColor: '#000',
+      border: '1px solid #333',
+      cursor: currentTool === 'rectangle' ? 'crosshair' : 'default'
+    },
+    imageNavigation: {
+      position: 'absolute',
+      bottom: '20px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: '8px 16px',
+      borderRadius: '8px',
+      color: 'white'
+    },
+    navButton: {
+      padding: '4px 8px',
+      backgroundColor: '#374151',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    },
+    reportPanel: {
+      width: '350px',
+      backgroundColor: 'white',
+      borderLeft: '1px solid #e0e0e0',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    reportHeader: {
       padding: '16px',
       borderBottom: '1px solid #e0e0e0',
       backgroundColor: '#f8f9fa'
     },
-    patientTitle: {
-      fontSize: '20px',
-      fontWeight: 'bold',
-      color: '#1f2937',
-      marginBottom: '8px'
-    },
-    patientDetails: {
-      display: 'flex',
-      gap: '20px',
-      fontSize: '14px',
-      color: '#6b7280'
-    },
-    content: {
+    reportContent: {
       flex: 1,
-      padding: '20px',
+      padding: '16px',
       overflowY: 'auto'
     },
-    studiesHeader: {
-      fontSize: '18px',
-      fontWeight: 'bold',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
+    reportTextarea: {
+      width: '100%',
+      minHeight: '150px',
+      padding: '12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '4px',
+      fontSize: '14px',
+      resize: 'vertical',
+      fontFamily: 'inherit'
     },
-    studyCard: {
-      border: '1px solid #e0e0e0',
-      borderRadius: '8px',
-      marginBottom: '12px',
-      padding: '16px',
-      backgroundColor: 'white',
-      transition: 'all 0.2s',
-      cursor: 'pointer'
-    },
-    studyCardSelected: {
-      borderColor: '#3b82f6',
-      backgroundColor: '#eff6ff'
-    },
-    studyHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
+    statusSelect: {
+      width: '100%',
+      padding: '8px',
+      border: '1px solid #d1d5db',
+      borderRadius: '4px',
       marginBottom: '12px'
     },
-    studyTitle: {
-      fontSize: '16px',
-      fontWeight: 'bold',
-      color: '#1f2937',
-      marginBottom: '4px'
-    },
-    studyMeta: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '8px',
-      fontSize: '12px',
-      color: '#6b7280'
-    },
-    studyActions: {
-      display: 'flex',
-      gap: '8px'
-    },
-    actionBtn: {
-      padding: '6px 12px',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      backgroundColor: 'white',
+    saveButton: {
+      padding: '8px 16px',
+      backgroundColor: '#10b981',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
       cursor: 'pointer',
       fontSize: '12px',
       display: 'flex',
       alignItems: 'center',
-      gap: '4px'
+      gap: '4px',
+      marginBottom: '8px'
     },
-    ohifBtn: {
-      backgroundColor: '#10b981',
-      color: 'white',
-      border: 'none'
+    annotationList: {
+      maxHeight: '120px',
+      overflowY: 'auto',
+      border: '1px solid #e0e0e0',
+      borderRadius: '4px',
+      marginBottom: '16px'
     },
-    loadingContainer: {
-      textAlign: 'center',
-      padding: '40px',
-      color: '#6b7280'
+    annotationItem: {
+      padding: '8px',
+      borderBottom: '1px solid #f0f0f0',
+      fontSize: '12px'
     },
-    emptyState: {
-      textAlign: 'center',
-      padding: '40px',
-      color: '#6b7280'
+    studyItem: {
+      padding: '8px',
+      border: '1px solid #e0e0e0',
+      borderRadius: '4px',
+      marginBottom: '8px',
+      cursor: 'pointer'
+    },
+    studyItemSelected: {
+      backgroundColor: '#eff6ff',
+      borderColor: '#3b82f6'
+    },
+    seriesItem: {
+      padding: '6px',
+      border: '1px solid #d1d5db',
+      borderRadius: '3px',
+      marginBottom: '4px',
+      cursor: 'pointer',
+      fontSize: '12px'
+    },
+    seriesItemSelected: {
+      backgroundColor: '#dbeafe',
+      borderColor: '#3b82f6'
     }
   };
 
@@ -432,14 +839,14 @@ const DMViewer = () => {
         <div style={styles.header}>
           <div style={styles.title}>
             <Stethoscope size={20} color="#3b82f6" />
-            Orthanc 환자 뷰어
+            DICOM Viewer
           </div>
           
           <div style={{position: 'relative'}}>
             <Search style={{position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af'}} size={16} />
             <input
               type="text"
-              placeholder="환자명, ID, Patient ID 검색..."
+              placeholder="환자 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
@@ -449,120 +856,299 @@ const DMViewer = () => {
 
         <div style={styles.patientList}>
           {loading && (
-            <div style={styles.loadingContainer}>
+            <div style={{textAlign: 'center', padding: '20px'}}>
               <RefreshCw className="animate-spin" size={20} />
-              <div>환자 목록 로딩 중...</div>
+              <div>로딩 중...</div>
             </div>
           )}
 
           {!loading && filteredPatients.map(patient => (
             <div
               key={patient.id}
-              onClick={() => handlePatientSelect(patient)}
+              onClick={() => {
+                setSelectedPatient(patient);
+                fetchPatientStudiesFromOrthanc(patient);
+              }}
               style={{
                 ...styles.patientItem,
-                ...(selectedPatient?.id === patient.id ? styles.patientItemSelected : {}),
-                ':hover': { backgroundColor: '#f3f4f6' }
+                ...(selectedPatient?.id === patient.id ? styles.patientItemSelected : {})
               }}
             >
-              <div style={styles.patientName}>{patient.name}</div>
-              <div style={styles.patientInfo}>
-                ID: {patient.identifier} | <span style={styles.patientIdHighlight}>Patient ID: {patient.patient_id}</span>
+              <div style={{fontWeight: 'medium', marginBottom: '4px'}}>{patient.name}</div>
+              <div style={{fontSize: '12px', color: '#6b7280'}}>
+                Patient ID: <strong>{patient.patient_id}</strong>
               </div>
-              <div style={styles.patientInfo}>
-                {patient.birthdate} | {patient.gender === 'M' ? '남성' : '여성'} | {patient.modality}
+              <div style={{fontSize: '11px', color: '#6b7280'}}>
+                {patient.identifier} | {patient.modality}
               </div>
             </div>
           ))}
-        </div>
-      </div>
 
-      {/* 메인 영역 */}
-      <div style={styles.mainArea}>
-        {selectedPatient ? (
-          <>
-            <div style={styles.mainHeader}>
-              <div style={styles.patientTitle}>
-                {selectedPatient.name} ({selectedPatient.patient_id})
-              </div>
-              <div style={styles.patientDetails}>
-                <span>ID: {selectedPatient.identifier}</span>
-                <span>생년월일: {selectedPatient.birthdate}</span>
-                <span>성별: {selectedPatient.gender === 'M' ? '남성' : '여성'}</span>
-                <span>모달리티: {selectedPatient.modality}</span>
-              </div>
-            </div>
-
-            <div style={styles.content}>
-              <div style={styles.studiesHeader}>
-                <Layers size={20} color="#3b82f6" />
-                DICOM Studies ({studyList.length}개)
-                {loadingStudies && <RefreshCw className="animate-spin" size={16} />}
-              </div>
-
-              {loadingStudies && (
-                <div style={styles.loadingContainer}>
-                  <div>Orthanc에서 Studies 조회 중...</div>
-                </div>
-              )}
-
-              {!loadingStudies && studyList.length === 0 && (
-                <div style={styles.emptyState}>
-                  <Image size={48} />
-                  <div>Patient ID "{selectedPatient.patient_id}"에 대한 DICOM Studies가 없습니다.</div>
-                </div>
-              )}
-
-              {!loadingStudies && studyList.map(study => (
+          {/* Studies 목록 */}
+          {selectedPatient && studyList.length > 0 && (
+            <div style={{borderTop: '2px solid #e0e0e0', padding: '16px'}}>
+              <h4 style={{margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold'}}>
+                📋 Studies ({studyList.length}개)
+              </h4>
+              {studyList.map(study => (
                 <div
                   key={study.orthanc_study_id}
                   onClick={() => handleStudySelect(study)}
                   style={{
-                    ...styles.studyCard,
-                    ...(selectedStudy?.orthanc_study_id === study.orthanc_study_id ? styles.studyCardSelected : {})
+                    ...styles.studyItem,
+                    ...(selectedStudy?.orthanc_study_id === study.orthanc_study_id ? styles.studyItemSelected : {})
                   }}
                 >
-                  <div style={styles.studyHeader}>
-                    <div>
-                      <div style={styles.studyTitle}>{study.study_description}</div>
-                      <div style={styles.studyMeta}>
-                        <div><strong>날짜:</strong> {formatDate(study.study_date)}</div>
-                        <div><strong>시간:</strong> {formatTime(study.study_time)}</div>
-                        <div><strong>모달리티:</strong> {study.modality}</div>
-                        <div><strong>접수번호:</strong> {study.accession_number || 'N/A'}</div>
-                        <div><strong>Series:</strong> {study.series_count}개</div>
-                        <div><strong>Images:</strong> {study.instances_count}개</div>
-                      </div>
-                    </div>
-                    
-                    <div style={styles.studyActions}>
-                      <button 
-                        style={styles.actionBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openInOHIF(study);
-                        }}
-                      >
-                        <Eye size={14} />
-                        OHIF 뷰어
-                      </button>
-                    </div>
+                  <div style={{fontSize: '12px', fontWeight: 'bold'}}>{study.study_description}</div>
+                  <div style={{fontSize: '11px', color: '#6b7280'}}>
+                    {study.study_date} | {study.modality} | {study.series_count} Series
                   </div>
-                  
-                  <div style={{fontSize: '11px', color: '#9ca3af', marginTop: '8px'}}>
-                    Study UID: {study.study_instance_uid}
+                  <div style={{fontSize: '10px', color: '#9ca3af'}}>
+                    UID: {study.study_instance_uid?.substring(0, 30)}...
                   </div>
                 </div>
               ))}
             </div>
-          </>
-        ) : (
-          <div style={styles.emptyState}>
-            <User size={64} />
-            <div style={{marginTop: '16px', fontSize: '18px'}}>환자를 선택하세요</div>
-            <div style={{marginTop: '8px'}}>좌측에서 환자를 선택하면 해당 Patient ID로 Orthanc에서 DICOM Studies를 조회합니다.</div>
+          )}
+
+          {/* Series 목록 */}
+          {selectedStudy && seriesList.length > 0 && (
+            <div style={{borderTop: '1px solid #e0e0e0', padding: '16px'}}>
+              <h4 style={{margin: '0 0 8px 0', fontSize: '12px', fontWeight: 'bold'}}>
+                🎞️ Series ({seriesList.length}개)
+              </h4>
+              {seriesList.map(series => (
+                <div
+                  key={series.orthanc_series_id}
+                  onClick={() => fetchInstancesFromSeries(series)}
+                  style={{
+                    ...styles.seriesItem,
+                    ...(selectedSeries?.orthanc_series_id === series.orthanc_series_id ? styles.seriesItemSelected : {})
+                  }}
+                >
+                  <div style={{fontWeight: 'bold'}}>{series.series_description}</div>
+                  <div style={{color: '#6b7280'}}>
+                    #{series.series_number} | {series.instances_count} Images
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {loadingImages && (
+            <div style={{textAlign: 'center', padding: '20px', color: '#6b7280'}}>
+              <RefreshCw className="animate-spin" size={16} />
+              <div style={{fontSize: '12px'}}>Orthanc에서 데이터 로딩 중...</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 메인 뷰어 영역 */}
+      <div style={styles.mainArea}>
+        <div style={styles.viewerArea}>
+          {/* 도구 모음 */}
+          <div style={styles.toolbar}>
+            <button
+              onClick={() => changeTool('pan')}
+              style={{...styles.toolButton, ...(currentTool === 'pan' ? styles.toolButtonActive : {})}}
+            >
+              <Move size={16} /> Pan
+            </button>
+            <button
+              onClick={() => changeTool('zoom')}
+              style={{...styles.toolButton, ...(currentTool === 'zoom' ? styles.toolButtonActive : {})}}
+            >
+              <ZoomIn size={16} /> Zoom
+            </button>
+            <button
+              onClick={() => changeTool('wwwc')}
+              style={{...styles.toolButton, ...(currentTool === 'wwwc' ? styles.toolButtonActive : {})}}
+            >
+              <Activity size={16} /> W/L
+            </button>
+            <button
+              onClick={() => changeTool('rectangle')}
+              style={{...styles.toolButton, ...(currentTool === 'rectangle' ? styles.toolButtonActive : {})}}
+            >
+              <Square size={16} /> Annotation
+            </button>
+            <button onClick={saveAnnotations} style={styles.toolButton}>
+              <Save size={16} /> Save Ann.
+            </button>
+            <button 
+              onClick={() => {
+                setAnnotations([]);
+                drawAnnotationsOnCanvas();
+              }} 
+              style={styles.toolButton}
+            >
+              <Trash2 size={16} /> Clear
+            </button>
+            
+            {/* 현재 이미지 정보 */}
+            {currentImageElement && (
+              <div style={{marginLeft: 'auto', color: 'white', fontSize: '12px'}}>
+                Instance: {currentImageElement.instance_number} | 
+                {selectedSeries && ` ${selectedSeries.series_description}`}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* DICOM 뷰어 */}
+          <div style={styles.viewerContainer}>
+            {selectedStudy && selectedSeries ? (
+              <>
+                <canvas
+                  ref={cornerstoneElement}
+                  style={styles.dicomViewer}
+                  width={512}
+                  height={512}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                />
+                
+                {/* 이미지 네비게이션 */}
+                {instancesList.length > 0 && (
+                  <div style={styles.imageNavigation}>
+                    <button 
+                      onClick={() => navigateImage('prev')} 
+                      style={styles.navButton}
+                      disabled={currentImageIndex === 0}
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span>{currentImageIndex + 1} / {instancesList.length}</span>
+                    <button 
+                      onClick={() => navigateImage('next')} 
+                      style={styles.navButton}
+                      disabled={currentImageIndex === instancesList.length - 1}
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{color: 'white', textAlign: 'center'}}>
+                <Image size={64} />
+                <div style={{marginTop: '16px', fontSize: '18px'}}>
+                  {!selectedPatient ? '환자를 선택하세요' : 
+                   !selectedStudy ? 'Study를 선택하세요' : 
+                   'Series를 선택하세요'}
+                </div>
+                <div style={{marginTop: '8px', fontSize: '14px', color: '#888'}}>
+                  {selectedPatient && `Patient ID: ${selectedPatient.patient_id}`}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 우측 어노테이션 & 리포트 패널 */}
+        <div style={styles.reportPanel}>
+          <div style={styles.reportHeader}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <FileText size={20} color="#3b82f6" />
+              <span style={{fontWeight: 'bold'}}>어노테이션 & 리포트</span>
+            </div>
+          </div>
+
+          <div style={styles.reportContent}>
+            {selectedPatient && (
+              <>
+                {/* 환자 정보 */}
+                <div style={{marginBottom: '16px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '4px'}}>
+                  <div style={{fontWeight: 'bold'}}>{selectedPatient.name}</div>
+                  <div style={{fontSize: '12px', color: '#6b7280'}}>
+                    Patient ID: <strong>{selectedPatient.patient_id}</strong>
+                  </div>
+                  <div style={{fontSize: '12px', color: '#6b7280'}}>
+                    {selectedPatient.identifier} | {selectedPatient.birthdate} | {selectedPatient.gender === 'M' ? '남성' : '여성'}
+                  </div>
+                  {selectedStudy && (
+                    <div style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>
+                      📋 {selectedStudy.study_description} | {selectedStudy.study_date}
+                    </div>
+                  )}
+                  {selectedSeries && (
+                    <div style={{fontSize: '11px', color: '#9ca3af', marginTop: '2px'}}>
+                      🎞️ {selectedSeries.series_description} | {selectedSeries.instances_count} Images
+                    </div>
+                  )}
+                </div>
+
+                {/* 어노테이션 목록 */}
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{fontSize: '14px', fontWeight: 'bold', marginBottom: '8px'}}>
+                    🎯 어노테이션 ({annotations.length}개)
+                  </h4>
+                  <div style={styles.annotationList}>
+                    {annotations.length === 0 ? (
+                      <div style={{padding: '20px', textAlign: 'center', color: '#6b7280'}}>
+                        어노테이션이 없습니다
+                      </div>
+                    ) : (
+                      annotations.map((annotation, index) => (
+                        <div key={index} style={styles.annotationItem}>
+                          <div style={{fontWeight: 'bold', color: '#dc2626'}}>{annotation.label}</div>
+                          <div style={{color: '#6b7280'}}>
+                            좌표: [{annotation.bbox.map(n => Math.round(n)).join(', ')}]
+                          </div>
+                          {annotation.dr_text && (
+                            <div style={{marginTop: '4px', fontStyle: 'italic'}}>
+                              {annotation.dr_text}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* 리포트 상태 */}
+                <div style={{marginBottom: '12px'}}>
+                  <label style={{fontSize: '14px', fontWeight: 'bold', marginBottom: '4px', display: 'block'}}>
+                    📄 리포트 상태
+                  </label>
+                  <select
+                    value={reportStatus}
+                    onChange={(e) => setReportStatus(e.target.value)}
+                    style={styles.statusSelect}
+                  >
+                    <option value="draft">초안</option>
+                    <option value="completed">완료</option>
+                    <option value="approved">승인</option>
+                  </select>
+                </div>
+
+                {/* 리포트 내용 */}
+                <div style={{marginBottom: '16px'}}>
+                  <label style={{fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                    📝 판독 소견
+                  </label>
+                  <textarea
+                    value={reportData}
+                    onChange={(e) => setReportData(e.target.value)}
+                    placeholder="판독 소견을 입력하세요..."
+                    style={styles.reportTextarea}
+                  />
+                </div>
+
+                {/* 저장 버튼들 */}
+                <div>
+                  <button onClick={saveAnnotations} style={styles.saveButton}>
+                    <Save size={16} /> 어노테이션 저장
+                  </button>
+                  <button onClick={saveReport} style={styles.saveButton}>
+                    <Save size={16} /> 리포트 저장
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

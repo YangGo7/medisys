@@ -1,27 +1,26 @@
+// src/components/EMR/home/DailySummary.jsx - 깔끔한 디자인
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-// import './DailySummary.css'; // <-- 🚨🚨🚨 이 줄을 삭제합니다! 🚨🚨🚨
-// 만약 DailySummary.css가 실제로 있고, 거기에만 정의된 스타일이 필요하다면
-// 이 줄을 살리고 해당 파일을 생성해야 하지만, 현재 에러는 파일이 없다는 것이므로 삭제하는 것이 일반적입니다.
+import { FileText, Brain, Camera } from 'lucide-react';
 
 const DailySummary = () => {
   const [summaryStats, setSummaryStats] = useState({
     total_consultations: '-',
-    ai_analysis_count: 2,      // 하드코딩
-    imaging_exam_count: 3,     // 하드코딩
+    ai_analysis_count: 2,
+    imaging_exam_count: 3,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const API_BASE = process.env.REACT_APP_INTEGRATION_API || 'http://35.225.63.41:8000/api/integration/';
-  const COMPLETED_PATIENTS_API = `${API_BASE}completed-patients/`; // 기존 API 사용
+  const COMPLETED_PATIENTS_API = `${API_BASE}completed-patients/`;
   const POLL_INTERVAL_MS = 15000;
 
   const fetchSummaryStats = async () => {
     setLoading(true);
     setError(null);
     try {
-      // 완료된 환자 수 가져오기 (실제 진료 건수)
       const completedRes = await axios.get(COMPLETED_PATIENTS_API);
       let completedCount = 0;
       
@@ -30,9 +29,9 @@ const DailySummary = () => {
       }
 
       setSummaryStats({
-        total_consultations: completedCount, // 실제 완료된 환자 수 사용
-        ai_analysis_count: 2,                // 하드코딩
-        imaging_exam_count: 3,               // 하드코딩
+        total_consultations: completedCount,
+        ai_analysis_count: 2,
+        imaging_exam_count: 3,
       });
       
     } catch (err) {
@@ -49,32 +48,137 @@ const DailySummary = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const summaryItems = [
+    {
+      icon: FileText,
+      label: '총 진료 건수',
+      value: loading ? '...' : error ? '오류' : `${summaryStats.total_consultations}`,
+      unit: '건',
+      description: '완료된 진료 건수',
+      color: 'var(--primary-purple)',
+      bgColor: 'rgba(139, 90, 150, 0.1)'
+    },
+    {
+      icon: Brain,
+      label: 'AI 분석 건수',
+      value: loading ? '...' : error ? '오류' : `${summaryStats.ai_analysis_count}`,
+      unit: '건',
+      description: 'CDSS 활용도',
+      color: 'var(--accent-purple)',
+      bgColor: 'rgba(187, 143, 206, 0.1)'
+    },
+    {
+      icon: Camera,
+      label: '영상 검사 수',
+      value: loading ? '...' : error ? '오류' : `${summaryStats.imaging_exam_count}`,
+      unit: '건',
+      description: 'Radiology 활용률',
+      color: 'var(--primary-purple-dark)',
+      bgColor: 'rgba(125, 60, 152, 0.1)'
+    }
+  ];
+
   return (
-    <div className="dashboard-cards">
-      <h3>📦 오늘 진료 요약</h3>
-      <div className="stats-grid" style={{ gap: '0.8rem' }}>
-        <div className="card" style={{ padding: '1rem', minHeight: '80px' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>📋 총 진료 건수</p>
-          <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '1.8rem' }}>
-            {loading ? '...' : error ? '오류' : `${summaryStats.total_consultations}건`}
-          </h2>
-          <small style={{ fontSize: '0.8rem', color: '#666' }}>완료된 진료 건수</small>
+    <div style={{ 
+      padding: '0',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem',
+      height: '100%'
+    }}>
+      {summaryItems.map((item, index) => {
+        const Icon = item.icon;
+        return (
+          <div 
+            key={index}
+            style={{
+              flex: 1,
+              background: item.bgColor,
+              borderRadius: '12px',
+              padding: '1.5rem',
+              border: `1px solid ${item.color}20`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = `0 4px 12px ${item.color}20`;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{
+              backgroundColor: item.color,
+              borderRadius: '12px',
+              padding: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Icon size={24} color="white" />
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontSize: '0.85rem',
+                color: 'var(--gray-600)',
+                marginBottom: '0.25rem',
+                fontWeight: '500'
+              }}>
+                {item.label}
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '0.25rem',
+                marginBottom: '0.25rem'
+              }}>
+                <span style={{
+                  fontSize: '1.8rem',
+                  fontWeight: '800',
+                  color: item.color,
+                  lineHeight: '1'
+                }}>
+                  {item.value}
+                </span>
+                <span style={{
+                  fontSize: '1rem',
+                  color: 'var(--gray-600)',
+                  fontWeight: '500'
+                }}>
+                  {item.unit}
+                </span>
+              </div>
+              
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'var(--gray-500)'
+              }}>
+                {item.description}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      
+      {error && (
+        <div style={{
+          marginTop: '0.5rem',
+          padding: '0.75rem',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderRadius: '8px',
+          fontSize: '0.8rem',
+          color: '#dc2626',
+          textAlign: 'center'
+        }}>
+          ⚠️ {error}
         </div>
-        <div className="card" style={{ padding: '1rem', minHeight: '80px' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>🧠 AI 분석 건수</p>
-          <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '1.8rem' }}>
-            {loading ? '...' : error ? '오류' : `${summaryStats.ai_analysis_count}건`}
-          </h2>
-          <small style={{ fontSize: '0.8rem', color: '#666' }}>CDSS 활용도</small>
-        </div>
-        <div className="card" style={{ padding: '1rem', minHeight: '80px' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>📦 영상 검사 수</p>
-          <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '1.8rem' }}>
-            {loading ? '...' : error ? '오류' : `${summaryStats.imaging_exam_count}건`}
-          </h2>
-          <small style={{ fontSize: '0.8rem', color: '#666' }}>Radiology 활용률</small>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

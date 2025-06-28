@@ -1,5 +1,5 @@
 // frontend/src/components/DocDashBoard/DocDashBoard.jsx
-// 🔥 새로운 레이아웃과 접는 카드 기능이 포함된 의사 대시보드
+// 🔥 슬림하고 효율적인 의사 대시보드 - 의사 정보 패널 포함 (완전 버전)
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import {
   Monitor,
   FileText, 
   Activity, 
-  Brain, 
+  Brain,
   Calendar,
   Search,
   Stethoscope,
@@ -42,7 +42,7 @@ import { generateCdssDummyResult } from '../utils/dummy';
 // CSS 파일 import
 import './DocDashBoard.css';
 
-const DocDashBoard = ({patient  }) => {
+const DocDashBoard = ({ patient }) => {
   // 🔥 상태 관리
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,17 +58,46 @@ const DocDashBoard = ({patient  }) => {
   const [cdssResult, setCdssResult] = useState(null);
   const [cdssDummy, setCdssDummy] = useState(null);
   const { sampleId } = useParams();
+
+  // 🩺 의사 정보 상태
+  const [doctorInfo, setDoctorInfo] = useState({
+    name: '김의사',
+    department: '내과',
+    status: '진료중',
+    patientCount: 0
+  });
+
   // 🔥 드롭다운 상태 관리
   const [dropdownStates, setDropdownStates] = useState({
-    consultation: false, // 진단 결과 및 전문 내용
-    history: false,      // 내원 이력 (좌측 하단)
-    diagnosis: false     // 진단 및 처방 (우측 하단)
+    consultation: false,
+    history: false,
+    diagnosis: false
   });
 
   // 🔥 환자 카드 펼침 상태 관리
   const [expandedPatients, setExpandedPatients] = useState(new Set());
 
   const API_BASE = process.env.REACT_APP_INTEGRATION_API;
+
+  // 🔥 현재 시간 상태
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // 🔥 시간 업데이트
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 🔥 의사 정보 업데이트 (환자 수 반영)
+  useEffect(() => {
+    const patientCount = Object.values(assignedPatients).filter(p => p !== null).length;
+    setDoctorInfo(prev => ({
+      ...prev,
+      patientCount
+    }));
+  }, [assignedPatients]);
 
   // 🔥 드롭다운 토글 함수
   const toggleDropdown = (cardName) => {
@@ -92,7 +121,7 @@ const DocDashBoard = ({patient  }) => {
   };
 
   // 🔥 전체 환자 검색 함수
-    const fetchAllPatientsFromBackend = async () => {
+  const fetchAllPatientsFromBackend = async () => {
     if (searchTerm.trim() === '') {
       setAllSearchResults([]);
       return;
@@ -159,30 +188,20 @@ const DocDashBoard = ({patient  }) => {
       return;
     }
 
-    // 환자 정보 확인
     const patientName = selectedPatient.name || selectedPatient.display || selectedPatient.patient_name || '알 수 없는 환자';
     const mappingId = selectedPatient.mapping_id || selectedPatient.id;
     const currentRoom = selectedPatient.assigned_room;
 
-    console.log('🏥 진료 완료 처리 시작:', {
-      patient: patientName,
-      mapping_id: mappingId,
-      room: currentRoom
-    });
-
-    // 매핑 ID 확인
     if (!mappingId) {
       alert('환자의 매핑 정보를 찾을 수 없습니다.\n환자가 올바르게 배정되었는지 확인해주세요.');
       return;
     }
 
-    // 진료실 정보 확인
     if (!currentRoom) {
       alert('환자의 진료실 정보를 찾을 수 없습니다.\n환자가 진료실에 배정되었는지 확인해주세요.');
       return;
     }
 
-    // 사용자 확인
     const confirmMessage = `${patientName}님의 진료를 완료하시겠습니까?\n\n` +
                           `📍 진료실: ${currentRoom}번\n` +
                           `⚠️ 진료 완료 후에는 되돌릴 수 없습니다.`;
@@ -192,41 +211,28 @@ const DocDashBoard = ({patient  }) => {
     }
 
     try {
-      // 로딩 상태 표시
-      console.log('📡 진료 완료 API 호출 중...');
-
       const requestData = {
         mapping_id: mappingId,
         room: currentRoom
       };
 
-      console.log('📤 진료 완료 요청 데이터:', requestData);
-
-      // 🔥 실제 진료 완료 API 호출
       const response = await axios.post(`${API_BASE}complete-treatment/`, requestData);
 
-      console.log('📥 진료 완료 API 응답:', response.data);
-
       if (response.data.success) {
-        // 성공 처리
         alert(`✅ ${patientName}님의 진료가 성공적으로 완료되었습니다.\n진료실 ${currentRoom}번이 해제되었습니다.`);
         
-        // 🔥 상태 초기화
         setSelectedPatient(null);
         setPersonUUID(null);
         setUuidError(null);
         
-        // 드롭다운 상태 초기화
         setDropdownStates({
           consultation: false,
           history: false,
           diagnosis: false
         });
 
-        // 🔥 데이터 새로고침 트리거
         setScheduleRefresh(prev => prev + 1);
         
-        // 🔥 BroadcastChannel로 다른 컴포넌트들에게 알림
         try {
           const channel = new BroadcastChannel('patient_channel');
           channel.postMessage({
@@ -240,36 +246,29 @@ const DocDashBoard = ({patient  }) => {
           console.error('BroadcastChannel 알림 실패:', bcError);
         }
 
-        console.log('✅ 진료 완료 처리 성공');
-
       } else {
-        // API 응답은 성공이지만 비즈니스 로직 실패
         const errorMessage = response.data.error || '진료 완료 처리에 실패했습니다.';
-        console.error('❌ 진료 완료 비즈니스 로직 실패:', errorMessage);
         alert(`❌ 진료 완료 처리 실패:\n${errorMessage}`);
       }
 
     } catch (error) {
-      // 네트워크 오류 또는 서버 오류
       console.error('❌ 진료 완료 API 호출 실패:', error);
       
       let errorMessage = '진료 완료 처리 중 오류가 발생했습니다.';
       
       if (error.response) {
-        // 서버에서 응답을 받았지만 오류 상태
         const serverError = error.response.data?.error || error.response.data?.message || '서버 오류';
         errorMessage = `서버 오류 (${error.response.status}): ${serverError}`;
       } else if (error.request) {
-        // 요청은 보냈지만 응답을 받지 못함
         errorMessage = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
       } else {
-        // 요청 설정 중 오류
         errorMessage = `요청 오류: ${error.message}`;
       }
 
       alert(`❌ 진료 완료 실패:\n${errorMessage}\n\n관리자에게 문의하시거나 잠시 후 다시 시도해주세요.`);
     }
   };
+
   // 검색 실행
   const handleMainSearch = () => {
     if (searchMode === 'all') {
@@ -296,8 +295,56 @@ const DocDashBoard = ({patient  }) => {
     }
   }, [searchTerm, searchMode]);
 
+  // UUID 조회
+  useEffect(() => {
+    const fetchPersonUUID = async () => {
+      if (!selectedPatient || !selectedPatient.patient_identifier) {
+        setPersonUUID(null);
+        return;
+      }
 
-  // 🔥 접을 수 있는 환자 카드 컴포넌트
+      setUuidLoading(true);
+      setUuidError(null);
+
+      try {
+        const res = await axios.get(
+          `${API_BASE}patient-uuid-by-identifier/${selectedPatient.patient_identifier}/`
+        );
+
+        if (res.data.success) {
+          setPersonUUID(res.data.person_uuid);
+        } else {
+          setUuidError(res.data.error || 'UUID 조회 실패');
+          setPersonUUID(null);
+        }
+      } catch (err) {
+        console.error('UUID 조회 실패:', err);
+        setUuidError('서버와의 통신에 실패했습니다.');
+        setPersonUUID(null);
+      } finally {
+        setUuidLoading(false);
+      }
+    };
+
+    fetchPersonUUID();
+  }, [selectedPatient]);
+
+  useEffect(() => {
+    const fetchCdssResult = async () => {
+      if (!selectedPatient || !selectedPatient.patient_identifier) return;
+      try {
+        const res = await axios.get(`${API_BASE}cdss/results/${selectedPatient.sample_id}/`);
+        setCdssResult(res.data);
+      } catch (err) {
+        console.error('❌ CDSS 결과 가져오기 실패:', err);
+        setCdssResult(null);
+      }
+    };
+
+    fetchCdssResult();
+  }, [selectedPatient]);
+
+  // 🔥 슬림한 환자 카드 컴포넌트
   const CollapsiblePatientCard = ({ 
     patient, 
     isSelected, 
@@ -317,7 +364,7 @@ const DocDashBoard = ({patient  }) => {
     const handleAssignClick = (e) => {
       e.stopPropagation();
       if (onAssign) {
-        onAssign(patient, 1); // 기본값으로 1번 진료실에 배정
+        onAssign(patient, 1);
       }
     };
 
@@ -328,7 +375,6 @@ const DocDashBoard = ({patient  }) => {
       }
     };
 
-    // 환자 상태 결정
     const getPatientStatus = () => {
       if (patient.assigned_room) {
         return { status: 'in-progress', label: '진료중' };
@@ -341,69 +387,15 @@ const DocDashBoard = ({patient  }) => {
 
     const { status, label } = getPatientStatus();
 
-
-
-
-    // 👇 2. 환자 선택 시 UUID 조회
-    useEffect(() => {
-      const fetchPersonUUID = async () => {
-        if (!selectedPatient || !selectedPatient.patient_identifier) {
-          setPersonUUID(null);
-          return;
-        }
-
-        setUuidLoading(true);
-        setUuidError(null);
-
-        try {
-          const res = await axios.get(
-            `${API_BASE}patient-uuid-by-identifier/${selectedPatient.patient_identifier}/`
-          );
-
-          if (res.data.success) {
-            setPersonUUID(res.data.person_uuid);
-          } else {
-            setUuidError(res.data.error || 'UUID 조회 실패');
-            setPersonUUID(null);
-          }
-        } catch (err) {
-          console.error('UUID 조회 실패:', err);
-          setUuidError('서버와의 통신에 실패했습니다.');
-          setPersonUUID(null);
-        } finally {
-          setUuidLoading(false);
-        }
-      };
-
-      fetchPersonUUID();
-      console.log('선택된 환자:', selectedPatient);
-    }, [selectedPatient]);
-
-    useEffect(() => {
-      const fetchCdssResult = async () => {
-        if (!selectedPatient || !selectedPatient.patient_identifier) return;
-        try {
-          const res = await axios.get(`${API_BASE}cdss/results/${selectedPatient.sample_id}/`);
-          setCdssResult(res.data);
-        } catch (err) {
-          console.error('❌ CDSS 결과 가져오기 실패:', err);
-          setCdssResult(null);
-        }
-      };
-
-      fetchCdssResult();
-    }, [selectedPatient]);
-
     return (
       <div className={`collapsible-patient-card ${isSelected ? 'selected' : ''} ${!isExpanded ? 'collapsed' : ''}`}>
-        {/* 🔥 환자 카드 헤더 (항상 보이는 부분) */}
         <div 
           className={`patient-card-header ${isSelected ? 'selected' : ''}`}
           onClick={handleHeaderClick}
         >
           <div className="patient-basic-info">
             <div className="patient-name-header">
-              <User size={14} />
+              <User size={12} />
               {patient.display || patient.name || 'Unknown Patient'}
             </div>
             <div className="patient-id-header">
@@ -418,19 +410,17 @@ const DocDashBoard = ({patient  }) => {
             </div>
           </div>
           <ChevronDown 
-            size={16} 
+            size={14} 
             className={`patient-toggle-icon ${isExpanded ? 'expanded' : ''}`}
           />
         </div>
 
-        {/* 🔥 환자 카드 상세 내용 (접을 수 있는 부분) */}
         <div className={`patient-card-content ${isExpanded ? 'expanded' : ''}`}>
           <div className="patient-card-body">
-            {/* 환자 상세 정보 */}
             <div className="patient-detail-section">
               <div className="patient-detail-row">
                 <span className="detail-label">
-                  <Calendar size={12} /> 생년월일
+                  <Calendar size={10} /> 생년월일
                 </span>
                 <span className="detail-value">
                   {patient.person?.birthdate ? 
@@ -442,7 +432,7 @@ const DocDashBoard = ({patient  }) => {
               
               <div className="patient-detail-row">
                 <span className="detail-label">
-                  <Phone size={12} /> 연락처
+                  <Phone size={10} /> 연락처
                 </span>
                 <span className="detail-value">
                   {patient.person?.phone || '010-0000-0000'}
@@ -451,16 +441,7 @@ const DocDashBoard = ({patient  }) => {
               
               <div className="patient-detail-row">
                 <span className="detail-label">
-                  <MapPin size={12} /> 주소
-                </span>
-                <span className="detail-value">
-                  {patient.person?.address || '주소 정보 없음'}
-                </span>
-              </div>
-              
-              <div className="patient-detail-row">
-                <span className="detail-label">
-                  <Activity size={12} /> 진료실
+                  <Activity size={10} /> 진료실
                 </span>
                 <span className="detail-value">
                   {patient.assigned_room ? `${patient.assigned_room}번` : '미배정'}
@@ -468,66 +449,38 @@ const DocDashBoard = ({patient  }) => {
               </div>
             </div>
 
-            {/* 검사 패널 선택 */}
             <div className="patient-detail-section">
-              <label className="detail-label">검사 패널 선택</label>
               <select className="patient-dropdown-select">
-                <option value="">검사 패널을 선택하세요</option>
-                <option value="basic">기본 검사 패널</option>
-                <option value="comprehensive">종합 검사 패널</option>
-                <option value="cardiac">심장 검사 패널</option>
-                <option value="liver">간 기능 검사</option>
-                <option value="kidney">신장 기능 검사</option>
-                <option value="diabetes">당뇨 검사 패널</option>
+                <option value="">검사 패널 선택</option>
+                <option value="basic">기본 검사</option>
+                <option value="comprehensive">종합 검사</option>
+                <option value="cardiac">심장 검사</option>
               </select>
             </div>
 
-            {/* 검사 주문 버튼 */}
             <button className="patient-order-button">
-              <Activity size={14} />
-              검사 주문 등록
+              <Activity size={12} />
+              검사 주문
             </button>
 
-            {/* 액션 버튼들 */}
             <div className="patient-actions">
               {!patient.assigned_room ? (
                 <button 
                   className="patient-action-btn assign"
                   onClick={handleAssignClick}
                 >
-                  <UserCheck size={14} />
-                  진료실 배정
+                  <UserCheck size={12} />
+                  배정
                 </button>
               ) : (
                 <button 
                   className="patient-action-btn complete"
                   onClick={handleCompleteClick}
                 >
-                  <X size={14} />
-                  진료 완료
+                  <X size={12} />
+                  완료
                 </button>
               )}
-            </div>
-
-            {/* 추가 정보 섹션 */}
-            <div className="patient-detail-section">
-              <div className="patient-detail-row">
-                <span className="detail-label">담당 의사</span>
-                <span className="detail-value">Dr. Current User</span>
-              </div>
-              <div className="patient-detail-row">
-                <span className="detail-label">진료 과목</span>
-                <span className="detail-value">내과</span>
-              </div>
-              <div className="patient-detail-row">
-                <span className="detail-label">내원 시간</span>
-                <span className="detail-value">
-                  {new Date().toLocaleTimeString('ko-KR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -535,7 +488,7 @@ const DocDashBoard = ({patient  }) => {
     );
   };
 
-  // 🔥 드롭다운 카드 컴포넌트
+  // 🔥 슬림한 드롭다운 카드 컴포넌트
   const DropdownCard = ({ 
     cardKey, 
     title, 
@@ -549,11 +502,11 @@ const DocDashBoard = ({patient  }) => {
         onClick={() => toggleDropdown(cardKey)}
       >
         <div className="dropdown-title">
-          <Icon size={20} />
+          <Icon size={18} />
           <span>{title}</span>
         </div>
         <div className={`dropdown-toggle ${dropdownStates[cardKey] ? 'expanded' : ''}`}>
-          {dropdownStates[cardKey] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          {dropdownStates[cardKey] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </div>
       </div>
       <div className={`dropdown-content ${dropdownStates[cardKey] ? 'expanded' : ''}`}>
@@ -566,76 +519,86 @@ const DocDashBoard = ({patient  }) => {
 
   // 🔥 환자 카드 리스트 렌더링
   const renderPatientList = () => {
-  if (searchMode === 'assigned') {
-    return (
-      <AssignedPatientList
-        onPatientSelect={setSelectedPatient}
-        selectedPatient={selectedPatient}
-        refreshTrigger={scheduleRefresh}
-        searchTerm={searchTerm}
-      />
-    );
-  } else {
-    return (
-      <div className="all-patients-grid">
-        {isSearchingAllPatients && (
-          <div className="loading-message">전체 환자 검색 중...</div>
-        )}
-        {allSearchError && (
-          <div className="error-message">⚠️ {allSearchError}</div>
-        )}
-        {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() !== '' ? (
-          <div className="no-results">검색 결과가 없습니다.</div>
-        ) : (
-          !isSearchingAllPatients && allSearchResults.map(p => {
-            const patientUniqueId = p.uuid;
-            const isSelected = selectedPatient?.uuid === patientUniqueId;
+    if (searchMode === 'assigned') {
+      return (
+        <AssignedPatientList
+          onPatientSelect={setSelectedPatient}
+          selectedPatient={selectedPatient}
+          refreshTrigger={scheduleRefresh}
+          searchTerm={searchTerm}
+        />
+      );
+    } else {
+      return (
+        <div className="all-patients-grid">
+          {isSearchingAllPatients && (
+            <div className="loading-message">검색 중...</div>
+          )}
+          {allSearchError && (
+            <div className="error-message">⚠️ {allSearchError}</div>
+          )}
+          {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() !== '' ? (
+            <div className="no-results">검색 결과가 없습니다.</div>
+          ) : (
+            !isSearchingAllPatients && allSearchResults.map(p => {
+              const patientUniqueId = p.uuid;
+              const isSelected = selectedPatient?.uuid === patientUniqueId;
 
-            return (
-              <CollapsiblePatientCard
-                key={patientUniqueId}
-                patient={{
-                  uuid: patientUniqueId,
-                  mapping_id: null,
-                  display: p.name,
-                  name: p.name,
-                  assigned_room: null,
-                  person: { age: p.age, gender: p.gender, birthdate: p.birthdate },
-                  identifiers: [{ identifier: p.patient_identifier, identifierType: 'OpenMRS ID', preferred: true }],
-                  patient_identifier: p.patient_identifier,
-                  ...p
-                }}
-                isSelected={isSelected}
-                onSelect={(patient) => setSelectedPatient(patient)}
-                onAssign={handleAssignToRoom}
-                onComplete={(patient) => console.log('Complete:', patient)}
-              />
-            );
-          })
-        )}
-        {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() === '' && (
-          <div className="search-prompt">
-            이름 또는 ID를 입력하여 전체 환자를 검색합니다.
-          </div>
-        )}
-      </div>
-    );
-  }
-};
-
+              return (
+                <CollapsiblePatientCard
+                  key={patientUniqueId}
+                  patient={{
+                    uuid: patientUniqueId,
+                    mapping_id: null,
+                    display: p.name,
+                    name: p.name,
+                    assigned_room: null,
+                    person: { age: p.age, gender: p.gender, birthdate: p.birthdate },
+                    identifiers: [{ identifier: p.patient_identifier, identifierType: 'OpenMRS ID', preferred: true }],
+                    patient_identifier: p.patient_identifier,
+                    ...p
+                  }}
+                  isSelected={isSelected}
+                  onSelect={(patient) => setSelectedPatient(patient)}
+                  onAssign={handleAssignToRoom}
+                  onComplete={(patient) => console.log('Complete:', patient)}
+                />
+              );
+            })
+          )}
+          {!isSearchingAllPatients && !allSearchError && allSearchResults.length === 0 && searchTerm.trim() === '' && (
+            <div className="search-prompt">
+              이름 또는 ID를 입력하여 검색합니다.
+            </div>
+          )}
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="doctor-dashboard">
-      {/* 🔥 대시보드 헤더 */}
+      {/* 🔥 슬림한 대시보드 헤더 - 의사 정보 포함 */}
       <div className="dashboard-header">
         <div className="header-left">
           <Stethoscope className="header-icon" />
           <h1 className="dashboard-title">의사 대시보드</h1>
+          
+          {/* 🩺 의사 정보 패널 */}
+          <div className="doctor-info-panel">
+            <div className="doctor-avatar">
+              <Stethoscope size={18} />
+            </div>
+            <div className="doctor-details">
+              <h4>Dr. {doctorInfo.name}</h4>
+              <p>{doctorInfo.department} • 환자 {doctorInfo.patientCount}명 • {doctorInfo.status}</p>
+            </div>
+          </div>
         </div>
         <div className="header-right">
           <Clock className="time-icon" />
           <span className="current-time">
-            {new Date().toLocaleTimeString('ko-KR', {
+            {currentTime.toLocaleTimeString('ko-KR', {
               hour: '2-digit',
               minute: '2-digit'
             })}
@@ -643,7 +606,7 @@ const DocDashBoard = ({patient  }) => {
         </div>
       </div>
 
-      {/* 🔥 메인 컨테이너 - 새로운 레이아웃 */}
+      {/* 🔥 슬림한 메인 컨테이너 */}
       <div className="dashboard-main">
         {/* 🔥 좌측 사이드바 - 환자 검색 */}
         <div className="dashboard-sidebar">
@@ -686,7 +649,7 @@ const DocDashBoard = ({patient  }) => {
             <div className="search-controls">
               <input
                 type="text"
-                placeholder="이름 또는 ID로 검색..."
+                placeholder="이름 또는 ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => { if (e.key === 'Enter') handleMainSearch(); }}
@@ -706,7 +669,7 @@ const DocDashBoard = ({patient  }) => {
           </div>
         </div>
 
-        {/* 🔥 메인 콘텐츠 상단 - 진단 결과 및 전문 내용 */}
+        {/* 🔥 메인 콘텐츠 상단 - 진단 결과 */}
         <div className="main-content-top">
           {selectedPatient ? (
             <DropdownCard
@@ -714,34 +677,31 @@ const DocDashBoard = ({patient  }) => {
               title="진단 결과 및 전문 내용"
               icon={Activity}
             >
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <h4 style={{ marginBottom: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  </h4>
                   <PatientInfoPanel 
                     patient={selectedPatient} 
-                    onOpenDetailModal={() => {/* 상세 모달 열기 로직 */}} 
+                    onOpenDetailModal={() => {}} 
                   />
                 </div>
                 <div>
-                  <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Brain size={18} />
+                  <h4 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                    <Brain size={16} />
                     AI 분석 결과
                   </h4>
                   {cdssResult ? (
                     <ResultModal data={cdssResult} onClose={() => setCdssResult(null)} isModal={false} />
-                    // 또는 <LogisticContributionChart data={cdssResult} />
                   ) : (
-                  <div style={{ 
-                    padding: '2rem',
-                    background: 'var(--white-tone-5)',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    color: 'var(--text-gray)'
-                  }}>
-                    <Activity size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                    <p>AI 분석이 진행 중입니다...</p>
-                  </div>
+                    <div style={{ 
+                      padding: '1rem',
+                      background: '#f8f9fa',
+                      borderRadius: '8px',
+                      textAlign: 'center',
+                      color: 'var(--text-medium)'
+                    }}>
+                      <Activity size={24} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
+                      <p style={{ fontSize: '0.8rem', margin: 0 }}>AI 분석이 진행 중입니다...</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -749,7 +709,7 @@ const DocDashBoard = ({patient  }) => {
           ) : (
             <div className="no-patient-selected">
               <div className="empty-state">
-                <Users size={64} className="empty-icon" />
+                <Users size={48} className="empty-icon" />
                 <h3>환자를 선택해주세요</h3>
                 <p>좌측에서 환자를 검색하고 선택하면 진료를 시작할 수 있습니다.</p>
               </div>
@@ -759,7 +719,6 @@ const DocDashBoard = ({patient  }) => {
 
         {/* 🔥 메인 콘텐츠 하단 - 2개 카드 */}
         <div className="main-content-bottom">
-          {/* 내원 이력 카드 */}
           <DropdownCard
             cardKey="history"
             title="내원 이력"
@@ -774,7 +733,6 @@ const DocDashBoard = ({patient  }) => {
             )}
           </DropdownCard>
 
-          {/* 진단 및 처방 카드 */}
           <DropdownCard
             cardKey="diagnosis"
             title="진단 및 처방"
@@ -798,36 +756,35 @@ const DocDashBoard = ({patient  }) => {
           {/* LIS 검사 요청 */}
           <div className="control-card">
             <div className="control-header">
-              <TestTube size={16} />
+              <TestTube size={14} />
               LIS 검사요청
             </div>
             <div className="control-content">
               {selectedPatient ? (
                 uuidLoading ? (
-                  <div style={{ color: 'gray' }}>UUID 조회 중...</div>
+                  <div style={{ color: 'var(--text-medium)', fontSize: '0.75rem' }}>UUID 조회 중...</div>
                 ) : uuidError ? (
-                  <div style={{ color: 'red' }}>⚠️ {uuidError}</div>
+                  <div style={{ color: 'var(--danger-red)', fontSize: '0.75rem' }}>⚠️ {uuidError}</div>
                 ) : (
                   <LisRequestPanel
                     patient={selectedPatient}
                     doctorId={DEFAULT_DOCTOR_ID}
-                    personUuid={personUUID} // 👈 넘길 수 있다면 이렇게
+                    personUuid={personUUID}
                     compact={true}
                     onRequestComplete={handleLisRequestComplete}
                   />
                 )
               ) : (
-                <div style={{ color: 'var(--text-gray)', fontSize: '0.85rem' }}>
+                <div style={{ color: 'var(--text-medium)', fontSize: '0.75rem' }}>
                   환자 선택 후<br />이용 가능
                 </div>
               )}
             </div>
           </div>
-
           {/* 영상 검사요청 */}
           <div className="control-card">
             <div className="control-header">
-              <Camera size={16} />
+              <Camera size={14} />
               영상 검사요청
             </div>
             <div className="control-content">
@@ -837,36 +794,65 @@ const DocDashBoard = ({patient  }) => {
                   compact={true}
                 />
               ) : (
-                <div style={{ color: 'var(--text-gray)', fontSize: '0.85rem' }}>
+                <div style={{ color: 'var(--text-medium)', fontSize: '0.75rem' }}>
                   환자 선택 후<br />이용 가능
                 </div>
               )}
             </div>
           </div>
 
-          {/* 빈 카드 (확장용) */}
+          {/* 알림 카드 */}
           <div className="control-card">
             <div className="control-header">
-              <AlertCircle size={16} />
+              <AlertCircle size={14} />
               알림
             </div>
             <div className="control-content">
-              <div style={{ color: 'var(--text-gray)', fontSize: '0.85rem' }}>
+              <div style={{ color: 'var(--text-medium)', fontSize: '0.75rem' }}>
                 새로운 알림이<br />없습니다.
               </div>
             </div>
           </div>
-         
+
+          {/* 오늘 진료 요약 카드 */}
+          <div className="control-card">
+            <div className="control-header">
+              <Activity size={14} />
+              오늘 요약
+            </div>
+            <div className="control-content">
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '0.25rem',
+                fontSize: '0.7rem',
+                color: 'var(--text-dark)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>진료 완료:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--success-green)' }}>8명</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>대기 중:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--warning-orange)' }}>3명</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>평균 시간:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--primary-blue)' }}>15분</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 🔥 진료 종료 버튼 */}
+      {/* 🔥 슬림한 진료 종료 버튼 */}
       {selectedPatient && (
         <button 
           className="end-consultation-btn"
           onClick={handleEndConsultation}
         >
-          <LogOut size={20} />
+          <LogOut size={18} />
           진료 종료
         </button>
       )}

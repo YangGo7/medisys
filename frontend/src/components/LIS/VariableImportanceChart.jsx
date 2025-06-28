@@ -1,10 +1,31 @@
-// src/components/VariableImportanceChart.jsx
-import React, { useEffect, useState } from 'react';
+// ✅ VariableImportanceChart.jsx with unified style (보라-푸른 테마 적용 + svg 렌더링)
+
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
+import * as echarts from 'echarts';
+import './VariableImportanceChart.css';
 
 const VariableImportanceChart = () => {
   const [importanceData, setImportanceData] = useState([]);
+  const chartRef = useRef(null);
+
+  const baseOption = {
+    color: ['#A78BFA'],
+    textStyle: {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: 13,
+      color: '#1f2937'
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: '#fff',
+      borderColor: '#e5e7eb',
+      textStyle: { color: '#1f2937' },
+      formatter: ({ 0: item }) => `중요도: ${item.data.toFixed(4)}`
+    },
+    grid: { top: 40, bottom: 40, left: 60, right: 30 }
+  };
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/importance/`)
@@ -12,52 +33,55 @@ const VariableImportanceChart = () => {
       .catch(err => console.error("📉 변수 중요도 로딩 실패:", err));
   }, []);
 
-  if (!importanceData || importanceData.length === 0) return null;
+  useEffect(() => {
+    if (!chartRef.current || importanceData.length === 0) return;
 
-  const labels = importanceData.map(d => d.feature);
-  const values = importanceData.map(d => d.importance);
-  const colors = values.map(v => v >= 0 ? '#EF4444' : '#10B981');
+    const chart = echarts.init(chartRef.current, null, { renderer: 'svg' });
+    const labels = importanceData.map(d => d.feature);
+    const values = importanceData.map(d => d.importance);
+
+    chart.setOption({
+      ...baseOption,
+      title: {
+        text: '📌 변수 중요도 (로지스틱 회귀 기준)',
+        left: 'center',
+        textStyle: { fontSize: 16 }
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLabel: { rotate: 30 }
+      },
+      yAxis: {
+        type: 'value',
+        name: '중요도'
+      },
+      series: [{
+        type: 'bar',
+        data: values,
+        itemStyle: {
+          color: '#A78BFA'
+        },
+        label: {
+          show: true,
+          position: 'top',
+          fontSize: 11,
+          formatter: val => val.value.toFixed(3)
+        }
+      }]
+    });
+
+    const handleResize = () => chart.resize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.dispose();
+    };
+  }, [importanceData]);
 
   return (
-    <div style={{
-      backgroundColor: '#fff',
-      borderRadius: '1rem',
-      padding: '1.5rem',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-      marginTop: '2rem'
-    }}>
-      <h2 style={{ fontWeight: '600', marginBottom: '1rem' }}>📌 변수 중요도 (로지스틱 회귀 기준)</h2>
-      <Bar
-        data={{
-          labels,
-          datasets: [{
-            label: '중요도',
-            data: values,
-            backgroundColor: colors,
-          }]
-        }}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `중요도: ${ctx.parsed.y.toFixed(4)}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: false,
-              title: { display: true, text: '계수값 (positive = 이상 관련)' }
-            },
-            x: {
-              ticks: { autoSkip: false },
-              title: { display: true, text: '검사 항목' }
-            }
-          }
-        }}
-      />
+    <div className="variable-importance-chart">
+      <div ref={chartRef} className="echart-container" />
     </div>
   );
 };

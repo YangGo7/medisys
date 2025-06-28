@@ -1,4 +1,4 @@
-// src/components/EMR/EmrMainPage.jsx (404 오류 완전 해결 버전)
+// src/components/EMR/EmrMainPage.jsx (깔끔한 의료 전문가용 UI)
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import UnifiedPatientStatus from './UnifiedPatientStatus';
 import NotificationModal from './NotificationModal';
 import { saveLog } from '../utils/saveLog';
 import SettingsPage from './SettingsPage';
-import MedicalViewer from './DMViewer'; // 새로 추가
+import MedicalViewer from './DMViewer';
 
 // 기존 컴포넌트들
 import WaitingBoard from './WaitingBoard';
@@ -28,6 +28,19 @@ import { UrgentWidget } from './home';
 // 캘린더 라이브러리
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+
+// 아이콘 추가
+import { 
+  Calendar as CalendarIcon, 
+  Users, 
+  Clock, 
+  TrendingUp, 
+  Activity, 
+  AlertCircle,
+  BarChart3,
+  Heart,
+  Stethoscope
+} from 'lucide-react';
 
 import './EmrMainPage.css';
 
@@ -50,7 +63,7 @@ const EmrMainPage = () => {
   const [calendarDate, setCalendarDate] = useState(new Date());
 
   // 🔥 오류 방지 상태
-  const [isLoading, setIsLoading] = useState(false); // 처음엔 false로 시작
+  const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
 
@@ -58,9 +71,8 @@ const EmrMainPage = () => {
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  // 🔥 실제 작동하는 API URL 하드코딩 (일단 작동시키기)
+  // 🔥 실제 작동하는 API URL 하드코딩
   const API_ENDPOINTS = {
-    // 기존에 작동했던 엔드포인트들 사용
     RECEPTION_LIST: 'http://35.225.63.41:8000/api/integration/reception-list/',
     WAITING_LIST: 'http://35.225.63.41:8000/api/integration/identifier-waiting/',
     COMPLETED: 'http://35.225.63.41:8000/api/integration/completed-patients/',
@@ -71,7 +83,6 @@ const EmrMainPage = () => {
 
   // 🔥 데이터 페칭 함수 - 오류 발생시 중단하고 기본값 사용
   const fetchAllPatientData = useCallback(async () => {
-    // 🔥 연속 오류 발생시 요청 중단
     if (errorCount >= 3) {
       console.log('⚠️ 연속 오류로 인해 API 요청을 중단합니다.');
       return;
@@ -80,7 +91,6 @@ const EmrMainPage = () => {
     try {
       console.log('🔄 환자 데이터 조회 시도...');
       
-      // 🔥 먼저 reception-list로 시도 (이게 더 안정적)
       const response = await axios.get(API_ENDPOINTS.RECEPTION_LIST, {
         timeout: 8000,
         headers: {
@@ -259,7 +269,7 @@ const EmrMainPage = () => {
 
   // 🔥 Effect 최적화 - 초기 로딩만
   useEffect(() => {
-    console.log('🚀 EMR 앱 시작');
+    console.log('🚀 Doc Board 앱 시작');
     fetchAllPatientData();
   }, []);
 
@@ -299,27 +309,50 @@ const EmrMainPage = () => {
     };
   }, []);
 
-  // 🔥 메모이제이션된 렌더 함수들
+  // 🔥 메모이제이션된 렌더 함수들 - 깔끔한 디자인
   const renderHome = useMemo(() => (
     <div className="page-container-full doctor-dashboard-container">
-      <div className="dashboard-card card--schedule">
-        <h3 className="section-title" style={{ textAlign: 'center' }}>📅 일정 관리</h3>
-        <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
+      {/* 📅 캘린더 카드 */}
+      <div className="dashboard-card card--calendar">
+        <h3 className="card-header">
+          <CalendarIcon className="icon" />
+          일정 관리
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          padding: '1rem'
+        }}>
           <Calendar
             onChange={setCalendarDate}
             value={calendarDate}
             locale="ko-KR"
           />
         </div>
-        <div style={{ marginTop: '10px', textAlign: 'center' }}>
-          <p>선택된 날짜: {calendarDate.toLocaleDateString('ko-KR', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</p>
+        <div style={{ 
+          marginTop: '1rem', 
+          textAlign: 'center',
+          padding: '1rem',
+          background: 'var(--light-gray)',
+          borderRadius: 'var(--border-radius)',
+          color: 'var(--text-dark)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 600 }}>
+            선택된 날짜: {calendarDate.toLocaleDateString('ko-KR', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
         </div>
       </div>
+
+      {/* 📊 대기 현황 카드 */}
       <div className="dashboard-card card--stats">
+        <h3 className="card-header">
+          <Users className="icon" />
+          진료 현황
+        </h3>
         <WaitingStatsPanel
           waitingList={waitingList}
           completedPatients={
@@ -335,14 +368,75 @@ const EmrMainPage = () => {
           }
         />
       </div>
+
+      {/* ⏱️ 대기 시간 카드 */}
       <div className="dashboard-card card--waittime">
+        <h3 className="card-header">
+          <Clock className="icon" />
+          대기 시간
+        </h3>
         <CurrentWaitTime waitingList={waitingList} />
       </div>
+
+      {/* 📈 일일 요약 카드 */}
       <div className="dashboard-card card--summary">
+        <h3 className="card-header">
+          <BarChart3 className="icon" />
+          오늘의 요약
+        </h3>
         <DailySummary />
       </div>
+
+      {/* 🚨 긴급 알림 카드 */}
       <div className="dashboard-card card--urgent">
-        <UrgentWidget marquee={false} withTabs={false} showActionButtons={false} />
+        <h3 className="card-header">
+          <AlertCircle className="icon" />
+          긴급 처리
+        </h3>
+        <UrgentWidget 
+          marquee={false} 
+          withTabs={false} 
+          showActionButtons={true} 
+        />
+      </div>
+
+      {/* 💊 건강 지표 카드 */}
+      <div className="dashboard-card card--schedule">
+        <h3 className="card-header">
+          <Heart className="icon" />
+          시스템 상태
+        </h3>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          textAlign: 'center'
+        }}>
+          <Activity size={48} style={{ color: 'var(--primary-purple)' }} />
+          <div>
+            <h4 style={{ 
+              margin: '0 0 0.5rem 0', 
+              color: 'var(--text-dark)',
+              fontSize: '1.1rem'
+            }}>
+              시스템 정상 가동 중
+            </h4>
+            <p style={{ 
+              margin: 0, 
+              color: 'var(--text-medium)',
+              fontSize: '0.9rem'
+            }}>
+              모든 의료 시스템이 안정적으로 운영되고 있습니다.
+            </p>
+          </div>
+          <div className="medical-badge normal">
+            <Activity size={16} />
+            정상
+          </div>
+        </div>
       </div>
     </div>
   ), [calendarDate, waitingList, completedPatients]);
@@ -383,7 +477,7 @@ const EmrMainPage = () => {
 
   const renderPatientStatus = useMemo(() => (
     <div className="page-container-full">
-      <PatientStatusBoard onComplete={() => setActiveTab('진료 대시보드')} />
+      <PatientStatusBoard onComplete={() => setActiveTab('의사 대시보드')} />
     </div>
   ), []);
 
@@ -400,29 +494,24 @@ const EmrMainPage = () => {
 
   return (
     <div className="emr-page">
+      {/* 🔥 깔끔한 헤더 - Doc Board */}
       <header className="emr-header">
         <div className="logo" onClick={() => handleTabChange('홈')}>
-          🏥 EMR 시스템
+          <Stethoscope size={32} />
+          Doc Board
         </div>
+        
         {/* 🔥 상태 표시 - 오류 발생시에만 표시 */}
         {errorCount > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            right: '2rem',
-            transform: 'translateY(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: errorCount >= 3 ? '#ef4444' : '#f59e0b',
-            fontSize: '0.9rem'
-          }}>
+          <div className={`status-indicator ${errorCount >= 3 ? 'error' : 'warning'}`}>
             {errorCount >= 3 ? '🔴' : '🟡'} 
             {errorCount >= 3 ? '오프라인 모드' : `연결 문제 (${errorCount}/3)`}
           </div>
         )}
       </header>
+
       <div className="emr-content">
+        {/* 🔥 깔끔한 사이드바 */}
         <aside className="sidebar-col">
           <Sidebar
             activeTab={activeTab}
@@ -430,6 +519,8 @@ const EmrMainPage = () => {
             onBellClick={() => setShowNotifModal(true)}
           />
         </aside>
+
+        {/* 🔥 메인 콘텐츠 */}
         <main className="content-col">
           {activeTab === '홈' && renderHome}
           {activeTab === '접수' && renderReception}
@@ -441,6 +532,8 @@ const EmrMainPage = () => {
           {activeTab === '의료영상 뷰어' && renderMedicalViewer}
         </main>
       </div>
+
+      {/* 🔥 모달들 */}
       {showNotifModal && (
         <NotificationModal onClose={() => setShowNotifModal(false)} />
       )}
