@@ -1,17 +1,26 @@
-/* lis_layout.css */
+/* 📁 LisHome.css (전체 화면 깨짐 문제 수정: flex, min-width, overflow 대응 포함) */
 
 .lis-dashboard-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 320px;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: auto;
   gap: 2rem;
   padding: 2rem;
   min-height: 100vh;
   background: #f9f9fb;
   box-sizing: border-box;
+  overflow-x: hidden; /* 👉 화면 밀림 방지 */
 }
 
-/* 좌측 일정 */
+.lis-main-flex {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2rem;
+  width: 100%;
+  align-items: flex-start;
+  min-width: 0; /* 👉 자식 요소가 너무 커질 경우 대비 */
+}
+
 .lis-sidebar {
   background: white;
   padding: 1.5rem;
@@ -32,14 +41,14 @@
   line-height: 1.8;
 }
 
-/* 중앙 영역 */
 .lis-center {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  flex: 1;
+  min-width: 640px; /* 👉 너무 작게 줄어들지 않도록 */
 }
 
-/* 이전 titlepage 버튼 스타일 유지 */
 .lis-menu-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -79,14 +88,15 @@
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   min-height: 500px;
+  overflow: visible; /* 👉 차트 잘림 방지 */
 }
 
-/* 우측 영역 */
 .lis-rightbar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  height: fit-content;
+  width: 340px;
+  flex-shrink: 0;
 }
 
 .calendar-box,
@@ -133,49 +143,8 @@
   line-height: 1.8;
 }
 
-/* 캘린더 */
-.custom-calendar {
-  width: 100%;
-  font-family: inherit;
-  border: none;
-}
+/* 📅 Calendar 정리 (생략) 유지 */
 
-.custom-calendar .react-calendar__tile {
-  border-radius: 8px;
-  padding: 0.6rem 0.3rem;
-  transition: background 0.2s ease;
-}
-
-.custom-calendar .react-calendar__tile--now {
-  background: rgba(52, 152, 219, 0.15);
-  font-weight: 600;
-}
-
-.custom-calendar .react-calendar__tile--active {
-  background: #3498db !important;
-  color: white;
-}
-
-.custom-calendar .react-calendar__tile:hover {
-  background: rgba(52, 152, 219, 0.1);
-}
-
-/* 캘린더 상단 네비게이션 영역 */
-.custom-calendar .react-calendar__navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-/* 중앙 label 스타일 */
-.custom-calendar .react-calendar__navigation__label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-}
-
-/* 반응형 */
 @media (max-width: 1024px) {
   .lis-dashboard-grid {
     grid-template-columns: 1fr;
@@ -184,7 +153,7 @@
   .lis-rightbar {
     display: none;
   }
-  .lis-center {
-    width: 100%;
+  .lis-main-flex {
+    flex-direction: column;
   }
 }

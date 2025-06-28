@@ -1,9 +1,9 @@
-import React from 'react'; // useEffect, useState 제거
-import './WaitingStatsPanel.css';
+// src/components/EMR/home/WaitingStatsPanel.jsx - 깔끔한 디자인
 
-// completedPatients prop을 EmrMainPage로부터 받도록 변경
+import React from 'react';
+import { Users, CheckCircle } from 'lucide-react';
+
 const WaitingStatsPanel = ({ waitingList, completedPatients }) => {
-  // completed state 및 useEffect 제거
   
   // 환자 이름에서 ID 제거 함수 (P6643 - 김아무개 → 김아무개)
   const cleanPatientName = (displayName) => {
@@ -13,32 +13,176 @@ const WaitingStatsPanel = ({ waitingList, completedPatients }) => {
   };
 
   return (
-    <div className="dashboard-card waiting-stats-panel">
-      <div className="panel-title">📋 진료 대기 중 · 최근 완료 🔄</div>
-      <div className="panel-body">
-        <div className="panel-column">
-          <div className="label-waiting">🟡 현재 대기 중:</div>
-          {waitingList && waitingList.length > 0
-            ? waitingList.map((p, i) => (
-                // key는 유니크한 값으로 설정하는 것이 좋습니다. mapping_id가 있다면 그것을 사용
-                <div key={p.mapping_id || p.uuid || i} className="list-item">
-                  {cleanPatientName(p.display || p.name)}
+    <div style={{ 
+      padding: '0',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.5rem',
+      height: '100%'
+    }}>
+      <div style={{ display: 'flex', gap: '2rem', height: '100%' }}>
+        {/* 대기 중 환자 */}
+        <div style={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--light-gray)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid var(--gray-200)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1rem',
+            color: 'var(--primary-purple)',
+            fontWeight: '600',
+            fontSize: '1rem'
+          }}>
+            <Users size={20} />
+            <span>대기 중</span>
+            <span style={{
+              backgroundColor: 'var(--primary-purple)',
+              color: 'var(--white)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '12px',
+              fontSize: '0.8rem',
+              marginLeft: 'auto'
+            }}>
+              {waitingList?.length || 0}명
+            </span>
+          </div>
+          
+          <div style={{ 
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+          }}>
+            {waitingList && waitingList.length > 0
+              ? waitingList.slice(0, 4).map((p, i) => (
+                  <div 
+                    key={p.mapping_id || p.uuid || i} 
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: 'var(--white)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--gray-200)',
+                      fontSize: '0.9rem',
+                      color: 'var(--gray-700)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--primary-purple)',
+                      flexShrink: 0
+                    }}></div>
+                    {cleanPatientName(p.display || p.name)}
+                  </div>
+                ))
+              : <div style={{
+                  textAlign: 'center',
+                  color: 'var(--gray-500)',
+                  fontSize: '0.9rem',
+                  padding: '2rem 0'
+                }}>
+                  대기 중인 환자가 없습니다
                 </div>
-              ))
-            : <div className="list-item">없음</div>
-          }
+            }
+          </div>
         </div>
-        <div className="panel-column">
-          <div className="label-completed">🟢 최근 완료:</div>
-          {completedPatients && completedPatients.length > 0
-            ? completedPatients.map((c, i) => (
-                // key는 유니크한 값으로 설정하는 것이 좋습니다.
-                <div key={c.name + i} className="list-item">
-                  {cleanPatientName(c.name)} ({c.time})
+
+        {/* 최근 완료 */}
+        <div style={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--light-gray)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid var(--gray-200)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1rem',
+            color: 'var(--accent-purple)',
+            fontWeight: '600',
+            fontSize: '1rem'
+          }}>
+            <CheckCircle size={20} />
+            <span>최근 완료</span>
+            <span style={{
+              backgroundColor: 'var(--accent-purple)',
+              color: 'var(--white)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '12px',
+              fontSize: '0.8rem',
+              marginLeft: 'auto'
+            }}>
+              {completedPatients?.length || 0}명
+            </span>
+          </div>
+          
+          <div style={{ 
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+          }}>
+            {completedPatients && completedPatients.length > 0
+              ? completedPatients.map((c, i) => (
+                  <div 
+                    key={c.name + i} 
+                    style={{
+                      padding: '0.75rem',
+                      backgroundColor: 'var(--white)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--gray-200)',
+                      fontSize: '0.9rem',
+                      color: 'var(--gray-700)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--accent-purple)',
+                        flexShrink: 0
+                      }}></div>
+                      {cleanPatientName(c.name)}
+                    </div>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      color: 'var(--gray-500)'
+                    }}>
+                      {c.time}
+                    </span>
+                  </div>
+                ))
+              : <div style={{
+                  textAlign: 'center',
+                  color: 'var(--gray-500)',
+                  fontSize: '0.9rem',
+                  padding: '2rem 0'
+                }}>
+                  완료된 진료가 없습니다
                 </div>
-              ))
-            : <div className="list-item">없음</div>
-          }
+            }
+          </div>
         </div>
       </div>
     </div>

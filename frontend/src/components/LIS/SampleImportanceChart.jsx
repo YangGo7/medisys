@@ -1,12 +1,33 @@
-// components/CDSS/SampleImportanceChart.jsx
-import React, { useEffect, useState } from 'react';
+// ✅ SampleImportanceChart.jsx with unified style (푸른보라 테마 + svg 렌더링 + 선명도 향상)
+
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts';
+import './SampleImportanceChart.css';
 
 const SampleImportanceChart = () => {
   const { sampleId } = useParams();
   const [data, setData] = useState(null);
+  const chartRef = useRef(null);
+
+  const baseOption = {
+    color: ['#60A5FA', '#93C5FD'],
+    textStyle: {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: 13,
+      color: '#1f2937'
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: '#fff',
+      borderColor: '#e5e7eb',
+      textStyle: { color: '#1f2937' },
+      formatter: ({ 0: item }) => `기여도: ${item.data.toFixed(4)}`
+    },
+    grid: { left: 80, right: 30, top: 40, bottom: 40 }
+  };
 
   useEffect(() => {
     const fetchContributions = async () => {
@@ -22,63 +43,63 @@ const SampleImportanceChart = () => {
     fetchContributions();
   }, [sampleId]);
 
-  if (!data) return <p>📊 기여도 데이터를 불러오는 중입니다...</p>;
+  useEffect(() => {
+    if (!data || !chartRef.current) return;
 
-  const option = {
-    title: {
-      text: `🧬 변수별 기여도 분석 (Sample ${sampleId})`,
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
+    const chart = echarts.init(chartRef.current, null, { renderer: 'svg' });
+    const option = {
+      ...baseOption,
+      title: {
+        text: `Sample ${sampleId} 변수 기여도`,
+        left: 'center',
+        textStyle: { fontSize: 16 }
       },
-      formatter: (params) => {
-        const val = params[0].value;
-        return `기여도: ${val.toFixed(4)}`;
-      }
-    },
-    grid: {
-      left: '10%',
-      right: '10%',
-      bottom: '10%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      name: '기여도 크기',
-      axisLabel: { formatter: '{value}' }
-    },
-    yAxis: {
-      type: 'category',
-      data: data.features,
-      axisLabel: {
-        fontSize: 12
-      }
-    },
-    series: [
-      {
-        name: '기여도',
-        type: 'bar',
-        data: data.contributions,
-        itemStyle: {
-          color: (params) =>
-            params.value > 0 ? '#EF4444' : '#3B82F6' // 빨강 vs 파랑
-        },
-        emphasis: {
+      xAxis: {
+        type: 'value',
+        name: '기여도'
+      },
+      yAxis: {
+        type: 'category',
+        data: data.features,
+        inverse: true,
+        axisLabel: { fontSize: 12 }
+      },
+      series: [
+        {
+          type: 'bar',
+          data: data.contributions,
           itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.3)'
+            color: (params) => params.data >= 0 ? '#60A5FA' : '#A5B4FC'
+          },
+          label: {
+            show: true,
+            position: 'right',
+            formatter: val => val.value.toFixed(3)
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0,0,0,0.15)'
+            }
           }
         }
-      }
-    ]
-  };
+      ]
+    };
+
+    chart.setOption(option);
+    const handleResize = () => chart.resize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.dispose();
+    };
+  }, [data]);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <ReactECharts option={option} style={{ height: `${data.features.length * 40}px` }} />
+    <div className="sample-importance-chart">
+      {!data && <p>📊 기여도 데이터를 불러오는 중입니다...</p>}
+      <div ref={chartRef} className="echart-container" />
     </div>
   );
 };
