@@ -17,6 +17,21 @@ function OnStoredInstance(instance_id, tags, metadata, origin)
     local instanceInfo = RestApiGet('/instances/' .. instance_id .. '/simplified-tags')
     local study_uid = instanceInfo["StudyInstanceUID"]
 
+
+    
+    -- 🧩 추가: Series에서 Study UID 추출 시도
+    if study_uid == nil then
+        local instanceMetadata = RestApiGet('/instances/' .. instance_id)
+        local parentSeriesId = instanceMetadata["ParentSeries"]
+        if parentSeriesId ~= nil then
+            local seriesMetadata = RestApiGet('/series/' .. parentSeriesId)
+            study_uid = seriesMetadata["MainDicomTags"]["StudyInstanceUID"]
+            print("📍 Series에서 Study UID 보완 추출: " .. tostring(study_uid))
+        end
+    end
+
+
+
     if study_uid ~= nil then
         -- 🔥 중요: Nginx 프록시 경로와 Python AI 서비스의 /analyze-study/ 엔드포인트에 맞춤
         -- Orthanc 컨테이너에서 Nginx 컨테이너로 접근 (Docker Compose 네트워크 내 이름 사용)

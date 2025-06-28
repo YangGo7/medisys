@@ -37,7 +37,10 @@ export default function LisLayout() {
         <aside className="lis-rightbar compact">
           <div className="calendar-box">
             <h4>📅 달력</h4>
-            <Calendar className="custom-calendar" />
+            <Calendar className="custom-calendar" 
+            formatMonthYear={(locale, date) =>
+              `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}`
+            }/>
           </div>
 
           <div className="chat-widget">

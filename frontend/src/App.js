@@ -51,7 +51,7 @@ function App() {
             {/* 메인 페이지 기능들 */}
             <Route path="/Main_page/StatisticsBoard" element={<StatisticsBoard />} />
             <Route path="/Main_page/main_page_function" element={<MainPageFunction />} />
-            <Route path="/Main_page/notices" element={<NoticeBoard />} /> {/* 새로 추가 */}
+            <Route path="/Main_page/notices" element={<NoticeBoard />} /> {/* 새로 추가 */}ㄴ
             <Route path="/login" element={<Login />} />
             {/* EMR 페이지 */}
             <Route path="/emr" element={<EmrMainPage />} />
