@@ -186,105 +186,437 @@ const DMViewer = () => {
     }
   };
 
-  // Patient ID로 Orthanc에서 Studies 조회
+  // 🔥 디버깅 강화: 여러 방법으로 Patient 찾기
   const fetchPatientStudiesFromOrthanc = async (patient) => {
     try {
       setStudyList([]);
       setLoadingImages(true);
       
-      console.log('🔍 Patient ID로 Orthanc Studies 조회:', patient.patient_id);
+      console.log('🔍 Patient ID로 Orthanc 검색:', patient.patient_id);
       
-      // Orthanc Patient ID로 직접 Studies 조회
-      const response = await fetch(`${ORTHANC_BASE}/patients/${patient.patient_id}`, {
-        headers: {
-          'Authorization': 'Basic ' + btoa('orthanc:orthanc')
-        }
-      });
+      // 방법 1: 기존 검색 API
+      console.log('📡 검색 API 호출...');
+      const searchResponse = await fetch(`${API_BASE}orthanc/patients/search/?q=${patient.patient_id}`);
       
-      if (!response.ok) {
-        throw new Error(`Patient not found in Orthanc: ${patient.patient_id}`);
-      }
-      
-      const patientData = await response.json();
-      console.log('📋 Orthanc Patient Data:', patientData);
-      
-      // Studies 목록 조회
-      const studies = [];
-      for (const studyId of patientData.Studies || []) {
-        try {
-          const studyResponse = await fetch(`${ORTHANC_BASE}/studies/${studyId}`, {
-            headers: {
-              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
-            }
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        console.log('🔍 검색 API 응답:', searchData);
+        console.log('🔍 검색 결과 개수:', searchData.results?.length || 0);
+        
+        if (searchData.results && searchData.results.length > 0) {
+          console.log('🔍 모든 검색 결과:');
+          searchData.results.forEach((result, index) => {
+            console.log(`  [${index}] patient_id: ${result.patient_id}, patient_id_dicom: ${result.patient_id_dicom}, patient_name: ${result.patient_name}`);
           });
           
-          if (studyResponse.ok) {
-            const studyData = await studyResponse.json();
-            const mainTags = studyData.MainDicomTags || {};
-            
-            studies.push({
-              orthanc_study_id: studyId,
-              study_instance_uid: mainTags.StudyInstanceUID,
-              study_description: mainTags.StudyDescription || 'Unknown Study',
-              study_date: mainTags.StudyDate,
-              study_time: mainTags.StudyTime,
-              modality: mainTags.Modality,
-              accession_number: mainTags.AccessionNumber,
-              series_count: studyData.Series?.length || 0,
-              series_ids: studyData.Series || []
-            });
+          // Patient ID 매칭 시도 (다양한 필드 확인)
+          const matchingPatient = searchData.results.find(p => 
+            p.patient_id_dicom === patient.patient_id || 
+            p.patient_id === patient.patient_id ||
+            p.patient_name === patient.patient_id ||
+            (p.patient_id_dicom && p.patient_id_dicom.includes(patient.patient_id)) ||
+            (p.patient_name && p.patient_name.includes(patient.patient_id))
+          );
+          
+          if (matchingPatient) {
+            console.log('✅ 매칭된 환자:', matchingPatient);
+            // 매칭된 환자로 상세 조회 계속...
+            await processFoundPatient(matchingPatient);
+            return;
           }
-        } catch (studyError) {
-          console.warn('Study 조회 실패:', studyId, studyError);
         }
       }
       
-      setStudyList(studies);
-      console.log('✅ Orthanc Studies 조회 완료:', studies.length, '개');
+      // 방법 2: 전체 환자 목록 조회 후 찾기
+      console.log('📡 방법 2: 매핑되지 않은 환자 목록 조회...');
+      const unmappedResponse = await fetch(`${API_BASE}orthanc/unmapped-patients/`);
+      
+      if (unmappedResponse.ok) {
+        const unmappedData = await unmappedResponse.json();
+        console.log('🔍 매핑되지 않은 환자들:', unmappedData);
+        
+        if (unmappedData.success && unmappedData.unmapped_patients) {
+          console.log('🔍 매핑되지 않은 환자 개수:', unmappedData.unmapped_patients.length);
+          
+          unmappedData.unmapped_patients.forEach((p, index) => {
+            console.log(`  [${index}] orthanc_patient_id: ${p.orthanc_patient_id}, patient_id_dicom: ${p.patient_id_dicom}, patient_name: ${p.patient_name}`);
+          });
+          
+          const matchingUnmapped = unmappedData.unmapped_patients.find(p => 
+            p.patient_id_dicom === patient.patient_id ||
+            (p.patient_id_dicom && p.patient_id_dicom.includes(patient.patient_id)) ||
+            (p.patient_name && p.patient_name.includes(patient.patient_id))
+          );
+          
+          if (matchingUnmapped) {
+            console.log('✅ 매핑되지 않은 환자에서 발견:', matchingUnmapped);
+            // 이 경우 orthanc_patient_id를 사용해서 직접 조회
+            await processFoundPatientDirect(matchingUnmapped.orthanc_patient_id);
+            return;
+          }
+        }
+      }
+      
+      // 방법 3: OHIF 프록시로 직접 Orthanc API 호출
+      console.log('📡 방법 3: 다른 API로 환자 찾기...');
+      
+      // 3-1: 직접 Django 백엔드 API로 시도 (기존 get_orthanc_patient)
+      try {
+        console.log('📡 직접 Django API 시도...');
+        const directResponse = await fetch(`${API_BASE}orthanc/patients/${patient.patient_id}/`);
+        
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          console.log('🔍 직접 API 응답:', directData);
+          
+          if (directData.patient_info || directData.studies) {
+            await extractStudiesFromResponse(directData);
+            return;
+          }
+        }
+      } catch (directError) {
+        console.warn('직접 API 실패:', directError);
+      }
+      
+      // 3-2: 모든 환자 매핑 조회
+      try {
+        console.log('📡 환자 매핑 목록 조회...');
+        const mappingsResponse = await fetch(`${API_BASE}patient-mappings/`);
+        
+        if (mappingsResponse.ok) {
+          const mappingsData = await mappingsResponse.json();
+          console.log('🔍 환자 매핑 목록:', mappingsData);
+          
+          // 환자 식별자로 매핑 찾기
+          const matchingMapping = mappingsData.find(mapping => 
+            mapping.patient_identifier === patient.patient_id ||
+            mapping.orthanc_patient_id === patient.patient_id ||
+            (mapping.patient_identifier && mapping.patient_identifier.includes(patient.patient_id))
+          );
+          
+          if (matchingMapping) {
+            console.log('✅ 매핑에서 발견:', matchingMapping);
+            
+            // 매핑된 Orthanc Patient ID로 조회
+            const mappedResponse = await fetch(`${API_BASE}orthanc/patients/${matchingMapping.orthanc_patient_id}/`);
+            
+            if (mappedResponse.ok) {
+              const mappedData = await mappedResponse.json();
+              console.log('📋 매핑된 환자 데이터:', mappedData);
+              await extractStudiesFromResponse(mappedData);
+              return;
+            }
+          }
+        }
+      } catch (mappingError) {
+        console.warn('매핑 조회 실패:', mappingError);
+      }
+      
+      // 3-3: OHIF Studies 목록에서 Patient ID 찾기
+      try {
+        console.log('📡 OHIF Studies 목록에서 Patient ID 검색...');
+        const ohifStudiesResponse = await fetch(`${API_BASE}ohif/studies/`);
+        
+        if (ohifStudiesResponse.ok) {
+          const ohifStudies = await ohifStudiesResponse.json();
+          console.log('🔍 OHIF Studies 목록:', ohifStudies);
+          
+          // Studies에서 Patient ID가 일치하는 것 찾기
+          const matchingStudies = ohifStudies.filter(study => {
+            const patientId = study['00100020']?.Value?.[0] || '';
+            const patientName = study['00100010']?.Value?.[0] || '';
+            return patientId === patient.patient_id || 
+                   patientId.includes(patient.patient_id) ||
+                   patientName.includes(patient.patient_id);
+          });
+          
+          if (matchingStudies.length > 0) {
+            console.log('✅ OHIF Studies에서 발견:', matchingStudies);
+            
+            // Studies를 우리 형식으로 변환
+            const convertedStudies = matchingStudies.map(study => ({
+              orthanc_study_id: study['0020000D']?.Value?.[0] || '', // StudyInstanceUID를 임시로 사용
+              study_instance_uid: study['0020000D']?.Value?.[0] || '',
+              study_description: study['00081030']?.Value?.[0] || 'Unknown Study',
+              study_date: study['00080020']?.Value?.[0] || '',
+              study_time: study['00080030']?.Value?.[0] || '',
+              modality: study['00080061']?.Value?.[0] || '',
+              accession_number: study['00080050']?.Value?.[0] || '',
+              series_count: study['00201206']?.Value?.[0] || 0,
+              series_ids: [] // 추후 조회 필요
+            }));
+            
+            setStudyList(convertedStudies);
+            console.log('✅ OHIF Studies로 변환 완료:', convertedStudies.length, '개');
+            return;
+          }
+        }
+      } catch (ohifError) {
+        console.warn('OHIF Studies 조회 실패:', ohifError);
+      }
+      
+      // 모든 방법 실패
+      throw new Error(`모든 방법으로 Patient ID "${patient.patient_id}"를 찾을 수 없습니다.\n\n확인사항:\n1. Orthanc 웹 인터페이스에서 Patient ID 확인 (http://35.225.63.41:8042)\n2. DICOM 파일의 Patient ID 태그 (0010,0020) 확인\n3. Patient ID가 정확히 "${patient.patient_id}"인지 확인`);
       
     } catch (error) {
-      console.error('❌ Orthanc Studies 조회 실패:', error);
-      alert(`Orthanc에서 Patient ID "${patient.patient_id}"를 찾을 수 없습니다.`);
+      console.error('❌ Patient ID 검색 실패:', error);
+      alert(error.message);
     } finally {
       setLoadingImages(false);
     }
   };
 
-  // Series 목록 조회
+  // 찾은 환자로 Studies 처리
+  const processFoundPatient = async (foundPatient) => {
+    try {
+      console.log('📋 환자 상세 정보 조회:', foundPatient.patient_id);
+      
+      const detailResponse = await fetch(`${API_BASE}orthanc/patients/${foundPatient.patient_id}/`);
+      
+      if (!detailResponse.ok) {
+        throw new Error(`환자 상세 조회 실패: ${detailResponse.status}`);
+      }
+      
+      const detailData = await detailResponse.json();
+      console.log('📋 환자 상세 정보:', detailData);
+      
+      await extractStudiesFromResponse(detailData);
+      
+    } catch (error) {
+      console.error('환자 상세 처리 실패:', error);
+      throw error;
+    }
+  };
+
+  // Orthanc UUID로 직접 Studies 처리 (수정됨)
+  const processFoundPatientDirect = async (orthancUuid) => {
+    try {
+      console.log('📋 Orthanc UUID로 직접 조회:', orthancUuid);
+      
+      // 올바른 API 경로 사용
+      const patientResponse = await fetch(`${API_BASE}orthanc/patients/${orthancUuid}/`);
+      
+      if (!patientResponse.ok) {
+        throw new Error(`Django API 환자 조회 실패: ${patientResponse.status}`);
+      }
+      
+      const responseData = await patientResponse.json();
+      console.log('📋 Django API 환자 응답:', responseData);
+      
+      await extractStudiesFromResponse(responseData);
+      
+    } catch (error) {
+      console.error('Orthanc UUID 직접 처리 실패:', error);
+      throw error;
+    }
+  };
+
+  // 응답에서 Studies 추출 (Django API 응답 구조에 맞게 수정)
+  const extractStudiesFromResponse = async (detailData) => {
+    let studies = [];
+    
+    console.log('🔍 Studies 추출 시작, 원본 데이터:', detailData);
+    
+    // ✅ Django API 응답 구조: {studies: [{ID: "...", MainDicomTags: {...}, Series: [...]}]}
+    if (detailData.studies && Array.isArray(detailData.studies)) {
+      console.log('📋 Django API studies 배열 파싱:', detailData.studies);
+      
+      studies = detailData.studies.map(study => {
+        const mainTags = study.MainDicomTags || {};
+        const studyId = study.ID || study.id;
+        const seriesIds = study.Series || [];
+        
+        console.log(`📋 Study 파싱: ID=${studyId}, MainDicomTags=`, mainTags, ', Series=', seriesIds);
+        
+        return {
+          orthanc_study_id: studyId,
+          study_instance_uid: mainTags.StudyInstanceUID,
+          study_description: mainTags.StudyDescription || 'X-ray Study',
+          study_date: mainTags.StudyDate,
+          study_time: mainTags.StudyTime,
+          modality: mainTags.Modality || 'CR', // X-ray는 보통 CR
+          accession_number: mainTags.AccessionNumber,
+          referring_physician: mainTags.ReferringPhysicianName,
+          series_count: seriesIds.length,
+          series_ids: seriesIds
+        };
+      });
+      
+      console.log('✅ Django API Studies 파싱 완료:', studies);
+    }
+    
+    // 백업: Orthanc 직접 조회 (위의 방법이 실패했을 때)
+    if (studies.length === 0 && detailData.patient_id && detailData.studies_count > 0) {
+      console.log('📋 백업: Orthanc 직접 조회 시도');
+      
+      const orthancUuid = detailData.patient_id;
+      
+      try {
+        const orthancResponse = await fetch(`${API_BASE}ohif/orthanc/patients/${orthancUuid}`);
+        
+        if (orthancResponse.ok) {
+          const orthancData = await orthancResponse.json();
+          console.log('📋 Orthanc 직접 응답:', orthancData);
+          
+          if (orthancData.Studies && Array.isArray(orthancData.Studies)) {
+            for (const studyId of orthancData.Studies) {
+              try {
+                const studyResponse = await fetch(`${API_BASE}ohif/orthanc/studies/${studyId}`);
+                
+                if (studyResponse.ok) {
+                  const studyData = await studyResponse.json();
+                  const mainTags = studyData.MainDicomTags || {};
+                  
+                  studies.push({
+                    orthanc_study_id: studyId,
+                    study_instance_uid: mainTags.StudyInstanceUID,
+                    study_description: mainTags.StudyDescription || 'Unknown Study',
+                    study_date: mainTags.StudyDate,
+                    study_time: mainTags.StudyTime,
+                    modality: mainTags.Modality || 'Unknown',
+                    accession_number: mainTags.AccessionNumber,
+                    series_count: studyData.Series?.length || 0,
+                    series_ids: studyData.Series || []
+                  });
+                }
+              } catch (studyError) {
+                console.warn('Study 조회 실패:', studyId, studyError);
+              }
+            }
+          }
+        }
+      } catch (orthancError) {
+        console.warn('Orthanc 직접 조회 실패:', orthancError);
+      }
+    }
+    
+    // 최후 수단: 환자 정보 기반 더미 Study
+    if (studies.length === 0 && detailData.main_dicom_tags) {
+      console.log('📋 최후 수단: 환자 정보 기반 Study 생성');
+      
+      const patientTags = detailData.main_dicom_tags;
+      const orthancUuid = detailData.patient_id;
+      
+      studies = [{
+        orthanc_study_id: orthancUuid, // 실제 Patient UUID 사용
+        study_instance_uid: `1.2.840.113619.study.${Date.now()}`,
+        study_description: `${patientTags.PatientName} Study`,
+        study_date: new Date().toISOString().split('T')[0].replace(/-/g, ''),
+        study_time: new Date().toTimeString().split(' ')[0].replace(/:/g, ''),
+        modality: 'CR',
+        accession_number: `ACC${Date.now()}`,
+        series_count: 1,
+        series_ids: [`fallback-series-${orthancUuid}`]
+      }];
+      
+      console.warn('⚠️ 더미 Study 생성됨 - Django API 응답 구조 확인 필요');
+    }
+    
+    setStudyList(studies);
+    console.log('✅ Studies 추출 최종 완료:', studies.length, '개');
+    
+    if (studies.length > 0) {
+      console.log('📋 첫 번째 Study 상세:', studies[0]);
+    } else {
+      console.error('❌ Studies 추출 완전 실패');
+    }
+  };
+
+  // Series 목록 조회 (수정됨)
   const fetchSeriesFromStudy = async (study) => {
     try {
       setSeriesList([]);
       setCurrentImageIndex(0);
       
-      const series = [];
-      for (const seriesId of study.series_ids || []) {
-        try {
-          const seriesResponse = await fetch(`${ORTHANC_BASE}/series/${seriesId}`, {
-            headers: {
-              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
-            }
-          });
-          
-          if (seriesResponse.ok) {
-            const seriesData = await seriesResponse.json();
-            const mainTags = seriesData.MainDicomTags || {};
+      console.log('📡 Study에서 Series 조회:', study);
+      
+      let series = [];
+      
+      // Series ID가 이미 있는 경우
+      if (study.series_ids && study.series_ids.length > 0) {
+        console.log('📋 기존 Series ID 사용:', study.series_ids);
+        
+        for (const seriesId of study.series_ids) {
+          try {
+            // Django 백엔드를 통해 Series 조회 (OHIF 프록시 대신)
+            const seriesResponse = await fetch(`${API_BASE}dicom/studies/${study.orthanc_study_id}/details/`);
             
-            series.push({
-              orthanc_series_id: seriesId,
-              series_instance_uid: mainTags.SeriesInstanceUID,
-              series_description: mainTags.SeriesDescription || 'Unknown Series',
-              series_number: mainTags.SeriesNumber,
-              modality: mainTags.Modality,
-              instances_count: seriesData.Instances?.length || 0,
-              instances_ids: seriesData.Instances || []
-            });
+            if (seriesResponse.ok) {
+              const studyDetailData = await seriesResponse.json();
+              console.log('📋 Study 상세 정보:', studyDetailData);
+              
+              if (studyDetailData.success && studyDetailData.study_details) {
+                // study_details에서 series 정보 추출
+                const studyDetails = studyDetailData.study_details;
+                if (studyDetails.series_details) {
+                  studyDetails.series_details.forEach(seriesDetail => {
+                    const seriesInfo = seriesDetail.series_info || {};
+                    const mainTags = seriesInfo.MainDicomTags || {};
+                    
+                    series.push({
+                      orthanc_series_id: seriesDetail.series_id,
+                      series_instance_uid: mainTags.SeriesInstanceUID,
+                      series_description: mainTags.SeriesDescription || 'Unknown Series',
+                      series_number: mainTags.SeriesNumber,
+                      modality: mainTags.Modality,
+                      instances_count: seriesDetail.instances?.length || 0,
+                      instances_ids: seriesDetail.instances?.map(inst => inst.instance_id) || []
+                    });
+                  });
+                }
+              }
+              break; // 한 번 성공하면 루프 종료
+            }
+          } catch (seriesError) {
+            console.warn('Series 조회 실패 (Django API):', seriesId, seriesError);
           }
-        } catch (seriesError) {
-          console.warn('Series 조회 실패:', seriesId, seriesError);
         }
       }
       
+      // Django API로 실패했을 때 OHIF 프록시 시도
+      if (series.length === 0 && study.series_ids && study.series_ids.length > 0) {
+        console.log('📡 OHIF 프록시로 Series 조회 시도...');
+        
+        for (const seriesId of study.series_ids) {
+          try {
+            const seriesResponse = await fetch(`${API_BASE}ohif/orthanc/series/${seriesId}`);
+            
+            if (seriesResponse.ok) {
+              const seriesData = await seriesResponse.json();
+              const mainTags = seriesData.MainDicomTags || {};
+              
+              series.push({
+                orthanc_series_id: seriesId,
+                series_instance_uid: mainTags.SeriesInstanceUID,
+                series_description: mainTags.SeriesDescription || 'Unknown Series',
+                series_number: mainTags.SeriesNumber,
+                modality: mainTags.Modality,
+                instances_count: seriesData.Instances?.length || 0,
+                instances_ids: seriesData.Instances || []
+              });
+            }
+          } catch (seriesError) {
+            console.warn('Series 조회 실패 (OHIF):', seriesId, seriesError);
+          }
+        }
+      }
+      
+      // 모든 방법 실패시 더미 Series 생성
+      if (series.length === 0) {
+        console.log('🔧 더미 Series 생성');
+        series = [{
+          orthanc_series_id: `dummy-series-${study.orthanc_study_id}`,
+          series_instance_uid: `1.2.840.113619.dummy.${Date.now()}`,
+          series_description: 'Default Series',
+          series_number: '1',
+          modality: study.modality || 'CT',
+          instances_count: 1,
+          instances_ids: [`dummy-instance-${study.orthanc_study_id}`]
+        }];
+      }
+      
       setSeriesList(series);
+      console.log('✅ Series 조회 완료:', series.length, '개');
       
       // 첫 번째 Series 자동 선택
       if (series.length > 0) {
@@ -296,42 +628,100 @@ const DMViewer = () => {
     }
   };
 
-  // Instances 목록 조회
+  // Instances 목록 조회 (더미 방지)
   const fetchInstancesFromSeries = async (series) => {
     try {
       setSelectedSeries(series);
       setInstancesList([]);
       setCurrentImageIndex(0);
       
-      const instances = [];
-      for (const instanceId of series.instances_ids || []) {
-        try {
-          const instanceResponse = await fetch(`${ORTHANC_BASE}/instances/${instanceId}`, {
-            headers: {
-              'Authorization': 'Basic ' + btoa('orthanc:orthanc')
-            }
-          });
-          
-          if (instanceResponse.ok) {
-            const instanceData = await instanceResponse.json();
-            const mainTags = instanceData.MainDicomTags || {};
+      console.log('📡 Instances 조회 시작:', series);
+      
+      let instances = [];
+      
+      // 실제 Series ID가 있는 경우에만 조회
+      if (series.instances_ids && series.instances_ids.length > 0 && 
+          !series.instances_ids[0].includes('dummy') && 
+          !series.instances_ids[0].includes('real')) {
+        
+        console.log('📋 실제 Instance ID 사용:', series.instances_ids);
+        
+        for (const instanceId of series.instances_ids) {
+          try {
+            const instanceResponse = await fetch(`${API_BASE}ohif/orthanc/instances/${instanceId}`);
             
-            instances.push({
-              orthanc_instance_id: instanceId,
-              instance_number: parseInt(mainTags.InstanceNumber) || instances.length + 1,
-              sop_instance_uid: mainTags.SOPInstanceUID,
-              image_url: `${ORTHANC_BASE}/instances/${instanceId}/preview`,
-              dicom_url: `wadouri:${ORTHANC_BASE}/instances/${instanceId}/file`
-            });
+            if (instanceResponse.ok) {
+              const instanceData = await instanceResponse.json();
+              const mainTags = instanceData.MainDicomTags || {};
+              
+              instances.push({
+                orthanc_instance_id: instanceId,
+                instance_number: parseInt(mainTags.InstanceNumber) || instances.length + 1,
+                sop_instance_uid: mainTags.SOPInstanceUID,
+                image_url: `${API_BASE}ohif/orthanc/instances/${instanceId}/preview`,
+                dicom_url: `${API_BASE}ohif/orthanc/instances/${instanceId}/file`
+              });
+            }
+          } catch (instanceError) {
+            console.warn('Instance 조회 실패:', instanceId, instanceError);
           }
-        } catch (instanceError) {
-          console.warn('Instance 조회 실패:', instanceId, instanceError);
         }
+      }
+      
+      // 실제 Instances를 못 찾은 경우 Series 정보로 재시도
+      if (instances.length === 0 && series.orthanc_series_id && 
+          !series.orthanc_series_id.includes('dummy') && 
+          !series.orthanc_series_id.includes('real')) {
+        
+        console.log('📡 Series ID로 Instances 재조회:', series.orthanc_series_id);
+        
+        try {
+          const seriesResponse = await fetch(`${API_BASE}ohif/orthanc/series/${series.orthanc_series_id}`);
+          
+          if (seriesResponse.ok) {
+            const seriesData = await seriesResponse.json();
+            console.log('📋 Series 데이터:', seriesData);
+            
+            if (seriesData.Instances && Array.isArray(seriesData.Instances)) {
+              for (const instanceId of seriesData.Instances) {
+                try {
+                  const instanceResponse = await fetch(`${API_BASE}ohif/orthanc/instances/${instanceId}`);
+                  
+                  if (instanceResponse.ok) {
+                    const instanceData = await instanceResponse.json();
+                    const mainTags = instanceData.MainDicomTags || {};
+                    
+                    instances.push({
+                      orthanc_instance_id: instanceId,
+                      instance_number: parseInt(mainTags.InstanceNumber) || instances.length + 1,
+                      sop_instance_uid: mainTags.SOPInstanceUID,
+                      image_url: `${API_BASE}ohif/orthanc/instances/${instanceId}/preview`,
+                      dicom_url: `${API_BASE}ohif/orthanc/instances/${instanceId}/file`
+                    });
+                  }
+                } catch (instanceError) {
+                  console.warn('Instance 재조회 실패:', instanceId, instanceError);
+                }
+              }
+            }
+          }
+        } catch (seriesError) {
+          console.warn('Series 재조회 실패:', seriesError);
+        }
+      }
+      
+      // 여전히 실제 Instances를 못 찾은 경우 알림
+      if (instances.length === 0) {
+        console.warn('❌ 실제 DICOM Instances를 찾을 수 없음');
+        alert(`Series "${series.series_description}"에서 실제 DICOM 이미지를 찾을 수 없습니다.\n\nOrthanc에 DICOM 파일이 올바르게 업로드되었는지 확인해주세요.\n\nOrthanc 웹 인터페이스: http://35.225.63.41:8042`);
+        return;
       }
       
       // Instance Number로 정렬
       instances.sort((a, b) => a.instance_number - b.instance_number);
       setInstancesList(instances);
+      
+      console.log('✅ 실제 Instances 조회 완료:', instances.length, '개');
       
       // 첫 번째 이미지 표시
       if (instances.length > 0) {
@@ -340,6 +730,7 @@ const DMViewer = () => {
       
     } catch (error) {
       console.error('Instances 조회 실패:', error);
+      alert('DICOM 이미지 로드에 실패했습니다. Orthanc 서버 상태를 확인해주세요.');
     }
   };
 
@@ -353,15 +744,48 @@ const DMViewer = () => {
       
       console.log('🖼️ DICOM 이미지 로딩:', instance.dicom_url);
       
-      // Cornerstone으로 DICOM 이미지 로드
-      const element = cornerstoneElement.current;
-      const imageId = instance.dicom_url;
+      // Django 프록시를 통해 이미지 로드 (Blob URL 방식)
+      const response = await fetch(instance.dicom_url);
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
       
-      await window.cornerstone.loadAndCacheImage(imageId);
-      await window.cornerstone.displayImage(element, imageId);
+      // 간단한 Canvas 방식으로 이미지 표시
+      const img = new Image();
+      img.onload = () => {
+        const canvas = cornerstoneElement.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 이미지를 Canvas 크기에 맞게 조정
+        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        const x = (canvas.width - img.width * scale) / 2;
+        const y = (canvas.height - img.height * scale) / 2;
+        
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        
+        // 기존 어노테이션 그리기
+        drawAnnotationsOnCanvas();
+        
+        // Blob URL 정리
+        URL.revokeObjectURL(imageUrl);
+      };
       
-      // 기존 어노테이션 그리기
-      drawAnnotationsOnCanvas();
+      img.onerror = () => {
+        console.error('이미지 로드 실패, 미리보기로 대체');
+        // 미리보기 이미지로 대체 시도
+        const previewImg = new Image();
+        previewImg.onload = () => {
+          const canvas = cornerstoneElement.current;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(previewImg, 0, 0, canvas.width, canvas.height);
+          drawAnnotationsOnCanvas();
+        };
+        previewImg.src = instance.image_url;
+        URL.revokeObjectURL(imageUrl);
+      };
+      
+      img.src = imageUrl;
       
       console.log('✅ DICOM 이미지 표시 완료');
       
@@ -371,7 +795,6 @@ const DMViewer = () => {
       // 실패시 미리보기 이미지로 대체
       try {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
         img.onload = () => {
           const canvas = cornerstoneElement.current;
           const ctx = canvas.getContext('2d');
@@ -379,7 +802,7 @@ const DMViewer = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           drawAnnotationsOnCanvas();
         };
-        img.src = instance.image_url + '?auth=' + btoa('orthanc:orthanc');
+        img.src = instance.image_url;
       } catch (previewError) {
         console.error('미리보기 이미지도 실패:', previewError);
       }

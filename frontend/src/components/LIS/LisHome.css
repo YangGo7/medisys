@@ -1,29 +1,29 @@
-/* 📁 LisHome.css (전체 화면 깨짐 문제 수정: flex, min-width, overflow 대응 포함) */
+/* 📁 LisHome.css (달력과 그래프 간 충돌 해결 + 달력 라벨 깨짐 보완 포함) */
 
 .lis-dashboard-grid {
   display: grid;
   grid-template-columns: 260px 1fr;
   grid-template-rows: auto;
-  gap: 2rem;
+  gap: 1rem;
   padding: 2rem;
   min-height: 100vh;
   background: #f9f9fb;
   box-sizing: border-box;
-  overflow-x: hidden; /* 👉 화면 밀림 방지 */
+  overflow-x: hidden;
 }
 
 .lis-main-flex {
   display: flex;
   flex-wrap: nowrap;
-  gap: 2rem;
+  gap: 1rem;
   width: 100%;
   align-items: flex-start;
-  min-width: 0; /* 👉 자식 요소가 너무 커질 경우 대비 */
+  min-width: 0;
 }
 
 .lis-sidebar {
   background: white;
-  padding: 1.5rem;
+  padding: 0.8rem;
   border-radius: 20px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -44,9 +44,9 @@
 .lis-center {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   flex: 1;
-  min-width: 640px; /* 👉 너무 작게 줄어들지 않도록 */
+  min-width: 680px; /* 👉 그래프 깨짐 방지용 확보 */
 }
 
 .lis-menu-bar {
@@ -88,15 +88,16 @@
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   min-height: 500px;
-  overflow: visible; /* 👉 차트 잘림 방지 */
+  overflow: visible;
 }
 
 .lis-rightbar {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  width: 340px;
+  gap: 1rem;
+  width: 350px;
   flex-shrink: 0;
+  min-width: 300px;
 }
 
 .calendar-box,
@@ -143,17 +144,42 @@
   line-height: 1.8;
 }
 
-/* 📅 Calendar 정리 (생략) 유지 */
+.react-calendar__navigation__label {
+  display: flex;
+  align-items: center;     /* ✅ 수직 중앙 정렬 */
+  justify-content: center; /* ✅ 수평 중앙 정렬 */
+  font-size: 1rem;
+  font-weight: bold;
+}
 
-@media (max-width: 1024px) {
+
+@media (max-width: 1100px) {
   .lis-dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas:
+      \"left main\"
+      \"right right\";
   }
-  .lis-sidebar,
+
+  .lis-leftbar {
+    grid-area: left;
+  }
+
+  .lis-maincontent {
+    grid-area: main;
+  }
+
   .lis-rightbar {
-    display: none;
+    grid-area: right;
+    flex-direction: row;
+    justify-content: space-between;
   }
-  .lis-main-flex {
-    flex-direction: column;
+
+  .calendar-box {
+    width: 48%;
+  }
+
+  .status-box {
+    width: 48%;
   }
 }

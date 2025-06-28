@@ -296,6 +296,49 @@ body {
   margin-right: 0.5rem;
 }
 
+/* ✅ 차트에 역동적인 애니메이션 효과 */
+.recharts-bar-rectangle path,
+.recharts-pie-sector path,
+.recharts-radar-polygon,
+.recharts-line-curve {
+  transition: all 0.8s ease-in-out;
+}
+
+.recharts-bar-rectangle:hover path {
+  transform: scaleY(1.08);
+  transform-origin: bottom;
+  filter: brightness(1.1);
+}
+
+.recharts-pie-sector:hover path,
+.recharts-radar-polygon:hover,
+.recharts-line-curve:hover {
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.15));
+  transform: scale(1.02);
+  transform-origin: center;
+}
+
+/* ✅ 호버 시 설명 강조 효과 */
+.recharts-tooltip-wrapper {
+  animation: fadeIn 0.3s ease-in-out;
+  backdrop-filter: blur(6px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ✅ 차트 제목 강조 */
+.chart-title {
+  transition: color 0.3s;
+}
+
+.chart-title:hover {
+  color: #3498db;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

@@ -1,299 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// frontend/src/components/EMR/VisitHistoryPanel.jsx
+// 🔥 내원이력 패널 - 카드 겹침 해결 및 버튼 조회 방식
+
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar, 
-  Clock, 
-  Eye, 
-  RefreshCw, 
-  AlertCircle, 
-  User,
+  User, 
+  MapPin, 
+  Clock,
   FileText,
-  X,
   Activity,
-  Brain,
-  ClipboardList,
-  Stethoscope
+  Search,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 
-// 토스트 모달 컴포넌트
-const SoapDetailToast = ({ visit, soapDetails, onClose }) => {
-  if (!visit || !soapDetails) return null;
-
-  const getSoapIcon = (soapType) => {
-    switch (soapType) {
-      case 'S': return <User size={16} className="soap-icon subjective" />;
-      case 'O': return <Activity size={16} className="soap-icon objective" />;
-      case 'A': return <Brain size={16} className="soap-icon assessment" />;
-      case 'P': return <ClipboardList size={16} className="soap-icon plan" />;
-      default: return <FileText size={16} />;
-    }
-  };
-
-  const getSoapLabel = (soapType) => {
-    switch (soapType) {
-      case 'S': return 'Subjective (주관적 정보)';
-      case 'O': return 'Objective (객관적 소견)';
-      case 'A': return 'Assessment (평가/진단)';
-      case 'P': return 'Plan (치료계획)';
-      default: return soapType;
-    }
-  };
-
-  return (
-    <div className="soap-toast-overlay">
-      <div className="soap-toast-modal">
-        <style jsx>{`
-          .soap-toast-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.2s ease;
-          }
-
-          .soap-toast-modal {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow: hidden;
-            animation: slideUp 0.3s ease;
-          }
-
-          .toast-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-
-          .toast-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          }
-
-          .toast-close {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: background 0.2s;
-          }
-
-          .toast-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-          }
-
-          .toast-content {
-            padding: 1.5rem;
-            max-height: 60vh;
-            overflow-y: auto;
-          }
-
-          .visit-info {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid #667eea;
-          }
-
-          .visit-date {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-          }
-
-          .visit-diagnosis {
-            color: #6c757d;
-            font-size: 0.9rem;
-          }
-
-          .soap-section {
-            margin-bottom: 1.5rem;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            overflow: hidden;
-          }
-
-          .soap-header {
-            background: #f8f9fa;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-          }
-
-          .soap-icon.subjective { color: #3b82f6; }
-          .soap-icon.objective { color: #10b981; }
-          .soap-icon.assessment { color: #f59e0b; }
-          .soap-icon.plan { color: #8b5cf6; }
-
-          .soap-items {
-            padding: 1rem;
-          }
-
-          .soap-item {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #f1f3f4;
-          }
-
-          .soap-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-          }
-
-          .soap-content {
-            line-height: 1.6;
-            color: #374151;
-            margin-bottom: 0.5rem;
-          }
-
-          .soap-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: #6b7280;
-          }
-
-          .icd10-badge {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-top: 0.5rem;
-            display: inline-block;
-          }
-
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          @keyframes slideUp {
-            from { 
-              opacity: 0;
-              transform: translateY(20px) scale(0.95);
-            }
-            to { 
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-        `}</style>
-
-        {/* 헤더 */}
-        <div className="toast-header">
-          <div className="toast-title">
-            <Stethoscope size={20} />
-            SOAP 진단 상세
-          </div>
-          <button className="toast-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* 내용 */}
-        <div className="toast-content">
-          {/* 방문 정보 */}
-          <div className="visit-info">
-            <div className="visit-date">
-              📅 {new Date(visit.visit_date).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'short'
-              })}
-            </div>
-            {visit.primary_diagnosis && (
-              <div className="visit-diagnosis">
-                주진단: {visit.primary_diagnosis}
-              </div>
-            )}
-          </div>
-
-          {/* SOAP 상세 */}
-          {Object.entries(soapDetails).map(([soapType, items]) => 
-            items.length > 0 && (
-              <div key={soapType} className="soap-section">
-                <div className="soap-header">
-                  {getSoapIcon(soapType)}
-                  {getSoapLabel(soapType)}
-                </div>
-                <div className="soap-items">
-                  {items.map((item, index) => (
-                    <div key={index} className="soap-item">
-                      <div className="soap-content">
-                        {item.content}
-                      </div>
-                      {item.clinical_notes && (
-                        <div className="soap-content" style={{fontStyle: 'italic', color: '#6b7280'}}>
-                          💭 {item.clinical_notes}
-                        </div>
-                      )}
-                      {item.icd10_code && item.icd10_name && (
-                        <div className="icd10-badge">
-                          {item.icd10_code} - {item.icd10_name}
-                        </div>
-                      )}
-                      <div className="soap-meta">
-                        <span>#{item.sequence_number}</span>
-                        <span>{item.diagnosis_type}</span>
-                        <span>{new Date(item.created_date).toLocaleString('ko-KR')}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 메인 컴포넌트
-const VisitHistoryPanel = ({ patient, refreshTrigger }) => {
+const VisitHistoryPanel = ({ patient }) => {
   const [visitHistory, setVisitHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedVisit, setSelectedVisit] = useState(null);
-  const [soapDetails, setSoapDetails] = useState(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const patientUuid = patient?.person?.uuid || patient?.uuid || patient?.openmrs_patient_uuid;
+  const API_BASE = process.env.REACT_APP_INTEGRATION_API;
 
-  // 내원이력 조회
-  const fetchVisitHistory = useCallback(async () => {
-    if (!patientUuid) return;
+  // 내원이력 조회 함수 - 버튼 클릭 시에만 실행
+  const fetchVisitHistory = async () => {
+    if (!patient?.patient_identifier && !patient?.uuid) {
+      setError('환자 식별자가 없습니다.');
+      return;
+    }
 
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await fetch(`/api/openmrs/visit-history/by_patient/?patient_uuid=${patientUuid}`);
+      const patientId = patient.patient_identifier || patient.uuid;
+      const response = await fetch(`${API_BASE}openmrs/visits/${patientId}/`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -301,359 +42,452 @@ const VisitHistoryPanel = ({ patient, refreshTrigger }) => {
       
       const data = await response.json();
       
-      if (data.success) {
-        setVisitHistory(data.visits || []);
+      if (data.success && Array.isArray(data.visits)) {
+        setVisitHistory(data.visits);
+        setHasSearched(true);
       } else {
-        throw new Error(data.error || '내원 이력 조회 실패');
+        throw new Error(data.message || '내원이력 조회에 실패했습니다.');
       }
-      
-    } catch (error) {
-      console.error('❌ 내원 이력 조회 실패:', error);
-      setError(error.message);
+    } catch (err) {
+      console.error('내원이력 조회 실패:', err);
+      setError(err.message);
       setVisitHistory([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [patientUuid]);
+  };
 
-  // SOAP 상세 조회
-  const fetchSoapDetails = useCallback(async (visit) => {
-    if (!visit.encounter_uuid) return;
-
-    try {
-      setLoadingDetails(true);
-      
-      // 🔥 올바른 ViewSet 엔드포인트 사용: visit-history/{pk}/soap_summary/
-      const response = await fetch(`/api/openmrs/visit-history/${visit.encounter_uuid}/soap_summary/`);
-      
-      if (!response.ok) {
-        throw new Error('SOAP 상세 정보를 불러올 수 없습니다.');
-      }
-      
-      const data = await response.json();
-      
-      // 🔥 응답 데이터 구조 확인
-      console.log('📋 SOAP 상세 응답:', data);
-      
-      if (data.soap_summary) {
-        setSoapDetails(data.soap_summary);
-        setSelectedVisit(visit);
-      } else {
-        throw new Error('SOAP 정보가 없습니다.');
-      }
-      
-    } catch (error) {
-      console.error('❌ SOAP 상세 조회 실패:', error);
-      alert(error.message);
-    } finally {
-      setLoadingDetails(false);
-    }
-  }, []);
-
-  // 토스트 닫기
-  const closeToast = useCallback(() => {
-    setSelectedVisit(null);
-    setSoapDetails(null);
-  }, []);
-
+  // 환자 변경 시 상태 초기화
   useEffect(() => {
-    if (patientUuid) {
-      fetchVisitHistory();
-    }
-  }, [patientUuid, refreshTrigger, fetchVisitHistory]);
+    setVisitHistory([]);
+    setError(null);
+    setHasSearched(false);
+  }, [patient]);
 
-  // 환자 정보가 없는 경우
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return '날짜 없음';
+    try {
+      return new Date(dateString).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // 방문 유형 한글화
+  const getVisitTypeKorean = (visitType) => {
+    const typeMap = {
+      'OUTPATIENT': '외래',
+      'INPATIENT': '입원',
+      'EMERGENCY': '응급',
+      'CONSULTATION': '상담'
+    };
+    return typeMap[visitType] || visitType || '일반';
+  };
+
   if (!patient) {
     return (
-      <div className="compact-visit-panel">
+      <div className="visit-history-panel">
         <div className="empty-state">
-          <User size={24} />
+          <AlertCircle size={24} />
           <span>환자를 선택해 주세요.</span>
         </div>
       </div>
     );
   }
 
+  const patientName = patient?.name || patient?.display || patient?.patient_name || '알 수 없는 환자';
+
   return (
-    <>
-      <div className="compact-visit-panel">
-        <style jsx>{`
-          .compact-visit-panel {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            height: 100%;
-            max-height: 400px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-          }
+    <div className="visit-history-panel">
+      <style jsx>{`
+        .visit-history-panel {
+          background: white;
+          border-radius: 8px;
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border: 1px solid #e5e7eb;
+        }
 
-          .panel-header {
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-            color: white;
-            padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
+        .panel-header {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
 
-          .header-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-          }
+        .header-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex: 1;
+        }
 
-          .visit-count {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-          }
+        .patient-name {
+          font-weight: 600;
+          color: #1f2937;
+          font-size: 0.9rem;
+        }
 
-          .refresh-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: background 0.2s;
-          }
+        .search-button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.8rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
 
-          .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-          }
+        .search-button:hover:not(:disabled) {
+          background: #2563eb;
+        }
 
-          .panel-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.75rem;
-          }
+        .search-button:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
 
-          .visit-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-          }
+        .panel-content {
+          flex: 1;
+          overflow: hidden;
+          height: calc(100% - 70px);
+        }
 
-          .visit-item {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-          }
+        .initial-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          width: 100%;
+          color: #6b7280;
+          text-align: center;
+          padding: 2rem;
+        }
 
-          .visit-item:hover {
-            background: #e9ecef;
-            border-color: #3b82f6;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
-          }
+        .initial-icon {
+          margin-bottom: 1rem;
+          opacity: 0.5;
+        }
 
-          .visit-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-          }
+        .loading-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: #3b82f6;
+          gap: 1rem;
+        }
 
-          .visit-date {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 0.85rem;
-          }
+        .loading-spinner {
+          animation: spin 1s linear infinite;
+        }
 
-          .visit-time {
-            font-size: 0.75rem;
-            color: #6c757d;
-          }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
 
-          .visit-diagnosis {
-            font-size: 0.8rem;
-            color: #495057;
-            line-height: 1.4;
-            margin-bottom: 0.25rem;
-          }
+        .error-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: #dc2626;
+          text-align: center;
+          padding: 2rem;
+          gap: 1rem;
+        }
 
-          .visit-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.7rem;
-            color: #6c757d;
-          }
+        .retry-button {
+          padding: 0.5rem 1rem;
+          background: #dc2626;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.8rem;
+          cursor: pointer;
+        }
 
-          .view-details {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            color: #3b82f6;
-            font-weight: 500;
-          }
+        .retry-button:hover {
+          background: #b91c1c;
+        }
 
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            gap: 0.5rem;
-            color: #6c757d;
-            text-align: center;
-            padding: 2rem;
-          }
+        .no-visits {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          width: 100%;
+          color: #6b7280;
+          text-align: center;
+          padding: 2rem;
+        }
 
-          .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            gap: 0.75rem;
-            color: #6c757d;
-          }
+        .visit-list {
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          overflow-y: auto;
+          height: calc(100% - 40px);
+        }
 
-          .error-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            gap: 0.75rem;
-            color: #dc3545;
-            text-align: center;
-            padding: 1rem;
-          }
+        .visit-item {
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 1rem;
+          transition: all 0.2s;
+        }
 
-          .retry-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background 0.2s;
-          }
+        .visit-item:hover {
+          background: #f3f4f6;
+          border-color: #d1d5db;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-          .retry-btn:hover {
-            background: #2563eb;
-          }
+        .visit-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 0.75rem;
+        }
 
-          .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f4f6;
-            border-top: 2px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
+        .visit-date {
+          font-weight: 600;
+          color: #1f2937;
+          font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
 
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
+        .visit-type {
+          background: #3b82f6;
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.7rem;
+          font-weight: 500;
+        }
 
-        {/* 헤더 */}
-        <div className="panel-header">
-          <div className="header-title">
-            <Calendar size={16} />
-            내원이력
-            {visitHistory.length > 0 && (
-              <span className="visit-count">{visitHistory.length}</span>
-            )}
-          </div>
-          <button 
-            className="refresh-btn" 
-            onClick={fetchVisitHistory}
-            disabled={loading}
-          >
-            <RefreshCw size={14} className={loading ? 'loading-spinner' : ''} />
-          </button>
+        .visit-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+          font-size: 0.8rem;
+          color: #6b7280;
+        }
+
+        .detail-item {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .visit-summary {
+          margin-top: 0.75rem;
+          padding-top: 0.75rem;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .summary-title {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .summary-content {
+          font-size: 0.75rem;
+          color: #6b7280;
+          line-height: 1.4;
+        }
+
+        .empty-state {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 2rem;
+          color: #6b7280;
+          text-align: center;
+          height: 100%;
+        }
+
+        .results-header {
+          background: #f0f9ff;
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid #e0e7ff;
+          font-size: 0.8rem;
+          color: #1e40af;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .results-count {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+      `}</style>
+
+      {/* 헤더 */}
+      <div className="panel-header">
+        <div className="header-info">
+          <User size={16} />
+          <span className="patient-name">{patientName}</span>
         </div>
-
-        {/* 내용 */}
-        <div className="panel-content">
-          {loading ? (
-            <div className="loading-state">
-              <div className="loading-spinner" />
-              <span>내원이력 조회 중...</span>
-            </div>
-          ) : error ? (
-            <div className="error-state">
-              <AlertCircle size={24} />
-              <span>{error}</span>
-              <button className="retry-btn" onClick={fetchVisitHistory}>
-                다시 시도
-              </button>
-            </div>
-          ) : visitHistory.length === 0 ? (
-            <div className="empty-state">
-              <FileText size={32} />
-              <span>내원기록이 없습니다</span>
-            </div>
+        <button
+          className="search-button"
+          onClick={fetchVisitHistory}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <RefreshCw size={14} className="loading-spinner" />
+              조회 중...
+            </>
           ) : (
+            <>
+              <Search size={14} />
+              내원이력 조회
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* 내용 */}
+      <div className="panel-content">
+        {!hasSearched && !isLoading && (
+          <div className="initial-state">
+            <Calendar size={48} className="initial-icon" />
+            <h4>내원이력을 조회합니다</h4>
+            <p>'{patientName}'님의 과거 내원이력을<br />확인하려면 조회 버튼을 클릭하세요.</p>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="loading-state">
+            <RefreshCw size={32} className="loading-spinner" />
+            <span>내원이력을 조회하고 있습니다...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-state">
+            <AlertCircle size={32} />
+            <h4>조회 실패</h4>
+            <p>{error}</p>
+            <button className="retry-button" onClick={fetchVisitHistory}>
+              다시 시도
+            </button>
+          </div>
+        )}
+
+        {hasSearched && !isLoading && !error && visitHistory.length === 0 && (
+          <div className="no-visits">
+            <Calendar size={32} />
+            <h4>내원이력이 없습니다</h4>
+            <p>'{patientName}'님의 기록된 내원이력이 없습니다.</p>
+          </div>
+        )}
+
+        {hasSearched && !isLoading && !error && visitHistory.length > 0 && (
+          <>
+            <div className="results-header">
+              <div className="results-count">
+                <Activity size={14} />
+                총 {visitHistory.length}건의 내원이력
+              </div>
+            </div>
             <div className="visit-list">
-              {visitHistory.map((visit) => (
-                <div 
-                  key={visit.uuid} 
-                  className="visit-item"
-                  onClick={() => fetchSoapDetails(visit)}
-                >
+              {visitHistory.map((visit, index) => (
+                <div key={visit.uuid || index} className="visit-item">
                   <div className="visit-header">
                     <div className="visit-date">
-                      {new Date(visit.visit_date).toLocaleDateString('ko-KR')}
+                      <Calendar size={14} />
+                      {formatDate(visit.startDatetime)}
                     </div>
-                    <div className="visit-time">
-                      {new Date(visit.visit_date).toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                    <div className="visit-type">
+                      {getVisitTypeKorean(visit.visitType?.name)}
                     </div>
                   </div>
                   
-                  {visit.primary_diagnosis && (
-                    <div className="visit-diagnosis">
-                      📋 {visit.primary_diagnosis}
+                  <div className="visit-details">
+                    <div className="detail-item">
+                      <MapPin size={12} />
+                      <span>{visit.location?.name || '위치 정보 없음'}</span>
+                    </div>
+                    <div className="detail-item">
+                      <Clock size={12} />
+                      <span>
+                        {visit.stopDatetime ? 
+                          `종료: ${formatDate(visit.stopDatetime)}` : 
+                          '진행 중'
+                        }
+                      </span>
+                    </div>
+                  </div>
+
+                  {visit.encounters?.length > 0 && (
+                    <div className="visit-summary">
+                      <div className="summary-title">
+                        <FileText size={12} />
+                        진료 기록 ({visit.encounters.length}건)
+                      </div>
+                      <div className="summary-content">
+                        {visit.encounters.slice(0, 2).map((encounter, idx) => (
+                          <div key={idx}>
+                            • {encounter.encounterType?.name || '일반 진료'} 
+                            {encounter.encounterDatetime && 
+                              ` (${formatDate(encounter.encounterDatetime)})`
+                            }
+                          </div>
+                        ))}
+                        {visit.encounters.length > 2 && (
+                          <div>... 외 {visit.encounters.length - 2}건 더</div>
+                        )}
+                      </div>
                     </div>
                   )}
-                  
-                  <div className="visit-meta">
-                    <span>진료: {visit.encounter_type || '일반진료'}</span>
-                    <div className="view-details">
-                      {loadingDetails ? (
-                        <div className="loading-spinner" style={{width: '12px', height: '12px'}} />
-                      ) : (
-                        <>
-                          <Eye size={12} />
-                          상세보기
-                        </>
-                      )}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
-
-      {/* SOAP 상세 토스트 */}
-      {selectedVisit && soapDetails && (
-        <SoapDetailToast 
-          visit={selectedVisit}
-          soapDetails={soapDetails}
-          onClose={closeToast}
-        />
-      )}
-    </>
+    </div>
   );
 };
 

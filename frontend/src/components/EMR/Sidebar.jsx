@@ -1,5 +1,5 @@
-// src/components/EMR/Sidebar.jsx - 깔끔한 의료 전문가용 사이드바
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import { 
   Home, 
@@ -7,13 +7,13 @@ import {
   Stethoscope, 
   Monitor, 
   Settings,
-  Activity,
-  Calendar,
-  FileText
-} from 'lucide-react';
+  Activity
+} from 'lucide-react'; // ✅ TitlePage 제거
 
 const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
-  // 의료 전문가용 메뉴 구성
+  const navigate = useNavigate();
+
+  // 메뉴 구성
   const menus = [
     { 
       name: '홈', 
@@ -40,13 +40,27 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
       icon: Settings,
       description: '시스템 설정'
     },
+    { 
+      name: '메인 페이지', 
+      icon: Home, // 필요시 다른 아이콘 추천 가능
+      description: '메인페이지',
+      route: '/Main_page/TitlePage'  // ✅ 라우팅 추가
+    },
   ];
 
-  const isActive = (menu) => activeTab === menu;
+  // 클릭 처리 함수
+  const handleClick = (menu) => {
+    setActiveTab(menu.name);
+    if (menu.name === '메인 페이지' && menu.route) {
+      navigate(menu.route);
+    }
+  };
+
+  const isActive = (menu) => activeTab === menu.name;
 
   return (
     <div className="medical-sidebar">
-      {/* 🏥 Doc Board 로고 */}
+      {/* 헤더 */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <Activity size={28} style={{ color: 'var(--primary-purple)' }} />
@@ -57,7 +71,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         </div>
       </div>
 
-      {/* 🔔 알림 벨 */}
+      {/* 알림 */}
       <div className="sidebar-notification">
         <div
           className="notification-wrapper"
@@ -69,18 +83,18 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         </div>
       </div>
 
-      {/* 📋 메뉴 리스트 */}
+      {/* 메뉴 */}
       <nav className="sidebar-nav">
         <ul className="nav-list">
           {menus.map(menu => {
             const IconComponent = menu.icon;
-            const active = isActive(menu.name);
-            
+            const active = isActive(menu);
+
             return (
               <li
                 key={menu.name}
                 className={`nav-item ${active ? 'active' : ''}`}
-                onClick={() => setActiveTab(menu.name)}
+                onClick={() => handleClick(menu)} // ✅ 수정됨
               >
                 <div className="nav-link">
                   <div className="nav-icon">
@@ -98,7 +112,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         </ul>
       </nav>
 
-      {/* 🩺 의료진 정보 (하단) */}
+      {/* 하단 의료진 정보 */}
       <div className="sidebar-footer">
         <div className="doctor-info">
           <div className="doctor-avatar">

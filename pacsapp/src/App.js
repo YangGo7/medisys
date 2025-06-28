@@ -5,7 +5,7 @@ import MainLayout from './components/layout/MainLayout';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import PacsPage from './pages/PACS/PacsPage';
-import PacsDocs from './pages/PacsDocs'; // 🆕 PacsDocs 추가
+import PacsDocs from './pages/PacsDocs';
 import OHIFViewer from './pages/OHIFViewer'; // 🆕 OHIF 추가
 import { DoctorProvider } from './contexts/DoctorContext';
 import './App.css';

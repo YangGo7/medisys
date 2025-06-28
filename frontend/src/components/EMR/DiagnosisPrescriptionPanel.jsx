@@ -197,13 +197,6 @@ const DiagnosisPrescriptionPanel = ({
           position: relative;
         }
 
-        .panel-header {
-          background: linear-gradient(135deg, ${currentStepInfo.color} 0%, ${currentStepInfo.color}dd 100%);
-          color: white;
-          padding: 0.75rem;
-          position: relative;
-        }
-
         .step-indicator {
           display: flex;
           justify-content: space-between;
@@ -335,20 +328,17 @@ const DiagnosisPrescriptionPanel = ({
         }
 
         .navigation-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem 1rem;
-          border-top: 1px solid #e5e7eb;
-          background: #f9fafb;
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 60px;
-          box-sizing: border-box;
-        }
-
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9fafb;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        box-sizing: border-box;
+      }
         .nav-btn {
           display: flex;
           align-items: center;
@@ -422,32 +412,7 @@ const DiagnosisPrescriptionPanel = ({
           color: #9ca3af;
           margin-top: 0.25rem;
         }
-      `}</style>
-
-      {/* 헤더 */}
-      <div className="panel-header">
-        <div className="step-indicator">
-          <div className="step-counter">
-            {currentStep + 1} / {soapSteps.length}
-          </div>
-          <div className="step-dots">
-            {soapSteps.map((_, index) => (
-              <div 
-                key={index}
-                className={`step-dot ${
-                  index === currentStep ? 'active' : 
-                  index < currentStep ? 'completed' : ''
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-        
-        <div className="step-title">
-          <IconComponent size={20} />
-          {currentStepInfo.title}
-        </div>
-      </div>
+      `}</style> 
 
       {/* 내용 */}
       <div className="panel-content">
