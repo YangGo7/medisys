@@ -9,7 +9,18 @@
   overflow: hidden;
 }
 
-/* 필터 섹션 */
+/* 섹션 헤더 */
+.section-header {
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  flex-shrink: 0;
+}
+
+/* 🔥 수정: 필터 섹션 2줄 레이아웃 */
 .filter-section {
   padding: 20px;
   background: #ffffff;
@@ -17,11 +28,15 @@
   flex-shrink: 0;
 }
 
-.filter-section h3 {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
+.filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
 }
 
 .filter-controls {
@@ -29,7 +44,26 @@
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+}
+
+/* 🆕 필터 아이템 컨테이너 */
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-item span {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* 🆕 필터 버튼 그룹 */
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .filter-input {
@@ -45,7 +79,8 @@
 
 .filter-input:focus {
   outline: none;
-  border-color: #6b7280;
+  border-color: #374151;
+  box-shadow: 0 0 0 1px #374151;
 }
 
 .filter-input::placeholder {
@@ -53,7 +88,7 @@
 }
 
 .patient-filter {
-  min-width: 160px;
+  min-width: 140px;
 }
 
 .btn {
@@ -68,6 +103,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -98,17 +134,6 @@
   background: #f3f4f6 !important;
   border-color: #d1d5db !important;
   color: #9ca3af !important;
-}
-
-/* 검색 결과 카운트 */
-.result-count {
-  font-size: 14px;
-  color: #374151;
-  margin-bottom: 12px;
-}
-
-.result-count strong {
-  font-weight: 600;
 }
 
 /* 메시지들 */
@@ -187,7 +212,7 @@
 }
 
 /* 번호 열 */
-.worklist-table .number-cell {
+.number-cell {
   text-align: center;
   width: 60px;
   font-weight: 500;
@@ -197,9 +222,10 @@
 .patient-cell {
   font-weight: 600;
   color: #111827;
+  min-width: 120px;
 }
 
-.patient-cell .patient-id {
+.patient-id {
   color: #6b7280;
   font-weight: normal;
   font-size: 12px;
@@ -218,13 +244,10 @@
 .modality-cr { color: #059669; }
 .modality-us { color: #0891b2; }
 .modality-xa { color: #ea580c; }
-
-/* 검사 상세 정보 */
-.exam-detail {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 2px;
-}
+.modality-dx { color: #059669; }
+.modality-mg { color: #c2410c; }
+.modality-nm { color: #7c3aed; }
+.modality-pt { color: #dc2626; }
 
 /* 동의서 섹션 */
 .consent-section {
@@ -242,7 +265,7 @@
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 60px;
+  min-width: 70px;
 }
 
 .consent-item.pending {
@@ -259,6 +282,12 @@
 
 .consent-item:hover {
   opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.no-consent {
+  color: #9ca3af;
+  font-style: italic;
 }
 
 /* 필수 서류 */
@@ -286,10 +315,12 @@
   color: #374151;
   cursor: pointer;
   flex: 1;
+  transition: color 0.2s ease;
 }
 
 .doc-label:hover {
   color: #111827;
+  text-decoration: underline;
 }
 
 .doc-status {
@@ -327,30 +358,11 @@
   color: #dc2626;
 }
 
-/* 리포트 상태 */
-.report-status {
-  text-align: center;
-  width: 120px;
-}
-
-.report-status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.report-status-badge.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.report-status-badge.completed {
-  background: #d1fae5;
-  color: #065f46;
+.doc-info {
+  font-size: 10px;
+  color: #6b7280;
+  margin-left: 20px;
+  font-style: italic;
 }
 
 /* 발급 섹션 */
@@ -370,12 +382,13 @@
   font-weight: 500;
   transition: all 0.2s ease;
   display: inline-block;
-  min-width: 60px;
+  min-width: 70px;
 }
 
 .issue-btn:hover:not(:disabled) {
   background: #059669;
   border-color: #059669;
+  transform: translateY(-1px);
 }
 
 .issue-btn:disabled {
@@ -385,10 +398,10 @@
   cursor: not-allowed;
 }
 
-.issue-date {
+.issue-count {
   font-size: 10px;
   color: #6b7280;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* 긴급 표시 */
@@ -410,16 +423,44 @@
   margin-left: 4px;
 }
 
-/* 모바일 반응형 */
+/* 🔥 수정: 반응형 개선 */
+@media (max-width: 1200px) {
+  .filter-row {
+    gap: 12px;
+  }
+  
+  .filter-input {
+    min-width: 100px;
+  }
+  
+  .patient-filter {
+    min-width: 120px;
+  }
+}
+
 @media (max-width: 768px) {
-  .filter-controls {
+  .filter-section {
+    padding: 16px;
+  }
+  
+  .filter-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+  
+  .filter-item {
+    justify-content: flex-start;
   }
   
   .filter-input {
     min-width: auto;
-    margin-bottom: 8px;
+    flex: 1;
+  }
+  
+  .filter-buttons {
+    margin-left: 0;
+    justify-content: center;
   }
   
   .worklist-table {
@@ -433,6 +474,10 @@
   
   .required-docs {
     min-width: 150px;
+  }
+  
+  .patient-cell {
+    min-width: 100px;
   }
 }
 

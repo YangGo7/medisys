@@ -1,14 +1,14 @@
-// src/components/Sidebar.jsx
+// src/components/EMR/Sidebar.jsx
 import React from 'react';
 import NotificationBell from './NotificationBell';
 
 const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
-  // ✅ 대기 목록과 완료 환자 목록 제거, 진료 대시보드 추가
+  // 의료영상 뷰어 메뉴 추가
   const menus = [
     '홈',
-    '접수',
-    '환자 관리',  // ✅ 통합된 환자 상태 관리
+    '환자 관리',
     '의사 대시보드',
+    '의료영상 뷰어',  // 새로 추가
     '설정',
   ];
 
@@ -23,7 +23,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         padding: '1rem 0.5rem',
       }}
     >
-      {/* ─── 제목 박스 ─── */}
+      {/* 제목 박스 */}
       <div
         style={{
           border: '1px solid #d9d9d9',
@@ -38,7 +38,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         <h2 style={{ fontSize: '18px', margin: 0, color: '#333' }}>1조 메디컬</h2>
       </div>
 
-      {/* ─── 알림 벨 ─── */}
+      {/* 알림 벨 */}
       <div
         className="notif-wrapper"
         role="button"
@@ -53,7 +53,7 @@ const Sidebar = ({ activeTab, setActiveTab, onBellClick }) => {
         <NotificationBell />
       </div>
 
-      {/* ─── 메뉴 리스트 ─── */}
+      {/* 메뉴 리스트 */}
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {menus.map(menu => (
           <li

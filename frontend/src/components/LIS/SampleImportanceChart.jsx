@@ -1,18 +1,8 @@
 // components/CDSS/SampleImportanceChart.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Bar } from 'react-chartjs-2';
 import axios from 'axios';
-import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+import ReactECharts from 'echarts-for-react';
 
 const SampleImportanceChart = () => {
   const { sampleId } = useParams();
@@ -34,48 +24,61 @@ const SampleImportanceChart = () => {
 
   if (!data) return <p>📊 기여도 데이터를 불러오는 중입니다...</p>;
 
-  const chartData = {
-    labels: data.features,
-    datasets: [
-      {
-        label: '기여도 (양수: 위험 ↑ / 음수: 위험 ↓)',
-        data: data.contributions,
-        backgroundColor: data.contributions.map(val =>
-          val > 0 ? 'rgba(255, 99, 132, 0.6)' : 'rgba(54, 162, 235, 0.6)'
-        ),
-        borderColor: data.contributions.map(val =>
-          val > 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(54, 162, 235, 1)'
-        ),
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    indexAxis: 'y', // 👉 수평 막대 차트
-    scales: {
-      x: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: '기여도 크기',
-        },
-      },
+  const option = {
+    title: {
+      text: `🧬 변수별 기여도 분석 (Sample ${sampleId})`,
+      left: 'center'
     },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: context => `기여도: ${context.raw.toFixed(4)}`
-        }
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: (params) => {
+        const val = params[0].value;
+        return `기여도: ${val.toFixed(4)}`;
       }
     },
+    grid: {
+      left: '10%',
+      right: '10%',
+      bottom: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      name: '기여도 크기',
+      axisLabel: { formatter: '{value}' }
+    },
+    yAxis: {
+      type: 'category',
+      data: data.features,
+      axisLabel: {
+        fontSize: 12
+      }
+    },
+    series: [
+      {
+        name: '기여도',
+        type: 'bar',
+        data: data.contributions,
+        itemStyle: {
+          color: (params) =>
+            params.value > 0 ? '#EF4444' : '#3B82F6' // 빨강 vs 파랑
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
+          }
+        }
+      }
+    ]
   };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-      <h3>🧬 변수별 기여도 분석 (Sample {sampleId})</h3>
-      <Bar data={chartData} options={chartOptions} />
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <ReactECharts option={option} style={{ height: `${data.features.length * 40}px` }} />
     </div>
   );
 };

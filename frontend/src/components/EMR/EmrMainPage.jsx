@@ -8,6 +8,7 @@ import UnifiedPatientStatus from './UnifiedPatientStatus';
 import NotificationModal from './NotificationModal';
 import { saveLog } from '../utils/saveLog';
 import SettingsPage from './SettingsPage';
+import MedicalViewer from './DMViewer'; // 새로 추가
 
 // 기존 컴포넌트들
 import WaitingBoard from './WaitingBoard';
@@ -390,6 +391,13 @@ const EmrMainPage = () => {
     <DocDashBoard />
   ), []);
 
+  // 🔥 의료영상 뷰어 렌더 함수 추가
+  const renderMedicalViewer = useMemo(() => (
+    <div className="page-container-full">
+      <MedicalViewer />
+    </div>
+  ), []);
+
   return (
     <div className="emr-page">
       <header className="emr-header">
@@ -430,6 +438,7 @@ const EmrMainPage = () => {
           {activeTab === '대기 화면' && renderWaitingBoard}
           {activeTab === '진료 진행도' && renderPatientStatus}
           {activeTab === '의사 대시보드' && renderDoctorDashboard}
+          {activeTab === '의료영상 뷰어' && renderMedicalViewer}
         </main>
       </div>
       {showNotifModal && (
