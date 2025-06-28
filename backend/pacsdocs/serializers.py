@@ -1,3 +1,5 @@
+# pacsdocs/serializers.py
+
 from rest_framework import serializers
 from .models import DocumentType, DocumentRequest, DocumentTemplate
 from worklists.models import StudyRequest
@@ -19,11 +21,11 @@ class DocumentRequestSerializer(serializers.ModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
     document_type_id = serializers.IntegerField(write_only=True)
     
-    # 추가 정보 필드들
-    patient_name = serializers.CharField(source='study_request.patient_name', read_only=True)
-    patient_id = serializers.CharField(source='study_request.patient_id', read_only=True)
+    # 워크리스트 호환 필드명 사용 ✅
+    patientName = serializers.CharField(source='study_request.patient_name', read_only=True)
+    patientId = serializers.CharField(source='study_request.patient_id', read_only=True)
     modality = serializers.CharField(source='study_request.modality', read_only=True)
-    exam_part = serializers.CharField(source='study_request.body_part', read_only=True)
+    examPart = serializers.CharField(source='study_request.body_part', read_only=True)
     
     class Meta:
         model = DocumentRequest
@@ -31,8 +33,8 @@ class DocumentRequestSerializer(serializers.ModelSerializer):
             'id', 'study_request', 'document_type', 'document_type_id',
             'status', 'requested_at', 'generated_at', 'completed_at',
             'generated_file_path', 'scanned_file_path', 'processed_by', 'notes',
-            # 추가 정보
-            'patient_name', 'patient_id', 'modality', 'exam_part'
+            # 워크리스트 호환 필드명 ✅
+            'patientName', 'patientId', 'modality', 'examPart'
         ]
         read_only_fields = ['requested_at', 'generated_at', 'completed_at']
     
@@ -45,23 +47,156 @@ class DocumentRequestSerializer(serializers.ModelSerializer):
 
 
 class StudyDocumentsSerializer(serializers.ModelSerializer):
-    """검사별 서류 목록용 시리얼라이저 (React 프론트엔드용)"""
+    """🔥 검사별 서류 목록용 시리얼라이저 - 워크리스트 필드명 호환"""
     
     documents = serializers.SerializerMethodField()
+    
+    # 🔥 워크리스트와 동일한 필드명 사용
+    patientId = serializers.CharField(source='patient_id')
+    patientName = serializers.CharField(source='patient_name')
+    birthDate = serializers.CharField(source='birth_date')  # 날짜 형식 맞춤
+    examPart = serializers.CharField(source='body_part')
+    reportingDoctor = serializers.CharField(source='interpreting_physician')
+    
+    # 🔥 수정: 검사일시는 scheduled_exam_datetime 사용
+    examDateTime = serializers.SerializerMethodField()
+    # 🔥 추가: 요청일시도 별도로 제공
+    requestDateTime = serializers.SerializerMethodField()
+    
+    examStatus = serializers.CharField(source='study_status')
     
     class Meta:
         model = StudyRequest
         fields = [
-            'id', 'patient_id', 'patient_name', 'birth_date',
-            'body_part', 'modality', 'interpreting_physician',
-            'request_datetime', 'priority', 'study_status',
+            # 🔥 워크리스트 호환 필드명
+            'id', 'patientId', 'patientName', 'birthDate',
+            'examPart', 'modality', 'reportingDoctor', 
+            'examDateTime', 'requestDateTime', 'priority', 'examStatus',
             'documents'
         ]
+    
+    def get_examDateTime(self, obj):
+        """🔥 실제 검사일시 반환 (scheduled_exam_datetime 우선)"""
+        # 1순위: 예약된 검사 시간
+        if obj.scheduled_exam_datetime:
+            return self._format_korean_datetime(obj.scheduled_exam_datetime)
+        
+        # 2순위: 실제 시작된 검사 시간
+        elif obj.actual_start_time:
+            return self._format_korean_datetime(obj.actual_start_time)
+        
+        # 3순위: 요청 시간 (fallback)
+        elif obj.request_datetime:
+            return self._format_korean_datetime(obj.request_datetime)
+        
+        return 'N/A'
+    
+    def get_requestDateTime(self, obj):
+        """🔥 요청일시 반환"""
+        if obj.request_datetime:
+            return self._format_korean_datetime(obj.request_datetime)
+        return 'N/A'
     
     def get_documents(self, obj):
         """해당 검사의 모든 서류 요청 반환"""
         document_requests = obj.document_requests.all().order_by('document_type__sort_order')
         return DocumentRequestSerializer(document_requests, many=True).data
+    
+    def to_representation(self, instance):
+        """🔥 날짜 형식을 워크리스트와 동일하게 변환"""
+        ret = super().to_representation(instance)
+        
+        # 날짜 형식 변환 (Django → 워크리스트 형식)
+        if instance.birth_date:
+            ret['birthDate'] = instance.birth_date.strftime('%Y/%m/%d')
+        
+        return ret
+    
+    def _format_korean_datetime(self, dt):
+        """날짜시간을 한국어 형식으로 변환"""
+        if not dt:
+            return 'N/A'
+            
+        try:
+            import pytz
+            from django.utils import timezone as django_timezone
+            
+            # UTC를 KST로 변환
+            kst = pytz.timezone('Asia/Seoul')
+            if dt.tzinfo is None:
+                dt = django_timezone.make_aware(dt, kst)
+            else:
+                dt = dt.astimezone(kst)
+            
+            # 한국어 형식으로 변환 "2025. 6. 27. 오전 3:52"
+            hour = dt.hour
+            minute = dt.minute
+            ampm = '오전' if hour < 12 else '오후'
+            display_hour = hour if hour <= 12 else hour - 12
+            display_hour = 12 if display_hour == 0 else display_hour
+            
+            return f"{dt.year}. {dt.month}. {dt.day}. {ampm} {display_hour}:{minute:02d}"
+            
+        except Exception as e:
+            # 변환 실패시 기본 형식 반환
+            return dt.strftime('%Y-%m-%d %H:%M') if dt else 'N/A'
+
+# class StudyDocumentsSerializer(serializers.ModelSerializer):
+#     """🔥 검사별 서류 목록용 시리얼라이저 - 워크리스트 필드명 호환"""
+    
+#     documents = serializers.SerializerMethodField()
+    
+#     # 🔥 워크리스트와 동일한 필드명 사용
+#     patientId = serializers.CharField(source='patient_id')
+#     patientName = serializers.CharField(source='patient_name')
+#     birthDate = serializers.CharField(source='birth_date')  # 날짜 형식 맞춤
+#     examPart = serializers.CharField(source='body_part')
+#     reportingDoctor = serializers.CharField(source='interpreting_physician')
+#     requestDateTime = serializers.CharField(source='request_datetime')  # 날짜 형식 맞춤
+#     examStatus = serializers.CharField(source='study_status')
+    
+#     class Meta:
+#         model = StudyRequest
+#         fields = [
+#             # 🔥 워크리스트 호환 필드명
+#             'id', 'patientId', 'patientName', 'birthDate',
+#             'examPart', 'modality', 'reportingDoctor', 
+#             'requestDateTime', 'priority', 'examStatus',
+#             'documents'
+#         ]
+    
+#     def get_documents(self, obj):
+#         """해당 검사의 모든 서류 요청 반환"""
+#         document_requests = obj.document_requests.all().order_by('document_type__sort_order')
+#         return DocumentRequestSerializer(document_requests, many=True).data
+    
+#     def to_representation(self, instance):
+#         """🔥 날짜 형식을 워크리스트와 동일하게 변환"""
+#         ret = super().to_representation(instance)
+        
+#         # 날짜 형식 변환 (Django → 워크리스트 형식)
+#         if instance.birth_date:
+#             ret['birthDate'] = instance.birth_date.strftime('%Y/%m/%d')
+        
+#         if instance.request_datetime:
+#             # "2025. 6. 27. 오전 3:52" 형식으로 변환
+#             from django.utils import timezone
+#             import pytz
+            
+#             # UTC를 KST로 변환
+#             kst = pytz.timezone('Asia/Seoul')
+#             kst_time = instance.request_datetime.astimezone(kst) if instance.request_datetime.tzinfo else kst.localize(instance.request_datetime)
+            
+#             # 한국어 형식으로 변환
+#             hour = kst_time.hour
+#             minute = kst_time.minute
+#             ampm = '오전' if hour < 12 else '오후'
+#             display_hour = hour if hour <= 12 else hour - 12
+#             display_hour = 12 if display_hour == 0 else display_hour
+            
+#             ret['requestDateTime'] = f"{kst_time.year}. {kst_time.month}. {kst_time.day}. {ampm} {display_hour}:{minute:02d}"
+        
+#         return ret
 
 
 class DocumentProcessRequestSerializer(serializers.Serializer):

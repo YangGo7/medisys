@@ -37,8 +37,8 @@ class YOLOv8Analyzer:
     def __init__(self, model_path='/models/yolov8/yolov8_best.pt'):
         self.model_path = model_path
         self.model = None
-        self.confidence_threshold = 0.25
-        self.iou_threshold = 0.45
+        self.confidence_threshold = 0.2
+        self.iou_threshold = 0.2
         self.class_names = self._get_class_names() # ai_service와 통일된 14개 클래스
         self._load_model()
     

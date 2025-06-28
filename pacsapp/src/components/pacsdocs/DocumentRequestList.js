@@ -10,11 +10,13 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // 필터 상태
+  // 🔥 수정: 필터 상태 확장 (5개 필터)
   const [filters, setFilters] = useState({
-    exam_date: new Date().toISOString().split('T')[0], // 오늘 날짜
-    patient_name: '',
-    modality: '',
+    exam_date: new Date().toISOString().split('T')[0], // 검사일시 (기존)
+    patient_id: '',      // 🆕 환자ID
+    patient_name: '',    // 환자명 (기존)
+    modality: '',        // 모달리티 (기존)
+    reporting_doctor: '' // 🆕 판독의
   });
 
   // 서류 선택 상태 (studyId: [docRequestIds])
@@ -37,27 +39,27 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
     } catch (err) {
       console.error('Failed to fetch study documents:', err);
       setError('서류 목록을 불러오는데 실패했습니다.');
-      // 에러 시 더미 데이터 사용 (개발용)
       setStudyDocuments(getDummyData());
     } finally {
       setLoading(false);
     }
   };
 
-  // 더미 데이터 (백엔드 연결 전 테스트용)
+  // 🔥 수정: 더미 데이터를 워크리스트 필드명으로 변경
   const getDummyData = () => {
     return [
       {
         id: 1,
-        patient_id: 'P2025-001234',
-        patient_name: '김철수',
-        birth_date: '1985-06-12',
-        body_part: '흉부',
+        patientId: 'P2025-001234',
+        patientName: '김철수',
+        birthDate: '1985-06-12',
+        examPart: '흉부',
         modality: 'CT',
-        interpreting_physician: '이지은',
-        request_datetime: '2025-06-24T14:30:00Z',
+        reportingDoctor: '이지은',
+        requestDateTime: '2025-06-24T14:30:00Z',
+        examDateTime: '2025. 6. 27. 오전 11:00', // 🆕 검사일시 추가
         priority: '응급',
-        study_status: '검사완료',
+        examStatus: '검사완료',
         documents: [
           {
             id: 1,
@@ -71,45 +73,6 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
           },
           {
             id: 3,
-            document_type: { code: 'report_eng', name: '판독 결과지 (영문)', requires_signature: false },
-            status: 'pending'
-          },
-          {
-            id: 4,
-            document_type: { code: 'imaging_cd', name: '진료기록영상 (CD)', requires_signature: false },
-            status: 'pending'
-          },
-          {
-            id: 5,
-            document_type: { code: 'export_certificate', name: '반출 확인서', requires_signature: true },
-            status: 'pending'
-          }
-        ]
-      },
-      {
-        id: 2,
-        patient_id: 'P2025-001235',
-        patient_name: '박영희',
-        birth_date: '1978-03-25',
-        body_part: '무릎',
-        modality: 'CR',
-        interpreting_physician: '김정호',
-        request_datetime: '2025-06-24T15:00:00Z',
-        priority: '일반',
-        study_status: '검사완료',
-        documents: [
-          {
-            id: 6,
-            document_type: { code: 'report_kor', name: '판독 결과지 (국문)', requires_signature: false },
-            status: 'pending'
-          },
-          {
-            id: 7,
-            document_type: { code: 'exam_certificate', name: '검사 확인서', requires_signature: false },
-            status: 'pending'
-          },
-          {
-            id: 8,
             document_type: { code: 'imaging_cd', name: '진료기록영상 (CD)', requires_signature: false },
             status: 'pending'
           }
@@ -126,12 +89,14 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
     }));
   };
 
-  // 필터 초기화
+  // 🔥 수정: 필터 초기화 확장
   const resetFilters = () => {
     setFilters({
       exam_date: '',
+      patient_id: '',      // 🆕 환자ID 초기화
       patient_name: '',
       modality: '',
+      reporting_doctor: '' // 🆕 판독의 초기화
     });
   };
 
@@ -141,13 +106,11 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
       const studySelections = prev[studyId] || [];
       
       if (checked) {
-        // 추가
         return {
           ...prev,
           [studyId]: [...studySelections, docRequestId]
         };
       } else {
-        // 제거
         return {
           ...prev,
           [studyId]: studySelections.filter(id => id !== docRequestId)
@@ -171,13 +134,10 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
       const result = await pacsdocsService.processDocuments(studyId, {
         document_ids: selectedIds,
         action: 'complete',
-        processed_by: 'current_user', // 실제로는 로그인 사용자
+        processed_by: 'current_user',
         notes: ''
       });
 
-      console.log('Process result:', result);
-      
-      // 성공 메시지
       if (result.processed_count > 0) {
         alert(`${result.processed_count}개 서류가 처리되었습니다.`);
       }
@@ -186,13 +146,11 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
         alert(`${result.failed_count}개 서류 처리에 실패했습니다.`);
       }
 
-      // 선택 상태 초기화
       setSelectedDocuments(prev => ({
         ...prev,
         [studyId]: []
       }));
 
-      // 데이터 새로고침
       await fetchStudyDocuments();
       
     } catch (error) {
@@ -203,43 +161,27 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
     }
   };
 
-  // 동의서 클릭 핸들러
+  // 🔥 수정: 동의서 클릭 핸들러 - 워크리스트 필드명 사용
   const handleConsentClick = (study, docRequest) => {
-    console.log('📝 동의서 클릭:', { study, docRequest });
-    
     if (onShowUpload) {
-      onShowUpload(docRequest.document_type.code, study.patient_name, study.modality, study.body_part);
+      onShowUpload(docRequest.document_type.code, study.patientName, study.modality, study.examPart);
     }
   };
 
-  // ✅ 수정: 필요서류 클릭 핸들러 - studyId 추가
+  // 🔥 수정: 필요서류 클릭 핸들러 - 워크리스트 필드명 사용
   const handleDocumentClick = (study, docRequest) => {
-    console.log('🔍 서류 클릭된 데이터:', { study, docRequest });
-    
     if (docRequest.document_type.code === 'imaging_cd' || docRequest.document_type.code === 'imaging_dvd') {
-      // 진료기록영상은 특별 프로세스
-      console.log('💿 진료기록영상 프로세스 시작');
       if (onShowImagingProcess) {
-        onShowImagingProcess(study.patient_name, study.modality, study.body_part);
+        onShowImagingProcess(study.patientName, study.modality, study.examPart);
       }
     } else {
-      // 일반 서류는 미리보기
-      console.log('📄 문서 미리보기 요청:', {
-        docType: docRequest.document_type.code,
-        patientName: study.patient_name,
-        modality: study.modality,
-        bodyPart: study.body_part,
-        studyId: study.id  // ✅ 디버깅용 로그
-      });
-      
       if (onShowDocument) {
-        // ✅ 수정: study.id 추가!
         onShowDocument(
           docRequest.document_type.code, 
-          study.patient_name, 
+          study.patientName,
           study.modality, 
-          study.body_part,
-          study.id  // ✅ 이게 핵심! studyId 전달
+          study.examPart,
+          study.id
         );
       }
     }
@@ -257,13 +199,12 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
 
   return (
     <div className="document-request-list">
-      <div className="section-header">
-        📋 서류 요청 목록
-      </div>
+      <div className="section-header">📋 서류 요청 목록</div>
       
-      {/* 필터 섹션 */}
+      {/* 🔥 수정: 필터 섹션 2줄 레이아웃 */}
       <div className="filter-section">
-        <div className="filter-controls">
+        {/* 첫 번째 줄: 검사일시 + 환자ID + 환자명 */}
+        <div className="filter-row">
           <div className="filter-item">
             <span>📅</span>
             <input
@@ -275,16 +216,30 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
           </div>
           
           <div className="filter-item">
-            <span>🔍</span>
+            <span>🆔</span>
             <input
               type="text"
-              placeholder="환자명 검색"
+              placeholder="환자ID"
+              value={filters.patient_id}
+              onChange={(e) => handleFilterChange('patient_id', e.target.value)}
+              className="filter-input"
+            />
+          </div>
+          
+          <div className="filter-item">
+            <span>👤</span>
+            <input
+              type="text"
+              placeholder="환자명"
               value={filters.patient_name}
               onChange={(e) => handleFilterChange('patient_name', e.target.value)}
               className="filter-input patient-filter"
             />
           </div>
-          
+        </div>
+
+        {/* 두 번째 줄: 모달리티 + 판독의 + 버튼들 */}
+        <div className="filter-row">
           <div className="filter-item">
             <span>📋</span>
             <select
@@ -305,23 +260,34 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
             </select>
           </div>
           
-          <button className="btn btn-primary" onClick={fetchStudyDocuments}>
-            🔎 검색
-          </button>
-          <button className="btn btn-secondary" onClick={resetFilters}>
-            🔄 초기화
-          </button>
+          <div className="filter-item">
+            <span>👨‍⚕️</span>
+            <input
+              type="text"
+              placeholder="판독의"
+              value={filters.reporting_doctor}
+              onChange={(e) => handleFilterChange('reporting_doctor', e.target.value)}
+              className="filter-input"
+            />
+          </div>
+          
+          <div className="filter-buttons">
+            <button className="btn btn-primary" onClick={fetchStudyDocuments}>
+              🔎 검색
+            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>
+              🔄 초기화
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 에러 메시지 */}
       {error && (
-        <div className="error-message">
-          ⚠️ {error}
-        </div>
+        <div className="error-message">⚠️ {error}</div>
       )}
       
-      {/* 테이블 */}
+      {/* 🔥 수정: 테이블 - 워크리스트 필드명 사용 */}
       <div className="table-container">
         <table className="worklist-table">
           <thead>
@@ -334,38 +300,59 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
               <th>판독의</th>
               <th>검사일시</th>
               <th>동의서</th>
-              <th>필요서류</th>
-              <th>발급</th>
+              <th>필요서류 등</th> 
+              <th>발급 현황</th>
             </tr>
           </thead>
           <tbody>
             {studyDocuments.map((study, index) => {
               const selectedIds = selectedDocuments[study.id] || [];
-              const consentDocs = study.documents?.filter(doc => doc.document_type.requires_signature) || [];
-              const requiredDocs = study.documents?.filter(doc => !doc.document_type.requires_signature) || [];
+              
+              // 🔥 수정: 동의서는 조영제 동의서만 필터링
+              const consentDocs = study.documents?.filter(doc => 
+                doc.document_type.code === 'consent_contrast'
+              ) || [];
+              
+              // 🔥 수정: 필요서류는 조영제 동의서 제외한 모든 서류
+              const requiredDocs = study.documents?.filter(doc => 
+                doc.document_type.code !== 'consent_contrast'
+              ) || [];
               
               return (
                 <tr 
                   key={study.id} 
-                  className={study.priority === '응급' ? 'urgent' : ''}
+                  className={study.priority === '응급' ? 'urgent-row' : ''}
                 >
-                  <td>{index + 1}</td>
-                  <td>{study.patient_id}</td>
-                  <td>
-                    {study.patient_name}
-                    <br />
-                    <small>{study.birth_date}</small>
+                  <td className="number-cell">{index + 1}</td>
+                  <td>{study.patientId}</td>
+                  <td className="patient-cell">
+                    {study.patientName}
+                    <div className="patient-id">{study.birthDate}</div>
                   </td>
-                  <td>{study.body_part}</td>
-                  <td>{study.modality}</td>
-                  <td>{study.interpreting_physician}</td>
+                  <td>{study.examPart}</td>
+                  <td className={`modality-cell modality-${study.modality?.toLowerCase()}`}>
+                    {study.modality}
+                  </td>
+                  <td>{study.reportingDoctor}</td>
                   <td>
-                    {new Date(study.request_datetime).toLocaleDateString('ko-KR')}
-                    <br />
-                    {new Date(study.request_datetime).toLocaleTimeString('ko-KR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
+                    {/* 🔥 수정: examDateTime 사용 (검사일시) */}
+                    {study.examDateTime ? (() => {
+                      if (typeof study.examDateTime === 'string' && study.examDateTime.includes('.')) {
+                        return study.examDateTime;
+                      } else {
+                        const date = new Date(study.examDateTime);
+                        return (
+                          <>
+                            {date.toLocaleDateString('ko-KR')}
+                            <br />
+                            {date.toLocaleTimeString('ko-KR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </>
+                        );
+                      }
+                    })() : 'N/A'}
                   </td>
                   
                   {/* 동의서 열 */}
@@ -374,14 +361,14 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
                       consentDocs.map(doc => (
                         <div 
                           key={doc.id}
-                          className={`consent-item ${doc.status === 'completed' ? 'completed' : ''}`}
+                          className={`consent-item ${doc.status}`}
                           onClick={() => handleConsentClick(study, doc)}
                         >
                           {doc.status === 'completed' ? '✅ 완료' : '조영제 동의서'}
                         </div>
                       ))
                     ) : (
-                      <small style={{ color: '#a0aec0' }}>해당없음</small>
+                      <small className="no-consent">해당없음</small>
                     )}
                   </td>
                   
@@ -417,19 +404,16 @@ const DocumentRequestList = ({ onShowDocument, onShowUpload, onShowImagingProces
                   </td>
                   
                   {/* 발급 열 */}
-                  <td>
-                    <div className="issue-section">
-                      <button
-                        className="issue-btn"
-                        onClick={() => handleProcessDocuments(study.id)}
-                        disabled={selectedIds.length === 0 || loading}
-                      >
-                        {loading ? '처리중...' : '선택 발급'}
-                      </button>
-                      <br />
-                      <small style={{ color: '#718096' }}>
-                        {selectedIds.length}개 선택
-                      </small>
+                  <td className="issue-section">
+                    <button
+                      className="issue-btn"
+                      onClick={() => handleProcessDocuments(study.id)}
+                      disabled={selectedIds.length === 0 || loading}
+                    >
+                      {loading ? '처리중...' : '선택 발급'}
+                    </button>
+                    <div className="issue-count">
+                      {selectedIds.length}개 선택
                     </div>
                   </td>
                 </tr>

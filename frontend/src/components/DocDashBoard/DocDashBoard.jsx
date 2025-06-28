@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   User, 
+  Monitor,
   FileText, 
   Activity, 
   Brain, 
@@ -37,6 +38,7 @@ import { DEFAULT_DOCTOR_ID } from '../EMR/lisConfig';
 import ResultModal from '../LIS/ResultModal';
 import { useParams } from 'react-router-dom';
 import { generateCdssDummyResult } from '../utils/dummy';
+
 // CSS 파일 import
 import './DocDashBoard.css';
 
@@ -854,6 +856,7 @@ const DocDashBoard = ({patient  }) => {
               </div>
             </div>
           </div>
+         
         </div>
       </div>
 

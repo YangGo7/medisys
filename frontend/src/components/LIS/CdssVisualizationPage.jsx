@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Doughnut, Bar, Line } from 'react-chartjs-2';
-import 'chart.js/auto';
+import ReactECharts from 'echarts-for-react';
 import './CdssVisualizationPage.css';
 import ShapContributionChart from './ShapContributionChart';
 import VariableImportanceChart from './VariableImportanceChart';
@@ -50,73 +49,42 @@ const CdssVisualizationPage = () => {
 
   const renderDonutChart = () => {
     if (!stats) return null;
-    return (
-      <Doughnut
-        data={{
-          labels: ['정상', '이상'],
-          datasets: [{
-            data: [stats.normal, stats.abnormal],
-            backgroundColor: ['#10B981', '#EF4444'],
-          }],
-        }}
-        options={{ plugins: { legend: { position: 'top' } }, maintainAspectRatio: false }}
-      />
-    );
-  };
 
-  const renderBarChart = () => {
-    if (!stats || !stats.mean_values) return null;
-    const labels = Object.keys(stats.mean_values);
-    const normalData = labels.map(l => stats.mean_values[l].normal);
-    const abnormalData = labels.map(l => stats.mean_values[l].abnormal);
-
-    return (
-      <Bar
-        data={{
-          labels,
-          datasets: [
-            { label: '정상 평균', data: normalData, backgroundColor: '#3B82F6' },
-            { label: '이상 평균', data: abnormalData, backgroundColor: '#F59E0B' },
-          ],
-        }}
-        options={{ responsive: true, plugins: { legend: { position: 'top' } } }}
-      />
-    );
-  };
-
-  const renderLineChart = () => {
-    if (!stats || !stats.weekly_abnormal_trend) return null;
-    return (
-      <Line
-        data={{
-          labels: stats.weekly_abnormal_trend.map(d => d.week),
-          datasets: [
-            {
-              label: '주간 이상 건수',
-              data: stats.weekly_abnormal_trend.map(d => d.abnormal_count),
-              borderColor: '#6366F1',
-              backgroundColor: 'rgba(99, 102, 241, 0.2)',
-              fill: true,
-            },
-          ],
-        }}
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          elements: {
-            point: {
-              radius: 4
-            },
-            line: {
-              borderWidth: 3
-            }
+    const option = {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c}건 ({d}%)'
+      },
+      legend: {
+        top: 'bottom'
+      },
+      series: [
+        {
+          name: '예측 분포',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: true,
+            position: 'outside',
+            fontSize: 14
           },
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }}
-      />
-    );
+          emphasis: {
+            scale: true,
+            scaleSize: 12
+          },
+          labelLine: {
+            show: true
+          },
+          data: [
+            { value: stats.normal, name: '정상', itemStyle: { color: '#10B981' } },
+            { value: stats.abnormal, name: '이상', itemStyle: { color: '#EF4444' } }
+          ]
+        }
+      ]
+    };
+
+    return <ReactECharts option={option} style={{ height: 360 }} />;
   };
 
   return (
@@ -168,17 +136,17 @@ const CdssVisualizationPage = () => {
             <p className="cdss-loading">예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
           )}
         </div>
-
+          
         {/* 전체 시각화 카드 */}
         <div className="cdss-card">
           <h2>📊 전체 시각화</h2>
           <div className="cdss-chart-row">
             <div className="cdss-doughnut-wrapper">{renderDonutChart()}</div>
-            <div>{renderLineChart()}</div>
+            <div>🚧 라인 차트(ECharts) 변환 예정</div>
           </div>
 
           <div className="cdss-chart-full">
-            {renderBarChart()}
+            🚧 바 차트(ECharts) 변환 예정
           </div>
 
           <VariableImportanceChart />

@@ -6,22 +6,14 @@
   flex-direction: column;
   background: #ffffff;
   font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow: hidden;
+  overflow: hidden; /* 🔥 여기가 중요! */
 }
 
-/* 헤더 섹션 */
-.preview-header {
-  padding: 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-}
-
-.preview-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto; /* 🔥 스크롤은 여기서만! */
+  display: flex;
+  flex-direction: column;
 }
 
 /* 빈 화면 스타일 */
@@ -110,7 +102,6 @@
 /* 문서 미리보기 컨텐츠 */
 .preview-content {
   flex: 1;
-  overflow-y: auto;
   background: white;
   padding: 30px;
   margin: 20px;
@@ -152,7 +143,7 @@
 }
 
 /* 환자 정보 */
-.patient-info {
+.document-patient-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
