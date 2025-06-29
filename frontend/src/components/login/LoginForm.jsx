@@ -12,8 +12,17 @@ function LoginForm({ onLoginSuccess }) {
   const getCSRFToken = async () => {
     try {
       const res = await fetch('/api/account/get-csrf/', {
+        method: 'GET',
         credentials: 'include',
+        headers: {
+          'Accept': 'application/json', // ✅ JSON 명시
+        },
       });
+
+      if (!res.ok) {
+        throw new Error(`CSRF 요청 실패: ${res.status}`);
+      }
+
       const data = await res.json();
       return data.csrfToken;
     } catch (err) {
@@ -21,6 +30,7 @@ function LoginForm({ onLoginSuccess }) {
       return null;
     }
   };
+
 
   const handleLogin = async () => {
     if (!username || !password || !code) {
