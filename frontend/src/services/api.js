@@ -80,7 +80,7 @@ export const getStudyDetailForViewer = async (studyUid) => {
  */
 export const getDicomImagesFromOrthanc = async (studyUid) => {
   try {
-    // Orthanc REST API를 직접 호출하거나 Django backend를 통해 호출
+    // Django backend를 통해 Orthanc API 호출
     const response = await fetch(`${API_BASE_URL}/api/orthanc/studies/${studyUid}/`, {
       method: 'GET',
       headers: {
@@ -96,6 +96,54 @@ export const getDicomImagesFromOrthanc = async (studyUid) => {
     return data;
   } catch (error) {
     console.error(`Study ${studyUid} DICOM 이미지 조회 오류:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Orthanc에서 스터디의 시리즈 목록 조회
+ */
+export const getStudySeries = async (studyUid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orthanc/studies/${studyUid}/series/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Study ${studyUid} 시리즈 조회 오류:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Orthanc에서 시리즈의 인스턴스 목록 조회
+ */
+export const getSeriesInstances = async (seriesUid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orthanc/series/${seriesUid}/instances/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Series ${seriesUid} 인스턴스 조회 오류:`, error);
     throw error;
   }
 };
@@ -126,5 +174,59 @@ export const getAnnotationsForStudy = async (studyUid) => {
     console.error(`Study ${studyUid} 어노테이션 조회 오류:`, error);
     // 어노테이션 조회 실패시에도 빈 배열 반환 (선택적 기능이므로)
     return { status: 'error', data: [] };
+  }
+};
+
+/**
+ * 특정 인스턴스의 어노테이션 조회
+ */
+export const getAnnotationsForInstance = async (sopInstanceUID) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/dr-annotations/instance/${sopInstanceUID}/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { status: 'success', data: [] };
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Instance ${sopInstanceUID} 어노테이션 조회 오류:`, error);
+    return { status: 'error', data: [] };
+  }
+};
+
+/**
+ * 리포트 조회
+ */
+export const getReportForStudy = async (studyUid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/dr-reports/study/${studyUid}/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { status: 'success', report: null };
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Study ${studyUid} 리포트 조회 오류:`, error);
+    throw error;
   }
 };

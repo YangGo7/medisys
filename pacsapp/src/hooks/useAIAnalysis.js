@@ -292,8 +292,7 @@ const useAIAnalysis = (currentStudyUID) => {
             if (data.status === 'success') {
                 setAnalysisResults(data);
                 setOverlays(data.results || []);
-                setAnalysisStatus(`저장된 결과 (${data.count}개)`);
-                showToast(`저장된 결과 ${data.count}개를 불러왔습니다`);
+                showToast(`저장된 결과를 불러왔습니다`);
                 return true;
             } else {
                 setAnalysisStatus('저장된 결과 없음');
@@ -473,7 +472,7 @@ const useAIAnalysis = (currentStudyUID) => {
      * 분석 상태를 초기화하는 함수
      */
     const resetAnalysisState = useCallback(() => {
-        setAnalysisStatus('대기 중');
+        setAnalysisStatus('AI분석 완료');  // 대기중에서 바꿈
         setAnalysisResults(null);
         setOverlays([]);
         setShowOverlays(false);

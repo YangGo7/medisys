@@ -9,6 +9,7 @@ import lacidLogo from '../Styles/LaCID_01.png';
 const LaCIDPage = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
   const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -18,6 +19,136 @@ const LaCIDPage = () => {
   const scrollToSection = (section) => {
     setActiveSection(section);
     setIsMobileMenuOpen(false);
+  };
+
+  // 팀원 상세 정보
+  const teamMembers = [
+    {
+      id: 1,
+      name: '김채윤',
+      role: '팀장',
+      desc: 'MEMO1',
+      initial: '김',
+      email: 'chaeyun.kim@lacid.ai',
+      phone: '010-1234-5678',
+      department: '연구개발본부',
+      experience: '5년차',
+      education: '서울대학교 컴퓨터공학과 석사',
+      goals: [
+        '폐 질환 진단 AI 모델의 정확도 98% 이상 달성',
+        '국내외 의료기관과의 파트너십 확대',
+        '차세대 의료 AI 플랫폼 구축 선도'
+      ],
+      responsibilities: [
+        '전체 프로젝트 기획 및 관리',
+        'AI 모델 개발 총괄',
+        '임상 파트너십 구축',
+        '팀원 멘토링 및 기술 지도'
+      ],
+      skills: ['Python', 'TensorFlow', 'PyTorch', 'Medical Imaging', 'Project Management'],
+      achievements: [
+        '2024년 우수 AI 연구상 수상',
+        '국제 의료 AI 학회 논문 3편 게재',
+        'SCI급 저널 논문 5편 발표'
+      ]
+    },
+    {
+      id: 2,
+      name: '김상묵',
+      role: '팀원',
+      desc: 'MEMO2',
+      initial: '김',
+      email: 'sangmook.kim@lacid.ai',
+      phone: '010-2345-6789',
+      department: 'AI 개발팀',
+      experience: '4년차',
+      education: '카이스트 전산학부 학사',
+      goals: [
+        '실시간 영상 처리 시스템 최적화',
+        '딥러닝 모델 경량화 기술 개발',
+        '의료진 사용자 경험 개선'
+      ],
+      responsibilities: [
+        '폐 결절 검출 모델 개발',
+        '영상 전처리 알고리즘 구현',
+        '모델 성능 최적화',
+        '데이터 파이프라인 구축'
+      ],
+      skills: ['Computer Vision', 'Deep Learning', 'OpenCV', 'CUDA', 'Docker'],
+      achievements: [
+        '폐 결절 검출 정확도 95% 달성',
+        '처리 속도 30% 향상 알고리즘 개발',
+        '특허 출원 2건'
+      ]
+    },
+    {
+      id: 3,
+      name: '심보람',
+      role: '팀원',
+      desc: 'MEMO3',
+      initial: '심',
+      email: 'boram.sim@lacid.ai',
+      phone: '010-3456-7890',
+      department: '임상연구팀',
+      experience: '3년차',
+      education: '연세대학교 의공학과 석사',
+      goals: [
+        '임상 검증 프로토콜 고도화',
+        '의료진 피드백 시스템 구축',
+        '국제 임상시험 참여 확대'
+      ],
+      responsibilities: [
+        '임상 데이터 수집 및 분석',
+        '의료진과의 협업 조율',
+        '임상시험 설계 및 진행',
+        '규제 승인 업무 지원'
+      ],
+      skills: ['Clinical Research', 'Medical Statistics', 'DICOM', 'HL7', 'GCP'],
+      achievements: [
+        '50개 병원 임상 파트너십 구축',
+        'FDA 승인 준비 문서 작성',
+        '임상시험 성공률 85% 달성'
+      ]
+    },
+    {
+      id: 4,
+      name: '이나영',
+      role: '팀원',
+      desc: 'MEMO4',
+      initial: '이',
+      email: 'nayoung.lee@lacid.ai',
+      phone: '010-4567-8901',
+      department: '소프트웨어개발팀',
+      experience: '3년차',
+      education: '고려대학교 컴퓨터학과 학사',
+      goals: [
+        '사용자 친화적 인터페이스 개발',
+        '시스템 안정성 99.9% 달성',
+        '글로벌 서비스 플랫폼 구축'
+      ],
+      responsibilities: [
+        '웹 플랫폼 프론트엔드 개발',
+        'UI/UX 디자인 및 구현',
+        '사용자 경험 분석 및 개선',
+        '시스템 통합 테스트'
+      ],
+      skills: ['React', 'JavaScript', 'Node.js', 'UI/UX Design', 'System Integration'],
+      achievements: [
+        '사용자 만족도 95% 달성',
+        '시스템 다운타임 0.01% 유지',
+        '모바일 반응형 웹 완성도 100%'
+      ]
+    }
+  ];
+
+  const openMemberModal = (member) => {
+    console.log('팀원 클릭됨:', member); // 디버깅용
+    setSelectedMember(member);
+  };
+
+  const closeMemberModal = () => {
+    console.log('모달 닫기'); // 디버깅용
+    setSelectedMember(null);
   };
 
   return (
@@ -161,17 +292,25 @@ const LaCIDPage = () => {
               <p className="section-subtitle">전문성과 경험을 갖춘 우리 팀을 소개합니다</p>
 
               <div className="grid-3">
-                {[
-                  { name: '김채윤', role: '팀장', desc: 'MEMO1', initial: '김' },
-                  { name: '김상묵', role: '팀원', desc: 'MEMO2', initial: '김'},
-                  { name: '심보람', role: '팀원', desc: 'MEMO3', initial: '심'},
-                  { name: '이나영', role: '팀원', desc: 'MEMO4', initial: '이' }
-                ].map((member, index) => (
-                  <div key={index} className="team-member">
+                {teamMembers.map((member) => (
+                  <div 
+                    key={member.id} 
+                    className="team-member"
+                    style={{ cursor: 'pointer' }}
+                    onClick={(e) => {
+                      console.log('카드 클릭됨!', member.name); // 디버깅
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openMemberModal(member);
+                    }}
+                  >
                     <div className="member-avatar">{member.initial}</div>
                     <h4 className="member-name">{member.name}</h4>
                     <p className="member-role">{member.role}</p>
                     <p className="member-desc">{member.desc}</p>
+                    <div style={{ marginTop: '12px', color: '#2563eb', fontSize: '14px', fontWeight: '500' }}>
+                      자세히 보기 →
+                    </div>
                   </div>
                 ))}
               </div>
@@ -297,6 +436,263 @@ const LaCIDPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Team Member Detail Modal */}
+      {selectedMember && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+          onClick={(e) => {
+            console.log('모달 배경 클릭됨');
+            closeMemberModal();
+          }}
+        >
+          <div 
+            style={{
+              background: 'white',
+              borderRadius: '1.5rem',
+              padding: '2rem',
+              width: '100%',
+              maxWidth: '64rem',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              transform: 'scale(1)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={(e) => {
+              console.log('모달 컨텐츠 클릭됨');
+              e.stopPropagation();
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#1f2937'
+              }}>팀원 상세 정보</h3>
+              <button 
+                onClick={(e) => {
+                  console.log('닫기 버튼 클릭됨');
+                  closeMemberModal();
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '0.5rem',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s ease'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#f3f4f6'}
+                onMouseOut={(e) => e.target.style.background = 'none'}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="grid-2" style={{ gap: '2rem' }}>
+              {/* 기본 정보 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div 
+                    className="member-avatar" 
+                    style={{ 
+                      width: '6rem', 
+                      height: '6rem', 
+                      fontSize: '1.875rem', 
+                      margin: '0 auto 1rem' 
+                    }}
+                  >
+                    {selectedMember.initial}
+                  </div>
+                  <h4 style={{ 
+                    fontSize: '1.5rem', 
+                    fontWeight: 'bold', 
+                    color: '#1f2937', 
+                    marginBottom: '0.5rem' 
+                  }}>
+                    {selectedMember.name}
+                  </h4>
+                  <p style={{ 
+                    color: '#2563eb', 
+                    fontWeight: '600', 
+                    fontSize: '1.125rem', 
+                    marginBottom: '1rem' 
+                  }}>
+                    {selectedMember.role}
+                  </p>
+                </div>
+                
+                <div style={{ 
+                  background: '#f9fafb', 
+                  borderRadius: '0.5rem', 
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Mail className="w-5 h-5" style={{ color: '#6b7280' }} />
+                    <span style={{ color: '#374151' }}>{selectedMember.email}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Phone className="w-5 h-5" style={{ color: '#6b7280' }} />
+                    <span style={{ color: '#374151' }}>{selectedMember.phone}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Users className="w-5 h-5" style={{ color: '#6b7280' }} />
+                    <span style={{ color: '#374151' }}>{selectedMember.department}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Award className="w-5 h-5" style={{ color: '#6b7280' }} />
+                    <span style={{ color: '#374151' }}>경력 {selectedMember.experience}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <h5 style={{ 
+                    fontWeight: '600', 
+                    color: '#1f2937', 
+                    marginBottom: '0.5rem' 
+                  }}>
+                    학력
+                  </h5>
+                  <p style={{ color: '#6b7280' }}>{selectedMember.education}</p>
+                </div>
+                
+                <div>
+                  <h5 style={{ 
+                    fontWeight: '600', 
+                    color: '#1f2937', 
+                    marginBottom: '0.75rem' 
+                  }}>
+                    기술 스택
+                  </h5>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    gap: '0.5rem' 
+                  }}>
+                    {selectedMember.skills.map((skill, index) => (
+                      <span 
+                        key={index}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          background: '#dbeafe',
+                          color: '#1e40af',
+                          borderRadius: '9999px',
+                          fontSize: '0.875rem',
+                          fontWeight: '500'
+                        }}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* 상세 정보 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <h5 style={{ 
+                    fontWeight: '600', 
+                    color: '#1f2937', 
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ fontSize: '1.25rem' }}>🎯</span>
+                    주요 목표
+                  </h5>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {selectedMember.goals.map((goal, index) => (
+                      <li key={index} style={{ 
+                        display: 'flex', 
+                        alignItems: 'flex-start', 
+                        gap: '0.5rem' 
+                      }}>
+                        <span style={{ color: '#2563eb', marginTop: '0.25rem' }}>•</span>
+                        <span style={{ color: '#374151' }}>{goal}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h5 style={{ 
+                    fontWeight: '600', 
+                    color: '#1f2937', 
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ fontSize: '1.25rem' }}>💼</span>
+                    수행 역할
+                  </h5>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {selectedMember.responsibilities.map((responsibility, index) => (
+                      <li key={index} style={{ 
+                        display: 'flex', 
+                        alignItems: 'flex-start', 
+                        gap: '0.5rem' 
+                      }}>
+                        <span style={{ color: '#059669', marginTop: '0.25rem' }}>•</span>
+                        <span style={{ color: '#374151' }}>{responsibility}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h5 style={{ 
+                    fontWeight: '600', 
+                    color: '#1f2937', 
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ fontSize: '1.25rem' }}>🏆</span>
+                    주요 성과
+                  </h5>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {selectedMember.achievements.map((achievement, index) => (
+                      <li key={index} style={{ 
+                        display: 'flex', 
+                        alignItems: 'flex-start', 
+                        gap: '0.5rem' 
+                      }}>
+                        <span style={{ color: '#d97706', marginTop: '0.25rem' }}>•</span>
+                        <span style={{ color: '#374151' }}>{achievement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       
     </div>

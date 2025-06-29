@@ -1,5 +1,4 @@
-// pacsapp/src/services/pacsdocsService.js
-
+// // pacsapp/src/services/pacsdocsService.js
 // import axios from 'axios';
 
 // // API 기본 URL 설정
@@ -136,7 +135,7 @@
 //         date: filters.exam_date
 //       };
 
-//           } catch (error) {
+//     } catch (error) {
 //       console.error('❌ PACS 문서 통합 데이터 조회 실패:', error);
       
 //       // 🔄 에러 발생시에도 워크리스트 API 한번 더 시도
@@ -159,65 +158,61 @@
 //       }
       
 //       // 🔄 개발용: 더미 데이터 반환 (기존 코드 유지)
-//       if (true) { // 강제로 더미 데이터 사용 중지
-//         console.warn('🔄 Using dummy data for development');
-//         return {
-//           results: [
-//             {
-//               id: 1,
-//               patientId: 'P2025-001234',        // ✅ 수정
-//               patientName: '김철수',             // ✅ 수정
-//               birthDate: '1985-06-12',          // ✅ 수정
-//               examPart: '흉부',                 // ✅ 수정
-//               modality: 'CT',
-//               reportingDoctor: '이지은',         // ✅ 수정
-//               requestDateTime: '2025-06-24T14:30:00Z',  // ✅ 수정
-//               priority: '응급',
-//               examStatus: '검사완료',           // ✅ 수정
-//               documents: [
-//                 {
-//                   id: 1,
-//                   document_type: { 
-//                     code: 'consent_contrast', 
-//                     name: '조영제 사용 동의서', 
-//                     requires_signature: true 
-//                   },
-//                   status: 'pending'
+//       console.warn('🔄 Using dummy data for development');
+//       return {
+//         results: [
+//           {
+//             id: 1,
+//             patientId: 'P2025-001234',
+//             patientName: '김철수',
+//             birthDate: '1985-06-12',
+//             examPart: '흉부',
+//             modality: 'CT',
+//             reportingDoctor: '이지은',
+//             requestDateTime: '2025-06-24T14:30:00Z',
+//             priority: '응급',
+//             examStatus: '검사완료',
+//             documents: [
+//               {
+//                 id: 1,
+//                 document_type: { 
+//                   code: 'consent_contrast', 
+//                   name: '조영제 사용 동의서', 
+//                   requires_signature: true 
 //                 },
-//                 {
-//                   id: 2,
-//                   document_type: { 
-//                     code: 'report_kor', 
-//                     name: '판독 결과지 (국문)', 
-//                     requires_signature: false 
-//                   },
-//                   status: 'pending'
+//                 status: 'pending'
+//               },
+//               {
+//                 id: 2,
+//                 document_type: { 
+//                   code: 'report_kor', 
+//                   name: '판독 결과지 (국문)', 
+//                   requires_signature: false 
 //                 },
-//                 {
-//                   id: 3,
-//                   document_type: { 
-//                     code: 'imaging_cd', 
-//                     name: '진료기록영상 (CD)', 
-//                     requires_signature: false 
-//                   },
-//                   status: 'pending'
+//                 status: 'pending'
+//               },
+//               {
+//                 id: 3,
+//                 document_type: { 
+//                   code: 'imaging_cd', 
+//                   name: '진료기록영상 (CD)', 
+//                   requires_signature: false 
 //                 },
-//                 {
-//                   id: 4,
-//                   document_type: { 
-//                     code: 'export_certificate', 
-//                     name: '반출 확인서', 
-//                     requires_signature: true 
-//                   },
-//                   status: 'pending'
-//                 }
-//               ]
-//             }
-//           ]
-//         };
-//       }
-      
-//       throw error;
+//                 status: 'pending'
+//               },
+//               {
+//                 id: 4,
+//                 document_type: { 
+//                   code: 'export_certificate', 
+//                   name: '반출 확인서', 
+//                   requires_signature: true 
+//                 },
+//                 status: 'pending'
+//               }
+//             ]
+//           }
+//         ]
+//       };
 //     }
 //   },
 
@@ -256,18 +251,6 @@
 //       return response.data;
 //     } catch (error) {
 //       console.error(`Failed to process documents for study ${studyId}:`, error);
-      
-//       // 개발용: 성공 응답 시뮬레이션
-//       if (process.env.NODE_ENV === 'development') {
-//         console.warn('🔄 Simulating successful document processing');
-//         return {
-//           processed_count: data.document_ids?.length || 0,
-//           failed_count: 0,
-//           processed_documents: ['시뮬레이션 처리됨'],
-//           failed_documents: []
-//         };
-//       }
-      
 //       throw error;
 //     }
 //   },
@@ -313,14 +296,113 @@
 //   },
 
 //   /**
-//    * 개별 서류 상태 변경
+//    * 🔥 개별 서류 상태 변경 (업로드/발급완료 처리용) - 콜백 지원 추가
 //    */
-//   updateDocumentStatus: async (docRequestId, data) => {
+//   updateDocumentStatus: async (docRequestId, data, options = {}) => {
 //     try {
+//       console.log('🔄 서류 상태 업데이트 시작:', { docRequestId, data });
+      
 //       const response = await api.patch(`/document-requests/${docRequestId}/update_status/`, data);
+      
+//       console.log('✅ 서류 상태 업데이트 성공:', response.data);
+      
+//       // 🔥 옵션 처리 (새로고침 콜백 등)
+//       if (options.onSuccess && typeof options.onSuccess === 'function') {
+//         try {
+//           await options.onSuccess(response.data);
+//         } catch (callbackError) {
+//           console.error('❌ 성공 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
 //       return response.data;
 //     } catch (error) {
-//       console.error(`Failed to update document status ${docRequestId}:`, error);
+//       console.error(`❌ 서류 상태 업데이트 실패 ${docRequestId}:`, error);
+      
+//       // 🔥 옵션 처리 (에러 콜백)
+//       if (options.onError && typeof options.onError === 'function') {
+//         try {
+//           await options.onError(error);
+//         } catch (callbackError) {
+//           console.error('❌ 에러 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
+//       throw error;
+//     }
+//   },
+
+//   /**
+//    * 🔥 CD 굽기 완료 시 상태 업데이트 (콜백 지원 강화)
+//    */
+//   updateCDStatus: async (studyId, documentId, options = {}) => {
+//     try {
+//       console.log('🔄 CD 굽기 완료 상태 업데이트:', { studyId, documentId });
+      
+//       // CD 관련 서류 상태를 완료로 변경
+//       const response = await api.patch(`/document-requests/${documentId}/update_status/`, {
+//         status: 'completed',
+//         processed_by: 'cd_burner_system',
+//         notes: 'CD 굽기 완료'
+//       });
+      
+//       console.log('✅ CD 상태 업데이트 성공:', response.data);
+      
+//       // 🔥 성공 시 부모 컴포넌트로 상태 변경 알림
+//       if (options.onSuccess && typeof options.onSuccess === 'function') {
+//         console.log('🔄 CD 완료 콜백 실행');
+//         try {
+//           await options.onSuccess(studyId, documentId, 'completed');
+//         } catch (callbackError) {
+//           console.error('❌ CD 완료 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
+//       return response.data;
+//     } catch (error) {
+//       console.error(`❌ CD 상태 업데이트 실패:`, error);
+      
+//       // 🔥 에러 콜백 처리
+//       if (options.onError && typeof options.onError === 'function') {
+//         try {
+//           await options.onError(error);
+//         } catch (callbackError) {
+//           console.error('❌ CD 에러 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
+//       throw error;
+//     }
+//   },
+
+//   /**
+//    * 🔥 업로드 완료 시 상태 업데이트 (새로 추가)
+//    */
+//   updateUploadStatus: async (documentId, options = {}) => {
+//     try {
+//       console.log('🔄 업로드 완료 상태 업데이트:', { documentId });
+      
+//       const response = await api.patch(`/document-requests/${documentId}/update_status/`, {
+//         status: 'completed',
+//         processed_by: 'upload_system',
+//         notes: '스캔 업로드 완료'
+//       });
+      
+//       console.log('✅ 업로드 상태 업데이트 성공:', response.data);
+      
+//       // 🔥 성공 콜백 실행
+//       if (options.onSuccess && typeof options.onSuccess === 'function') {
+//         console.log('🔄 업로드 완료 콜백 실행');
+//         try {
+//           await options.onSuccess(null, documentId, 'completed');
+//         } catch (callbackError) {
+//           console.error('❌ 업로드 완료 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
+//       return response.data;
+//     } catch (error) {
+//       console.error(`❌ 업로드 상태 업데이트 실패:`, error);
 //       throw error;
 //     }
 //   },
@@ -355,12 +437,12 @@
 //     }
 //   },
 
-//   // ========== 파일 업로드 (향후 확장용) ==========
+//   // ========== 파일 업로드 ==========
 
 //   /**
-//    * 파일 업로드 (스캔 문서 등)
+//    * 🔥 파일 업로드 (스캔 문서 등) - 실제 Django API 사용
 //    */
-//   uploadFile: async (file, metadata = {}) => {
+//   uploadFile: async (file, metadata = {}, options = {}) => {
 //     try {
 //       const formData = new FormData();
 //       formData.append('file', file);
@@ -369,16 +451,38 @@
 //         formData.append(key, metadata[key]);
 //       });
 
-//       const response = await axios.post(`${API_BASE_URL}/api/upload/`, formData, {
+//       // 🔥 실제 Django API 호출
+//       const response = await axios.post(`${PACSDOCS_API_URL}/upload/`, formData, {
 //         headers: {
 //           'Content-Type': 'multipart/form-data',
 //         },
 //         timeout: 30000,
 //       });
       
+//       console.log('✅ 파일 업로드 성공:', response.data);
+      
+//       // 🔥 업로드 성공 콜백 실행
+//       if (options.onSuccess && typeof options.onSuccess === 'function') {
+//         try {
+//           await options.onSuccess(response.data);
+//         } catch (callbackError) {
+//           console.error('❌ 업로드 성공 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
 //       return response.data;
 //     } catch (error) {
-//       console.error('Failed to upload file:', error);
+//       console.error('❌ 파일 업로드 실패:', error);
+      
+//       // 🔥 업로드 에러 콜백 실행
+//       if (options.onError && typeof options.onError === 'function') {
+//         try {
+//           await options.onError(error);
+//         } catch (callbackError) {
+//           console.error('❌ 업로드 에러 콜백 실행 실패:', callbackError);
+//         }
+//       }
+      
 //       throw error;
 //     }
 //   },
@@ -387,7 +491,7 @@
 // // ========== 🔧 헬퍼 함수들 ==========
 
 // /**
-//  * 🔧 모달리티별 기본 서류 생성 함수
+//  * 🔧 모달리티별 기본 서류 생성 함수 (중복 방지)
 //  */
 // function getDefaultDocuments(modality) {
 //   const contrastModalities = ['CT', 'MR', 'XA', 'NM', 'PT'];
@@ -423,16 +527,24 @@
 //     }
 //   ];
 
+//   // 🔥 수정: 조영제 동의서 중복 방지
 //   if (requiresContrast) {
-//     baseDocuments.unshift({
-//       id: Date.now(),
-//       document_type: { 
-//         code: 'consent_contrast', 
-//         name: '조영제 사용 동의서', 
-//         requires_signature: true 
-//       },
-//       status: 'pending'
-//     });
+//     // 이미 동의서가 있는지 확인
+//     const hasConsent = baseDocuments.some(doc => 
+//       doc.document_type.code === 'consent_contrast'
+//     );
+    
+//     if (!hasConsent) {
+//       baseDocuments.unshift({
+//         id: Date.now(),
+//         document_type: { 
+//           code: 'consent_contrast', 
+//           name: '조영제 사용 동의서', 
+//           requires_signature: true 
+//         },
+//         status: 'pending'
+//       });
+//     }
 //   }
 
 //   return baseDocuments;
@@ -585,6 +697,23 @@ export const pacsdocsService = {
       const enrichedData = await Promise.all(
         worklistData.map(async (studyRequest) => {
           try {
+            // 🔥 판독의와 검사일시 유효성 체크
+            const hasRadiologist = studyRequest.reportingDoctor && 
+                                 studyRequest.reportingDoctor !== '' && 
+                                 studyRequest.reportingDoctor !== 'N/A' &&
+                                 studyRequest.reportingDoctor !== 'n/a';
+            
+            const hasValidDateTime = studyRequest.requestDateTime && 
+                                    studyRequest.requestDateTime !== '' && 
+                                    studyRequest.requestDateTime !== 'N/A' &&
+                                    studyRequest.requestDateTime !== 'n/a';
+            
+            // 판독의나 검사일시가 없으면 null 반환 (나중에 필터링됨)
+            if (!hasRadiologist || !hasValidDateTime) {
+              console.log(`🚫 필터링됨: Study ID ${studyRequest.id} - 판독의: ${hasRadiologist}, 검사일시: ${hasValidDateTime}`);
+              return null;
+            }
+
             // 각 검사별 서류 정보 조회 시도
             const docResponse = await api.get(`/study-documents/${studyRequest.id}/`);
             
@@ -597,6 +726,22 @@ export const pacsdocsService = {
             };
           } catch (docError) {
             console.warn(`서류 정보 조회 실패 (Study ID: ${studyRequest.id}):`, docError);
+            
+            // 🔥 서류 정보 조회 실패해도 판독의와 검사일시가 있으면 포함
+            const hasRadiologist = studyRequest.reportingDoctor && 
+                                 studyRequest.reportingDoctor !== '' && 
+                                 studyRequest.reportingDoctor !== 'N/A' &&
+                                 studyRequest.reportingDoctor !== 'n/a';
+            
+            const hasValidDateTime = studyRequest.requestDateTime && 
+                                    studyRequest.requestDateTime !== '' && 
+                                    studyRequest.requestDateTime !== 'N/A' &&
+                                    studyRequest.requestDateTime !== 'n/a';
+            
+            if (!hasRadiologist || !hasValidDateTime) {
+              console.log(`🚫 필터링됨 (서류조회실패): Study ID ${studyRequest.id} - 판독의: ${hasRadiologist}, 검사일시: ${hasValidDateTime}`);
+              return null;
+            }
             
             // 🔧 서류 정보가 없는 경우 기본 서류 생성
             const defaultDocuments = getDefaultDocuments(studyRequest.modality);
@@ -612,11 +757,14 @@ export const pacsdocsService = {
         })
       );
 
-      console.log(`✅ 통합 데이터 완성: ${enrichedData.length}개`);
+      // 🔥 null 값들 제거 (필터링된 데이터)
+      const filteredData = enrichedData.filter(item => item !== null);
+
+      console.log(`✅ 필터링된 데이터 완성: ${filteredData.length}개 (원본: ${enrichedData.length}개)`);
       
       return {
-        results: enrichedData,
-        count: enrichedData.length,
+        results: filteredData,
+        count: filteredData.length,
         date: filters.exam_date
       };
 
@@ -629,12 +777,28 @@ export const pacsdocsService = {
         const fallbackResponse = await worklistApi.get(`/${filters.exam_date}/`);
         if (fallbackResponse.data.status === 'success') {
           console.log('✅ 복구 성공! 워크리스트 데이터:', fallbackResponse.data.data);
+          
+          // 🔥 복구 시에도 필터링 적용
+          const fallbackData = fallbackResponse.data.data.filter(item => {
+            const hasRadiologist = item.reportingDoctor && 
+                                 item.reportingDoctor !== '' && 
+                                 item.reportingDoctor !== 'N/A' &&
+                                 item.reportingDoctor !== 'n/a';
+            
+            const hasValidDateTime = item.requestDateTime && 
+                                    item.requestDateTime !== '' && 
+                                    item.requestDateTime !== 'N/A' &&
+                                    item.requestDateTime !== 'n/a';
+            
+            return hasRadiologist && hasValidDateTime;
+          });
+          
           return {
-            results: fallbackResponse.data.data.map(item => ({
+            results: fallbackData.map(item => ({
               ...item,
               documents: getDefaultDocuments(item.modality)
             })),
-            count: fallbackResponse.data.count,
+            count: fallbackData.length,
             date: filters.exam_date
           };
         }

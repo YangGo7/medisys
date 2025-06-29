@@ -142,7 +142,7 @@ def send_cdss_result_to_emr(request):
         }
 
         # 🔗 EMR API URL 설정
-        EMR_URL = "http://<EMR_SERVER>:8000/api/emr/receive_cdss_result/"  # 실제 주소로 변경
+        EMR_URL = "http://35.225.63.41:8000/api/integration/receive_cdss_result/" 
 
         response = requests.post(EMR_URL, json=payload)
         response.raise_for_status()
