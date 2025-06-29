@@ -188,14 +188,14 @@ const CdssVisualizationPage = () => {
           {sampleDetail ? (
             <>
               <span>{sampleDetail?.prediction === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
-              <ShapContributionChart shapData={sampleDetail.shap_data} />
+              {/* <ShapContributionChart shapData={sampleDetail.shap_data} /> */}
               <SimulationPanel
                 sampleId={selectedSample}
                 testType={sampleDetail?.test_type}
                 initialValues={sampleDetail?.results ? Object.fromEntries(sampleDetail.results.map(r => [r.component_name, parseFloat(r.value)])) : {}}
                 statMax={stats?.mean_values ? Object.fromEntries(Object.entries(stats.mean_values).map(([k, v]) => [k, v.abnormal * 2 || 100])) : {}}
               />
-              <SampleImportanceChart sampleId={selectedSample} />
+              {/* <SampleImportanceChart sampleId={selectedSample} /> */}
             </>
           ) : (
             <p className="cdss-loading">예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>

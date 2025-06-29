@@ -43,7 +43,7 @@ const VariableImportanceChart = () => {
     chart.setOption({
       ...baseOption,
       title: {
-        text: '📌 변수 중요도 (로지스틱 회귀 기준)',
+        text: '📌 변수 중요도',
         left: 'center',
         textStyle: { fontSize: 16 }
       },

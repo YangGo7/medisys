@@ -75,6 +75,19 @@ const AssignmentModal = ({
       isOpen={isOpen} 
       onClose={onClose} 
       title="검사 배정"
+      // ✅ Modal 컴포넌트에 직접 스타일 전달 (오버레이 투명도 수정)
+      overlayStyle={{
+        background: 'rgba(0, 0, 0, 0.3)', // 30% 투명도로 덜 어둡게
+        zIndex: 10000 // 로딩 오버레이보다 높게
+      }}
+      contentStyle={{
+        maxWidth: '500px',
+        width: '90%',
+        maxHeight: '90vh',
+        padding: '2rem',
+        borderRadius: '12px',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
+      }}
     >
       <div className="assignment-content">
         <div className="assignment-info">

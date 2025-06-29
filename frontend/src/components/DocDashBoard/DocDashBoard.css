@@ -368,7 +368,7 @@
   gap: var(--spacing-xs);
 }
 
-/* 🔥 메인 콘텐츠 영역 - z-index 수정 */
+/* 🔥 메인 콘텐츠 영역 - z-index 수정 및 전체 높이 활용 */
 .main-content-top {
   grid-area: main-top;
   background: var(--background-card);
@@ -380,6 +380,7 @@
   flex-direction: column;
   position: relative;
   z-index: 1;
+  height: 100%; /* 전체 높이 활용 */
 }
 
 .main-content-bottom {
@@ -387,6 +388,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
+  height: 100%; /* 전체 높이 활용 */
 }
 
 /* 🔥 우측 컨트롤 패널 - z-index 수정 */
@@ -440,7 +442,7 @@
   min-height: 50px;
 }
 
-/* 🔥 슬림한 드롭다운 카드 - z-index 수정 */
+/* 🔥 슬림한 드롭다운 카드 - z-index 수정 및 전체 높이 활용 */
 .dropdown-card {
   background: var(--background-card);
   border-radius: 8px;
@@ -452,22 +454,18 @@
   transition: var(--transition-base);
   position: relative;
   z-index: 1;
+  height: 100%; /* 전체 높이 활용 */
 }
 
 .dropdown-header {
   background: var(--primary-gray-purple);
   color: var(--white);
   padding: var(--spacing-sm) var(--spacing-md);
-  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   transition: var(--transition-base);
   border-bottom: 1px solid var(--primary-gray-purple-dark);
-}
-
-.dropdown-header:hover {
-  background: var(--primary-gray-purple-dark);
+  flex-shrink: 0; /* 헤더 크기 고정 */
 }
 
 .dropdown-title {
@@ -478,30 +476,24 @@
   font-size: 0.85rem;
 }
 
-.dropdown-toggle {
-  font-size: 0.9rem;
-  transition: transform 0.3s ease;
-}
-
-.dropdown-toggle.expanded {
-  transform: rotate(180deg);
-}
-
 .dropdown-content {
-  max-height: 0;
+  flex: 1; /* 남은 공간 모두 활용 */
   overflow: hidden;
-  transition: max-height 0.3s ease;
   background: var(--background-card);
+  display: flex;
+  flex-direction: column;
 }
 
 .dropdown-content.expanded {
-  max-height: 350px;
+  flex: 1; /* expanded 상태에서도 전체 공간 활용 */
 }
 
 .dropdown-body {
   padding: var(--spacing-md);
+  flex: 1; /* 남은 공간 모두 활용 */
   overflow-y: auto;
-  max-height: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 🔥 진료 종료 버튼 - 슬림화 */
