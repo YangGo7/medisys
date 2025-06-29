@@ -14,8 +14,8 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
 
   const interpretPrediction = (value) => {
     const finalValue = value === null || value === undefined || value === '' ? 0 : value;
-    if (finalValue === 1 || finalValue === true || finalValue === "1") return '🔴 이상 소견';
-    if (finalValue === 0 || finalValue === false || finalValue === "0") return '🟢 정상';
+    if (finalValue === 1 || finalValue === true || finalValue === "1") return '🟢 정상';
+    if (finalValue === 0 || finalValue === false || finalValue === "0") return '🔴 이상 소견';
     return String(finalValue);
   };
 

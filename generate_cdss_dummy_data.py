@@ -88,12 +88,16 @@ def generate_recent_request_datetime():
         microsecond=0
     )
     
-    return target_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+    # ISO 8601 형식 (Z 포함)으로 반환
+    return target_datetime.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
 def generate_study_request():
     """StudyRequest 더미 데이터 생성"""
     modality = random.choice(MODALITY_OPTIONS)
     body_part = random.choice(BODY_PART_BY_MODALITY[modality])
+    
+    # 🔥 처음부터 2~3일 전 날짜로 설정
+    target_datetime = generate_recent_request_datetime()
     
     data = {
         'patient_id': generate_patient_id(),
@@ -105,23 +109,18 @@ def generate_study_request():
         'requesting_physician': random.choice(PHYSICIANS),
         'priority': PRIORITY,
         'study_description': f"{body_part} {modality} 검사",
-        'clinical_info': f"{body_part} 부위 이상 소견으로 {modality} 검사 의뢰합니다."
-        # 🔥 request_datetime은 API에서 자동 생성되므로 제외
+        'clinical_info': f"{body_part} 부위 이상 소견으로 {modality} 검사 의뢰합니다.",
+        'request_datetime': target_datetime  # 🔥 처음부터 과거 날짜 포함
     }
-    
-    # 🔥 2~3일 전 시간을 나중에 DB에서 수정하기 위해 별도 저장
-    data['_target_datetime'] = generate_recent_request_datetime()
     
     return data
 
 def send_study_request(data):
-    """API로 StudyRequest 전송 후 날짜 업데이트"""
+    """API로 StudyRequest 전송 (이미 과거 날짜 포함)"""
     try:
-        # 목표 날짜 추출 및 API 데이터에서 제거
-        target_datetime = data.pop('_target_datetime', None)
-        target_date = target_datetime.split('T')[0] if target_datetime else '오늘'
+        target_date = data.get('request_datetime', '').split('T')[0] if 'request_datetime' in data else '오늘'
         
-        print(f"📤 전송 중: {data['patient_name']} ({data['patient_id']}) - {data['modality']} [목표: {target_date}]")
+        print(f"📤 전송 중: {data['patient_name']} ({data['patient_id']}) - {data['modality']} [날짜: {target_date}]")
         
         response = requests.post(
             EMR_ENDPOINT,
@@ -134,16 +133,7 @@ def send_study_request(data):
             result = response.json()
             if result.get('success'):
                 study_id = result['data']['id']
-                print(f"✅ 성공: {result['data']['patient_name']} (ID: {study_id})")
-                
-                # 🔥 생성된 레코드의 날짜를 2~3일 전으로 업데이트
-                if target_datetime:
-                    update_success = update_request_datetime(study_id, target_datetime)
-                    if update_success:
-                        print(f"📅 날짜 업데이트 완료: {target_date}")
-                    else:
-                        print(f"⚠️ 날짜 업데이트 실패: {target_date}")
-                
+                print(f"✅ 성공: {result['data']['patient_name']} (ID: {study_id}) - 날짜: {target_date}")
                 return True
             else:
                 print(f"❌ 실패: {result.get('error', '알 수 없는 오류')}")
@@ -164,26 +154,10 @@ def send_study_request(data):
         print(f"❌ 예외 발생: {e}")
         return False
 
-def update_request_datetime(study_id, target_datetime):
-    """🔥 생성된 StudyRequest의 날짜를 2~3일 전으로 업데이트"""
-    try:
-        update_url = f"{API_BASE_URL}/worklist/{study_id}/"
-        update_data = {
-            'request_datetime': target_datetime
-        }
-        
-        response = requests.patch(
-            update_url,
-            json=update_data,
-            headers={'Content-Type': 'application/json'},
-            timeout=5
-        )
-        
-        return response.status_code in [200, 204]
-        
-    except Exception as e:
-        print(f"❌ 날짜 업데이트 오류: {e}")
-        return False
+# 더미 데이터 생성이 완료되면 불필요한 함수 제거
+# def update_request_datetime(study_id, target_datetime):
+#     """🔥 생성된 StudyRequest의 날짜를 2~3일 전으로 업데이트"""
+#     # 이 함수는 이제 사용하지 않음 (처음부터 과거 날짜로 생성)
 
 def main():
     """메인 실행 함수"""
@@ -196,7 +170,7 @@ def main():
     three_days_ago = today - timedelta(days=3)
     print(f"📅 생성 대상 날짜: {three_days_ago.strftime('%Y-%m-%d')} ~ {two_days_ago.strftime('%Y-%m-%d')}")
     print(f"⏰ 생성 시간대: 오전 8시 ~ 오후 5시 (업무시간)")
-    print("📋 참고: 데이터 생성 후 날짜를 자동으로 업데이트합니다.")
+    print("📋 참고: 처음부터 과거 날짜로 request_datetime 설정")
     print("=" * 70)
     
     # 더미 데이터 25개 생성 및 전송 (기존 20개에서 증가)
@@ -207,7 +181,7 @@ def main():
     for i in range(1, total_count + 1):
         print(f"\n[{i}/{total_count}]", end=" ")
         
-        # 더미 데이터 생성
+        # 더미 데이터 생성 (이미 과거 날짜 포함)
         study_data = generate_study_request()
         
         # API 전송
@@ -235,6 +209,7 @@ def main():
         print(f"   - 시간대: 업무시간 (8:00~17:59)")
         print(f"   - 새로운 한국어 이름 사용")
         print(f"   - 다양한 검사 부위 및 모달리티")
+        print(f"   - 처음부터 과거 날짜로 생성 (업데이트 없음)")
 
 if __name__ == "__main__":
     # 의존성 확인
@@ -247,4 +222,3 @@ if __name__ == "__main__":
         exit(1)
     
     main()
-    

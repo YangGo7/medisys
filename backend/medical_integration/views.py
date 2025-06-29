@@ -9,8 +9,8 @@ from django.conf import settings
 from datetime import datetime
 from .openmrs_api import OpenMRSAPI
 from .orthanc_api import OrthancAPI
-from .models import PatientMapping, Alert
-from .serializers import AlertSerializer
+from .models import PatientMapping, Alert, CDSSResult
+from .serializers import AlertSerializer, CDSSResultSerializer
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
@@ -3299,9 +3299,30 @@ def receive_cdss_result(request):
         mapping.status = 'in_progress' if prediction == 'abnormal' else 'waiting'
         mapping.last_sync = timezone.now()
         mapping.save(update_fields=['status', 'last_sync'])
+        
+        CDSSResult.objects.create(
+            patient_mapping=mapping,
+            panel=panel,
+            prediction=prediction,
+            explanation=data.get('explanation', 'AI 예측 설명 없음'),
+            results=results
+        )
 
         return Response({'message': 'CDSS 결과가 성공적으로 반영되었습니다.'}, status=200)
 
     except Exception as e:
         logger.error(f"❌ CDSS 결과 수신 실패: {e}")
         return Response({'error': str(e)}, status=500)
+    
+@api_view(['GET'])
+def get_cdss_result_by_patient(request):
+    patient_id = request.GET.get('patient_id')
+    if not patient_id:
+        return Response({"error": "환자 ID가 필요합니다."}, status=400)
+
+    results = CDSSResult.objects.filter(patient_mapping__patient_identifier=patient_id).order_by('-created_at')
+    if not results.exists():
+        return Response({"message": "AI 분석 결과 없음"}, status=204)
+
+    serializer = CDSSResultSerializer(results, many=True)
+    return Response(serializer.data)

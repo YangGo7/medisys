@@ -88,28 +88,69 @@ def normalize_component_name(raw_name):
     # 마지막 항목을 반환 (대부분 검사 항목이 마지막)
     return parts[-1].strip()
 
-def send_result_to_emr(patient_id, sample_id, test_type, prediction, result_dict, created_at):
-    emr_url = "http://<EMR_API_HOST>/api/emr/receive_cdss_result/"  # ⬅️ 실제 URL로 변경
-    payload = {
-        "patient_id": patient_id,
-        "sample_id": sample_id,
-        "panel": test_type,
-        "prediction": "abnormal" if prediction == 1 else "normal",
-        "results": result_dict,
-        "created_at": created_at.isoformat() if isinstance(created_at, datetime) else str(created_at)
-    }
+def generate_explanation(results: dict, panel: str) -> str:
+    """
+    검사 결과 dict와 패널명을 받아 rule 기반 explanation 생성
+    """
+    panel = panel.upper()
 
-    print("📤 EMR 전송 payload:", payload)  # 디버깅 로그
+    if panel == 'PNEUMONIA':
+        crp = results.get('CRP')
+        if crp is not None and crp > 5.0:
+            return f"CRP 수치({crp})가 5.0을 초과하여 폐렴 가능성이 있습니다."
 
+    elif panel == 'CHF':
+        bnp = results.get('NT-proBNP')
+        if bnp is not None and bnp > 125:
+            return f"NT-proBNP 수치({bnp})가 125를 초과하여 심부전 가능성이 있습니다."
+
+    elif panel == 'PE':
+        d_dimer = results.get('D-dimer')
+        if d_dimer is not None and d_dimer > 0.5:
+            return f"D-dimer 수치({d_dimer})가 0.5를 초과하여 폐색전증 가능성이 있습니다."
+
+    elif panel == 'COPD':
+        pco2 = results.get('pCO2')
+        if pco2 is not None and pco2 > 45:
+            return f"pCO₂ 수치({pco2})가 45를 초과하여 COPD 가능성이 있습니다."
+
+    elif panel == 'ASTHMA':
+        eos = results.get('Eosinophils')
+        if eos is not None and eos > 300:
+            return f"Eosinophil 수치({eos})가 300을 초과하여 천식 가능성이 있습니다."
+
+    return "검사 수치에 기반한 이상 소견이 탐지되었습니다."
+
+
+@api_view(['POST'])
+def send_cdss_result_to_emr(request):
     try:
-        response = requests.post(emr_url, json=payload, timeout=5)
+        # CDSS 내부에서 예측 결과 확보
+        patient_id = request.data.get('patient_id')
+        prediction = request.data.get('prediction')  # 'normal' or 'abnormal'
+        panel = request.data.get('panel')            # 예: 'LFT'
+        results = request.data.get('results')        # Dict of lab values
+        
+        explanation = generate_explanation(results, panel)
+        
+        payload = {
+            "patient_id": patient_id,
+            "prediction": prediction,
+            "panel": panel,
+            "results": results,
+            "explanation": "Eosinophil 수치가 비정상적으로 높습니다"
+        }
+
+        # 🔗 EMR API URL 설정
+        EMR_URL = "http://<EMR_SERVER>:8000/api/emr/receive_cdss_result/"  # 실제 주소로 변경
+
+        response = requests.post(EMR_URL, json=payload)
         response.raise_for_status()
-        print(f"✅ EMR 전송 성공: {response.status_code}")
-        return True
-    except requests.exceptions.RequestException as e:
-        print(f"❌ EMR 전송 실패: {e}")
-        return False
-    
+
+        return Response({'message': 'EMR 전송 성공', 'response': response.json()}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 def receive_model_result(request):
     data = request.data
@@ -161,36 +202,6 @@ def receive_model_result(request):
             instance.prediction = prediction
             instance.prediction_prob = probability
             instance.save()
-        
-
-            # ✅ LFT 저장
-            if test_type.strip().lower() == "lft":
-                lft_components = {
-                    "ALT": None, "AST": None, "ALP": None,
-                    "Albumin": None, "Total Bilirubin": None, "Direct Bilirubin": None
-                }
-
-                for comp in related:
-                    cname = normalize_component_name(comp.component_name)
-                    if cname in lft_components:
-                        lft_components[cname] = comp.value
-
-                if all(v is not None for v in lft_components.values()):
-                    LiverFunctionSample.objects.filter(
-                        sample_id=sample, prediction=prediction
-                    ).delete()
-
-                    LiverFunctionSample.objects.create(
-                        sample_id=sample,
-                        ALT=lft_components["ALT"],
-                        AST=lft_components["AST"],
-                        ALP=lft_components["ALP"],
-                        Albumin=lft_components["Albumin"],
-                        Total_Bilirubin=lft_components["Total Bilirubin"],
-                        Direct_Bilirubin=lft_components["Direct Bilirubin"],
-                        prediction=prediction,
-                        probability=instance.prediction_prob
-                    )
 
             # ✅ EMR 전송 시도
             try:

@@ -258,7 +258,7 @@ from rest_framework.decorators import api_view, action
 from datetime import datetime, date
 from .models import StudyRequest
 from .serializers import StudyRequestSerializer, WorklistSerializer
-
+from django.db.models import Q
 
 #영상 검사 요청
 class StudyRequestViewSet(viewsets.ModelViewSet):
@@ -623,4 +623,187 @@ def worklist_by_date_specific(request, year, month, day):
         return Response({
             'status': 'error',
             'message': f'데이터를 불러오는데 실패했습니다: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+def completed_studies_list(request):
+    """
+    DMViewer용 - 검사와 리포트가 모두 완료된 환자들의 study 목록 반환
+    """
+    try:
+        # 완료 상태 정의 (한국어 + 영어 모든 경우 처리)
+        study_completed_statuses = [
+            '검사완료',     # 한국어 (worklists 앱)
+            'completed',   # 영어 (worklist 앱)
+            'COMPLETED',   # 대문자
+            'Completed'    # 첫글자 대문자
+        ]
+        
+        report_completed_statuses = [
+            '작성완료',     # 한국어 (worklists 앱) 
+            'completed',   # 영어 (worklist 앱)
+            'COMPLETED',   # 대문자
+            'Completed'    # 첫글자 대문자
+        ]
+        
+        # 검사상태와 리포트상태가 모두 완료된 항목 조회
+        completed_studies = StudyRequest.objects.filter(
+            study_status__in=study_completed_statuses,
+            report_status__in=report_completed_statuses
+        ).exclude(
+            study_uid__isnull=True  # study_uid가 있는 것만 (실제 검사가 진행된 것)
+        ).exclude(
+            study_uid__exact=''     # 빈 문자열 제외
+        ).order_by('-request_datetime')
+
+        # DMViewer에서 필요한 데이터 구성
+        completed_data = []
+        for study in completed_studies:
+            data = {
+                'id': study.id,
+                'patient_id': study.patient_id,
+                'patient_name': study.patient_name,
+                'birth_date': study.birth_date.strftime('%Y-%m-%d') if study.birth_date else None,
+                'sex': study.sex,
+                'modality': study.modality,
+                'body_part': study.body_part,
+                'study_uid': study.study_uid,
+                'accession_number': study.accession_number,
+                'requesting_physician': study.requesting_physician,
+                'interpreting_physician': study.interpreting_physician,
+                'request_datetime': study.request_datetime.strftime('%Y-%m-%d %H:%M:%S') if study.request_datetime else None,
+                'scheduled_exam_datetime': study.scheduled_exam_datetime.strftime('%Y-%m-%d %H:%M:%S') if study.scheduled_exam_datetime else None,
+                'study_status': study.study_status,
+                'report_status': study.report_status,
+                # DMViewer에서 필요한 추가 정보
+                'completion_date': study.request_datetime.strftime('%Y-%m-%d') if study.request_datetime else None,
+            }
+            completed_data.append(data)
+
+        return Response({
+            'status': 'success',
+            'count': len(completed_data),
+            'message': f'{len(completed_data)}건의 완료된 검사를 찾았습니다.',
+            'data': completed_data
+        })
+
+    except Exception as e:
+        print(f"완료된 스터디 목록 조회 에러: {e}")
+        return Response({
+            'status': 'error',
+            'message': '완료된 검사 데이터를 불러오는데 실패했습니다.',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def completed_studies_by_patient(request, patient_id):
+    """
+    특정 환자의 완료된 모든 study 목록 반환 (환자 내원이력용)
+    """
+    try:
+        study_completed_statuses = [
+            '검사완료', 'completed', 'COMPLETED', 'Completed'
+        ]
+        report_completed_statuses = [
+            '작성완료', 'completed', 'COMPLETED', 'Completed'  
+        ]
+        
+        patient_studies = StudyRequest.objects.filter(
+            patient_id=patient_id,
+            study_status__in=study_completed_statuses,
+            report_status__in=report_completed_statuses
+        ).exclude(
+            study_uid__isnull=True
+        ).exclude(
+            study_uid__exact=''
+        ).order_by('-request_datetime')
+
+        studies_data = []
+        for study in patient_studies:
+            data = {
+                'id': study.id,
+                'study_uid': study.study_uid,
+                'accession_number': study.accession_number,
+                'modality': study.modality,
+                'body_part': study.body_part,
+                'exam_date': study.request_datetime.strftime('%Y-%m-%d') if study.request_datetime else None,
+                'exam_datetime': study.request_datetime.strftime('%Y-%m-%d %H:%M:%S') if study.request_datetime else None,
+                'interpreting_physician': study.interpreting_physician,
+                'requesting_physician': study.requesting_physician,
+                'study_status': study.study_status,
+                'report_status': study.report_status,
+            }
+            studies_data.append(data)
+
+        return Response({
+            'status': 'success',
+            'patient_id': patient_id,
+            'count': len(studies_data),
+            'data': studies_data
+        })
+
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'환자 {patient_id}의 검사 이력을 불러오는데 실패했습니다.',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def study_detail_for_viewer(request, study_uid):
+    """
+    DMViewer에서 특정 study 클릭시 필요한 모든 정보 반환
+    (Orthanc DICOM 정보 + Django annotation 정보 + 리포트 정보)
+    """
+    try:
+        # StudyRequest에서 기본 정보 조회
+        study_request = StudyRequest.objects.get(study_uid=study_uid)
+        
+        # 기본 study 정보
+        study_info = {
+            'id': study_request.id,
+            'patient_id': study_request.patient_id,
+            'patient_name': study_request.patient_name,
+            'birth_date': study_request.birth_date.strftime('%Y-%m-%d') if study_request.birth_date else None,
+            'sex': study_request.sex,
+            'study_uid': study_request.study_uid,
+            'accession_number': study_request.accession_number,
+            'modality': study_request.modality,
+            'body_part': study_request.body_part,
+            'exam_datetime': study_request.request_datetime.strftime('%Y-%m-%d %H:%M:%S') if study_request.request_datetime else None,
+            'requesting_physician': study_request.requesting_physician,
+            'interpreting_physician': study_request.interpreting_physician,
+            'study_status': study_request.study_status,
+            'report_status': study_request.report_status,
+        }
+
+        # TODO: 여기에 Orthanc에서 DICOM 이미지 정보 가져오는 로직 추가
+        # orthanc_info = get_study_from_orthanc(study_uid)
+        
+        # TODO: 여기에 annotation 정보 가져오는 로직 추가 (dr_annotations 앱 활용)
+        # annotations = get_annotations_for_study(study_uid)
+
+        return Response({
+            'status': 'success',
+            'study_info': study_info,
+            'has_images': bool(study_request.study_uid),  # study_uid가 있으면 이미지 존재
+            'has_annotations': False,  # TODO: annotation 존재 여부 확인
+            'has_report': study_request.report_status in ['작성완료', 'completed', 'COMPLETED', 'Completed'],
+            # 'orthanc_info': orthanc_info,    # TODO: 구현 후 추가
+            # 'annotations': annotations,       # TODO: 구현 후 추가
+        })
+
+    except StudyRequest.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': f'Study UID {study_uid}에 해당하는 검사를 찾을 수 없습니다.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': '검사 상세 정보를 불러오는데 실패했습니다.',
+            'details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

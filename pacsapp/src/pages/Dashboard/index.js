@@ -464,25 +464,7 @@ const Dashboard = () => {
         gridTemplateColumns: `${leftWidth}% 4px ${100 - leftWidth}%`
       }}
     >
-      {/* 로딩 오버레이 */}
-      {loading && (
-        <div className="loading-overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          color: 'white',
-          fontSize: '1.2rem'
-        }}>
-          <div>⏳ 처리 중...</div>
-        </div>
-      )}
+      
       
       {/* 워크리스트 섹션 */}
       <div className="dashboard-worklist-section">
