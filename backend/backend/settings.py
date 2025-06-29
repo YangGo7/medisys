@@ -303,4 +303,40 @@ CSRF_COOKIE_SAMESITE = 'Lax'     # 기본값 (또는 'Strict')
 SESSION_COOKIE_SAMESITE = 'Lax'  # 동일하게 유지
 
 
+# backend/backend/settings.py에 추가할 캐시 설정
+
+# 캐시 설정 (Redis 추천, 없으면 로컬 메모리 캐시)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'medical-platform-cache',
+        'TIMEOUT': 180000,  # 30분 기본 타임아웃
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
+
+# Redis 사용 시 (권장)
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#         'TIMEOUT': 1800,
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }
+
+# 세션 설정 (캐시와 연동)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 180000  # 30분
+SESSION_SAVE_EVERY_REQUEST = True  # 매 요청마다 세션 갱신
+
+# 캐시 무효화 방지 설정
+CACHE_PROTECTED_LOGOUT = True  # 캐시 기반 로그아웃 제한
+CACHE_CLEAR_ON_LOGOUT = False  # 로그아웃 시 캐시 유지
+
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
