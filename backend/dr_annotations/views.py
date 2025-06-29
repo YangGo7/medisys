@@ -281,7 +281,6 @@
 #                 'status': 'error',
 #                 'message': f'삭제 실패: {str(e)}'
 #             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -328,13 +327,14 @@ class AnnotationSaveView(APIView):
             
             patient_id = ai_result.patient_id
             
-            # 👈 새로 추가: 환자ID로 worklist에서 배정된 판독의 조회
+            # 👈 환자ID로 worklist에서 배정된 판독의 조회
             try:
                 study_request = StudyRequest.objects.filter(patient_id=patient_id).first()
                 if study_request and study_request.assigned_radiologist:
                     # 실제 배정된 판독의 정보 사용
-                    doctor_name = study_request.interpreting_physician or study_request.assigned_radiologist.name
-                    doctor_id = f"DR{study_request.assigned_radiologist.id:03d}"  # 예: DR001, DR002
+                    radiologist = study_request.assigned_radiologist  # Doctor 모델 인스턴스
+                    doctor_name = radiologist.name  # 의사 이름
+                    doctor_id = radiologist.medical_id  # 👈 의료진식별번호 사용 (R0001 형태)
                 else:
                     # fallback: 기본값 사용 (배정되지 않은 경우)
                     doctor_name = '미배정'
@@ -355,7 +355,7 @@ class AnnotationSaveView(APIView):
                 for ann_data in annotations:
                     annotation = AnnotationResult.objects.create(
                         study_uid=study_uid,
-                        patient_id=patient_id,  # 👈 PACS에서 가져온 patient_id 사용
+                        patient_id=patient_id,  # 👈 AI 분석 결과에서 가져온 patient_id 사용
                         series_uid=f"{study_uid}.1",  # 임시값
                         instance_uid=f"{study_uid}.1.1",  # 임시값
                         instance_number=1,  # 임시값

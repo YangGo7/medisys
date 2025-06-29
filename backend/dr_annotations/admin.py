@@ -12,15 +12,17 @@ class AnnotationResultAdmin(admin.ModelAdmin):
         'instance_number',
         'label',  # 라벨명 표시
         'bbox_display',  # 바운딩박스 위치
-        'doctor_name', 
+        'doctor_display',  # 👈 개선: ID와 이름 함께 표시
         'created_at'
     ]
     
-    # 필터 옵션
+    # 필터 옵션 (👈 개선: 더 유용한 필터 추가)
     list_filter = [
         'doctor_name',
+        'doctor_id',  # 👈 추가: 의료진식별번호로 필터
         'label',
         'created_at',
+        'patient_id',  # 👈 추가: 환자별 필터
     ]
     
     # 검색 가능한 필드
@@ -31,6 +33,7 @@ class AnnotationResultAdmin(admin.ModelAdmin):
         'instance_uid',
         'label',
         'doctor_name',
+        'doctor_id',  # 👈 추가: 의료진식별번호로 검색
         'dr_text'
     ]
     
@@ -46,7 +49,8 @@ class AnnotationResultAdmin(admin.ModelAdmin):
             'fields': ('patient_id', 'study_uid', 'series_uid', 'instance_uid', 'instance_number')
         }),
         ('판독의 정보', {
-            'fields': ('doctor_id', 'doctor_name')
+            'fields': ('doctor_id', 'doctor_name'),
+            'description': '워크리스트에서 자동으로 가져온 판독의 정보'  # 👈 추가: 설명
         }),
         ('어노테이션 정보', {
             'fields': ('label', 'bbox', 'dr_text')
@@ -65,6 +69,9 @@ class AnnotationResultAdmin(admin.ModelAdmin):
     
     # 액션
     actions = ['delete_selected']
+    
+    # 👈 정렬 기본값 설정
+    ordering = ['-created_at', 'patient_id']
     
     def study_uid_short(self, obj):
         """Study UID를 짧게 표시"""
@@ -85,6 +92,29 @@ class AnnotationResultAdmin(admin.ModelAdmin):
         return str(obj.bbox)
     bbox_display.short_description = 'BBox'
     
+    # 👈 새로 추가: 판독의 정보를 ID와 이름 함께 표시
+    def doctor_display(self, obj):
+        """판독의 ID와 이름을 함께 표시"""
+        return f"{obj.doctor_id} - {obj.doctor_name}"
+    doctor_display.short_description = '판독의 (ID - 이름)'
+    doctor_display.admin_order_field = 'doctor_name'  # 정렬 가능하게
+    
     def get_queryset(self, request):
         """쿼리셋 최적화"""
         return super().get_queryset(request).select_related()
+    
+    # 👈 추가: 관리자 페이지에서 통계 정보 표시
+    def changelist_view(self, request, extra_context=None):
+        """목록 페이지에 통계 추가"""
+        extra_context = extra_context or {}
+        
+        # 판독의별 어노테이션 수 통계
+        from django.db.models import Count
+        doctor_stats = (AnnotationResult.objects
+                       .values('doctor_name', 'doctor_id')
+                       .annotate(count=Count('id'))
+                       .order_by('-count'))
+        
+        extra_context['doctor_stats'] = doctor_stats[:5]  # 상위 5명
+        
+        return super().changelist_view(request, extra_context)

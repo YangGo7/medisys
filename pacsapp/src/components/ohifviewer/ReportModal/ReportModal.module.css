@@ -206,6 +206,13 @@
   margin-top: var(--spacing-xs);
 }
 
+.annotationDoctor {
+  font-size: var(--font-sm);
+  color: var(--color-annotation);
+  margin-top: var(--spacing-xs);
+  font-weight: 500;
+}
+
 /* ⭐ STT 섹션 스타일 추가 */
 .sttSection {
   background: rgba(34, 197, 94, 0.1);

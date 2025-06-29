@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny , IsAuthenticated
 from rest_framework.response import Response
 from .models import Notice, UserProfile
 from django.utils import timezone
@@ -104,6 +104,37 @@ def get_notice(request):
 from django.middleware.csrf import get_token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response   
+from django.contrib.auth import logout
 @api_view(['GET'])
 def get_csrf_token(request):
     return Response({'csrfToken': get_token(request)})
+
+# 유저 정보 캐시 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_info_view(request):
+    user = request.user
+    try: 
+        profile = UserProfile.objects.get(user=user)
+        return Response({
+            "user_id": user.id,
+            "username": user.username,
+            "code": profile.code,
+            "display": f"{user.last_name}{user.first_name}" or user.username,
+            "uuid": f"user_{user.id}"
+        })
+    except UserProfile.DoesNotExist:
+        return Response({
+            "user_id": user.id,
+            "username": user.username,
+            "code": None,
+            "display": user.username,
+            "uuid": f"user_{user.id}"
+        })
+        
+# 로그아웃         
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    logout(request)  # 현재 세션 무효화
+    return Response({"message": "로그아웃 성공"})
