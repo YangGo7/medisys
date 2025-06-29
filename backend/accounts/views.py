@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 import logging
-
+from django.views.decorators.csrf import ensure_csrf_cookie
 logger = logging.getLogger(__name__)
 
 @csrf_exempt
@@ -105,9 +105,9 @@ from django.middleware.csrf import get_token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response   
 from django.contrib.auth import logout
-@api_view(['GET'])
+@ensure_csrf_cookie
 def get_csrf_token(request):
-    return Response({'csrfToken': get_token(request)})
+    return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE', '')})
 
 # 유저 정보 캐시 
 @api_view(['GET'])
