@@ -4,8 +4,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from .models import StudyRequest
-from .serializers import StudyRequestSerializer
+from worklists.models import StudyRequest
+from worklists.serializers import StudyRequestSerializer
 from datetime import datetime
 
 
@@ -62,12 +62,12 @@ def create_from_emr(request):
             # 선택적 필드들
             'study_description': data.get('study_description', ''),
             'clinical_info': data.get('clinical_info', ''),
-            'priority': data.get('priority', 'routine'),
+            'priority': data.get('priority', '일반'),
             
             # 자동 생성 필드들
             'request_datetime': datetime.now(),
-            'study_status': 'requested',
-            'report_status': 'requested',
+            'study_status': '대기',
+            'report_status': '대기',
             
             # Accession Number에 전체 UUID 저장 (임시 해결책)
             'accession_number': f"EMR_{raw_patient_id}",  # 🔥 UUID 전체를 여기에 저장

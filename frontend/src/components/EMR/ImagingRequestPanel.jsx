@@ -7,7 +7,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     body_part: '',
     study_description: '',
     clinical_info: '',
-    priority: 'routine',
+    priority: '일반',
     requesting_physician: ''
   });
   const [loading, setLoading] = useState(false);
@@ -54,15 +54,12 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
     console.log('🔍 환자 원본 데이터:', patient);
 
     // 다양한 형태의 환자 데이터 구조에 대응
-    const patientId = patient.uuid || 
-                     patient.openmrs_patient_uuid || 
-                     patient.patient_identifier || 
+    const patientId =patient.patient_identifier || 
                      patient.mapping_id || 
                      'UNKNOWN_ID';
 
-    const patientName = patient.display || 
-                       patient.name || 
-                       patient.patient_name || 
+    const patientName = patient.name || 
+                        patient.patient_name || 
                        '이름 없음';
 
     // 생년월일 처리 - 다양한 형식 지원
@@ -198,7 +195,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
       console.log('🚀 영상검사 요청 데이터:', requestData);
 
       // 🔥 원본 코드와 동일한 API 호출
-      const response = await fetch('http://meddocai.p-e.kr:8000/api/worklist/create-from-emr/', {
+      const response = await fetch('http://35.225.63.41:8000/api/worklist/create-from-emr/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
@@ -223,7 +220,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
           body_part: '',
           study_description: '',
           clinical_info: '',
-          priority: 'routine',
+          priority: '일반',
           requesting_physician: doctorName
         });
 
@@ -312,7 +309,7 @@ const ImagingRequestPanel = ({ selectedPatient, onRequestSuccess, onNewRequest, 
               onChange={handleChange}
               style={styles.select}
             >
-              <option value="routine">일반</option>
+              <option value="일반">일반</option>
               <option value="urgent">긴급</option>
             </select>
           </div>

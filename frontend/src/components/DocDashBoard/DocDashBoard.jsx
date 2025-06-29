@@ -280,12 +280,12 @@ const DocDashBoard = ({ patient }) => {
     }
   };
 
-  const handleLisRequestComplete = () => {
-    setTimeout(() => {
-      const dummy = generateCdssDummyResult(selectedPatient);
-      setCdssResult(dummy);
-    }, 15000);
-  };
+  // const handleLisRequestComplete = () => {
+  //   setTimeout(() => {
+  //     const dummy = generateCdssDummyResult(selectedPatient);
+  //     setCdssResult(dummy);
+  //   }, 15000);
+  // };
 
   // 검색어 변경 시 자동 검색
   useEffect(() => {
@@ -312,7 +312,7 @@ const DocDashBoard = ({ patient }) => {
 
       try {
         const res = await axios.get(
-          `${API_BASE}patient-uuid-by-identifier/${selectedPatient.patient_identifier}/`
+          `${API_BASE}person-uuid-by-identifier/${selectedPatient.patient_identifier}/`
         );
 
         if (res.data.success) {
@@ -323,6 +323,7 @@ const DocDashBoard = ({ patient }) => {
         }
       } catch (err) {
         console.error('UUID 조회 실패:', err);
+        console.log("📛 fetchCdssResult에 사용된 sampleId:", sampleId);
         setUuidError('서버와의 통신에 실패했습니다.');
         setPersonUUID(null);
       } finally {
@@ -335,7 +336,10 @@ const DocDashBoard = ({ patient }) => {
 
   useEffect(() => {
     const fetchCdssResult = async () => {
-      if (!selectedPatient || !selectedPatient.patient_identifier) return;
+      if (!selectedPatient || !selectedPatient.sample_id) {
+        console.warn('⚠️ CDSS 요청 생략: sample_id 없음');
+        return;
+      }
       try {
         const res = await axios.get(`${API_BASE}cdss/results/${selectedPatient.sample_id}/`);
         setCdssResult(res.data);
@@ -765,7 +769,7 @@ const DocDashBoard = ({ patient }) => {
                     doctorId={DEFAULT_DOCTOR_ID}
                     personUuid={personUUID}
                     compact={true}
-                    onRequestComplete={handleLisRequestComplete}
+                    // onRequestComplete={handleLisRequestComplete}
                   />
                 )
               ) : (

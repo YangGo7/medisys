@@ -4,6 +4,14 @@ import axios from 'axios';
 import { saveLog } from '../utils/saveLog';
 import './ResultInputForm.css';
 
+const aliasToPanelName = {
+  asthma: 'CBC',
+  pneumonia: 'CRP',
+  chf: 'NT-proBNP',
+  pe: 'D-dimer',
+  copd: 'ABGA',
+};
+
 const panelComponents = {
   CRP: ['CRP'],
   CBC: ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet'],
@@ -39,6 +47,9 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   const [results, setResults] = useState({});
   const [sampleId, setSampleId] = useState('');
   const [sampleList, setSampleList] = useState([]);
+  const [sample, setSample] = useState(null);    // 샘플 전체 객체
+  const [values, setValues] = useState([]);      // 샘플에 저장된 기존 결과
+  const [error, setError] = useState(null);   
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/`)
@@ -56,22 +67,36 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   }, [propSampleId]);
 
   useEffect(() => {
-    if (!sampleId) return;
+  const fetchSample = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/get/${sampleId}/`);
+      setSample(res.data);
+      setValues(res.data.results || []);
 
-    axios.get(`${process.env.REACT_APP_API_BASE_URL}samples/get/${sampleId}`)
-      .then((res) => {
-        const alias = res.data.test_type;
-        if (alias && panelComponents[alias]) {
-          setSelectedPanel(alias);
-        } else {
-          setSelectedPanel('');
-        }
-      })
-      .catch((err) => {
-        console.error('샘플 정보 불러오기 실패:', err);
+      // 🔥 alias -> 패널명 변환
+      const alias = res.data.test_type;
+      const panelName = aliasToPanelName[alias];
+      if (panelName && panelComponents[panelName]) {
+        setSelectedPanel(panelName);
+      } else {
         setSelectedPanel('');
-      });
-  }, [sampleId]);
+      }
+
+     } catch (err) {
+    //   console.log('샘플 ID:', sampleId);
+    //   console.log('test_type:', alias);
+    //   console.log('패널명 변환 결과:', panelName);
+    //   console.log('패널 구성 존재 여부:', !!panelComponents[panelName]);
+
+      console.error('샘플 불러오기 실패:', err);
+      setError('샘플 데이터를 불러오는 데 실패했습니다.');
+    }
+  };
+
+  if (sampleId) {
+    fetchSample();
+  }
+}, [sampleId]);
 
   const handleChange = (component, value) => {
     setResults((prev) => ({ ...prev, [component]: value }));
