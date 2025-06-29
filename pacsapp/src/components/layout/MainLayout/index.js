@@ -139,7 +139,7 @@ const MainLayout = ({ children }) => {
       <div className="sidebar">         
         <div className="sidebar-header">           
           <h2>LaCID</h2>           
-          <p>양진모 님</p>         
+          <p>심보람 님</p>         
         </div>         
         <nav className="nav-menu">             
           <Link to="/">Home</Link>             
@@ -182,16 +182,16 @@ const MainLayout = ({ children }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}               
               title="계정"             
             >               
-              양             
+              심             
             </button>                          
             
             {showProfileMenu && (               
               <div className="profile-dropdown">                 
                 <div className="profile-info">                   
-                  <div className="profile-avatar-large">양</div>                   
+                  <div className="profile-avatar-large">심</div>                   
                   <div className="profile-details">                     
-                    <p className="profile-name">안녕하세요, 양진모님.</p>                     
-                    <p className="profile-email">jimno@mediis.com</p>                   
+                    <p className="profile-name">안녕하세요, 심보람님.</p>                     
+                    <p className="profile-email">brsim13@lacid.com</p>                   
                   </div>                 
                 </div>                 
                 <div className="profile-actions">                   

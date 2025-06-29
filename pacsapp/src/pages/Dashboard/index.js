@@ -198,7 +198,7 @@ const Dashboard = () => {
     setDraggedExam(exam);
   }, []);
 
-  // ✅ 배정 확정 핸들러 개선
+  // ✅ 배정 확정 핸들러 개선 - 로딩 먼저 해제
   const confirmAssignment = useCallback(async () => {
     if (!selectedRadiologist || !selectedTime || !estimatedDuration || !modalData) return;
 
@@ -218,6 +218,12 @@ const Dashboard = () => {
       const result = await worklistService.assignExam(modalData.exam.id, assignmentData);
       console.log('📥 배정 API 결과:', result);
 
+      // ✅ 로딩 상태 먼저 해제
+      setLoading(false);
+      
+      // 그 다음 alert 표시
+      alert(`✅ ${modalData.exam.patientName} 환자의 검사가 성공적으로 배정되었습니다!`);
+      
       // 2. ✅ 즉시 스케줄 새로고침 (여러 번 시도)
       console.log('🔄 스케줄 새로고침 시작...');
       
@@ -235,20 +241,17 @@ const Dashboard = () => {
         workListPanelRef.current.refreshWorklist();
       }
 
-      // 4. ✅ 성공 메시지를 더 명확하게
       console.log('✅ 배정 완료!');
-      alert(`✅ ${modalData.exam.patientName} 환자의 검사가 성공적으로 배정되었습니다!`);
       cancelAssignment();
 
     } catch (error) {
       console.error('❌ 배정 실패:', error);
+      setLoading(false); // ✅ 에러 시에도 로딩 먼저 해제
       alert(`❌ 배정 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
     }
   }, [selectedRadiologist, selectedTime, estimatedDuration, modalData, refreshSchedules, selectedDate, loadTodaySchedules]);
 
-  // 검사 시작 핸들러
+  // ✅ 검사 시작 핸들러 수정
   const handleStartExam = useCallback(async (roomId, examId) => {
     try {
       setLoading(true);
@@ -257,6 +260,12 @@ const Dashboard = () => {
       const result = await worklistService.startExam(examId);
       console.log('검사 시작 결과:', result);
       
+      // ✅ 로딩 상태 먼저 해제
+      setLoading(false);
+      
+      // 그 다음 alert 표시
+      alert('검사가 시작되었습니다.');
+      
       // API 호출 후 스케줄 새로고침
       await refreshSchedules();
 
@@ -265,16 +274,14 @@ const Dashboard = () => {
         workListPanelRef.current.refreshWorklist();
       }
 
-      alert('검사가 시작되었습니다.');
     } catch (error) {
       console.error('검사 시작 실패:', error);
+      setLoading(false); // ✅ 에러 시에도 로딩 먼저 해제
       alert(`검사 시작 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
     }
   }, [refreshSchedules]);
 
-  // 검사 완료 핸들러
+  // ✅ 검사 완료 핸들러 수정
   const handleCompleteExam = useCallback(async (roomId, examId) => {
     try {
       setLoading(true);
@@ -283,6 +290,12 @@ const Dashboard = () => {
       const result = await worklistService.completeExam(examId);
       console.log('검사 완료 결과:', result);
       
+      // ✅ 로딩 상태 먼저 해제
+      setLoading(false);
+      
+      // 그 다음 alert 표시
+      alert('검사가 완료되었습니다.');
+      
       // API 호출 후 스케줄 새로고침
       await refreshSchedules();
 
@@ -291,16 +304,14 @@ const Dashboard = () => {
         workListPanelRef.current.refreshWorklist();
       }
 
-      alert('검사가 완료되었습니다.');
     } catch (error) {
       console.error('검사 완료 실패:', error);
+      setLoading(false); // ✅ 에러 시에도 로딩 먼저 해제
       alert(`검사 완료 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
     }
   }, [refreshSchedules]);
 
-  // 검사 취소 핸들러
+  // ✅ 검사 취소 핸들러 수정 (기존 API 사용 - 완전 삭제용)
   const handleCancelExam = useCallback(async (examId) => {
     if (!window.confirm('정말로 검사를 취소하시겠습니까?')) return;
     
@@ -311,6 +322,12 @@ const Dashboard = () => {
       const result = await worklistService.cancelExam(examId);
       console.log('검사 취소 결과:', result);
       
+      // ✅ 로딩 상태 먼저 해제
+      setLoading(false);
+      
+      // 그 다음 alert 표시
+      alert('검사가 취소되었습니다.');
+      
       // API 호출 후 스케줄 새로고침
       await refreshSchedules();
 
@@ -319,12 +336,10 @@ const Dashboard = () => {
         workListPanelRef.current.refreshWorklist();
       }
 
-      alert('검사가 취소되었습니다.');
     } catch (error) {
       console.error('검사 취소 실패:', error);
+      setLoading(false); // ✅ 에러 시에도 로딩 먼저 해제
       alert(`검사 취소 실패: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setLoading(false);
     }
   }, [refreshSchedules]);
 
@@ -342,7 +357,7 @@ const Dashboard = () => {
     e.preventDefault();
   }, []);
 
-  // 스케줄에서 이벤트 받기
+  // ✅ 스케줄에서 이벤트 받기 - 배정 취소 처리 추가
   const handleExamUpdated = useCallback((eventType, data) => {
     console.log('검사 업데이트 이벤트:', eventType, data);
     
@@ -353,8 +368,66 @@ const Dashboard = () => {
       setSelectedTime(data.timeSlot);
       setEstimatedDuration(getTodayKST(data.exam.modality).toString());
       setShowAssignmentModal(true);
+    } 
+    // ✅ 새로 추가: 배정 취소 처리 (X 버튼)
+    else if (eventType === 'unassignment_requested') {
+      handleUnassignExam(data.examId, data.roomId);
     }
   }, []);
+
+  // ✅ 배정 취소 핸들러 수정 - cancel_exam API 사용 (워크리스트 복귀)
+  const handleUnassignExam = useCallback(async (examId, roomId) => {
+    try {
+      setLoading(true);
+      console.log('🔄 배정 취소 처리:', { examId, roomId });
+
+      // ✅ 1. cancel_exam API 호출 (백엔드에서 cancel_schedule() 실행 → 워크리스트 복귀)
+      console.log('🔄 배정 취소 API 호출');
+      await worklistService.cancelExam(examId);
+      console.log('✅ 배정 취소 API 성공');
+
+      // ✅ 로딩 상태 먼저 해제
+      setLoading(false);
+
+      // 2. 스케줄에서 검사 제거 (즉시 UI 업데이트)
+      setRoomSchedules(prevSchedules => {
+        const newSchedules = { ...prevSchedules };
+        if (newSchedules[roomId]) {
+          const beforeCount = newSchedules[roomId].length;
+          newSchedules[roomId] = newSchedules[roomId].filter(
+            exam => exam.examId !== examId && exam.id !== examId
+          );
+          const afterCount = newSchedules[roomId].length;
+          console.log(`✅ Room ${roomId}에서 검사 ${examId} 제거됨 (${beforeCount} → ${afterCount})`);
+        }
+        return newSchedules;
+      });
+
+      // 3. 워크리스트 새로고침 (검사가 다시 '대기' 상태로 돌아옴)
+      setTimeout(async () => {
+        if (workListPanelRef.current?.refreshWorklist) {
+          console.log('🔄 워크리스트 새로고침 요청');
+          await workListPanelRef.current.refreshWorklist();
+        }
+      }, 500);
+
+      // 4. 스케줄도 새로고침 (서버 상태와 동기화)
+      setTimeout(async () => {
+        await refreshSchedules();
+        console.log('🔄 스케줄 새로고침 완료');
+      }, 1000);
+
+      console.log('✅ 배정 취소 완료 - 검사가 워크리스트로 복귀했습니다');
+
+    } catch (error) {
+      console.error('❌ 배정 취소 실패:', error);
+      setLoading(false); // ✅ 에러 시에도 로딩 먼저 해제
+      alert('배정 취소에 실패했습니다.');
+      
+      // 실패 시 스케줄 다시 로드해서 원상복구
+      await refreshSchedules();
+    }
+  }, [refreshSchedules]);
 
   // 리사이즈 핸들링
   const handleMouseDown = useCallback((e) => {

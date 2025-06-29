@@ -30,7 +30,7 @@ const componentUnits = {
   // ABGA 기반 (COPD 등)
   pCO2: 'mmHg',
   pO2: 'mmHg',
-  pH: '',             // 단위 없음 (수소 이온 농도 지수)
+  pH: '-',             // 단위 없음 (수소 이온 농도 지수)
   HCO3: 'mmol/L',
   O2_sat: '%',
   // CBC 기반 (천식)
