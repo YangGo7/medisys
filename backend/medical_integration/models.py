@@ -352,3 +352,23 @@ class Alert(models.Model):
 
     def __str__(self):
         return f'[{self.get_type_display()}] {self.message[:20]}…'
+    
+class CDSSResult(models.Model):
+    patient_mapping = models.ForeignKey(
+        PatientMapping,
+        on_delete=models.CASCADE,
+        related_name='cdss_results',
+        help_text='예측 대상이 된 환자 매핑 정보'
+    )
+    panel = models.CharField(max_length=50)
+    prediction = models.CharField(max_length=16)
+    explanation = models.TextField(blank=True, null=True)
+    results = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'cdss_result'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.patient_mapping.patient_identifier} - {self.panel} : {self.prediction}"
