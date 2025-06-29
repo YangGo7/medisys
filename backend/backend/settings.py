@@ -187,7 +187,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41",
+    "http://35.225.63.41:3020",
+    "http://localhost:3020",
+    "http://127.0.0.1:3020",
+    "http://35.225.63.41:3020",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -199,12 +202,13 @@ CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CSRF_TRUSTED_ORIGINS = [
       "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41",
+    "http://35.225.63.41:3000",
       "http://localhost:3020",
       "http://35.225.63.41:3020",
     "http://127.0.0.1:3020",
       "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://35.225.63.41:8000"
 
 ]
 
@@ -294,5 +298,9 @@ LOGGING = {
         },
     },
 }
+CSRF_COOKIE_HTTPONLY = False     # JS에서 접근 가능하게 (선택)
+CSRF_COOKIE_SAMESITE = 'Lax'     # 기본값 (또는 'Strict')
+SESSION_COOKIE_SAMESITE = 'Lax'  # 동일하게 유지
+
 
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
