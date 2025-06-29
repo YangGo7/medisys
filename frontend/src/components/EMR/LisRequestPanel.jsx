@@ -323,9 +323,9 @@ const LisRequestPanel = ({ patient, onRequestComplete }) => {
     } finally {
       setLoading(false);
       // 더미 데이터 용,,,
-      if (typeof onRequestComplete === 'function') {
-        onRequestComplete();
-      }
+      // if (typeof onRequestComplete === 'function') {
+      //   onRequestComplete();
+      // }
     }
   };
 

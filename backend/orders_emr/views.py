@@ -22,14 +22,11 @@ logger = logging.getLogger(__name__)
 
 # LIS 검사 패널 정의 (OpenMRS와 Orthanc 통합을 위한)
 PANEL_COMPONENTS = {
-    'CBC': ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets'],
-    'LFT': ['ALT', 'AST', 'ALP', 'GGT', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin', 'Total Protein'],
-    'RFT': ['BUN', 'Creatinine', 'eGFR', 'Uric Acid', 'Sodium', 'Potassium', 'Chloride'],
-    'Lipid Panel': ['Total Cholesterol', 'HDL Cholesterol', 'LDL Cholesterol', 'Triglycerides'],
-    'Electrolyte Panel': ['Sodium', 'Potassium', 'Chloride', 'Bicarbonate'],
-    'Thyroid Panel': ['TSH', 'Free T4', 'T3'],
-    'Coagulation Panel': ['PT', 'INR', 'aPTT', 'Fibrinogen'],
-    'Glucose': ['Fasting Blood Glucose', 'HbA1c'],
+    'CRP': ['CRP'],
+    'CBC': ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet'],
+    'ABGA': ['pCO2', 'pO2', 'pH', 'HCO3', 'O2_sat'],
+    'NT-proBNP': ['NT-proBNP'],
+    'D-dimer': ['D-dimer'],
 }
 
 @api_view(['GET', 'POST'])

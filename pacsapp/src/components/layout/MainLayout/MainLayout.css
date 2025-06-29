@@ -343,3 +343,15 @@ body[data-route="/pacs"] .content-area {
   padding: 0 !important;
   margin: 0 !important;
 }
+
+/* PACS 페이지에서 패딩 완전 제거 */
+.content-area[data-page="pacs"] {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* OHIF 페이지에서도 패딩 완전 제거 - 새로 추가! */
+.content-area[data-page="ohif"] {
+  padding: 0 !important;
+  margin: 0 !important;
+}
