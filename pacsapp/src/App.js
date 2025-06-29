@@ -9,6 +9,7 @@ import PacsDocs from './pages/PacsDocs';
 import OHIFViewer from './pages/OHIFViewer'; // 🆕 OHIF 추가
 import { DoctorProvider } from './contexts/DoctorContext';
 import './App.css';
+import './utils/emergencyFix';
 
 function App() {
   return (

@@ -9,8 +9,8 @@
 }
 
 /* Grid Sections */
-.worklist-section,
-.schedule-section {
+.dashboard-worklist-section,
+.dashboard-schedule-section {
   background: white;
   overflow: hidden;
   display: flex;

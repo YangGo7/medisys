@@ -34,7 +34,9 @@ from .views import (
     PersonalScheduleViewSet,
     ExamRoomViewSet,  # 🆕 추가
     get_room_schedules,  # 🆕 추가
-    get_room_schedules_summary  # 🆕 추가
+    get_room_schedules_summary,  # 🆕 추가
+    get_all_schedules_by_date,  # 🆕 통합 API 추가
+    get_all_schedules_month_summary  # 🆕 통합 API 추가
 )
 
 router = DefaultRouter()
@@ -49,4 +51,7 @@ urlpatterns = [
     # 🆕 검사실 스케줄 API 추가
     path('schedules/room-schedules/', get_room_schedules, name='room-schedules'),
     path('schedules/room-schedules-summary/', get_room_schedules_summary, name='room-schedules-summary'),
+    # 🆕 통합 일정 API 추가
+    path('schedules/all/date/<str:target_date>/', get_all_schedules_by_date, name='all-schedules-by-date'),
+    path('schedules/all/month/<int:year>/<int:month>/', get_all_schedules_month_summary, name='all-schedules-month-summary'),
 ]

@@ -212,31 +212,25 @@ class YOLOv8Analyzer:
             logger.error(traceback.format_exc())
             return None
     
+
     def _parse_yolo_outputs(self, results, image_shape):
         """YOLO 검출 결과 후처리 및 ai_service.py 형식에 맞게 변환"""
         detections = []
         
         try:
-            for result in results: # 하나의 이미지에 대한 result 객체
-                boxes = result.boxes # Box 텐서들을 포함하는 객체
+            for result in results:
+                boxes = result.boxes
                 if boxes is not None and len(boxes) > 0:
                     logger.info(f"YOLO에서 {len(boxes)}개 검출 (임계치 {self.confidence_threshold})")
                     
-                    # boxes는 iterable하며 각 box는 Box 객체처럼 동작
-                    for i in range(len(boxes)): # boxes를 직접 순회
-                        # box.xyxy는 torch.Tensor, box.conf, box.cls도 torch.Tensor
-                        # .cpu().numpy().tolist() 또는 .item()을 사용하여 파이썬 기본 타입으로 변환
+                    for i in range(len(boxes)):
                         x1, y1, x2, y2 = boxes.xyxy[i].cpu().numpy().tolist()
                         confidence = float(boxes.conf[i].cpu().numpy().item())
                         class_id = int(boxes.cls[i].cpu().numpy().item())
                         
-                        # 클래스명 결정
                         class_name = self.class_names.get(class_id, f'Unknown_class_{class_id}')
                         
-                        # 신뢰도 임계값은 YOLO 모델 호출 시 이미 적용되었지만, 방어적으로 한 번 더 확인.
-                        # (YOLO의 results 객체는 이미 임계값을 적용한 필터링된 결과만 포함함)
                         if confidence >= self.confidence_threshold:
-                            # ai_service.py의 save_analysis_result가 기대하는 형식으로 변경
                             detection_item = {
                                 'bbox': {
                                     'x': float(x1),
@@ -245,19 +239,19 @@ class YOLOv8Analyzer:
                                     'height': float(y2 - y1)
                                 },
                                 'confidence': confidence,
-                                'label': class_name, # ai_service에서 'label'을 사용
-                                'confidence_score': confidence, # ai_service에서 'confidence_score'도 사용
-                                'ai_text': f'YOLOv8 검출: {class_name} (정확도: {confidence:.3f})', # ai_service에서 'ai_text'를 사용
-                                'area': float((x2 - x1) * (y2 - y1))
+                                'label': class_name,
+                                'confidence_score': confidence,
+                                'ai_text': f'YOLOv8 검출: {class_name} (정확도: {confidence:.3f})',
+                                'area': float((x2 - x1) * (y2 - y1)),
+                                # 🔥 해상도 정보 추가!
+                                'image_width': image_shape[1],   # width
+                                'image_height': image_shape[0],  # height
                             }
                             
-                            # 의료 영상 특화 정보 추가
-                            # _extract_medical_features 함수가 기대하는 detection 형식에 맞춰 데이터 전달
                             detection_item['medical_info'] = self._extract_medical_features(detection_item, image_shape)
-                            
                             detections.append(detection_item)
                             
-                            logger.info(f"✅ YOLO 검출: {class_name} ({confidence:.3f}) [x:{x1:.1f},y:{y1:.1f},w:{(x2-x1):.1f},h:{(y2-y1):.1f}]")
+                            logger.info(f"✅ YOLO 검출: {class_name} ({confidence:.3f}) [x:{x1:.1f},y:{y1:.1f},w:{(x2-x1):.1f},h:{(y2-y1):.1f}] 해상도:{image_shape[1]}x{image_shape[0]}")
                 else:
                     logger.info("YOLO에서 검출된 객체가 없습니다.")
             
@@ -267,6 +261,108 @@ class YOLOv8Analyzer:
             logger.error(f"YOLO 검출 결과 후처리 실패: {str(e)}")
             logger.error(f"상세 에러: {traceback.format_exc()}")
             return []
+
+    def analyze(self, dicom_data_bytes):
+        """DICOM 이미지 분석 메인 함수"""
+        try:
+            start_time = datetime.now()
+            
+            if self.model is None:
+                logger.error("YOLOv8 모델이 로드되지 않았습니다. 분석을 수행할 수 없습니다.")
+                return {
+                    'success': False,
+                    'error': 'YOLOv8 모델이 로드되지 않았습니다.',
+                    'detections': []
+                }
+            
+            # DICOM 이미지 로드
+            image, dicom_dataset = self._load_dicom_from_bytes(dicom_data_bytes)
+            if image is None:
+                return {
+                    'success': False,
+                    'error': 'DICOM 이미지를 로드할 수 없습니다.',
+                    'detections': []
+                }
+            
+            # 의료 영상 향상
+            enhanced_image = self._enhance_medical_image(image)
+            
+            # YOLO 추론 실행
+            results = self._run_inference(enhanced_image)
+            if results is None:
+                return {
+                    'success': False,
+                    'error': '모델 추론에 실패했습니다.',
+                    'detections': []
+                }
+            
+            # 결과 후처리 (해상도 정보 포함)
+            detections = self._parse_yolo_outputs(results, enhanced_image.shape)
+            
+            # 처리 시간 계산
+            processing_time = (datetime.now() - start_time).total_seconds()
+            
+            # DICOM 메타데이터 추출
+            dicom_info = {}
+            original_width = 0
+            original_height = 0
+            
+            if dicom_dataset:
+                try:
+                    original_width = int(getattr(dicom_dataset, 'Columns', 0))
+                    original_height = int(getattr(dicom_dataset, 'Rows', 0))
+                    
+                    dicom_info = {
+                        'patient_id': str(getattr(dicom_dataset, 'PatientID', 'Unknown')),
+                        'study_date': str(getattr(dicom_dataset, 'StudyDate', 'Unknown')),
+                        'modality': str(getattr(dicom_dataset, 'Modality', 'UNKNOWN')),
+                        'body_part': str(getattr(dicom_dataset, 'BodyPartExamined', 'Unknown')),
+                        'image_size': {
+                            'width': original_width,
+                            'height': original_height
+                        }
+                    }
+                except Exception as e:
+                    logger.warning(f"DICOM 메타데이터 추출 실패: {str(e)}")
+            
+            # 🔥 결과에 해상도 정보 명시적으로 추가
+            result = {
+                'success': True,
+                'detections': detections,
+                # 🔥 최상위 레벨에 해상도 정보 추가 (Django에서 쉽게 접근 가능)
+                'image_width': original_width if original_width > 0 else enhanced_image.shape[1],
+                'image_height': original_height if original_height > 0 else enhanced_image.shape[0],
+                'analysis_info': {
+                    'model_type': 'YOLOv8',
+                    'processing_time_seconds': processing_time,
+                    'detection_count': len(detections),
+                    'confidence_threshold': self.confidence_threshold,
+                    'iou_threshold': self.iou_threshold
+                },
+                'dicom_info': dicom_info,
+                'image_info': {
+                    'original_shape': image.shape,
+                    'processed_shape': enhanced_image.shape,
+                    # 🔥 여기에도 해상도 정보 추가
+                    'original_width': original_width,
+                    'original_height': original_height,
+                    'processed_width': enhanced_image.shape[1],
+                    'processed_height': enhanced_image.shape[0]
+                },
+                'message': f"YOLOv8 분석 완료: {len(detections)}개 검출, 해상도: {original_width}x{original_height}"
+            }
+            
+            logger.info(f"✅ YOLOv8 분석 완료: {len(detections)}개 검출, 처리시간: {processing_time:.2f}초, 해상도: {original_width}x{original_height}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ YOLOv8 분석 중 오류 발생: {str(e)}")
+            logger.error(f"❌ 상세 에러: {traceback.format_exc()}")
+            return {
+                'success': False,
+                'error': str(e),
+                'detections': []
+            }
     
     
     def _extract_medical_features(self, detection, image_shape):

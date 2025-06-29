@@ -14,11 +14,13 @@ app_name = 'pacsdocs'
 urlpatterns = [
     # DRF ViewSet URLs
     path('api/', include(router.urls)),
+
+    # 🔥 파일 업로드 API 추가
+    path('api/upload/', views.upload_file, name='upload-file'),
     
     # 통계 API
     path('api/statistics/', views.get_document_statistics, name='document-statistics'),
 ]
-
 # 생성되는 API 엔드포인트들:
 """
 GET    /pacsdocs/api/document-types/                    # 서류 종류 목록
@@ -30,6 +32,9 @@ GET    /pacsdocs/api/document-requests/{id}/            # 특정 서류 요청 �
 PUT    /pacsdocs/api/document-requests/{id}/            # 서류 요청 수정
 DELETE /pacsdocs/api/document-requests/{id}/            # 서류 요청 삭제
 PATCH  /pacsdocs/api/document-requests/{id}/update_status/  # 서류 상태 변경
+POST   /pacsdocs/api/document-requests/{id}/upload_file/    # 🔥 개별 파일 업로드
+
+🔥 POST   /pacsdocs/api/upload/                           # 파일 업로드 (메인)
 
 GET    /pacsdocs/api/study-documents/                   # 검사별 서류 목록 (React UI용)
 GET    /pacsdocs/api/study-documents/{study_id}/        # 특정 검사의 서류들

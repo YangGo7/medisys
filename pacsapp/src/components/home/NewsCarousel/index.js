@@ -27,11 +27,10 @@ const NewsCarousel = () => {
     }
   ];
 
-  // 나머지 코드는 그대로...
   useEffect(() => {
     const slideTimer = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % newsSlides.length);
-    }, 5000);
+    }, 10000); // 5초에서 10초로 변경
 
     return () => clearInterval(slideTimer);
   }, [newsSlides.length]);
@@ -64,6 +63,7 @@ const NewsCarousel = () => {
         </button>
       </div>
       
+      {/* 인디케이터 제거 - 주석 처리하거나 아예 삭제하세요
       <div className="carousel-indicators">
         {newsSlides.map((_, index) => (
           <button
@@ -73,6 +73,7 @@ const NewsCarousel = () => {
           />
         ))}
       </div>
+      */}
     </div>
   );
 };

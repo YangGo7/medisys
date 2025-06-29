@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './StatisticsBoard.css';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PolarRadiusAxis,
+  PieChart, Pie, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis
+} from 'recharts';
 
 // 백엔드 API 서비스 클래스
 class DashboardAPI {
@@ -408,6 +412,7 @@ const StatisticsBoard = ({
         </div>
       </div>
 
+      <div style={{ height: '5rem' }} />
       <div className="container">
         <div className="dashboard-layout">
           {/* 왼쪽 패널: 주요 지표 */}
@@ -467,6 +472,7 @@ const StatisticsBoard = ({
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                           <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip />
                           <Bar dataKey="value" fill="#3498db" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -479,6 +485,7 @@ const StatisticsBoard = ({
                     {dashboardData.patientDistribution?.genderDistribution ? (
                       <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
+                          <Tooltip />
                           <Pie
                             data={dashboardData.patientDistribution.genderDistribution}
                             cx="50%"
@@ -486,11 +493,13 @@ const StatisticsBoard = ({
                             innerRadius={40}
                             outerRadius={80}
                             dataKey="value"
+                            nameKey="name"
                           >
                             {dashboardData.patientDistribution.genderDistribution.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color || '#3498db'} />
                             ))}
                           </Pie>
+                          <Tooltip formatter={(value, name) => [`${value}명`, name]} />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
@@ -523,6 +532,7 @@ const StatisticsBoard = ({
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip />
                       <Bar dataKey="value" fill="#3498db" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -548,6 +558,7 @@ const StatisticsBoard = ({
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                         <XAxis type="number" tick={{ fontSize: 12 }} />
                         <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} />
+                        <Tooltip />
                         <Bar dataKey="value" fill="#3498db" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -568,6 +579,7 @@ const StatisticsBoard = ({
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                         <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip />
                         <Line 
                           type="monotone" 
                           dataKey="value" 
@@ -623,6 +635,7 @@ const StatisticsBoard = ({
                         domain={[0, 100]} 
                         tick={{ fontSize: 10 }}
                       />
+                      <Tooltip />
                       <Radar
                         name="AI 성능"
                         dataKey="value"

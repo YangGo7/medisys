@@ -207,7 +207,7 @@
   text-overflow: ellipsis;
 }
 
-/* 🔥 새로운 exam-actions 스타일 */
+/* 🔥 검사 액션 영역 너비 축소 */
 .exam-actions {
   position: relative !important;
   display: flex !important;
@@ -215,21 +215,21 @@
   align-items: flex-end !important;
   gap: 0.25rem !important;
   flex-shrink: 0 !important;
-  min-width: 70px !important;
+  min-width: 50px !important; /* 🔥 70px → 50px로 축소 */
 }
 
 /* 🔥 X 취소 버튼 */
 .exam-card .exam-cancel-btn {
   position: absolute !important;
-  top: -8px !important;
-  right: -8px !important;
-  width: 20px !important;
-  height: 20px !important;
+  top: -6px !important; /* 🔥 -8px → -6px */
+  right: -6px !important; /* 🔥 -8px → -6px */
+  width: 18px !important; /* 🔥 20px → 18px */
+  height: 18px !important; /* 🔥 20px → 18px */
   border: none !important;
   background: rgba(239, 68, 68, 0.9) !important;
   color: white !important;
   border-radius: 50% !important;
-  font-size: 14px !important;
+  font-size: 12px !important; /* 🔥 14px → 12px */
   font-weight: bold !important;
   cursor: pointer !important;
   display: flex !important;
@@ -245,19 +245,19 @@
   transform: scale(1.1) !important;
 }
 
-/* 🔥 클릭 가능한 상태 버튼 */
+/* 🔥 클릭 가능한 상태 버튼 - 너비 축소 */
 .exam-card .exam-status-clickable {
-  font-size: 0.75rem !important;
-  padding: 0.25rem 0.5rem !important;
+  font-size: 0.65rem !important; /* 🔥 0.75rem → 0.65rem */
+  padding: 0.2rem 0.3rem !important; /* 🔥 패딩 축소 */
   border: none !important;
   border-radius: 0.25rem !important;
   font-weight: 500 !important;
   white-space: nowrap !important;
   text-align: center !important;
-  min-width: 60px !important;
-  max-width: 60px !important;
-  width: 60px !important;
-  height: 24px !important;
+  min-width: 45px !important; /* 🔥 60px → 45px */
+  max-width: 45px !important; /* 🔥 60px → 45px */
+  width: 45px !important; /* 🔥 60px → 45px */
+  height: 22px !important; /* 🔥 24px → 22px */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -291,18 +291,18 @@
   color: #9333ea !important;
 }
 
-/* 🔧 상태 배지 크기 통일 - exam-status-small로 변경 */
+/* 🔧 상태 배지 크기 축소 */
 .exam-status-small {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem; /* 🔥 0.75rem → 0.65rem */
+  padding: 0.2rem 0.3rem; /* 🔥 패딩 축소 */
   border-radius: 0.25rem;
   font-weight: 500;
   white-space: nowrap;
   text-align: center;
-  min-width: 60px;        /* 🔧 최소 너비 설정 */
-  max-width: 60px;        /* 🔧 최대 너비도 동일하게 */
+  min-width: 45px; /* 🔥 60px → 45px */
+  max-width: 45px; /* 🔥 60px → 45px */
   box-sizing: border-box;
-  height: 24px;           /* 🔧 높이 고정 */
+  height: 22px; /* 🔥 24px → 22px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -312,15 +312,15 @@
 .exam-status-small.exam-status-검사중 { background: #dcfce7; color: #16a34a; }
 .exam-status-small.exam-status-완료 { background: #f3e8ff; color: #9333ea; }
 
-/* 기존 exam-status-badge 클래스도 유지 */
+/* 기존 exam-status-badge 클래스도 축소 */
 .exam-status-badge {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem; /* 🔥 0.75rem → 0.65rem */
+  padding: 0.2rem 0.3rem; /* 🔥 패딩 축소 */
   border-radius: 0.25rem;
   font-weight: 500;
   white-space: nowrap;
   text-align: center;
-  min-width: 60px;        /* 🔧 최소 너비 설정 */
+  min-width: 45px; /* 🔥 60px → 45px */
   box-sizing: border-box;
 }
 
@@ -328,21 +328,21 @@
 .exam-status-badge.exam-status-검사중 { background: #dcfce7; color: #16a34a; }
 .exam-status-badge.exam-status-완료 { background: #f3e8ff; color: #9333ea; }
 
-/* 🔧 버튼 크기 통일 */
+/* 🔧 액션 버튼 크기 축소 */
 .action-btn {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem; /* 🔥 0.75rem → 0.65rem */
+  padding: 0.2rem 0.3rem; /* 🔥 패딩 축소 */
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
   font-weight: 500;
   white-space: nowrap;
   transition: opacity 0.2s;
-  min-width: 60px;        /* 🔧 상태 배지와 동일한 최소 너비 */
-  max-width: 60px;        /* 🔧 최대 너비도 동일하게 */
+  min-width: 45px; /* 🔥 60px → 45px */
+  max-width: 45px; /* 🔥 60px → 45px */
   text-align: center;
   box-sizing: border-box;
-  height: 24px;           /* 🔧 높이 고정 */
+  height: 22px; /* 🔥 24px → 22px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -406,28 +406,29 @@
   }
   
   .action-btn {
-    font-size: 0.625rem;
-    padding: 0.125rem 0.25rem;
-    min-width: 50px;  /* 🔧 모바일에서는 조금 작게 */
+    font-size: 0.6rem; /* 🔥 0.625rem → 0.6rem */
+    padding: 0.15rem 0.2rem; /* 🔥 더 축소 */
+    min-width: 40px; /* 🔥 50px → 40px */
   }
   
   .exam-status-small,
   .exam-status-badge {
-    font-size: 0.625rem;
-    min-width: 50px;  /* 🔧 모바일에서는 조금 작게 */
+    font-size: 0.6rem; /* 🔥 0.625rem → 0.6rem */
+    min-width: 40px; /* 🔥 50px → 40px */
   }
 
-  /* 모바일에서 새로운 버튼들도 조정 */
+  /* 모바일에서 새로운 버튼들도 더 축소 */
   .exam-card .exam-status-clickable {
-    font-size: 0.625rem !important;
-    min-width: 50px !important;
-    max-width: 50px !important;
-    width: 50px !important;
+    font-size: 0.6rem !important; /* 🔥 0.625rem → 0.6rem */
+    min-width: 40px !important; /* 🔥 50px → 40px */
+    max-width: 40px !important; /* 🔥 50px → 40px */
+    width: 40px !important; /* 🔥 50px → 40px */
+    height: 20px !important; /* 🔥 높이도 축소 */
   }
 
   .exam-card .exam-cancel-btn {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 12px !important;
+    width: 16px !important; /* 🔥 18px → 16px */
+    height: 16px !important; /* 🔥 18px → 16px */
+    font-size: 10px !important; /* 🔥 12px → 10px */
   }
 }
