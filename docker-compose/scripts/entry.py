@@ -211,7 +211,35 @@ def analyze_instance(instance_id):
             return jsonify({'error': 'DICOM download failed'}), 500
 
         modality = instance_info['MainDicomTags'].get('Modality', 'UNKNOWN')
+        
+        # 🔥 해상도 추출 우선순위 변경
+        # 1. DICOM 데이터에서 직접 추출 (최우선)
         image_width, image_height = get_image_dimensions_from_data(dicom_data)
+        
+        # 2. 추출 실패시 Orthanc에서 시도
+        if not image_width or not image_height:
+            logger.warning("⚠️ DICOM 직접 추출 실패, Orthanc API 시도")
+            try:
+                orthanc_url = "http://35.225.63.41:8042"
+                auth = ("orthanc", "orthanc")
+                tags_response = requests.get(f"{orthanc_url}/instances/{resolved_id}/tags", auth=auth, timeout=10)
+                
+                if tags_response.status_code == 200:
+                    tags = tags_response.json()
+                    rows = tags.get("0028,0010", {}).get("Value", [None])[0]
+                    cols = tags.get("0028,0011", {}).get("Value", [None])[0]
+                    
+                    if rows and cols:
+                        image_height = int(rows)
+                        image_width = int(cols)
+                        logger.info(f"📐 Orthanc API에서 해상도 추출: {image_width}x{image_height}")
+            except Exception as e:
+                logger.warning(f"⚠️ Orthanc API 해상도 추출 실패: {e}")
+        
+        # 3. 최종 기본값
+        if not image_width or not image_height:
+            image_width, image_height = 512, 512  # 🔥 1024에서 512로 변경
+            logger.warning(f"⚠️ 모든 해상도 추출 실패, 기본값 사용: {image_width}x{image_height}")
 
         analysis_results = ai_analyzer.analyze_dicom_data(dicom_data, modality)
 
@@ -222,7 +250,6 @@ def analyze_instance(instance_id):
                 result['metadata']['image_width'] = image_width
                 result['metadata']['image_height'] = image_height
 
-                # 여전히 저장은 original instance_id 사용 (UID 저장 목적)
                 save_result = save_analysis_result(instance_id, result, dicom_data)
                 saved_results.append(save_result)
 
@@ -231,7 +258,8 @@ def analyze_instance(instance_id):
             'total_models': len(analysis_results),
             'saved_count': len(saved_results),
             'results': analysis_results,
-            'image_dimensions': f"{image_width}x{image_height}"
+            'image_dimensions': f"{image_width}x{image_height}",
+            'resolution_source': 'DICOM_direct' if image_width != 512 else 'default'  # 🔥 출처 정보
         })
 
     except Exception as e:
@@ -253,15 +281,43 @@ def get_image_dimensions_from_data(dicom_data):
         width = getattr(dicom_file, 'Columns', None)
         
         if height and width:
-            logger.info(f"📐 DICOM에서 해상도 추출: {width}x{height}")
-            return int(width), int(height)
+            height, width = int(height), int(width)
+            logger.info(f"📐 DICOM Rows/Columns에서 해상도 추출: {width}x{height}")
+            return width, height
+        
+        # 2. 백업: PixelData에서 추출 시도
+        if hasattr(dicom_file, 'pixel_array'):
+            try:
+                pixel_array = dicom_file.pixel_array
+                if len(pixel_array.shape) >= 2:
+                    height, width = pixel_array.shape[:2]
+                    logger.info(f"📐 DICOM pixel_array에서 해상도 추출: {width}x{height}")
+                    return int(width), int(height)
+            except Exception as e:
+                logger.warning(f"⚠️ pixel_array 접근 실패: {e}")
+        
+        # 3. 다른 태그들 시도
+        alternative_tags = [
+            ('BitsAllocated', 'BitsStored'),  # 픽셀 정보
+            ('PhotometricInterpretation',),   # 색상 정보
+            ('SamplesPerPixel',),             # 채널 정보
+        ]
+        
+        for tags in alternative_tags:
+            if all(hasattr(dicom_file, tag) for tag in tags):
+                logger.info(f"📋 DICOM에 {tags} 태그 존재 - 이미지 데이터 있음")
+                break
         else:
-            logger.warning(f"⚠️ DICOM에서 해상도 정보 없음, 기본값 사용")
-            return 1024, 1024
+            logger.warning(f"⚠️ DICOM에서 이미지 관련 태그를 찾을 수 없음")
+            return None, None
+        
+        logger.warning(f"⚠️ DICOM에서 해상도 정보 없음, 다른 방법 필요")
+        return None, None
             
     except Exception as e:
         logger.error(f"❌ DICOM 해상도 추출 실패: {e}")
-        return 1024, 1024
+        return None, None
+
     
 
 @app.route('/results/<instance_id>', methods=['GET'])
@@ -338,9 +394,6 @@ def get_instance_info(instance_id):
         logger.error(traceback.format_exc())
         return None
 
-
-
-
 def get_dicom_file(instance_id):
     try:
         r = requests.get(f"{ORTHANC_URL}/instances/{instance_id}/file", auth=auth_tuple, timeout=80)
@@ -407,19 +460,31 @@ def save_analysis_result(instance_id, result_dict, dicom_data=None):
         # 🔥 해상도 정보 획득 (이미 추출된 것 우선 사용)
         model_width = result_dict.get("metadata", {}).get("image_width")
         model_height = result_dict.get("metadata", {}).get("image_height")
-        
-        # 🔥 DICOM 데이터가 전달된 경우에만 추출 (fallback)
-        dicom_width, dicom_height = None, None
-        if not model_width or not model_height:
-            if dicom_data:
-                dicom_width, dicom_height = get_image_dimensions_from_data(dicom_data)
-            
-        # 우선순위: 모델 제공 > DICOM 추출 > 기본값
-        final_width = model_width or dicom_width or 1024
-        final_height = model_height or dicom_height or 1024
-        
-        logger.info(f"📐 최종 해상도: {final_width}x{final_height} (모델:{model_width}x{model_height}, DICOM:{dicom_width}x{dicom_height})")
 
+        # 🔥 DICOM 데이터에서 실제 해상도 추출 (우선순위 높임)
+        dicom_width, dicom_height = None, None
+        if dicom_data:
+            dicom_width, dicom_height = get_image_dimensions_from_data(dicom_data)
+        
+        # 🔥 우선순위 변경: DICOM 추출 > 모델 제공 > 기본값
+        if dicom_width and dicom_height:
+            final_width = dicom_width
+            final_height = dicom_height
+            source = "DICOM"
+        elif model_width and model_height:
+            final_width = model_width
+            final_height = model_height
+            source = "Model"
+        else:
+            # 🔥 기본값도 더 합리적으로 설정
+            final_width = 512   # 의료영상 일반적 크기
+            final_height = 512
+            source = "Default"
+            logger.warning(f"⚠️ 해상도 추출 실패, 기본값 사용: {final_width}x{final_height}")
+        
+        logger.info(f"📐 최종 해상도: {final_width}x{final_height} (출처: {source})")
+
+        
         detections = []
         raw_detections = result_dict.get("detections", [])
 
@@ -505,10 +570,11 @@ def save_analysis_result(instance_id, result_dict, dicom_data=None):
                     **result_dict.get("metadata", {}),
                     # 🔥 해상도 정보 추가
                     "image_width": final_width,
-                    "image_height": final_height
+                    "image_height": final_height,
+                    "resolution_source": source  # 해상도 출처 정보
                 },
                 "processing_time": float(result_dict.get("processing_time", 0.0)),
-                # 🔥 최상위 레벨에도 해상도 정보 추가 (Django API 호환성)
+                # 🔥 최상위 레벨에도 해상도 정보 추가
                 "image_width": final_width,
                 "image_height": final_height
             }

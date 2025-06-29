@@ -127,6 +127,18 @@
   color: #9ca3af !important;
 }
 
+/* 🔥 디바운싱 상태 표시 */
+.filter-loading {
+  padding: 8px 16px;
+  background: #f0f9ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1e40af;
+  text-align: center;
+  margin-top: 8px;
+}
+
 /* 메시지들 */
 .loading-message, .error-message, .empty-message {
   text-align: center;
@@ -157,8 +169,8 @@
   background: white;
 }
 
-/* 워크리스트 테이블 */
-.worklist-table {
+/* 🔥 PACSDOCS 전용 테이블 - 클래스명 분리 */
+.pacsdocs-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
@@ -166,7 +178,7 @@
   background: white;
 }
 
-.worklist-table th {
+.pacsdocs-table th {
   background: #f8f9fa;
   font-weight: 600;
   font-size: 13px;
@@ -181,11 +193,11 @@
   z-index: 10;
 }
 
-.worklist-table th:last-child {
+.pacsdocs-table th:last-child {
   border-right: none;
 }
 
-.worklist-table td {
+.pacsdocs-table td {
   padding: 10px 8px;
   border-bottom: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
@@ -194,11 +206,11 @@
   vertical-align: top;
 }
 
-.worklist-table td:last-child {
+.pacsdocs-table td:last-child {
   border-right: none;
 }
 
-.worklist-table tbody tr:hover {
+.pacsdocs-table tbody tr:hover {
   background: #f8f9fa;
 }
 
@@ -245,7 +257,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-width: 240px;
+  min-width: 160px; /* 🔥 240px → 160px로 축소 */
 }
 
 .unified-document {
@@ -312,6 +324,9 @@
   font-size: 12px;
   font-weight: 500;
   flex: 1;
+  white-space: nowrap; /* 🔥 추가: 텍스트 줄바꿈 방지 */
+  overflow: hidden;     /* 🔥 추가: 넘치는 텍스트 숨김 */
+  text-overflow: ellipsis; /* 🔥 추가: ... 표시 */
 }
 
 .consent-name {
@@ -326,6 +341,7 @@
 .doc-actions-simple {
   display: flex;
   gap: 4px;
+  flex-shrink: 0; /* 🔥 추가: 버튼 크기 고정 */
 }
 
 .simple-btn {
@@ -468,7 +484,7 @@
 }
 
 .remarks-section {
-  width: 120px;
+  width: 100px; /* 🔥 120px → 100px로 축소 */
   vertical-align: top;
   padding: 8px;
 }
@@ -482,17 +498,17 @@
   background: #fecaca !important;
 }
 
-/* 테이블 열 너비 조정 */
-.worklist-table th:nth-child(8), /* 필요서류 등 */
-.worklist-table td:nth-child(8) {
-  min-width: 260px;
-  width: 260px;
+/* 🔥 PACSDOCS 테이블 열 너비 조정 - 독립적 설정 */
+.pacsdocs-table th:nth-child(8), /* 서류 컬럼 */
+.pacsdocs-table td:nth-child(8) {
+  min-width: 180px;  /* 🔥 PACSDOCS 전용 너비 */
+  width: 180px;
 }
 
-.worklist-table th:nth-child(9), /* 비고 */
-.worklist-table td:nth-child(9) {
-  min-width: 120px;
-  width: 120px;
+.pacsdocs-table th:nth-child(9), /* 비고 컬럼 */
+.pacsdocs-table td:nth-child(9) {
+  min-width: 100px;  /* 🔥 PACSDOCS 전용 너비 */
+  width: 100px;
 }
 
 /* 반응형 */
@@ -513,6 +529,17 @@
     font-size: 12px;
     min-width: 20px;
     height: 20px;
+  }
+  
+  /* 🔥 중간 화면에서 더 축소 */
+  .all-documents {
+    min-width: 140px;
+  }
+  
+  .pacsdocs-table th:nth-child(8),
+  .pacsdocs-table td:nth-child(8) {
+    min-width: 150px;
+    width: 150px;
   }
 }
 
@@ -541,17 +568,17 @@
     justify-content: center;
   }
   
-  .worklist-table {
+  .pacsdocs-table {
     font-size: 12px;
   }
   
-  .worklist-table th,
-  .worklist-table td {
+  .pacsdocs-table th,
+  .pacsdocs-table td {
     padding: 8px 4px;
   }
   
   .all-documents {
-    min-width: 200px;
+    min-width: 120px; /* 🔥 모바일에서 더 축소 */
   }
   
   .patient-cell {
@@ -570,6 +597,19 @@
   
   .imaging-info-line {
     font-size: 9px;
+  }
+  
+  /* 🔥 모바일에서 컬럼 더 축소 */
+  .pacsdocs-table th:nth-child(8),
+  .pacsdocs-table td:nth-child(8) {
+    min-width: 120px;
+    width: 120px;
+  }
+  
+  .pacsdocs-table th:nth-child(9),
+  .pacsdocs-table td:nth-child(9) {
+    min-width: 80px;
+    width: 80px;
   }
 }
 

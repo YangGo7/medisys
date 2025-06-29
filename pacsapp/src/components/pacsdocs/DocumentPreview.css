@@ -1,4 +1,5 @@
 /* pacsapp/src/components/pacsdocs/DocumentPreview.css */
+/* pacsapp/src/components/pacsdocs/DocumentPreview.css */
 
 .document-preview {
   height: 100%;
@@ -279,8 +280,8 @@
   margin-right: 8px;
 }
 
-/* 액션 버튼들 */
-.action-buttons {
+/* 🔥 PACSDOCS 전용 액션 버튼들 - 클래스명 분리 */
+.preview-action-buttons {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -291,7 +292,7 @@
   margin-top: auto;
 }
 
-.btn {
+.preview-btn {
   padding: 10px 20px;
   border: 1px solid;
   border-radius: 4px;
@@ -307,56 +308,56 @@
   justify-content: center;
 }
 
-.btn:hover:not(:disabled) {
+.preview-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary {
+.preview-btn-primary {
   background: #374151;
   color: white;
   border-color: #374151;
 }
 
-.btn-primary:hover:not(:disabled) {
+.preview-btn-primary:hover:not(:disabled) {
   background: #1f2937;
   border-color: #1f2937;
 }
 
-.btn-secondary {
+.preview-btn-secondary {
   background: #6b7280;
   color: white;
   border-color: #6b7280;
 }
 
-.btn-secondary:hover:not(:disabled) {
+.preview-btn-secondary:hover:not(:disabled) {
   background: #4b5563;
   border-color: #4b5563;
 }
 
-.btn-success {
+.preview-btn-success {
   background: #10b981;
   color: white;
   border-color: #10b981;
 }
 
-.btn-success:hover:not(:disabled) {
+.preview-btn-success:hover:not(:disabled) {
   background: #059669;
   border-color: #059669;
 }
 
-.btn-danger {
+.preview-btn-danger {
   background: #dc2626;
   color: white;
   border-color: #dc2626;
 }
 
-.btn-danger:hover:not(:disabled) {
+.preview-btn-danger:hover:not(:disabled) {
   background: #b91c1c;
   border-color: #b91c1c;
 }
 
-.btn:disabled {
+.preview-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
@@ -367,12 +368,12 @@
 }
 
 /* 로딩 상태 */
-.btn.loading {
+.preview-btn.loading {
   position: relative;
   color: transparent;
 }
 
-.btn.loading::after {
+.preview-btn.loading::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -398,12 +399,12 @@
     gap: 16px;
   }
   
-  .action-buttons {
+  .preview-action-buttons {
     flex-direction: column;
     gap: 8px;
   }
   
-  .btn {
+  .preview-btn {
     min-width: auto;
     width: 100%;
   }
@@ -452,7 +453,7 @@
     margin: 8px;
   }
   
-  .btn {
+  .preview-btn {
     padding: 8px 16px;
     font-size: 13px;
   }
@@ -477,7 +478,7 @@
 }
 
 /* 접근성 */
-.btn:focus,
+.preview-btn:focus,
 .upload-section:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -486,7 +487,7 @@
 /* 인쇄 스타일 */
 @media print {
   .preview-header,
-  .action-buttons,
+  .preview-action-buttons,
   .upload-section {
     display: none !important;
   }
@@ -708,7 +709,7 @@
 }
 
 /* 버튼 비활성화 상태 */
-.btn.disabled {
+.preview-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;

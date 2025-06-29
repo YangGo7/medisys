@@ -24,39 +24,39 @@ const LisRequestPanel = ({ patient, onRequestComplete }) => {
   // LIS 검사 패널 정의
   const testPanels = useMemo(() => [
     {
-      id: 'Glucose',
-      name: '기본 생화학',
+      id: 'CBC',
+      name: '천식 검사',
       icon: TestTube,
       color: '#3b82f6',
-      tests: ['Fasting Blood Glucose', 'HbA1c']
+      tests: ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet']
     },
     {
-      id: 'Lipid Panel',
-      name: '지질 검사',
+      id: 'CRP',
+      name: '폐렴 검사',
       icon: Activity,
       color: '#10b981',
-      tests: ['Total Cholesterol', 'HDL Cholesterol', 'LDL Cholesterol', 'Triglycerides']
+      tests: ['CRP']
     },
     {
-      id: 'CBC',
-      name: '전혈구 검사',
+      id: 'NT-proBNP',
+      name: '심부전 검사',
       icon: Microscope,
       color: '#f59e0b',
-      tests: ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets']
+      tests: ['NT-proBNP']
     },
     {
-      id: 'Thyroid Panel',
-      name: '갑상선 기능',
+      id: 'D-dimer',
+      name: '폐색전증 검사',
       icon: Stethoscope,
       color: '#8b5cf6',
-      tests: ['TSH', 'Free T4', 'T3']
+      tests: ['D-dimer']
     },
     {
-      id: 'LFT',
-      name: '간기능 검사',
+      id: 'ABGA',
+      name: '만성 폐쇄성 폐질환 검사',
       icon: Calendar,
       color: '#ef4444',
-      tests: ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin'],
+      tests: ['pCO2', 'pO2', 'pH', 'HCO3', 'O2_sat'],
     }
   ], []);
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SSD300 기반 DICOM 이미지 분석 모듈 (PyTorch 버전) - 의료 영상 특화
+SSD300 기반 DICOM 이미지 분석 모듈 (PyTorch 버전) - 의료 영상 특화 + 필터링
 """
 
 import os
@@ -43,7 +43,7 @@ class SSDAnalyzer:
         self.model_path = model_path
         self.model = None
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.confidence_threshold = 0.2
+        self.confidence_threshold = 0.1  # 🔥 낮은 임계값으로 변경 (필터링에서 처리)
         self.input_size = 300  # SSD300 입력 크기
         
         # ai_service의 MEDICAL_CLASSES와 동일하게 14개 클래스 (배경 제외, ID 0부터 13까지)
@@ -177,7 +177,6 @@ class SSDAnalyzer:
             return None, None
     
     
-    ## 아래 부분 삭제 가능 ----------------------------------------------------------------------------- ##
     def _enhance_medical_image(self, image):
         """의료 영상에 특화된 이미지 향상"""
         try:
@@ -219,8 +218,6 @@ class SSDAnalyzer:
             logger.warning(f"이미지 향상 처리 실패: {str(e)}")
             logger.warning(traceback.format_exc())
             return image
-
-    ## ---------------------------------------------------------------------------------------------- ##
 
     
     def _preprocess_image(self, image):
@@ -269,9 +266,130 @@ class SSDAnalyzer:
             logger.error(f"모델 추론 실패: {str(e)}")
             logger.error(traceback.format_exc())
             return None
-    
+
+    # 🔥 새로 추가된 필터링 함수들
+    def _calculate_iou(self, box1, box2):
+        """두 bounding box의 IoU(Intersection over Union) 계산"""
+        # box format: {'x': x, 'y': y, 'width': w, 'height': h}
+        
+        x1_1, y1_1 = box1.get('x', 0), box1.get('y', 0)
+        x2_1, y2_1 = x1_1 + box1.get('width', 0), y1_1 + box1.get('height', 0)
+        
+        x1_2, y1_2 = box2.get('x', 0), box2.get('y', 0)
+        x2_2, y2_2 = x1_2 + box2.get('width', 0), y1_2 + box2.get('height', 0)
+        
+        # 교집합 영역 계산
+        x1_inter = max(x1_1, x1_2)
+        y1_inter = max(y1_1, y1_2)
+        x2_inter = min(x2_1, x2_2)
+        y2_inter = min(y2_1, y2_2)
+        
+        if x2_inter <= x1_inter or y2_inter <= y1_inter:
+            return 0.0
+        
+        intersection = (x2_inter - x1_inter) * (y2_inter - y1_inter)
+        
+        # 합집합 영역 계산
+        area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+        union = area1 + area2 - intersection
+        
+        return intersection / union if union > 0 else 0.0
+
+    def _apply_ssd_filtering(self, detections):
+        """
+        SSD 검출 결과 필터링
+        - confidence >= 0.4
+        - Normal 클래스 제거
+        - NMS 적용 (IoU threshold 0.3)
+        - 같은 라벨은 confidence 가장 높은 것만 선택
+        """
+        if not detections:
+            return []
+            
+        logger.info(f"🔍 SSD 필터링 시작: {len(detections)}개 detection")
+            
+        # 1. 신뢰도 임계값 필터링 (0.4)
+        filtered_by_conf = [
+            det for det in detections 
+            if det.get('confidence', 0) >= 0.5
+        ]
+        logger.info(f"✅ 신뢰도 0.5 이상: {len(filtered_by_conf)}개")
+            
+        # 2. Normal 클래스 제거
+        filtered_by_label = [
+            det for det in filtered_by_conf 
+            if det.get('label', '').lower() != 'normal'
+        ]
+        logger.info(f"✅ Normal 클래스 제거 후: {len(filtered_by_label)}개")
+            
+        if not filtered_by_label:
+            logger.info("⚠️ 모든 detection이 필터링됨")
+            return []
+            
+        # 3. 신뢰도 순으로 정렬 (높은 순)
+        sorted_detections = sorted(
+            filtered_by_label, 
+            key=lambda x: x.get('confidence', 0), 
+            reverse=True
+        )
+            
+        # 4. NMS 적용 (IoU threshold 0.3)
+        keep_indices = []
+        suppressed = set()
+            
+        for i, det_i in enumerate(sorted_detections):
+            if i in suppressed:
+                continue
+                    
+            keep_indices.append(i)
+                    
+            # 현재 detection과 겹치는 것들 찾아서 제거
+            for j, det_j in enumerate(sorted_detections[i+1:], i+1):
+                if j in suppressed:
+                    continue
+                    
+                # IoU 계산
+                iou = self._calculate_iou(det_i.get('bbox', {}), det_j.get('bbox', {}))
+                    
+                if iou > 0.3:  # IoU threshold
+                    conf_i = det_i.get('confidence', 0)
+                    conf_j = det_j.get('confidence', 0)
+                        
+                    if conf_i >= conf_j:  # i가 더 높거나 같은 신뢰도 → j 제거
+                        suppressed.add(j)
+                        logger.info(f"🚫 제거: {det_j.get('label')} (conf:{conf_j:.3f}) ← IoU:{iou:.3f} → 유지: {det_i.get('label')} (conf:{conf_i:.3f})")
+            
+        # 5. NMS 결과
+        nms_detections = [sorted_detections[i] for i in keep_indices]
+        
+        # 🔥 6. 같은 라벨은 confidence 가장 높은 것만 선택
+        label_best = {}
+        for det in nms_detections:
+            label = det.get('label', '')
+            confidence = det.get('confidence', 0)
+            
+            if label not in label_best or confidence > label_best[label]['confidence']:
+                label_best[label] = det
+                logger.info(f"📝 라벨 '{label}' 최고 confidence 업데이트: {confidence:.3f}")
+        
+        # 7. 최종 결과: 라벨별 최고 confidence만
+        final_detections = list(label_best.values())
+        
+        logger.info(f"✅ SSD 필터링 완료: {len(detections)}개 → NMS:{len(nms_detections)}개 → 라벨중복제거:{len(final_detections)}개")
+            
+        # 8. 결과 요약 로그
+        if final_detections:
+            logger.info("📋 최종 SSD detection 요약:")
+            for i, det in enumerate(final_detections):
+                label = det.get('label', 'Unknown')
+                conf = det.get('confidence', 0)
+                logger.info(f"  {i+1}. {label} (신뢰도: {conf:.3f})")
+            
+        return final_detections
+
     def _parse_ssd_outputs(self, predictions, original_size):
-        """SSD300 출력 파싱 및 ai_service.py 형식에 맞게 변환"""
+        """SSD300 출력 파싱 및 ai_service.py 형식에 맞게 변환 + 필터링 적용"""
         detections = []
         try:
             original_width, original_height = original_size
@@ -290,25 +408,25 @@ class SSDAnalyzer:
             labels = pred.get('labels', torch.empty((0,)))
             scores = pred.get('scores', torch.empty((0,)))
             
-            logger.info(f"📊 SSD 출력: boxes={boxes.shape}, labels={labels.shape}, scores={scores.shape}")
+            logger.info(f"📊 SSD 원본 출력: boxes={boxes.shape}, labels={labels.shape}, scores={scores.shape}")
             
             if len(boxes) == 0:
                 logger.info("검출된 객체 없음.")
                 return detections
                 
-            valid_indices = scores > self.confidence_threshold
+            # 🔥 임계값을 낮게 해서 일단 모든 검출 수집 (필터링에서 처리)
+            valid_indices = scores > self.confidence_threshold  # 0.1로 모든 검출 수집
             valid_boxes = boxes[valid_indices]
             valid_labels = labels[valid_indices]
             valid_scores = scores[valid_indices]
             
-            logger.info(f"🔍 임계값 {self.confidence_threshold} 이상: {len(valid_boxes)}개")
+            logger.info(f"🔍 기본 임계값 {self.confidence_threshold} 이상: {len(valid_boxes)}개")
             
             scale_x = original_width / self.input_size
             scale_y = original_height / self.input_size
             
             for i in range(len(valid_boxes)):
-                # 모든 텐서 값을 파이썬 기본 타입으로 완전히 변환
-                box = valid_boxes[i].cpu().numpy().tolist() # [x1, y1, x2, y2]
+                box = valid_boxes[i].cpu().numpy().tolist()
                 label_id = int(valid_labels[i].cpu().numpy().item())
                 score = float(valid_scores[i].cpu().numpy().item())
                 
@@ -327,7 +445,6 @@ class SSDAnalyzer:
                 if orig_x2 > orig_x1 + 5 and orig_y2 > orig_y1 + 5:
                     class_name = self.class_names.get(label_id, f'Unknown_class_{label_id}')
                     
-                    # ai_service.py의 save_analysis_result가 기대하는 형식으로 변경
                     detection_item = {
                         'bbox': {
                             'x': float(orig_x1),
@@ -336,22 +453,24 @@ class SSDAnalyzer:
                             'height': float(orig_y2 - orig_y1)
                         },
                         'confidence': score,
-                        'label': class_name,  # ai_service에서 'class_name' 대신 'label'을 사용
-                        'confidence_score': score, # ai_service에서 'confidence_score'도 사용
-                        'ai_text': f'SSD300 검출: {class_name} (정확도: {score:.3f})', # ai_service에서 'description' 대신 'ai_text' 사용
-                        'area': float((orig_x2 - orig_x1) * (orig_y2 - orig_y1)) # area는 ai_service에서 계산해도 되지만, 여기 있으면 편리
+                        'label': class_name,
+                        'confidence_score': score,
+                        'ai_text': f'SSD300 검출: {class_name} (정확도: {score:.3f})',
+                        'area': float((orig_x2 - orig_x1) * (orig_y2 - orig_y1)),
+                        # 해상도 정보 추가
+                        'image_width': original_width,
+                        'image_height': original_height,
                     }
                     
-                    # 의료 영상 특화 정보 추가
-                    # _extract_medical_features 함수가 기대하는 detection 형식에 맞춰 데이터 전달
-                    # _extract_medical_features 내부에서 bbox는 {x,y,width,height}를 기대하므로 detection_item 그대로 전달
                     detection_item['medical_info'] = self._extract_medical_features(detection_item, (original_height, original_width))
-                    
                     detections.append(detection_item)
-                    
-                    logger.info(f"✅ SSD 검출: {class_name} ({score:.3f}) [x:{orig_x1},y:{orig_y1},w:{(orig_x2-orig_x1)},h:{(orig_y2-orig_y1)}]")
             
-            return detections
+            logger.info(f"✅ SSD 원본 검출 완료: {len(detections)}개")
+            
+            # 🔥 필터링 적용
+            filtered_detections = self._apply_ssd_filtering(detections)
+            
+            return filtered_detections
             
         except Exception as e:
             logger.error(f"SSD 출력 파싱 실패: {e}")
@@ -431,9 +550,7 @@ class SSDAnalyzer:
         else:
             return 'lower_right'
 
-    
-    
-    def analyze(self, dicom_data_bytes): # 인풋을 dicom_path 대신 bytes로 받도록 변경
+    def analyze(self, dicom_data_bytes):
         """DICOM 이미지 분석 메인 함수"""
         try:
             start_time = datetime.now()
@@ -447,7 +564,7 @@ class SSDAnalyzer:
                 }
             
             # DICOM 이미지 로드
-            image, dicom_dataset = self._load_dicom_from_bytes(dicom_data_bytes) # 변경된 함수 호출
+            image, dicom_dataset = self._load_dicom_from_bytes(dicom_data_bytes)
             if image is None:
                 return {
                     'success': False,
@@ -476,52 +593,76 @@ class SSDAnalyzer:
                     'detections': []
                 }
             
-            # 결과 파싱
+            # 결과 파싱 (해상도 정보 포함) + 필터링 적용
             detections = self._parse_ssd_outputs(predictions, original_size)
-        
             
             # 처리 시간 계산
             processing_time = (datetime.now() - start_time).total_seconds()
             
             # DICOM 메타데이터 추출
             dicom_info = {}
+            original_width, original_height = original_size
+            
             if dicom_dataset:
                 try:
+                    # DICOM에서 직접 해상도 추출 (더 정확할 수 있음)
+                    dicom_width = int(getattr(dicom_dataset, 'Columns', 0))
+                    dicom_height = int(getattr(dicom_dataset, 'Rows', 0))
+                    
+                    # DICOM에서 추출한 해상도가 유효하면 우선 사용
+                    if dicom_width > 0 and dicom_height > 0:
+                        original_width = dicom_width
+                        original_height = dicom_height
+                    
                     dicom_info = {
                         'patient_id': str(getattr(dicom_dataset, 'PatientID', 'Unknown')),
                         'study_date': str(getattr(dicom_dataset, 'StudyDate', 'Unknown')),
-                        'modality': str(getattr(dicom_dataset, 'Modality', 'UNKNOWN')), 
+                        'modality': str(getattr(dicom_dataset, 'Modality', 'UNKNOWN')),
                         'body_part': str(getattr(dicom_dataset, 'BodyPartExamined', 'Unknown')),
                         'image_size': {
-                            'width': int(getattr(dicom_dataset, 'Columns', 0)),
-                            'height': int(getattr(dicom_dataset, 'Rows', 0))
+                            'width': original_width,
+                            'height': original_height
                         }
                     }
                 except Exception as e:
                     logger.warning(f"DICOM 메타데이터 추출 실패: {str(e)}")
-                    logger.warning(traceback.format_exc())
             
-            # 결과 구성
+            # 🔥 결과에 해상도 정보 명시적으로 추가
             result = {
                 'success': True,
-                'detections': detections, 
+                'detections': detections,
+                # 🔥 최상위 레벨에 해상도 정보 추가 (Django에서 쉽게 접근 가능)
+                'image_width': original_width,
+                'image_height': original_height,
                 'analysis_info': {
                     'model_type': 'SSD300',
                     'device': str(self.device),
                     'processing_time_seconds': processing_time,
                     'detection_count': len(detections),
-                    'confidence_threshold': self.confidence_threshold,
-                    'input_size': self.input_size
+                    'confidence_threshold': 0.4,  # 실제 필터링에 사용된 임계값
+                    'input_size': self.input_size,
+                    'filtering_applied': True,  # 필터링이 적용되었음을 명시
+                    'nms_iou_threshold': 0.3
                 },
                 'dicom_info': dicom_info,
                 'image_info': {
                     'original_shape': image.shape,
-                    'processed_shape': enhanced_image.shape
+                    'processed_shape': enhanced_image.shape,
+                    # 🔥 여기에도 해상도 정보 추가
+                    'original_width': original_width,
+                    'original_height': original_height,
+                    'processed_width': enhanced_image.shape[1],
+                    'processed_height': enhanced_image.shape[0],
+                    'input_size': self.input_size,  # SSD 모델 입력 크기도 포함
+                    'scale_factors': {
+                        'scale_x': original_width / self.input_size,
+                        'scale_y': original_height / self.input_size
+                    }
                 },
-                'message': f"SSD 분석 완료: {len(detections)}개 검출." 
+                'message': f"SSD 분석 완료: {len(detections)}개 검출 (필터링 적용), 해상도: {original_width}x{original_height}"
             }
             
-            logger.info(f"✅ SSD 분석 완료: {len(detections)}개 검출, 처리시간: {processing_time:.2f}초")
+            logger.info(f"✅ SSD 분석 완료: {len(detections)}개 검출, 처리시간: {processing_time:.2f}초, 해상도: {original_width}x{original_height}")
             return result
             
         except Exception as e:

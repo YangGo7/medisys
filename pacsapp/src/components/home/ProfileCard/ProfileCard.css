@@ -2,7 +2,7 @@
   height: 100%;
   background: white;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem; /* 하단 패딩 줄임: 1.5rem → 1rem */
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -262,15 +262,16 @@
   font-style: italic;
 }
 
-/* 액션 버튼 */
+/* 퀵 액션 버튼 위치 조정 */
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-top: auto;
   position: relative;
-  bottom: 40px;
+  bottom: 5px; /* 조정: 10px → 5px */
   margin-left: -10px;
+  margin-bottom: 2rem; /* 약간의 하단 마진 추가 */
 }
 
 .action-btn {

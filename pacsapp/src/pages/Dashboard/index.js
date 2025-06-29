@@ -412,7 +412,7 @@ const Dashboard = () => {
       )}
       
       {/* 워크리스트 섹션 */}
-      <div className="worklist-section">
+      <div className="dashboard-worklist-section">
         <WorkListPanel 
           ref={workListPanelRef}
           onDragStart={handleDragStart}
@@ -430,7 +430,7 @@ const Dashboard = () => {
       </div>
       
       {/* ✅ 스케줄 섹션 - 검사실 데이터만 있으면 렌더링 */}
-      <div className="schedule-section">
+      <div className="dashboard-schedule-section">
         {rooms.length > 0 ? (
           <SchedulePanel 
             draggedExam={draggedExam}

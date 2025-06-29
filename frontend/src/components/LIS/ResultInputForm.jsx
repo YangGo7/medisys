@@ -5,25 +5,34 @@ import { saveLog } from '../utils/saveLog';
 import './ResultInputForm.css';
 
 const panelComponents = {
-  CBC: ['WBC', 'RBC', 'Hemoglobin', 'Hematocrit', 'MCV', 'MCH', 'MCHC', 'Platelets'],
-  LFT: ['ALT', 'AST', 'ALP', 'Total Bilirubin', 'Direct Bilirubin', 'Albumin'],
-  RFT: ['BUN', 'Creatinine', 'eGFR', 'Uric Acid', 'Sodium', 'Potassium', 'Chloride'],
-  'Lipid Panel': ['Total Cholesterol', 'HDL Cholesterol', 'LDL Cholesterol', 'Triglycerides'],
-  'Electrolyte Panel': ['Sodium', 'Potassium', 'Chloride', 'Bicarbonate'],
-  'Thyroid Panel': ['TSH', 'Free T4', 'T3'],
-  'Coagulation Panel': ['PT', 'INR', 'aPTT', 'Fibrinogen'],
-  Glucose: ['Fasting Blood Glucose', 'HbA1c'],
+  CRP: ['CRP'],
+  CBC: ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet'],
+  ABGA: ['pCO2', 'pO2', 'pH', 'HCO3', 'O2_sat'],
+  'NT-proBNP': ['NT-proBNP'],
+  'D-dimer': ['D-dimer'],
 };
 
 const componentUnits = {
-  WBC: '10^3/uL', RBC: '10^6/uL', Hemoglobin: 'g/dL', Hematocrit: '%', MCV: 'fL', MCH: 'pg', MCHC: 'g/dL', Platelets: '10^3/uL',
-  ALT: 'U/L', AST: 'U/L', ALP: 'U/L', 'Total Bilirubin': 'mg/dL', 'Direct Bilirubin': 'mg/dL', Albumin: 'g/dL',
-  BUN: 'mg/dL', Creatinine: 'mg/dL', eGFR: 'mL/min/1.73m^2', 'Uric Acid': 'mg/dL', Sodium: 'mmol/L', Potassium: 'mmol/L', Chloride: 'mmol/L',
-  'Total Cholesterol': 'mg/dL', 'HDL Cholesterol': 'mg/dL', 'LDL Cholesterol': 'mg/dL', Triglycerides: 'mg/dL',
-  Bicarbonate: 'mmol/L', TSH: 'uIU/mL', 'Free T4': 'ng/dL', T3: 'ng/dL', PT: 'sec', INR: '', aPTT: 'sec', Fibrinogen: 'mg/dL',
-  'Fasting Blood Glucose': 'mg/dL', HbA1c: '%'
+  // CRP 기반 (폐렴)
+  CRP: 'mg/L',
+  // NT-proBNP 기반 (심부전)
+  'NT-proBNP': 'pg/mL',
+  // D-dimer 기반 (폐색전증)
+  'D-dimer': 'ng/mL FEU', // 또는 'μg/mL FEU'도 있음 → 단위 통일 필요
+  // ABGA 기반 (COPD 등)
+  pCO2: 'mmHg',
+  pO2: 'mmHg',
+  pH: '',             // 단위 없음 (수소 이온 농도 지수)
+  HCO3: 'mmol/L',
+  O2_sat: '%',
+  // CBC 기반 (천식)
+  WBC: '10^3/uL',
+  'Neutrophil%': '%',
+  'Lymphocyte%': '%',
+  'Eosinophil%': '%',
+  Hemoglobin: 'g/dL',
+  Platelet: '10^3/uL',
 };
-
 const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   const navigate = useNavigate();
   const [selectedPanel, setSelectedPanel] = useState('');

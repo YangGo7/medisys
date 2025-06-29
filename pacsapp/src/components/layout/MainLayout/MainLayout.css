@@ -330,3 +330,16 @@
   color: #6b7280;
   text-align: center;
 }
+
+
+/* PACS 페이지에서 패딩 완전 제거 */
+.content-area[data-page="pacs"] {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 또는 PACS 경로에서 패딩 제거 (URL 기반) */
+body[data-route="/pacs"] .content-area {
+  padding: 0 !important;
+  margin: 0 !important;
+}

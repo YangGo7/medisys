@@ -1,134 +1,3 @@
-// import React, { useState } from 'react';
-// import { useDoctor } from '../../../contexts/DoctorContext'; // 🆕 추가
-// import './ProfileCard.css';
-
-// const ProfileCard = () => {
-//   // 🆕 기존 코드 삭제하고 Context 사용
-//   const { doctor, loading, error, updateDoctorStatus } = useDoctor();
-//   const [isUpdating, setIsUpdating] = useState(false); // 🆕 추가
-
-//   // 🆕 상태 토글 함수 추가
-//   const handleStatusToggle = async (newStatus) => {
-//     if (isUpdating) return;
-//     setIsUpdating(true);
-    
-//     try {
-//       await updateDoctorStatus(newStatus);
-//     } catch (err) {
-//       alert('상태 업데이트에 실패했습니다.');
-//     } finally {
-//       setIsUpdating(false);
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="profile-card">
-//         <div className="loading">로딩 중...</div>
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="profile-card">
-//         <div className="error">{error}</div>
-//       </div>
-//     );
-//   }
-
-//   // 🆕 온라인 상태 확인
-//   const isOnline = doctor?.status === '온라인';
-
-//   return (
-//     <div className="profile-card">
-//       <div className="profile-header">
-//         <div className="profile-avatar">
-//           <div className="avatar-circle">{doctor?.name?.charAt(0) || 'U'}</div>
-//         </div>
-//         <div className="profile-info">
-//           <div className="profile-name">{doctor?.name || '사용자'}</div>
-//           <div className="profile-department">{doctor?.department || '진료과'}</div>
-//           <div className="profile-department">{doctor?.role || '역할'}</div>
-//           <div className="profile-status">
-//             <span className={`status-dot ${doctor?.status === '온라인' ? 'online' : 'offline'}`}></span>
-//             {doctor?.status || '상태'}
-//           </div>
-//         </div>
-//       </div>
-      
-//       <div className="profile-stats">
-//         <div className="stat-item">
-//             <div className="stat-number">42</div>
-//             <div className="stat-label">금일 영상 검사</div>
-//         </div>
-//         <div className="stat-item">
-//             <div className="stat-number">5/12</div>
-//             <div className="stat-label">검사현황</div>
-//         </div>
-//         <div className="stat-item">
-//             <div className="stat-number">8/15</div>
-//             <div className="stat-label">레포트 현황</div>
-//         </div>
-//       </div>
-
-//       <div className="today-schedule">
-//         <div className="schedule-title">오늘 일정</div>
-//         <div className="schedule-list">
-//           <div className="schedule-item">
-//             <span className="schedule-time">09:00</span>
-//             <span className="schedule-content">CT 촬영</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">14:00</span>
-//             <span className="schedule-content">장비 점검</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">16:00</span>
-//             <span className="schedule-content">컨퍼런스</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">16:00</span>
-//             <span className="schedule-content">컨퍼런스</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">16:00</span>
-//             <span className="schedule-content">컨퍼런스</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">16:00</span>
-//             <span className="schedule-content">컨퍼런스</span>
-//           </div>
-//           <div className="schedule-item">
-//             <span className="schedule-time">16:00</span>
-//             <span className="schedule-content">컨퍼런스</span>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* 🆕 버튼 부분 완전 교체 */}
-//       <div className="quick-actions">
-//         <button 
-//           className={`action-btn ${isOnline ? 'primary' : 'secondary'}`}
-//           onClick={() => handleStatusToggle('온라인')}
-//           disabled={isUpdating}
-//         >
-//           {isUpdating && !isOnline ? '변경 중...' : '온라인'}
-//         </button>
-//         <button 
-//           className={`action-btn ${!isOnline ? 'primary' : 'secondary'}`}
-//           onClick={() => handleStatusToggle('자리 비움')}
-//           disabled={isUpdating}
-//         >
-//           {isUpdating && isOnline ? '변경 중...' : '자리 비움'}
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ProfileCard;
-
 // D:\250619\radiology-system\frontend\src\components\home\ProfileCard\index.js
 import React, { useState } from 'react';
 import { useDoctor } from '../../../contexts/DoctorContext';
@@ -225,15 +94,15 @@ const ProfileCard = () => {
       
       <div className="profile-stats">
         <div className="stat-item">
-            <div className="stat-number">5</div>
+            <div className="stat-number">0</div>
             <div className="stat-label">금일 영상 검사</div>
         </div>
         <div className="stat-item">
-            <div className="stat-number">2/5</div>
+            <div className="stat-number">0/0</div>
             <div className="stat-label">검사현황</div>
         </div>
         <div className="stat-item">
-            <div className="stat-number">0/5</div>
+            <div className="stat-number">0/0</div>
             <div className="stat-label">레포트 현황</div>
         </div>
       </div>

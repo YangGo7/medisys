@@ -597,24 +597,24 @@ const useAIAnalysis = (currentStudyUID) => {
         console.log('🎛️ SSD 표시 상태:', showSSDOverlays);
 
         const filteredOverlays = overlays.filter((overlay, idx) => {
-            const model = overlay.model || '';
+            const model = (overlay.model || '').toLowerCase(); // 🔥 소문자로 변환
             
-            console.log(`🔍 [${idx}] ID: ${overlay.id}, 모델: "${model}"`);
+            console.log(`🔍 [${idx}] ID: ${overlay.id}, 모델: "${overlay.model}" → 변환: "${model}"`);
             
-            // 🔥 부분 문자열 매칭으로 변경
-            if (model.includes('YOLO')) {  // ✅ "YOLOv8"도 매칭됨
+            // 🔥 소문자로 비교하도록 수정
+            if (model.includes('yolo')) {  // ✅ "yolo", "yolov8" 등 모두 매칭
                 const shouldShow = showYOLOOverlays;
                 console.log(`🎯 [${idx}] YOLO 계열 모델 - showYOLOOverlays: ${showYOLOOverlays} → ${shouldShow ? '표시' : '숨김'}`);
                 return shouldShow;
             }
             
-            if (model.includes('SSD')) {   // ✅ "SSD"와 모든 SSD 변형 매칭
+            if (model.includes('ssd')) {   // ✅ "ssd" 및 모든 SSD 변형 매칭
                 const shouldShow = showSSDOverlays;
                 console.log(`🎯 [${idx}] SSD 계열 모델 - showSSDOverlays: ${showSSDOverlays} → ${shouldShow ? '표시' : '숨김'}`);
                 return shouldShow;
             }
             
-            console.log(`❌ [${idx}] 알 수 없는 모델: "${model}" → 숨김`);
+            console.log(`❌ [${idx}] 알 수 없는 모델: "${overlay.model}" → 숨김`);
             return false;
         });
         

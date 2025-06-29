@@ -71,12 +71,13 @@ body {
 }
 
 .container {
-  padding: 1.5rem 2rem;
+  padding: 5rem 2rem;
   max-width: 100%;
 }
 
 /* 가로 화면 최적화 레이아웃 */
 .dashboard-layout {
+  padding-bottom:20px;
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 2rem;
