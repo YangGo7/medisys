@@ -335,22 +335,21 @@ const DocDashBoard = ({ patient }) => {
   }, [selectedPatient]);
 
   useEffect(() => {
-    const fetchCdssResult = async () => {
-      if (!selectedPatient || !selectedPatient.sample_id) {
-        console.warn('⚠️ CDSS 요청 생략: sample_id 없음');
-        return;
-      }
-      try {
-        const res = await axios.get(`${API_BASE}cdss/results/${selectedPatient.sample_id}/`);
-        setCdssResult(res.data);
-      } catch (err) {
-        console.error('❌ CDSS 결과 가져오기 실패:', err);
+  if (!selectedPatient || !selectedPatient.patient_identifier) return;
+
+  axios.get(`${API_BASE}cdss_result/?patient_id=${selectedPatient.patient_identifier}`)
+    .then(res => {
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setCdssResult(res.data[0]);  // 최신 결과만 표시
+      } else {
         setCdssResult(null);
       }
-    };
-
-    fetchCdssResult();
-  }, [selectedPatient]);
+    })
+    .catch(err => {
+      console.error('❌ CDSS 결과 가져오기 실패:', err);
+      setCdssResult(null);
+    });
+}, [selectedPatient]);
 
   // 🔥 슬림한 환자 카드 컴포넌트
   const CollapsiblePatientCard = ({ 

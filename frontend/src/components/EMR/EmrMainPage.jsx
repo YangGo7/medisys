@@ -8,7 +8,7 @@ import UnifiedPatientStatus from './UnifiedPatientStatus';
 import NotificationModal from './NotificationModal';
 import { saveLog } from '../utils/saveLog';
 import SettingsPage from './SettingsPage';
-import DMViewer from './DMViewer';
+import RealDicomViewer from '../RIS/RealDicomViewer';
 
 // 기존 컴포넌트들
 import WaitingBoard from './WaitingBoard';
@@ -488,7 +488,7 @@ const EmrMainPage = () => {
   // 🔥 의료영상 뷰어 렌더 함수 추가
   const renderMedicalViewer = useMemo(() => (
     <div className="page-container-full">
-      <DMViewer />
+      <RealDicomViewer />
     </div>
   ), []);
 

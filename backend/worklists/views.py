@@ -625,27 +625,43 @@ def worklist_by_date_specific(request, year, month, day):
             'message': f'데이터를 불러오는데 실패했습니다: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+# backend/worklists/views.py의 completed_studies_list 함수에 디버깅 추가
+
 @api_view(['GET'])
 def completed_studies_list(request):
     """
-    DMViewer용 - 검사와 리포트가 모두 완료된 환자들의 study 목록 반환
+    RealDicomViewer용 - 검사와 리포트가 모두 완료된 환자들의 study 목록 반환
     """
     try:
+        print("=" * 50)
+        print("🚀 completed_studies_list API 호출됨")
+        print(f"📡 요청 메서드: {request.method}")
+        print(f"📡 요청 헤더: {dict(request.headers)}")
+        print(f"📡 요청 경로: {request.path}")
+        print("=" * 50)
+        
         # 완료 상태 정의 (한국어 + 영어 모든 경우 처리)
         study_completed_statuses = [
             '검사완료',     # 한국어 (worklists 앱)
-            'completed',   # 영어 (worklist 앱)
+            'completed',   # 영어 
             'COMPLETED',   # 대문자
             'Completed'    # 첫글자 대문자
         ]
         
         report_completed_statuses = [
             '작성완료',     # 한국어 (worklists 앱) 
-            'completed',   # 영어 (worklist 앱)
+            'completed',   # 영어 
             'COMPLETED',   # 대문자
             'Completed'    # 첫글자 대문자
         ]
-        
+
+        print(f"🔍 검색할 study 상태: {study_completed_statuses}")
+        print(f"🔍 검색할 report 상태: {report_completed_statuses}")
+
+        # 전체 StudyRequest 개수 확인
+        total_studies = StudyRequest.objects.count()
+        print(f"📊 전체 StudyRequest 개수: {total_studies}")
+
         # 검사상태와 리포트상태가 모두 완료된 항목 조회
         completed_studies = StudyRequest.objects.filter(
             study_status__in=study_completed_statuses,
@@ -656,9 +672,26 @@ def completed_studies_list(request):
             study_uid__exact=''     # 빈 문자열 제외
         ).order_by('-request_datetime')
 
-        # DMViewer에서 필요한 데이터 구성
+        completed_count = completed_studies.count()
+        print(f"📊 완료된 검사 개수: {completed_count}")
+
+        # 각 상태별 개수 확인
+        for status in study_completed_statuses:
+            count = StudyRequest.objects.filter(study_status=status).count()
+            print(f"  - study_status='{status}': {count}개")
+            
+        for status in report_completed_statuses:
+            count = StudyRequest.objects.filter(report_status=status).count()
+            print(f"  - report_status='{status}': {count}개")
+
+        # study_uid가 있는 검사 개수
+        with_uid_count = StudyRequest.objects.exclude(study_uid__isnull=True).exclude(study_uid__exact='').count()
+        print(f"📊 study_uid가 있는 검사: {with_uid_count}개")
+
+        # RealDicomViewer에서 필요한 데이터 구성
         completed_data = []
         for study in completed_studies:
+            print(f"  ✅ 완료된 검사: {study.patient_name} - {study.modality} - {study.study_uid}")
             data = {
                 'id': study.id,
                 'patient_id': study.patient_id,
@@ -675,20 +708,30 @@ def completed_studies_list(request):
                 'scheduled_exam_datetime': study.scheduled_exam_datetime.strftime('%Y-%m-%d %H:%M:%S') if study.scheduled_exam_datetime else None,
                 'study_status': study.study_status,
                 'report_status': study.report_status,
-                # DMViewer에서 필요한 추가 정보
+                # RealDicomViewer에서 필요한 추가 정보
                 'completion_date': study.request_datetime.strftime('%Y-%m-%d') if study.request_datetime else None,
             }
             completed_data.append(data)
 
-        return Response({
+        response_data = {
             'status': 'success',
             'count': len(completed_data),
             'message': f'{len(completed_data)}건의 완료된 검사를 찾았습니다.',
             'data': completed_data
-        })
+        }
+        
+        print(f"✅ 응답 데이터: {len(completed_data)}건")
+        print("=" * 50)
+        
+        return Response(response_data)
 
     except Exception as e:
-        print(f"완료된 스터디 목록 조회 에러: {e}")
+        print(f"❌ completed_studies_list 에러: {e}")
+        print(f"❌ 에러 타입: {type(e)}")
+        import traceback
+        print(f"❌ 전체 스택트레이스:")
+        traceback.print_exc()
+        
         return Response({
             'status': 'error',
             'message': '완료된 검사 데이터를 불러오는데 실패했습니다.',

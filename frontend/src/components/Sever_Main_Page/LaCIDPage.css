@@ -303,6 +303,15 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
+.team-member.cursor-pointer {
+  cursor: pointer;
+}
+
+.team-member.cursor-pointer:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
 .member-avatar {
   width: 5rem;
   height: 5rem;
@@ -478,6 +487,8 @@ body {
   max-width: 28rem;
   transform: scale(1);
   transition: all 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {

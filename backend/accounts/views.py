@@ -99,3 +99,11 @@ def get_notice(request):
         return Response({"notice": notice.message})
     except Notice.DoesNotExist:
         return Response({"notice": ""})
+    
+ # views.py
+from django.middleware.csrf import get_token
+from rest_framework.decorators import api_view
+from rest_framework.response import Response   
+@api_view(['GET'])
+def get_csrf_token(request):
+    return Response({'csrfToken': get_token(request)})

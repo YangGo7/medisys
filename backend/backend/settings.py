@@ -168,8 +168,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST Framework
 ########################################
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],  # 빈 리스트로 설정
-    'DEFAULT_PERMISSION_CLASSES': [],      # 빈 리스트로 설정
+    'DEFAULT_AUTHENTICATION_CLASSES': [ 'rest_framework.authentication.SessionAuthentication',],  # 빈 리스트로 설정
+    'DEFAULT_PERMISSION_CLASSES': [ 'rest_framework.permissions.IsAuthenticated',],      # 빈 리스트로 설정
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -212,8 +212,6 @@ CSRF_TRUSTED_ORIGINS = [
 # 외부 서비스 / PACS / 기타
 ########################################
 AI_MODELS_DIR = BASE_DIR / 'ai_models'
-DEFAULT_DOCTOR_ID = "DR001"
-DEFAULT_DOCTOR_NAME = "김영상"
 
 PACS_CONFIG = {
     'BASE_URL': os.getenv('ORTHANC_URL', 'http://localhost:8042'),
