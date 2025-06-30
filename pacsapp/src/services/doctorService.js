@@ -63,6 +63,7 @@ const API_BASE_URL = 'http://35.225.63.41:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+    withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },

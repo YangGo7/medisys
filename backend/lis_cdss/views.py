@@ -136,7 +136,7 @@ def send_cdss_result_to_emr(request):
         payload = {
             "patient_id": patient_id,
             "prediction": prediction,
-            "panel": panel,
+            "test_type": panel,
             "results": results,
             "explanation": "Eosinophil 수치가 비정상적으로 높습니다"
         }

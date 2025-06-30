@@ -1,4 +1,6 @@
+// LoginForm.jsx
 import React, { useState } from 'react';
+import { login } from './auth';
 
 function LoginForm({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
@@ -7,30 +9,6 @@ function LoginForm({ onLoginSuccess }) {
   const [autoLoginChecked, setAutoLoginChecked] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // ✅ CSRF 토큰 요청 함수
-  const getCSRFToken = async () => {
-    try {
-      const res = await fetch('/api/account/get-csrf/', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json', // ✅ JSON 명시
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error(`CSRF 요청 실패: ${res.status}`);
-      }
-
-      const data = await res.json();
-      return data.csrfToken;
-    } catch (err) {
-      console.error('CSRF 토큰 가져오기 실패:', err);
-      return null;
-    }
-  };
-
 
   const handleLogin = async () => {
     if (!username || !password || !code) {
@@ -42,31 +20,12 @@ function LoginForm({ onLoginSuccess }) {
     setError('');
 
     try {
-      const csrfToken = await getCSRFToken();
-
-      const res = await fetch('/api/account/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        credentials: 'include', // ✅ 세션 쿠키 사용
-        body: JSON.stringify({ username, password, code }),
-      });
-
-      if (!res.ok) {
-        throw new Error('로그인 실패');
-      }
-
-      const data = await res.json();
-
+      const res = await login({ username, password, code });
       if (autoLoginChecked) {
-        localStorage.setItem('autoLoginUser', data.user_id);
+        localStorage.setItem('autoLoginUser', res.data.user_id);
       }
-
-      onLoginSuccess(data.user_id);
+      onLoginSuccess(res.data.user_id);
     } catch (err) {
-      console.error('로그인 오류:', err);
       setError('로그인 실패: 아이디/비번/코드 확인');
     } finally {
       setIsLoading(false);

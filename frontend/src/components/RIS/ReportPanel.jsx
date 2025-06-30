@@ -34,7 +34,7 @@ const ReportPanel = ({
 
       console.log('📋 리포트 로드 시작:', studyUid);
 
-      const response = await fetch(`${API_BASE}/api/dr-reports/study/${studyUid}/`, {
+      const response = await fetch(`${API_BASE}dr-reports/study/${studyUid}/`, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -85,8 +85,8 @@ const ReportPanel = ({
       console.log('💾 리포트 저장 시작:', requestData);
 
       const url = reportData 
-        ? `${API_BASE}/api/dr-reports/${reportData.id}/`
-        : `${API_BASE}/api/dr-reports/create/`;
+        ? `${API_BASE}dr-reports/${reportData.id}/`
+        : `${API_BASE}dr-reports/create/`;
       
       const method = reportData ? 'PUT' : 'POST';
 
