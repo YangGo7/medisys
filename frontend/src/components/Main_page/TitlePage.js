@@ -56,7 +56,7 @@ export default function TitlePage() {
   // 상태 관리
   const [mainData, setMainData] = useState({
     doctor_info: {
-      name: '사용자', // 초기값
+      name: '김의사',
       department: '내과',
       status: 'online',
       status_display: '온라인'
@@ -69,76 +69,72 @@ export default function TitlePage() {
     notices: [],
     schedule: []
   });
-  const loadUserInfo = async () => {
-    try {
-      const res = await fetch('/api/account/user-info/', {
-        method: 'GET',
-        credentials: 'include'
-      });
-      if (!res.ok) throw new Error('사용자 정보 없음');
-      const user = await res.json();
-
-      setMainData(prev => ({
-        ...prev,
-        doctor_info: {
-          ...prev.doctor_info,
-          name: user.display || user.username
-        }
-      }));
-    } catch (err) {
-      console.error('❌ 사용자 정보 불러오기 실패:', err);
-      setError('로그인 정보를 확인할 수 없습니다.');
-    }
-  };
-  const handleLogout = async () => {
-    try {
-      const res = await fetch('/api/account/logout/', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        console.log('✅ 로그아웃 완료');
-        navigate('/'); // 로그인 페이지로
-      } else {
-        console.warn('❌ 로그아웃 실패');
-      }
-    } catch (err) {
-      console.error('❌ 로그아웃 오류:', err);
-    }
-  };
-  const loadMainData = async () => {
-    try {
-      const response = await MainPageAPI.getMainPageData(); // 기본 doctor_id는 서버 내부 로직으로 처리
-      setMainData(prev => ({
-        ...prev,
-        ...response
-      }));
-      setLastUpdate(new Date());
-      setError(null);
-    } catch (err) {
-      console.error('❌ 메인 페이지 데이터 로드 실패:', err);
-      setError(err.message);
-
-      // fallback 더미 데이터 유지
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadUserInfo();   // ✅ 유저 정보 먼저
-    loadMainData();   // 📊 메인 데이터 로드
-
-    const interval = setInterval(loadMainData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  
+  // 데이터 로드 함수
+  const loadMainData = async () => {
+    try {
+      console.log('📡 메인 페이지 데이터 로드 시작...');
+      
+      // 메인 페이지 데이터 조회
+      const response = await MainPageAPI.getMainPageData();
+      
+      console.log('📊 받은 메인 페이지 데이터:', response);
+      
+      setMainData(response);
+      setLastUpdate(new Date());
+      setError(null);
+      
+      console.log('✅ 메인 페이지 데이터 로드 완료');
+      
+    } catch (error) {
+      console.error('❌ 메인 페이지 데이터 로드 실패:', error);
+      setError(error.message);
+      
+      // 에러 시 더미 데이터 사용
+      setMainData({
+        doctor_info: {
+          name: '김의사',
+          department: '내과',
+          status: 'online',
+          status_display: '온라인'
+        },
+        stats: {
+          today_patients: 24,
+          waiting_patients: 3,
+          unread_messages: 7
+        },
+        notices: [
+          {
+            id: 1,
+            title: '23:00~24:00 시스템 점검 예정',
+            notice_type: 'maintenance',
+            notice_type_display: '점검',
+            created_at: new Date().toISOString()
+          },
+          {
+            id: 2,
+            title: 'ICD-11 코드 적용 완료',
+            notice_type: 'update',
+            notice_type_display: '업데이트',
+            created_at: new Date().toISOString()
+          }
+        ],
+        schedule: [
+          { time: '14:00', type: '진료', description: '고혈압 환자' },
+          { time: '16:00', type: '진료', description: '두통 환자' },
+          { time: '18:00', type: '회의', description: '의료진 미팅' }
+        ]
+      });
+      
+      setLastUpdate(new Date());
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // 의사 상태 변경
   const handleStatusChange = async (newStatus) => {
@@ -251,112 +247,90 @@ export default function TitlePage() {
   };
 
   return (
-  <div className="title-page">
-    {/* 좌측 정보 카드 */}
-    <div className="main-left">
-      <div className="doctor-card">
-        <div className="doctor-header">
-          {/* 이름 + 로그아웃을 상단 우측에 배치 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h3>{mainData.doctor_info.name}</h3>
-              <p className="department">{mainData.doctor_info.department} 전문의</p>
+    <div className="title-page">
+      {/* 좌측 정보 카드 */}
+      <div className="main-left">
+        <div className="doctor-card">
+          <div className="doctor-header">
+            <h3>{mainData.doctor_info.name}</h3>
+            <p className="department">{mainData.doctor_info.department} 전문의</p>
+            <div className="status-container">
+              <p 
+                className="status" 
+                style={{ color: getStatusColor(mainData.doctor_info.status) }}
+              >
+                ● {mainData.doctor_info.status_display}
+              </p>
+              <div className="status-buttons">
+                <button 
+                  className={`status-btn ${mainData.doctor_info.status === 'online' ? 'active' : ''}`}
+                  onClick={() => handleStatusChange('online')}
+                >
+                  온라인
+                </button>
+                <button 
+                  className={`status-btn ${mainData.doctor_info.status === 'busy' ? 'active' : ''}`}
+                  onClick={() => handleStatusChange('busy')}
+                >
+                  진료중
+                </button>
+                <button 
+                  className={`status-btn ${mainData.doctor_info.status === 'break' ? 'active' : ''}`}
+                  onClick={() => handleStatusChange('break')}
+                >
+                  휴식
+                </button>
+              </div>
             </div>
+          </div>
+          
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-number">{mainData.stats.today_patients}</span>
+              <span className="stat-label">오늘 진료</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{mainData.stats.waiting_patients}</span>
+              <span className="stat-label">대기</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{mainData.stats.unread_messages}</span>
+              <span className="stat-label">새 메시지</span>
+            </div>
+          </div>
+
+          <div className="schedule-section">
+            <h5>📅 오늘 일정</h5>
+            <ul className="schedule-list">
+              {mainData.schedule.length > 0 ? (
+                mainData.schedule.map((item, index) => (
+                  <li key={index}>
+                    {item.time} {item.type} - {item.description}
+                  </li>
+                ))
+              ) : (
+                <li>오늘 일정이 없습니다.</li>
+              )}
+            </ul>
+          </div>
+
+          {/* 새로고침 버튼 */}
+          <div className="refresh-section">
             <button 
-              onClick={handleLogout}
-              style={{
-                background: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
+              className="refresh-btn"
+              onClick={loadMainData}
+              disabled={isLoading}
             >
-              로그아웃
+              🔄 새로고침
             </button>
-          </div>
-
-          <div className="status-container">
-            <p 
-              className="status" 
-              style={{ color: getStatusColor(mainData.doctor_info.status) }}
-            >
-              ● {mainData.doctor_info.status_display}
-            </p>
-            <div className="status-buttons">
-              <button 
-                className={`status-btn ${mainData.doctor_info.status === 'online' ? 'active' : ''}`}
-                onClick={() => handleStatusChange('online')}
-              >
-                온라인
-              </button>
-              <button 
-                className={`status-btn ${mainData.doctor_info.status === 'busy' ? 'active' : ''}`}
-                onClick={() => handleStatusChange('busy')}
-              >
-                진료중
-              </button>
-              <button 
-                className={`status-btn ${mainData.doctor_info.status === 'break' ? 'active' : ''}`}
-                onClick={() => handleStatusChange('break')}
-              >
-                휴식
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="stats-grid">
-          <div className="stat-item">
-            <span className="stat-number">{mainData.stats.today_patients}</span>
-            <span className="stat-label">오늘 진료</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{mainData.stats.waiting_patients}</span>
-            <span className="stat-label">대기</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{mainData.stats.unread_messages}</span>
-            <span className="stat-label">새 메시지</span>
-          </div>
-        </div>
-
-        <div className="schedule-section">
-          <h5>📅 오늘 일정</h5>
-          <ul className="schedule-list">
-            {mainData.schedule.length > 0 ? (
-              mainData.schedule.map((item, index) => (
-                <li key={index}>
-                  {item.time} {item.type} - {item.description}
-                </li>
-              ))
-            ) : (
-              <li>오늘 일정이 없습니다.</li>
+            {lastUpdate && (
+              <p className="last-update">
+                마지막 업데이트: {lastUpdate.toLocaleTimeString()}
+              </p>
             )}
-          </ul>
-        </div>
-
-        {/* 새로고침 버튼 */}
-        <div className="refresh-section">
-          <button 
-            className="refresh-btn"
-            onClick={loadMainData}
-            disabled={isLoading}
-          >
-            🔄 새로고침
-          </button>
-          {lastUpdate && (
-            <p className="last-update">
-              마지막 업데이트: {lastUpdate.toLocaleTimeString()}
-            </p>
-          )}
+          </div>
         </div>
       </div>
-    </div>
-
 
       {/* 중앙 공지/배너/링크 */}
       <div className="main-middle">

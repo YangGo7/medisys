@@ -620,7 +620,7 @@ export const saveReport = async (studyUID, patientId, reportContent, reportStatu
     };
 
     const options = createFetchOptions('POST', reportData);
-    const response = await fetch(`${API_BASE_URL}/api/dr-reports/save/`, options);
+    const response = await fetch(`${API_BASE_URL}/api/reports/save/`, options);
     return handleApiResponse(response);
 };
 
@@ -632,7 +632,7 @@ export const saveReport = async (studyUID, patientId, reportContent, reportStatu
  */
 export const loadReport = async (studyUID) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/dr-reports/${studyUID}/`);
+        const response = await fetch(`${API_BASE_URL}/api/reports/${studyUID}/`);
         
         if (response.status === 404) {
             return { 
@@ -665,7 +665,7 @@ export const loadReport = async (studyUID) => {
 export const deleteReport = async (studyUID) => {
     try {
         const options = createFetchOptions('DELETE');
-        const response = await fetch(`${API_BASE_URL}/api/dr-reports/${studyUID}/delete/`, options);
+        const response = await fetch(`${API_BASE_URL}/api/reports/${studyUID}/delete/`, options);
         
         if (response.status === 404) {
             return { 
@@ -699,7 +699,7 @@ export const deleteReport = async (studyUID) => {
 export const updateReportStatus = async (studyUID, status) => {
     try {
         const options = createFetchOptions('PATCH', { report_status: status });
-        const response = await fetch(`${API_BASE_URL}/api/dr-reports/${studyUID}/status/`, options);
+        const response = await fetch(`${API_BASE_URL}/api/reports/${studyUID}/status/`, options);
         
         if (response.status === 404) {
             return { 

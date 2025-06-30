@@ -50,9 +50,8 @@ urlpatterns = [
     
     # Orthanc 환자 관리
     path('orthanc/studies/', views.get_orthanc_studies, name='get_orthanc_studies'),
-    path('orthanc/patients/search/', views.search_orthanc_patients, name='search_orthanc_patients'),
     path('orthanc/patients/<str:patient_id>/', views.get_orthanc_patient, name='get_orthanc_patient'),
-
+    path('orthanc/studies/search-by-patient/', views.search_orthanc_studies_by_patient_id, name='search_orthanc_studies_by_patient_id'),
     # DICOM 업로드 및 자동 매핑
     path('dicom/upload-with-mapping/', views.upload_dicom_with_auto_mapping, name='upload_dicom_with_auto_mapping'),
     path('dicom/upload/', views.upload_dicom_with_auto_mapping, name='upload_dicom'),
@@ -92,7 +91,7 @@ urlpatterns = [
     path('waiting-statistics/', get_waiting_statistics, name='waiting_statistics'),                      # 🔥 대기 현황 통계
     path('completed-patients/', get_completed_patients_today, name='completed_patients_today'),    # 🔥 완료 환자 목록
     path('waiting-board/', views.waiting_board_view, name='waiting_board'),
-
+    
     # 알림 API
     path('alerts/urgent/', UrgentAlertList.as_view(), name='urgent_alert_list'),
     path('alerts/urgent/count/', UrgentAlertCount.as_view(), name='urgent_alert_count'),
@@ -115,4 +114,6 @@ urlpatterns = [
     # lis 결과 받아오기
     path('receive_cdss_result/', receive_cdss_result),
     path('cdss_result/', get_cdss_result_by_patient),
+    
+    path('orthanc/instances/<str:instance_id>/preview/', views.orthanc_instance_preview, name='orthanc_instance_preview'),
 ]   

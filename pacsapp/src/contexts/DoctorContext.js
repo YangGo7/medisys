@@ -44,8 +44,11 @@ export const DoctorProvider = ({ children }) => {
       // 의사 정보 로드 후 오늘 일정도 조회
       fetchTodaySchedules();
     } catch (err) {
-      setError('의사 정보를 불러올 수 없습니다.');
-    } finally {
+    console.error('❌ 의사 정보 로딩 실패:', err);
+    console.error('에러 응답 상태:', err?.response?.status);
+    setError('의사 정보를 불러올 수 없습니다.');
+  }
+ finally {
       setLoading(false);
     }
   };

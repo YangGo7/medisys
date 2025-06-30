@@ -168,8 +168,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST Framework
 ########################################
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [ 'rest_framework.authentication.SessionAuthentication',],  # 빈 리스트로 설정
-    'DEFAULT_PERMISSION_CLASSES': [ 'rest_framework.permissions.IsAuthenticated',],      # 빈 리스트로 설정
+    'DEFAULT_AUTHENTICATION_CLASSES': [],  # 빈 리스트로 설정
+    'DEFAULT_PERMISSION_CLASSES': [],      # 빈 리스트로 설정
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -187,10 +187,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41:3020",
-    "http://localhost:3020",
-    "http://127.0.0.1:3020",
-    "http://35.225.63.41:3020",
+    "http://35.225.63.41",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -202,13 +199,12 @@ CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CSRF_TRUSTED_ORIGINS = [
       "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://35.225.63.41:3000",
+    "http://35.225.63.41",
       "http://localhost:3020",
       "http://35.225.63.41:3020",
     "http://127.0.0.1:3020",
       "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "http://35.225.63.41:8000"
 
 ]
 
@@ -298,45 +294,5 @@ LOGGING = {
         },
     },
 }
-CSRF_COOKIE_HTTPONLY = False     # JS에서 접근 가능하게 (선택)
-CSRF_COOKIE_SAMESITE = 'Lax'     # 기본값 (또는 'Strict')
-SESSION_COOKIE_SAMESITE = 'Lax'  # 동일하게 유지
-
-
-# backend/backend/settings.py에 추가할 캐시 설정
-
-# 캐시 설정 (Redis 추천, 없으면 로컬 메모리 캐시)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'medical-platform-cache',
-        'TIMEOUT': 180000,  # 30분 기본 타임아웃
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-        }
-    }
-}
-
-# Redis 사용 시 (권장)
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-#         'LOCATION': 'redis://127.0.0.1:6379/1',
-#         'TIMEOUT': 1800,
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
-
-# 세션 설정 (캐시와 연동)
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
-SESSION_COOKIE_AGE = 180000  # 30분
-SESSION_SAVE_EVERY_REQUEST = True  # 매 요청마다 세션 갱신
-
-# 캐시 무효화 방지 설정
-CACHE_PROTECTED_LOGOUT = True  # 캐시 기반 로그아웃 제한
-CACHE_CLEAR_ON_LOGOUT = False  # 로그아웃 시 캐시 유지
 
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)

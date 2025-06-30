@@ -742,41 +742,6 @@ def sync_patient_mapping(request, mapping_id):
         logger.error(f"환자 매핑 동기화 실패: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
-def search_orthanc_patients(request):
-    """Orthanc에서 환자 검색"""
-    query = request.query_params.get('q', '')
-    if not query:
-        return Response({'error': '검색어(q)가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        orthanc_api = OrthancAPI()
-        results = orthanc_api.search_patients_by_name(query)
-        
-        patients = []
-        for result in results:
-            patient_info = result.get('patient_info', {})
-            main_tags = patient_info.get('MainDicomTags', {})
-            
-            patient = {
-                'patient_id': result.get('patient_id'),
-                'patient_name': main_tags.get('PatientName', ''),
-                'patient_birth_date': main_tags.get('PatientBirthDate', ''),
-                'patient_sex': main_tags.get('PatientSex', ''),
-                'patient_id_dicom': main_tags.get('PatientID', ''),
-                'studies_count': len(patient_info.get('Studies', [])),
-                'last_update': patient_info.get('LastUpdate', '')
-            }
-            patients.append(patient)
-        
-        return Response({
-            'results': patients,
-            'total': len(patients)
-        })
-        
-    except Exception as e:
-        logger.error(f"Orthanc 환자 검색 실패: {e}")
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def get_orthanc_patient(request, patient_id):
@@ -3326,3 +3291,93 @@ def get_cdss_result_by_patient(request):
 
     serializer = CDSSResultSerializer(results, many=True)
     return Response(serializer.data)
+
+# backend/medical_integration/views.py에 추가할 함수
+
+# backend/medical_integration/views.py에 추가할 함수
+
+@api_view(['POST'])
+def search_orthanc_studies_by_patient_id(request):
+    """Patient ID로 Orthanc에서 Study 검색"""
+    try:
+        patient_id = request.data.get('patient_id')
+        if not patient_id:
+            return Response({
+                'success': False,
+                'error': 'patient_id가 필요합니다'
+            }, status=400)
+
+        orthanc_api = OrthancAPI()
+        
+        # 1. Orthanc에서 모든 환자 조회해서 Patient ID 매칭
+        all_patients = orthanc_api.get_patients()
+        if not all_patients:
+            return Response({
+                'success': True,
+                'message': 'Orthanc에 환자가 없습니다',
+                'studies': []
+            })
+        
+        matching_patient_info = None
+        for orthanc_patient_id in all_patients:
+            patient_info = orthanc_api.get_patient(orthanc_patient_id)
+            if patient_info:
+                dicom_patient_id = patient_info.get('MainDicomTags', {}).get('PatientID', '')
+                if dicom_patient_id == patient_id:
+                    matching_patient_info = patient_info
+                    break
+        
+        if not matching_patient_info:
+            return Response({
+                'success': True,
+                'message': f'Patient ID {patient_id}에 매칭되는 환자가 없습니다',
+                'studies': []
+            })
+
+        # 2. 환자 정보에서 직접 Study ID 목록 가져오기
+        study_ids = matching_patient_info.get('Studies', [])
+        
+        studies = []
+        for study_id in study_ids:
+            study_info = orthanc_api.get_study(study_id)
+            if study_info:
+                studies.append({
+                    'study_id': study_id,
+                    'study_uid': study_info.get('MainDicomTags', {}).get('StudyInstanceUID'),
+                    'study_date': study_info.get('MainDicomTags', {}).get('StudyDate'),
+                    'study_description': study_info.get('MainDicomTags', {}).get('StudyDescription', 'No Description'),
+                    'modality': study_info.get('MainDicomTags', {}).get('Modality', 'Unknown'),
+                    'series_count': len(study_info.get('Series', [])),
+                    'patient_name': study_info.get('PatientMainDicomTags', {}).get('PatientName'),
+                    'patient_id_dicom': study_info.get('PatientMainDicomTags', {}).get('PatientID')
+                })
+        
+        return Response({
+            'success': True,
+            'message': f'Patient ID {patient_id}: {len(studies)}개 Study 발견',
+            'patient_id': patient_id,
+            'studies': studies
+        })
+        
+    except Exception as e:
+        logger.error(f"Orthanc 환자 검색 실패: {e}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@api_view(['GET'])
+def orthanc_instance_preview(request, instance_id):
+    """Orthanc Instance 미리보기 프록시"""
+    try:
+        orthanc_api = OrthancAPI()
+        preview_data = orthanc_api.get_instance_preview(instance_id)
+        
+        if preview_data:
+            return HttpResponse(preview_data, content_type='image/png')
+        else:
+            return Response({'error': '이미지를 찾을 수 없습니다'}, status=404)
+            
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

@@ -29,7 +29,7 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
         </p>
 
         {data.explanation && (
-          <p><strong>📌 설명:</strong> {data.explanation}</p>
+          <p><strong>📌 </strong> {data.explanation}</p>
         )}
 
         <table className="ai-result-table">

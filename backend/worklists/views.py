@@ -259,7 +259,7 @@ from datetime import datetime, date
 from .models import StudyRequest
 from .serializers import StudyRequestSerializer, WorklistSerializer
 from django.db.models import Q
-
+from medical_integration.models import PatientMapping 
 #영상 검사 요청
 class StudyRequestViewSet(viewsets.ModelViewSet):
     queryset = StudyRequest.objects.all()
@@ -630,68 +630,131 @@ def worklist_by_date_specific(request, year, month, day):
 @api_view(['GET'])
 def completed_studies_list(request):
     """
-    RealDicomViewer용 - 검사와 리포트가 모두 완료된 환자들의 study 목록 반환
+    RealDicomViewer용 - 진료실에 배정된 환자 중 검사상태가 완료된 검사 목록 반환
+    ✅ 진료실 배정 조건 추가
+    ✅ DICOM 업로드 여부와 관계없이 검사상태만 완료되면 목록에 표시
+    ✅ 리포트상태는 확인하지 않음
+    ✅ 중복 PatientMapping 처리
     """
     try:
         print("=" * 50)
-        print("🚀 completed_studies_list API 호출됨")
+        print("🚀 completed_studies_list API 호출됨 (진료실 배정 조건 포함)")
         print(f"📡 요청 메서드: {request.method}")
-        print(f"📡 요청 헤더: {dict(request.headers)}")
         print(f"📡 요청 경로: {request.path}")
         print("=" * 50)
         
-        # 완료 상태 정의 (한국어 + 영어 모든 경우 처리)
+        # 검사완료 상태 정의
         study_completed_statuses = [
             '검사완료',     # 한국어 (worklists 앱)
             'completed',   # 영어 
             'COMPLETED',   # 대문자
             'Completed'    # 첫글자 대문자
         ]
-        
-        report_completed_statuses = [
-            '작성완료',     # 한국어 (worklists 앱) 
-            'completed',   # 영어 
-            'COMPLETED',   # 대문자
-            'Completed'    # 첫글자 대문자
-        ]
 
         print(f"🔍 검색할 study 상태: {study_completed_statuses}")
-        print(f"🔍 검색할 report 상태: {report_completed_statuses}")
+
+        # 🆕 1단계: 진료실에 배정된 환자들의 patient_id 목록 가져오기
+        assigned_patient_mappings = PatientMapping.objects.filter(
+            assigned_room__isnull=False,  # 진료실이 배정된 환자만
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED'
+        ).values_list('patient_identifier', flat=True).distinct()  # 중복 제거
+
+        assigned_patient_ids = list(assigned_patient_mappings)
+        print(f"🏥 진료실에 배정된 환자 수: {len(assigned_patient_ids)}명")
+        print(f"🔍 배정된 환자 ID들: {assigned_patient_ids[:5]}{'...' if len(assigned_patient_ids) > 5 else ''}")
+
+        if not assigned_patient_ids:
+            print("⚠️ 진료실에 배정된 환자가 없음")
+            return Response({
+                'status': 'success',
+                'message': '진료실에 배정된 환자가 없습니다.',
+                'count': 0,
+                'data': [],
+                'statistics': {
+                    'total_completed': 0,
+                    'with_dicom': 0,
+                    'without_dicom': 0,
+                    'assigned_patients': 0
+                }
+            })
 
         # 전체 StudyRequest 개수 확인
         total_studies = StudyRequest.objects.count()
         print(f"📊 전체 StudyRequest 개수: {total_studies}")
 
-        # 검사상태와 리포트상태가 모두 완료된 항목 조회
+        # 🆕 2단계: 진료실에 배정된 환자 중 검사상태가 완료된 항목만 조회
         completed_studies = StudyRequest.objects.filter(
             study_status__in=study_completed_statuses,
-            report_status__in=report_completed_statuses
-        ).exclude(
-            study_uid__isnull=True  # study_uid가 있는 것만 (실제 검사가 진행된 것)
-        ).exclude(
-            study_uid__exact=''     # 빈 문자열 제외
+            patient_id__in=assigned_patient_ids  # 🔥 진료실 배정 조건 추가
         ).order_by('-request_datetime')
 
         completed_count = completed_studies.count()
-        print(f"📊 완료된 검사 개수: {completed_count}")
+        print(f"📊 진료실 배정 + 검사완료 상태인 검사 개수: {completed_count}")
 
-        # 각 상태별 개수 확인
-        for status in study_completed_statuses:
-            count = StudyRequest.objects.filter(study_status=status).count()
-            print(f"  - study_status='{status}': {count}개")
-            
-        for status in report_completed_statuses:
-            count = StudyRequest.objects.filter(report_status=status).count()
-            print(f"  - report_status='{status}': {count}개")
+        # 각 상태별 개수 확인 (디버깅용)
+        for status_name in study_completed_statuses:
+            count = StudyRequest.objects.filter(
+                study_status=status_name,
+                patient_id__in=assigned_patient_ids
+            ).count()
+            print(f"  - study_status='{status_name}' + 진료실 배정: {count}개")
 
-        # study_uid가 있는 검사 개수
-        with_uid_count = StudyRequest.objects.exclude(study_uid__isnull=True).exclude(study_uid__exact='').count()
-        print(f"📊 study_uid가 있는 검사: {with_uid_count}개")
+        # study_uid 통계 (참고용)
+        with_uid_count = completed_studies.exclude(
+            Q(study_uid__isnull=True) | Q(study_uid__exact='')
+        ).count()
+        without_uid_count = completed_count - with_uid_count
+        
+        print(f"📊 진료실배정+검사완료 중 DICOM 있음: {with_uid_count}개")
+        print(f"📊 진료실배정+검사완료 중 DICOM 없음: {without_uid_count}개")
 
-        # RealDicomViewer에서 필요한 데이터 구성
+        if completed_count == 0:
+            print("⚠️ 진료실에 배정된 환자 중 검사완료된 항목이 없음")
+            return Response({
+                'status': 'success',
+                'message': '진료실에 배정된 환자 중 검사가 완료된 환자가 없습니다.',
+                'count': 0,
+                'data': [],
+                'statistics': {
+                    'total_completed': 0,
+                    'with_dicom': 0,
+                    'without_dicom': 0,
+                    'assigned_patients': len(assigned_patient_ids)
+                }
+            })
+
+        # 🆕 3단계: 진료실 정보를 포함한 데이터 구성
         completed_data = []
         for study in completed_studies:
-            print(f"  ✅ 완료된 검사: {study.patient_name} - {study.modality} - {study.study_uid}")
+            # 🔥 해당 환자의 진료실 정보 가져오기 (중복 처리)
+            try:
+                # 가장 최근에 업데이트된 매핑 정보 사용
+                patient_mapping = PatientMapping.objects.filter(
+                    patient_identifier=study.patient_id,
+                    is_active=True,
+                    mapping_type='IDENTIFIER_BASED',
+                    assigned_room__isnull=False  # 진료실이 배정된 것만
+                ).order_by('-last_sync').first()  # 가장 최근 업데이트된 것
+                
+                if patient_mapping:
+                    assigned_room = patient_mapping.assigned_room
+                    room_status = patient_mapping.status
+                else:
+                    assigned_room = None
+                    room_status = 'unknown'
+                    print(f"⚠️ 환자 {study.patient_id}의 진료실 매핑 정보를 찾을 수 없음")
+                    
+            except Exception as e:
+                print(f"❌ 환자 {study.patient_id} 매핑 조회 에러: {e}")
+                assigned_room = None
+                room_status = 'error'
+
+            # study_uid가 없는 경우에도 목록에 포함 (임시 UID 생성)
+            study_uid_display = study.study_uid if study.study_uid else f"temp_uid_{study.id}"
+            
+            print(f"  ✅ 완료된 검사: {study.patient_name} - {study.modality} - 진료실: {assigned_room}번 - UID: {study_uid_display}")
+            
             data = {
                 'id': study.id,
                 'patient_id': study.patient_id,
@@ -700,7 +763,7 @@ def completed_studies_list(request):
                 'sex': study.sex,
                 'modality': study.modality,
                 'body_part': study.body_part,
-                'study_uid': study.study_uid,
+                'study_uid': study_uid_display,
                 'accession_number': study.accession_number,
                 'requesting_physician': study.requesting_physician,
                 'interpreting_physician': study.interpreting_physician,
@@ -708,16 +771,26 @@ def completed_studies_list(request):
                 'scheduled_exam_datetime': study.scheduled_exam_datetime.strftime('%Y-%m-%d %H:%M:%S') if study.scheduled_exam_datetime else None,
                 'study_status': study.study_status,
                 'report_status': study.report_status,
-                # RealDicomViewer에서 필요한 추가 정보
                 'completion_date': study.request_datetime.strftime('%Y-%m-%d') if study.request_datetime else None,
+                # 🆕 진료실 정보 추가
+                'assigned_room': assigned_room,
+                'room_status': room_status,
+                # DICOM 이미지 존재 여부 플래그
+                'has_dicom_images': bool(study.study_uid and study.study_uid.strip()),
             }
             completed_data.append(data)
 
         response_data = {
             'status': 'success',
             'count': len(completed_data),
-            'message': f'{len(completed_data)}건의 완료된 검사를 찾았습니다.',
-            'data': completed_data
+            'message': f'진료실에 배정된 환자 중 {len(completed_data)}건의 완료된 검사를 찾았습니다. (DICOM 있음: {with_uid_count}건, 없음: {without_uid_count}건)',
+            'data': completed_data,
+            'statistics': {
+                'total_completed': completed_count,
+                'with_dicom': with_uid_count,
+                'without_dicom': without_uid_count,
+                'assigned_patients': len(assigned_patient_ids)
+            }
         }
         
         print(f"✅ 응답 데이터: {len(completed_data)}건")
@@ -739,34 +812,64 @@ def completed_studies_list(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# 🔥 completed_studies_by_patient 함수도 동일하게 수정
 @api_view(['GET'])
 def completed_studies_by_patient(request, patient_id):
     """
     특정 환자의 완료된 모든 study 목록 반환 (환자 내원이력용)
+    ✅ 진료실 배정 조건 추가
+    ✅ DICOM 업로드 여부와 관계없이 검사상태만 완료되면 목록에 표시
+    ✅ 중복 PatientMapping 처리
     """
     try:
+        # 🆕 1단계: 해당 환자가 진료실에 배정되어 있는지 확인 (중복 처리)
+        try:
+            # 가장 최근에 업데이트된 매핑 정보 사용
+            patient_mapping = PatientMapping.objects.filter(
+                patient_identifier=patient_id,
+                assigned_room__isnull=False,  # 진료실이 배정된 환자만
+                is_active=True,
+                mapping_type='IDENTIFIER_BASED'
+            ).order_by('-last_sync').first()  # 가장 최근 업데이트된 것
+            
+            if patient_mapping:
+                print(f"🏥 환자 {patient_id}는 {patient_mapping.assigned_room}번 진료실에 배정됨")
+            else:
+                print(f"❌ 환자 {patient_id}는 진료실에 배정되지 않음")
+                return Response({
+                    'status': 'success',
+                    'message': f'환자 {patient_id}가 진료실에 배정되지 않았습니다.',
+                    'patient_id': patient_id,
+                    'count': 0,
+                    'data': []
+                })
+                
+        except Exception as e:
+            print(f"❌ 환자 {patient_id} 매핑 조회 에러: {e}")
+            return Response({
+                'status': 'error',
+                'message': f'환자 {patient_id}의 매핑 정보 조회에 실패했습니다.',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         study_completed_statuses = [
             '검사완료', 'completed', 'COMPLETED', 'Completed'
         ]
-        report_completed_statuses = [
-            '작성완료', 'completed', 'COMPLETED', 'Completed'  
-        ]
         
+        # 🆕 2단계: 진료실에 배정된 환자의 완료된 검사만 조회
         patient_studies = StudyRequest.objects.filter(
             patient_id=patient_id,
-            study_status__in=study_completed_statuses,
-            report_status__in=report_completed_statuses
-        ).exclude(
-            study_uid__isnull=True
-        ).exclude(
-            study_uid__exact=''
+            study_status__in=study_completed_statuses
         ).order_by('-request_datetime')
 
         studies_data = []
         for study in patient_studies:
+            # study_uid가 없는 경우에도 포함
+            study_uid_display = study.study_uid if study.study_uid else f"temp_uid_{study.id}"
+            
             data = {
                 'id': study.id,
-                'study_uid': study.study_uid,
+                'study_uid': study_uid_display,
                 'accession_number': study.accession_number,
                 'modality': study.modality,
                 'body_part': study.body_part,
@@ -776,12 +879,18 @@ def completed_studies_by_patient(request, patient_id):
                 'requesting_physician': study.requesting_physician,
                 'study_status': study.study_status,
                 'report_status': study.report_status,
+                'has_dicom_images': bool(study.study_uid and study.study_uid.strip()),
+                # 🆕 진료실 정보 추가
+                'assigned_room': patient_mapping.assigned_room,
+                'room_status': patient_mapping.status,
             }
             studies_data.append(data)
 
         return Response({
             'status': 'success',
             'patient_id': patient_id,
+            'assigned_room': patient_mapping.assigned_room,
+            'room_status': patient_mapping.status,
             'count': len(studies_data),
             'data': studies_data
         })
@@ -848,5 +957,258 @@ def study_detail_for_viewer(request, study_uid):
         return Response({
             'status': 'error',
             'message': '검사 상세 정보를 불러오는데 실패했습니다.',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# backend/worklists/views.py - 디버그용 함수 추가
+
+@api_view(['GET'])
+def debug_patient_mapping(request):
+    """
+    Patient ID 매칭 디버그용 API
+    - StudyRequest의 patient_id 목록
+    - PatientMapping의 patient_identifier 목록
+    - PACS patient_id와 매칭 상태 확인
+    """
+    try:
+        print("=" * 50)
+        print("🔍 Patient ID 매칭 디버그 시작")
+        print("=" * 50)
+        
+        # 1. StudyRequest의 patient_id 목록 확인
+        study_patient_ids = StudyRequest.objects.values_list('patient_id', flat=True).distinct()
+        study_patient_list = list(study_patient_ids)
+        print(f"📋 StudyRequest patient_id 목록 ({len(study_patient_list)}개):")
+        for i, pid in enumerate(study_patient_list[:10]):  # 처음 10개만
+            print(f"  {i+1}. '{pid}' (길이: {len(pid) if pid else 0})")
+        if len(study_patient_list) > 10:
+            print(f"  ... 외 {len(study_patient_list)-10}개")
+        
+        # 2. PatientMapping의 patient_identifier 목록 확인
+        mapping_patient_ids = PatientMapping.objects.filter(
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED'
+        ).values_list('patient_identifier', flat=True).distinct()
+        mapping_patient_list = list(mapping_patient_ids)
+        print(f"\n🏥 PatientMapping patient_identifier 목록 ({len(mapping_patient_list)}개):")
+        for i, pid in enumerate(mapping_patient_list[:10]):  # 처음 10개만
+            print(f"  {i+1}. '{pid}' (길이: {len(pid) if pid else 0})")
+        if len(mapping_patient_list) > 10:
+            print(f"  ... 외 {len(mapping_patient_list)-10}개")
+        
+        # 3. 진료실에 배정된 환자 확인
+        assigned_mappings = PatientMapping.objects.filter(
+            assigned_room__isnull=False,
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED'
+        )
+        print(f"\n🏥 진료실 배정된 환자 ({assigned_mappings.count()}명):")
+        for mapping in assigned_mappings[:5]:  # 처음 5명만
+            print(f"  - {mapping.patient_identifier} ({mapping.display}) → {mapping.assigned_room}번실")
+        
+        # 4. 매칭되는 patient_id 확인
+        matched_ids = []
+        unmatched_study_ids = []
+        unmatched_mapping_ids = []
+        
+        for study_id in study_patient_list:
+            if study_id in mapping_patient_list:
+                matched_ids.append(study_id)
+            else:
+                unmatched_study_ids.append(study_id)
+        
+        for mapping_id in mapping_patient_list:
+            if mapping_id not in study_patient_list:
+                unmatched_mapping_ids.append(mapping_id)
+        
+        print(f"\n🔗 매칭 결과:")
+        print(f"  ✅ 매칭되는 ID: {len(matched_ids)}개")
+        print(f"  ❌ StudyRequest에만 있는 ID: {len(unmatched_study_ids)}개")
+        print(f"  ❌ PatientMapping에만 있는 ID: {len(unmatched_mapping_ids)}개")
+        
+        # 5. PACS 형식 ID 패턴 분석
+        pacs_pattern_ids = [pid for pid in study_patient_list if pid and len(pid) == 4 and pid.startswith('P')]
+        print(f"\n🎯 PACS 패턴 (P + 3자리) ID: {len(pacs_pattern_ids)}개")
+        for pid in pacs_pattern_ids[:5]:
+            print(f"  - {pid}")
+        
+        # 6. 검사완료 상태인 StudyRequest 중 진료실 매칭 확인
+        completed_studies = StudyRequest.objects.filter(
+            study_status__in=['검사완료', 'completed', 'COMPLETED', 'Completed']
+        )
+        
+        completed_with_room = 0
+        completed_without_room = 0
+        
+        for study in completed_studies:
+            if study.patient_id in mapping_patient_list:
+                # 해당 환자가 진료실에 배정되어 있는지 확인
+                has_room = PatientMapping.objects.filter(
+                    patient_identifier=study.patient_id,
+                    assigned_room__isnull=False,
+                    is_active=True,
+                    mapping_type='IDENTIFIER_BASED'
+                ).exists()
+                
+                if has_room:
+                    completed_with_room += 1
+                else:
+                    completed_without_room += 1
+        
+        print(f"\n📊 검사완료 상태 분석:")
+        print(f"  전체 검사완료: {completed_studies.count()}건")
+        print(f"  진료실 배정 + 검사완료: {completed_with_room}건")
+        print(f"  진료실 미배정 + 검사완료: {completed_without_room}건")
+        
+        # 응답 데이터 구성
+        response_data = {
+            'status': 'success',
+            'debug_info': {
+                'study_patient_ids': {
+                    'count': len(study_patient_list),
+                    'sample': study_patient_list[:10],
+                    'pacs_pattern_count': len(pacs_pattern_ids),
+                    'pacs_pattern_sample': pacs_pattern_ids[:5]
+                },
+                'mapping_patient_ids': {
+                    'count': len(mapping_patient_list),
+                    'sample': mapping_patient_list[:10]
+                },
+                'assigned_patients': {
+                    'count': assigned_mappings.count(),
+                    'sample': [
+                        {
+                            'patient_identifier': m.patient_identifier,
+                            'display': m.display,
+                            'assigned_room': m.assigned_room
+                        } for m in assigned_mappings[:5]
+                    ]
+                },
+                'matching_results': {
+                    'matched_count': len(matched_ids),
+                    'unmatched_study_count': len(unmatched_study_ids),
+                    'unmatched_mapping_count': len(unmatched_mapping_ids),
+                    'matched_sample': matched_ids[:5],
+                    'unmatched_study_sample': unmatched_study_ids[:5],
+                    'unmatched_mapping_sample': unmatched_mapping_ids[:5]
+                },
+                'completed_studies_analysis': {
+                    'total_completed': completed_studies.count(),
+                    'with_room_assignment': completed_with_room,
+                    'without_room_assignment': completed_without_room
+                }
+            }
+        }
+        
+        print("=" * 50)
+        print("🔍 Patient ID 매칭 디버그 완료")
+        print("=" * 50)
+        
+        return Response(response_data)
+        
+    except Exception as e:
+        print(f"❌ 디버그 API 에러: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return Response({
+            'status': 'error',
+            'message': '디버그 정보 조회 실패',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# backend/worklists/views.py - PACS Patient ID 동기화 함수 추가
+
+@api_view(['POST'])
+def sync_pacs_patient_ids(request):
+    """
+    PACS Patient ID와 데이터베이스 동기화
+    PACS에서 사용하는 P001, P002 형식의 patient_id를 기반으로 
+    PatientMapping과 StudyRequest를 연결
+    """
+    try:
+        print("=" * 50)
+        print("🔄 PACS Patient ID 동기화 시작")
+        print("=" * 50)
+        
+        # 1. PACS 패턴의 patient_id를 가진 StudyRequest 조회
+        pacs_studies = StudyRequest.objects.filter(
+            patient_id__regex=r'^P\d{3}$'  # P + 3자리 숫자 패턴
+        )
+        
+        print(f"📋 PACS 패턴 StudyRequest: {pacs_studies.count()}건")
+        
+        created_mappings = 0
+        updated_mappings = 0
+        errors = []
+        
+        for study in pacs_studies:
+            try:
+                pacs_patient_id = study.patient_id
+                
+                # 2. 동일한 환자 이름으로 기존 PatientMapping 찾기
+                potential_mappings = PatientMapping.objects.filter(
+                    display__icontains=study.patient_name.split()[0] if study.patient_name else '',
+                    is_active=True,
+                    mapping_type='IDENTIFIER_BASED'
+                )
+                
+                if potential_mappings.exists():
+                    # 기존 매핑이 있으면 patient_identifier 업데이트
+                    mapping = potential_mappings.first()
+                    old_identifier = mapping.patient_identifier
+                    mapping.patient_identifier = pacs_patient_id
+                    mapping.save(update_fields=['patient_identifier'])
+                    
+                    print(f"✅ 매핑 업데이트: {old_identifier} → {pacs_patient_id} ({mapping.display})")
+                    updated_mappings += 1
+                    
+                else:
+                    # 새 매핑 생성 (최소한의 정보로)
+                    mapping = PatientMapping.objects.create(
+                        orthanc_patient_id=f"PACS_{pacs_patient_id}",
+                        openmrs_patient_uuid=f"temp_uuid_{pacs_patient_id}",
+                        patient_identifier=pacs_patient_id,
+                        mapping_type='IDENTIFIER_BASED',
+                        display=study.patient_name or f"환자_{pacs_patient_id}",
+                        sync_status='MANUAL_SYNC',
+                        is_active=True
+                    )
+                    
+                    print(f"🆕 새 매핑 생성: {pacs_patient_id} ({mapping.display})")
+                    created_mappings += 1
+                    
+            except Exception as e:
+                error_msg = f"환자 {study.patient_id} 처리 실패: {str(e)}"
+                errors.append(error_msg)
+                print(f"❌ {error_msg}")
+        
+        # 3. 결과 요약
+        print(f"\n📊 동기화 결과:")
+        print(f"  🆕 새 매핑 생성: {created_mappings}개")
+        print(f"  ✅ 기존 매핑 업데이트: {updated_mappings}개")
+        print(f"  ❌ 에러: {len(errors)}개")
+        
+        return Response({
+            'status': 'success',
+            'message': f'PACS Patient ID 동기화 완료',
+            'results': {
+                'created_mappings': created_mappings,
+                'updated_mappings': updated_mappings,
+                'errors_count': len(errors),
+                'errors': errors[:5]  # 처음 5개 에러만
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ PACS 동기화 에러: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return Response({
+            'status': 'error',
+            'message': 'PACS Patient ID 동기화 실패',
             'details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
