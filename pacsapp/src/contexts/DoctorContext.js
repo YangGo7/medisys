@@ -1,5 +1,5 @@
 // contexts/DoctorContext.js
-// KST 시간대 문제 해결 버전
+// 🆕 통계 API 추가된 최종 버전
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doctorService } from '../services/doctorService';
@@ -25,6 +25,11 @@ export const DoctorProvider = ({ children }) => {
   const [scheduleRefreshTrigger, setScheduleRefreshTrigger] = useState(0);
   const [schedulesLoading, setSchedulesLoading] = useState(false);
 
+  // 🆕 통계 관련 상태들
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
+
   useEffect(() => {
     fetchDoctorData();
   }, []);
@@ -36,31 +41,98 @@ export const DoctorProvider = ({ children }) => {
     }
   }, [scheduleRefreshTrigger, doctor]);
 
+  // 🆕 의사 정보 로드 후 통계도 함께 조회
   const fetchDoctorData = async () => {
     try {
       setLoading(true);
       const doctorData = await doctorService.getCurrentUser();
       setDoctor(doctorData);
-      // 의사 정보 로드 후 오늘 일정도 조회
-      fetchTodaySchedules();
+      
+      // 의사 정보 로드 후 오늘 일정과 통계 조회
+      await Promise.all([
+        fetchTodaySchedules(),
+        fetchDashboardStats(doctorData.name) // 🆕 통계 조회 추가
+      ]);
     } catch (err) {
-    console.error('❌ 의사 정보 로딩 실패:', err);
-    console.error('에러 응답 상태:', err?.response?.status);
-    setError('의사 정보를 불러올 수 없습니다.');
-  }
- finally {
+      console.error('❌ 의사 정보 로딩 실패:', err);
+      console.error('에러 응답 상태:', err?.response?.status);
+      setError('의사 정보를 불러올 수 없습니다.');
+    } finally {
       setLoading(false);
     }
   };
 
-  // ✅ 오늘 개인일정 조회 (KST 기준으로 수정)
+  // 🆕 판독의별 대시보드 통계 조회
+  const fetchDashboardStats = async (doctorName = null) => {
+    try {
+      setStatsLoading(true);
+      setStatsError(null);
+      
+      // 의사 이름이 없으면 현재 doctor 상태에서 가져오거나 디폴트 사용
+      const targetDoctorName = doctorName || doctor?.name || '심보람';
+      
+      console.log('📊 통계 조회 시작:', targetDoctorName);
+      
+      // API URL 생성 및 로깅 (절대 URL 사용)
+      const apiUrl = `http://35.225.63.41:8000/api/worklists/doctor-stats/?doctor_name=${encodeURIComponent(targetDoctorName)}`;
+      console.log('🔗 API URL:', apiUrl);
+      
+      // API 호출
+      const response = await fetch(apiUrl);
+      
+      console.log('📡 응답 상태:', response.status);
+      console.log('📡 응답 헤더:', response.headers.get('content-type'));
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('❌ 에러 응답 내용:', errorText);
+        throw new Error(`통계 API 호출 실패: ${response.status} - ${errorText}`);
+      }
+      
+      const statsData = await response.json();
+      
+      console.log('✅ 통계 조회 성공:', statsData);
+      
+      setDashboardStats(statsData);
+      return statsData;
+      
+    } catch (err) {
+      console.error('❌ 통계 조회 실패:', err);
+      setStatsError(`통계 데이터를 불러올 수 없습니다: ${err.message}`);
+      
+      // 에러 시 기본값 설정
+      setDashboardStats({
+        status: 'error',
+        stats: {
+          today_total: 0,
+          exam_completed: 0,
+          exam_total: 0,
+          report_completed: 0,
+          report_total: 0
+        },
+        display: {
+          today_total_display: '0',
+          exam_status_display: '0/0',
+          report_status_display: '0/0'
+        }
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // 🆕 통계 새로고침 함수
+  const refreshDashboardStats = () => {
+    console.log('🔄 통계 새로고침');
+    fetchDashboardStats();
+  };
+
   const fetchTodaySchedules = async () => {
     try {
       setSchedulesLoading(true);
       
       console.log('🕐 DoctorContext: 오늘 일정 조회 시작');
       
-      // ✅ 방법 1: KST 기준 오늘 날짜로 명시적 조회 (추천)
       const today = scheduleService.getTodayKST();
       console.log('🕐 KST 기준 오늘 날짜:', today);
       
@@ -72,14 +144,10 @@ export const DoctorProvider = ({ children }) => {
       
       setTodaySchedules(personalSchedules);
       
-      // ✅ 방법 2: 서버의 today_schedules도 함께 테스트 (비교용)
       try {
         const serverTodaySchedules = await scheduleService.getTodayPersonalSchedules();
         console.log('🔍 서버 today_schedules 비교:', serverTodaySchedules);
         console.log(`📊 서버 today_schedules 수: ${serverTodaySchedules.length}개`);
-        
-        // 만약 서버의 today_schedules가 더 정확하다면 이걸 사용
-        // setTodaySchedules(serverTodaySchedules);
       } catch (serverError) {
         console.log('🔍 서버 today_schedules 조회 실패:', serverError);
       }
@@ -92,7 +160,6 @@ export const DoctorProvider = ({ children }) => {
         url: err.config?.url
       });
       
-      // 에러 시 빈 배열로 설정
       setTodaySchedules([]);
     } finally {
       setSchedulesLoading(false);
@@ -109,13 +176,11 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // 일정 새로고침 함수
   const refreshSchedules = () => {
     console.log('🔄 일정 새로고침 트리거');
     setScheduleRefreshTrigger(prev => prev + 1);
   };
 
-  // ✅ 개인일정 생성 (성공 후 새로고침)
   const createPersonalSchedule = async (scheduleData) => {
     try {
       console.log('📅 개인일정 생성 시작:', scheduleData);
@@ -125,7 +190,6 @@ export const DoctorProvider = ({ children }) => {
       console.log('✅ 개인일정 생성 성공:', newSchedule);
       console.log('🔄 오늘 일정 새로고침 시작');
       
-      // 생성 후 즉시 새로고침
       refreshSchedules();
       
       return newSchedule;
@@ -135,7 +199,6 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // 개인일정 수정
   const updatePersonalSchedule = async (scheduleId, scheduleData) => {
     try {
       console.log('📅 개인일정 수정 시작:', scheduleId, scheduleData);
@@ -143,7 +206,7 @@ export const DoctorProvider = ({ children }) => {
       const updatedSchedule = await scheduleService.updatePersonalSchedule(scheduleId, scheduleData);
       
       console.log('✅ 개인일정 수정 성공:', updatedSchedule);
-      refreshSchedules(); // 수정 후 새로고침
+      refreshSchedules();
       
       return updatedSchedule;
     } catch (err) {
@@ -152,7 +215,6 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // 개인일정 삭제
   const deletePersonalSchedule = async (scheduleId) => {
     try {
       console.log('📅 개인일정 삭제 시작:', scheduleId);
@@ -160,7 +222,7 @@ export const DoctorProvider = ({ children }) => {
       await scheduleService.deletePersonalSchedule(scheduleId);
       
       console.log('✅ 개인일정 삭제 성공');
-      refreshSchedules(); // 삭제 후 새로고침
+      refreshSchedules();
       
     } catch (err) {
       console.error('❌ 개인일정 삭제 실패:', err);
@@ -168,7 +230,6 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // ✅ 특정 날짜 일정 조회 (캘린더용)
   const getSchedulesByDate = async (date) => {
     try {
       console.log('📅 날짜별 일정 조회:', date);
@@ -183,7 +244,6 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // 월별 일정 요약 조회 (캘린더 점 표시용)
   const getMonthSchedulesSummary = async (year, month) => {
     try {
       console.log('📅 월별 일정 요약 조회:', year, month);
@@ -198,7 +258,6 @@ export const DoctorProvider = ({ children }) => {
     }
   };
 
-  // ✅ 디버깅용 함수 추가
   const debugScheduleData = () => {
     console.log('🔍 DoctorContext 디버깅 정보:');
     console.log('  현재 의사:', doctor);
@@ -206,16 +265,20 @@ export const DoctorProvider = ({ children }) => {
     console.log('  일정 로딩 상태:', schedulesLoading);
     console.log('  새로고침 트리거:', scheduleRefreshTrigger);
     console.log('  KST 오늘 날짜:', scheduleService.getTodayKST());
+    console.log('  📊 대시보드 통계:', dashboardStats);
+    console.log('  📊 통계 로딩 상태:', statsLoading);
     
     return {
       doctor,
       todaySchedules,
       schedulesLoading,
       scheduleRefreshTrigger,
-      kstToday: scheduleService.getTodayKST()
+      kstToday: scheduleService.getTodayKST(),
+      dashboardStats,
+      statsLoading
     };
   };
-
+  
   const value = {
     // 기존 값들
     doctor,
@@ -228,6 +291,12 @@ export const DoctorProvider = ({ children }) => {
     schedulesLoading,
     refreshSchedules,
     
+    // 🆕 통계 관련 값들 추가
+    dashboardStats,
+    statsLoading,
+    statsError,
+    refreshDashboardStats,
+    
     // 일정 CRUD 함수들
     createPersonalSchedule,
     updatePersonalSchedule,
@@ -235,7 +304,7 @@ export const DoctorProvider = ({ children }) => {
     getSchedulesByDate,
     getMonthSchedulesSummary,
     
-    // ✅ 디버깅용 함수
+    // 디버깅용 함수
     debugScheduleData,
   };
 
@@ -245,4 +314,3 @@ export const DoctorProvider = ({ children }) => {
     </DoctorContext.Provider>
   );
 };
-

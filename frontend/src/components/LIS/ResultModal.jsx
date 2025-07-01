@@ -10,8 +10,8 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
 
   const interpretPrediction = (value) => {
     const finalValue = value === null || value === undefined || value === '' ? 0 : value;
-    if (finalValue === 1 || finalValue === true || finalValue === "1") return '🔴 이상 소견';
-    if (finalValue === 0 || finalValue === false || finalValue === "0") return '🟢 정상';
+    if (finalValue === 1 || finalValue === true || finalValue === "1") return '🟢 정상';
+    if (finalValue === 0 || finalValue === false || finalValue === "0") return '🔴 이상 소견';
     return String(finalValue);
   };
 
@@ -39,8 +39,8 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
           <tbody>
             {Object.entries(data.results || {}).map(([key, value]) => (
               <tr key={key}>
-                <td>{key}</td>
-                <td>{value}</td>
+                <td>{value.component_name || `항목 ${key}`}</td>
+                <td>{`${value.value ?? '-'} ${value.unit ?? ''}`}</td>
               </tr>
             ))}
           </tbody>

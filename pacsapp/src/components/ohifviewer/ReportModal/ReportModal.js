@@ -1,5 +1,6 @@
 // // src/components/OHIFViewer/ReportModal/ReportModal.js
 // import React, { useState, useEffect, useRef } from 'react';
+// import { loadReport } from '../../../utils/api'; // 👈 API 함수 import 추가
 // import styles from './ReportModal.module.css';
 
 // const ReportModal = ({
@@ -29,6 +30,10 @@
 //   const [recordingTime, setRecordingTime] = useState(0);
 //   const [hasPermission, setHasPermission] = useState(false);
 
+//   // 👈 새로 추가: API 기반 환자 정보 상태
+//   const [apiPatientInfo, setApiPatientInfo] = useState({});
+//   const [isLoadingPatientInfo, setIsLoadingPatientInfo] = useState(false);
+
 //   // ⭐ Refs 추가
 //   const mediaRecorderRef = useRef(null);
 //   const recordingTimerRef = useRef(null);
@@ -41,6 +46,52 @@
 //       checkMicrophonePermission(); // ⭐ 마이크 권한 확인 추가
 //     }
 //   }, [isOpen, initialContent]);
+
+//   // 👈 새로 추가: API에서 환자 정보 로드
+//   useEffect(() => {
+//     const loadPatientInfoFromAPI = async () => {
+//       if (isOpen && currentStudyUID) {
+//         setIsLoadingPatientInfo(true);
+//         try {
+//           console.log('🔍 ReportModal에서 환자 정보 직접 로드 시도...');
+//           const result = await loadReport(currentStudyUID);
+          
+//           if (result && result.status === 'success' && result.report) {
+//             const report = result.report;
+//             const apiInfo = {
+//               patient_name: report.patient_name || 'Unknown',
+//               patient_id: report.patient_id || 'Unknown',
+//               // 👈 여러 날짜 필드 시도
+//               study_date: report.study_date || 
+//                          report.study_datetime?.split(' ')[0] || 
+//                          report.scheduled_exam_datetime?.split(' ')[0] ||
+//                          report.created_at?.split('T')[0] ||
+//                          'Unknown',
+//               doctor_name: report.doctor_name || '미배정',  // 👈 API에서 직접 가져온 값
+//               doctor_id: report.doctor_id || 'UNASSIGNED'
+//             };
+            
+//             setApiPatientInfo(apiInfo);
+//             console.log('✅ API에서 환자 정보 로드 성공:');
+//             console.log('  - doctor_name:', apiInfo.doctor_name);
+//             console.log('  - study_date:', apiInfo.study_date);
+//             console.log('  - API 원본 날짜들:', {
+//               study_date: report.study_date,
+//               study_datetime: report.study_datetime,
+//               scheduled_exam_datetime: report.scheduled_exam_datetime,
+//               created_at: report.created_at
+//             });
+//           }
+//         } catch (error) {
+//           console.error('❌ API 환자 정보 로드 실패:', error);
+//         } finally {
+//           setIsLoadingPatientInfo(false);
+//         }
+//       }
+//     };
+
+//     loadPatientInfoFromAPI();
+//   }, [isOpen, currentStudyUID]);
 
 //   // ESC 키로 모달 닫기
 //   useEffect(() => {
@@ -228,13 +279,27 @@
 //     }
 //   };
 
-//   // 환자 정보 기본값 설정
+//   // 👈 환자 정보 우선순위: API > prop > fallback (간단한 방식)
 //   const patient = {
-//     patient_name: patientInfo.patient_name || 'Unknown',
-//     patient_id: patientInfo.patient_id || 'Unknown', 
-//     study_date: patientInfo.study_date || 'Unknown',
-//     ...patientInfo
+//     ...patientInfo, // 1. 기본 prop 값들
+//     // 2. API 값이 있으면 덮어쓰기 (빈 문자열이 아닌 경우만)
+//     patient_name: apiPatientInfo.patient_name || patientInfo.patient_name || 'Unknown',
+//     patient_id: apiPatientInfo.patient_id || patientInfo.patient_id || 'Unknown',
+//     study_date: apiPatientInfo.study_date || (patientInfo.study_date && patientInfo.study_date !== '' ? patientInfo.study_date : 'Unknown'), // 👈 빈 문자열 체크
+//     doctor_name: apiPatientInfo.doctor_name || (patientInfo.doctor_name && patientInfo.doctor_name !== '' ? patientInfo.doctor_name : '미배정'),
+//     doctor_id: apiPatientInfo.doctor_id || patientInfo.doctor_id || 'UNASSIGNED'
 //   };
+
+//   // 👈 디버깅용 로그
+//   useEffect(() => {
+//     if (isOpen) {
+//       console.log('🔍 ReportModal 환자 정보 디버깅:');
+//       console.log('  - API에서 가져온 정보:', apiPatientInfo);
+//       console.log('  - prop으로 받은 정보:', patientInfo);
+//       console.log('  - 최종 사용할 정보:', patient);
+//       console.log('  - 최종 판독의:', patient.doctor_name);
+//     }
+//   }, [isOpen, apiPatientInfo, patientInfo, patient]);
 
 //   // Study UID 표시용
 //   const displayStudyUID = currentStudyUID ? 
@@ -250,7 +315,7 @@
 //           {title}
 //         </h2>
         
-//         {/* 환자 정보 섹션 */}
+//         {/* 환자 정보 섹션 - 👈 판독의 정보 추가 */}
 //         <div className={styles.patientInfo}>
 //           <h3 className={styles.patientInfoHeader}>👤 환자 정보</h3>
 //           <div className={styles.patientGrid}>
@@ -262,6 +327,9 @@
 //             </div>
 //             <div className={styles.patientGridItem}>
 //               <strong>검사일:</strong> {patient.study_date}
+//             </div>
+//             <div className={styles.patientGridItem}>
+//               <strong>판독의:</strong> {patient.doctor_name} {isLoadingPatientInfo && '(로딩중...)'} {/* 👈 API 우선 사용 */}
 //             </div>
 //             <div className={styles.patientGridItem}>
 //               <strong>Study UID:</strong> {displayStudyUID}
@@ -323,6 +391,12 @@
 //                   <div className={styles.annotationLocation}>
 //                     화면 위치: [{box.left}, {box.top}, {box.left + box.width}, {box.top + box.height}]
 //                   </div>
+//                   {/* 👈 어노테이션 판독의 표시 */}
+//                   {box.doctor_name && (
+//                     <div className={styles.annotationDoctor}>
+//                       판독의: {box.doctor_name}
+//                     </div>
+//                   )}
 //                 </div>
 //                 <span className={styles.annotationBadge}>
 //                   수동
@@ -332,7 +406,7 @@
 //           </div>
 //         )}
 
-//         {/* ⭐ STT 섹션 추가 */}
+//         {/* ⭐ STT 섹션 */}
 //         <div className={styles.sttSection}>
 //           <h3 className={styles.sttHeader}>
 //             🎤 음성 인식 (SOAP 형식 자동 변환)
@@ -467,7 +541,9 @@
 // export default ReportModal;
 
 // src/components/OHIFViewer/ReportModal/ReportModal.js
+// src/components/OHIFViewer/ReportModal/ReportModal.js
 import React, { useState, useEffect, useRef } from 'react';
+import { loadReport } from '../../../utils/api'; // 👈 일단 AI API 제거
 import styles from './ReportModal.module.css';
 
 const ReportModal = ({
@@ -497,6 +573,10 @@ const ReportModal = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [hasPermission, setHasPermission] = useState(false);
 
+  // 👈 새로 추가: API 기반 환자 정보 상태
+  const [apiPatientInfo, setApiPatientInfo] = useState({});
+  const [isLoadingPatientInfo, setIsLoadingPatientInfo] = useState(false);
+
   // ⭐ Refs 추가
   const mediaRecorderRef = useRef(null);
   const recordingTimerRef = useRef(null);
@@ -509,6 +589,46 @@ const ReportModal = ({
       checkMicrophonePermission(); // ⭐ 마이크 권한 확인 추가
     }
   }, [isOpen, initialContent]);
+
+  // 👈 API에서 환자 정보 로드 (AI 제거하고 환자 정보만)
+  useEffect(() => {
+    const loadPatientInfoFromAPI = async () => {
+      if (isOpen && currentStudyUID) {
+        setIsLoadingPatientInfo(true);
+        try {
+          console.log('🔍 ReportModal에서 환자 정보 직접 로드 시도...');
+          const result = await loadReport(currentStudyUID);
+          
+          if (result && result.status === 'success' && result.report) {
+            const report = result.report;
+            const apiInfo = {
+              patient_name: report.patient_name || 'Unknown',
+              patient_id: report.patient_id || 'Unknown',
+              // 👈 여러 날짜 필드 시도
+              study_date: report.study_date || 
+                         report.study_datetime?.split(' ')[0] || 
+                         report.scheduled_exam_datetime?.split(' ')[0] ||
+                         report.created_at?.split('T')[0] ||
+                         'Unknown',
+              doctor_name: report.doctor_name || '미배정',  // 👈 API에서 직접 가져온 값
+              doctor_id: report.doctor_id || 'UNASSIGNED'
+            };
+            
+            setApiPatientInfo(apiInfo);
+            console.log('✅ API에서 환자 정보 로드 성공:');
+            console.log('  - doctor_name:', apiInfo.doctor_name);
+            console.log('  - study_date:', apiInfo.study_date);
+          }
+        } catch (error) {
+          console.error('❌ API 환자 정보 로드 실패:', error);
+        } finally {
+          setIsLoadingPatientInfo(false);
+        }
+      }
+    };
+
+    loadPatientInfoFromAPI();
+  }, [isOpen, currentStudyUID]);
 
   // ESC 키로 모달 닫기
   useEffect(() => {
@@ -696,14 +816,27 @@ const ReportModal = ({
     }
   };
 
-  // 환자 정보 기본값 설정 (👈 판독의 정보 추가)
+  // 👈 환자 정보 우선순위: API > prop > fallback (간단한 방식)
   const patient = {
-    patient_name: patientInfo.patient_name || 'Unknown',
-    patient_id: patientInfo.patient_id || 'Unknown', 
-    study_date: patientInfo.study_date || 'Unknown',
-    doctor_name: patientInfo.doctor_name || 'DR001 - 김영상', // 👈 fallback 값
-    ...patientInfo
+    ...patientInfo, // 1. 기본 prop 값들
+    // 2. API 값이 있으면 덮어쓰기 (빈 문자열이 아닌 경우만)
+    patient_name: apiPatientInfo.patient_name || patientInfo.patient_name || 'Unknown',
+    patient_id: apiPatientInfo.patient_id || patientInfo.patient_id || 'Unknown',
+    study_date: apiPatientInfo.study_date || (patientInfo.study_date && patientInfo.study_date !== '' ? patientInfo.study_date : 'Unknown'), // 👈 빈 문자열 체크
+    doctor_name: apiPatientInfo.doctor_name || (patientInfo.doctor_name && patientInfo.doctor_name !== '' ? patientInfo.doctor_name : '미배정'),
+    doctor_id: apiPatientInfo.doctor_id || patientInfo.doctor_id || 'UNASSIGNED'
   };
+
+  // 👈 디버깅용 로그
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔍 ReportModal 환자 정보 디버깅:');
+      console.log('  - API에서 가져온 정보:', apiPatientInfo);
+      console.log('  - prop으로 받은 정보:', patientInfo);
+      console.log('  - 최종 사용할 정보:', patient);
+      console.log('  - 최종 판독의:', patient.doctor_name);
+    }
+  }, [isOpen, apiPatientInfo, patientInfo, patient]);
 
   // Study UID 표시용
   const displayStudyUID = currentStudyUID ? 
@@ -733,7 +866,7 @@ const ReportModal = ({
               <strong>검사일:</strong> {patient.study_date}
             </div>
             <div className={styles.patientGridItem}>
-              <strong>판독의:</strong> {patient.doctor_name} {/* 👈 추가 */}
+              <strong>판독의:</strong> {patient.doctor_name} {isLoadingPatientInfo && '(로딩중...)'} {/* 👈 API 우선 사용 */}
             </div>
             <div className={styles.patientGridItem}>
               <strong>Study UID:</strong> {displayStudyUID}
@@ -741,15 +874,34 @@ const ReportModal = ({
           </div>
         </div>
         
-        {/* AI 분석 결과 섹션 */}
+        {/* AI 분석 결과 섹션 - 원래대로 복원 */}
         {analysisResults && analysisResults.results && analysisResults.results.length > 0 && (
           <div className={styles.aiResults}>
             <h3 className={styles.aiResultsHeader}>
               🤖 AI 분석 결과
             </h3>
+            
+            {/* 👈 임시 디버깅 로그 추가 */}
+            {console.log('🔍 analysisResults 디버깅:', {
+              전체_객체: analysisResults,
+              model_used: analysisResults.model_used,
+              model_type: analysisResults.model_type,
+              model: analysisResults.model,
+              models: analysisResults.models,
+              첫번째_result_model: analysisResults.results?.[0]?.model,
+              모든_키들: Object.keys(analysisResults)
+            })}
+            
             <div className={styles.aiResultsSummary}>
-              <strong>사용 모델:</strong> {analysisResults.model_used} | 
-              <strong> 총 검출:</strong> {analysisResults.detections}개
+              <strong>사용 모델:</strong> {
+                analysisResults.model_used || 
+                analysisResults.model_type || 
+                analysisResults.model ||
+                analysisResults.models?.[0] ||
+                analysisResults.results?.[0]?.model ||
+                'Unknown'
+              } | 
+              <strong> 총 검출:</strong> {analysisResults.detections || analysisResults.results.length}개
             </div>
             
             {analysisResults.results.map((result, index) => (

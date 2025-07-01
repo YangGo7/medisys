@@ -1,4 +1,4 @@
-// E:\250619\radiology-system\frontend\src\components\dashboard\WorkListPanel\WorkListTable.js
+// /home/medical_system/pacsapp/src/components/dashboard/WorkListPanel/WorkListTable.js
 
 import React from 'react';
 

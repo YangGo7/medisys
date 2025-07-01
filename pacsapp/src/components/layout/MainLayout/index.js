@@ -213,7 +213,7 @@ const MainLayout = ({ children }) => {
       {/* 하단바 */}       
       <div className="statusbar">         
         <span>시스템 상태: 정상 운영 중</span>         
-        <span>2025-06-29</span>       
+        <span>2025-07-01</span>       
       </div>        
       
       {/* 🚀 새로운 메신저 시스템 - 기존 하드코딩 채팅 대체 */}       

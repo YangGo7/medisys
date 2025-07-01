@@ -1,156 +1,194 @@
-// // E:\250619\radiology-system\frontend\src\components\dashboard\WorkListPanel\index.js
-// // ESLint 에러 제거 및 useCallback 적용 버전
+// // home/medical_system/pacsapp/src/components/dashboard/WorkListPanel/index.js
 
 // import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 // import FilterSection from './FilterSection';
 // import WorkListTable from './WorkListTable';
 // import { worklistService } from '../../../services/worklistService';
+// import { getTodayKST } from '../../../utils/timeUtils';
 // import './WorkListPanel.css';
 
 // const WorkListPanel = forwardRef((props, ref) => {
-//   const { onDragStart, onDateChange } = props;
+//   const { onDragStart, onDateChange, selectedDate } = props;
   
 //   // 상태 관리
 //   const [worklist, setWorklist] = useState([]);
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState(null);
-//   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  
+//   // ✅ 날짜 초기값을 일관성 있게 처리
+//   const getInitialDate = () => {
+//     if (selectedDate) {
+//       if (selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+//         return selectedDate;
+//       }
+//     }
+//     return getTodayKST();
+//   };
+  
+//   const [currentDate, setCurrentDate] = useState(getInitialDate());
 //   const [filters, setFilters] = useState({
 //     patientId: '',
 //     patientName: '',
 //     modality: '',
 //     examPart: '',
 //     requestDoctor: '',
+//     reportingDoctor: '',
 //     examStatus: '',
 //     reportStatus: ''
 //   });
 
-//   // 날짜별 데이터 로딩 함수 (useCallback으로 감싸기)
+//   // ✅ 간단한 데이터 로딩 함수 (시간 변환 없음)
 //   const loadWorklist = useCallback(async (date = null) => {
 //     try {
 //       setLoading(true);
 //       setError(null);
       
-//       console.log('📅 날짜별 워크리스트 로딩:', date);
+//       const targetDate = date || currentDate;
+//       console.log('📅 워크리스트 로딩 시작 - 목표 날짜:', targetDate);
       
-//       // 날짜가 있으면 날짜별 API, 없으면 전체 API
-//       const data = date 
-//         ? await worklistService.getWorklistByDate(date)
-//         : await worklistService.getWorklist();
-      
-//       console.log('원본 API 응답:', data);
-      
-//       // 데이터 변환 로직
-//       let transformedData = [];
-//       if (Array.isArray(data)) {
-//         transformedData = data.map(item => ({
-//           id: item.id,
-//           patientId: item.patientId || item.patient_id || '-',
-//           patientName: item.patientName || item.patient_name || '-',
-//           birthDate: item.birthDate || item.birth_date || '-',
-//           gender: item.gender || (item.sex === 'M' ? '남' : item.sex === 'F' ? '여' : '-'),
-//           examPart: item.examPart || item.body_part || '-',
-//           modality: item.modality || '-',
-//           requestDoctor: item.requestDoctor || item.requesting_physician || '-',
-//           requestDateTime: item.requestDateTime || item.request_datetime || '-',
-//           reportingDoctor: item.reportingDoctor || item.interpreting_physician || '-',
-//           examDateTime: item.examDateTime || item.scheduled_exam_datetime || null,
-//           examStatus: item.examStatus || item.study_status || '대기',
-//           reportStatus: item.reportStatus || item.report_status || '대기',
-//           priority: item.priority || '일반',
-//           estimatedDuration: item.estimatedDuration || item.estimated_duration || 30,
-//           notes: item.notes || '',
-//           radiologistId: item.radiologistId || item.assigned_radiologist || null,
-//           roomId: item.roomId || item.assigned_room || null,
-//           startTime: item.startTime || null
-//         }));
+//       // 날짜 형식 검증
+//       if (!targetDate || !targetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+//         throw new Error(`잘못된 날짜 형식: ${targetDate}`);
 //       }
       
-//       console.log('📊 변환된 데이터:', transformedData.length, '개');
-//       setWorklist(transformedData);
+//       // 날짜별 API 호출
+//       const data = await worklistService.getWorklistByDate(targetDate);
+//       console.log('✅ API 성공:', data?.length || 0, '개');
+//       console.log('원본 데이터:', data);
+      
+//       // ✅ 데이터를 그대로 사용 (Django에서 이미 변환된 상태)
+//       if (Array.isArray(data)) {
+//         console.log('📊 최종 데이터:', data.length, '개');
+//         setWorklist(data);  // 변환 없이 그대로 사용
+//       } else {
+//         console.warn('⚠️ 데이터가 배열이 아님:', typeof data);
+//         setWorklist([]);
+//       }
       
 //     } catch (err) {
-//       console.error('워크리스트 로드 실패:', err);
+//       console.error('❌ 워크리스트 로드 실패:', err);
 //       setError(`데이터를 불러오는데 실패했습니다: ${err.message}`);
+//       setWorklist([]);
 //     } finally {
 //       setLoading(false);
 //     }
-//   }, []); // 빈 의존성 배열
+//   }, [currentDate]);
 
-//   // 날짜 변경 핸들러 (useCallback으로 감싸기)
+//   // ✅ prop으로 받은 selectedDate 변화 감지
+//   useEffect(() => {
+//     if (selectedDate && selectedDate !== currentDate) {
+//       console.log('📅 상위에서 날짜 변경됨:', selectedDate);
+//       if (selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+//         setCurrentDate(selectedDate);
+//       } else {
+//         console.warn('⚠️ 잘못된 날짜 형식:', selectedDate);
+//       }
+//     }
+//   }, [selectedDate, currentDate]);
+
+//   // ✅ 날짜 변경 핸들러
 //   const handleDateChange = useCallback((date) => {
-//     console.log('📅 날짜 변경:', date);
-//     setSelectedDate(date);
+//     console.log('📅 WorkListPanel 날짜 변경:', date);
     
-//     // 부모 컴포넌트(Dashboard)에 날짜 변경 알림
+//     // 날짜 형식 검증
+//     if (!date || !date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+//       console.warn('⚠️ 잘못된 날짜 형식, 오늘 날짜로 설정');
+//       date = getTodayKST();
+//     }
+    
+//     setCurrentDate(date);
+    
+//     // 부모 컴포넌트에 알림
 //     if (onDateChange) {
 //       onDateChange(date);
 //     }
 //   }, [onDateChange]);
 
-//   // ref 메서드 노출
+//   // ✅ ref 메서드 노출
 //   useImperativeHandle(ref, () => ({
-//     refreshWorklist: () => loadWorklist(selectedDate),
-//     setDate: (date) => handleDateChange(date)
-//   }), [selectedDate, loadWorklist, handleDateChange]);
+//     refreshWorklist: () => {
+//       console.log('🔄 외부에서 워크리스트 새로고침 요청');
+//       return loadWorklist(currentDate);
+//     },
+//     setDate: (date) => handleDateChange(date),
+//     getCurrentDate: () => currentDate,
+//     getWorklistCount: () => worklist.length,
+//     clearData: () => {
+//       console.log('🧹 워크리스트 데이터 초기화');
+//       setWorklist([]);
+//       setError(null);
+//     }
+//   }), [currentDate, loadWorklist, handleDateChange, worklist.length]);
 
-//   // 날짜 변경 시 데이터 다시 로딩
+//   // ✅ 날짜 변경시 데이터 로딩
 //   useEffect(() => {
-//     loadWorklist(selectedDate);
-//   }, [selectedDate, loadWorklist]);
+//     console.log('📅 useEffect - 날짜 변경 감지:', currentDate);
+//     loadWorklist(currentDate);
+//   }, [currentDate, loadWorklist]);
 
-//   // 초기 로딩
-//   useEffect(() => {
-//     loadWorklist(selectedDate);
-//   }, [loadWorklist, selectedDate]);
-
-//   // 필터링된 워크리스트 (useMemo 대신 일반 계산으로)
+//   // ✅ 필터링된 워크리스트
 //   const filteredWorklist = worklist.filter(exam => {
-//     return (!filters.patientId || exam.patientId?.toLowerCase().includes(filters.patientId.toLowerCase())) &&
-//            (!filters.patientName || exam.patientName?.toLowerCase().includes(filters.patientName.toLowerCase())) &&
-//            (!filters.modality || exam.modality === filters.modality) &&
-//            (!filters.examPart || exam.examPart?.toLowerCase().includes(filters.examPart.toLowerCase())) &&
-//            (!filters.requestDoctor || exam.requestDoctor?.toLowerCase().includes(filters.requestDoctor.toLowerCase())) &&
-//            (!filters.examStatus || exam.examStatus === filters.examStatus) &&
-//            (!filters.reportStatus || exam.reportStatus === filters.reportStatus);
+//     try {
+//       return (!filters.patientId || (exam.patientId && exam.patientId.toLowerCase().includes(filters.patientId.toLowerCase()))) &&
+//              (!filters.patientName || (exam.patientName && exam.patientName.toLowerCase().includes(filters.patientName.toLowerCase()))) &&
+//              (!filters.modality || exam.modality === filters.modality) &&
+//              (!filters.examPart || (exam.examPart && exam.examPart.toLowerCase().includes(filters.examPart.toLowerCase()))) &&
+//              (!filters.requestDoctor || (exam.requestDoctor && exam.requestDoctor.toLowerCase().includes(filters.requestDoctor.toLowerCase()))) &&
+//              (!filters.examStatus || exam.examStatus === filters.examStatus) &&
+//              (!filters.reportStatus || exam.reportStatus === filters.reportStatus);
+//     } catch (filterError) {
+//       console.error('❌ 필터링 오류:', filterError, exam);
+//       return false;
+//     }
 //   });
 
-//   // 필터 변경 핸들러 (useCallback으로 감싸기)
+//   // 디버깅 로그 추가
+//   console.log('📊 현재 상태:', {
+//     worklist: worklist.length,
+//     filteredWorklist: filteredWorklist.length,
+//     loading,
+//     error
+//   });
+
+//   // 필터 변경 핸들러
 //   const handleFilterChange = useCallback((field, value) => {
+//     console.log('🔍 필터 변경:', field, '=', value);
 //     setFilters(prev => ({
 //       ...prev,
 //       [field]: value
 //     }));
 //   }, []);
 
-//   // 필터 초기화 (useCallback으로 감싸기)
+//   // 필터 초기화
 //   const clearFilters = useCallback(() => {
+//     console.log('🧹 필터 초기화');
 //     setFilters({
 //       patientId: '',
 //       patientName: '',
 //       modality: '',
 //       examPart: '',
 //       requestDoctor: '',
+//       reportingDoctor: '',
 //       examStatus: '',
 //       reportStatus: ''
 //     });
 //   }, []);
 
-//   // 드래그 시작 핸들러 (useCallback으로 감싸기)
+//   // 드래그 시작 핸들러
 //   const handleDragStart = useCallback((exam) => {
-//     // 대기 상태인 검사만 드래그 가능
 //     if (exam.examStatus === '대기') {
-//       console.log('드래그 시작:', exam);
+//       console.log('🖱️ 드래그 시작:', exam.patientName, exam.modality, exam.examPart);
 //       onDragStart && onDragStart(exam);
 //     } else {
-//       console.log('드래그 불가능한 상태:', exam.examStatus);
+//       console.log('❌ 드래그 불가능한 상태:', exam.examStatus);
 //     }
 //   }, [onDragStart]);
 
-//   // 재시도 핸들러 (useCallback으로 감싸기)
+//   // 재시도 핸들러
 //   const handleRetry = useCallback(() => {
-//     loadWorklist(selectedDate);
-//   }, [selectedDate, loadWorklist]);
+//     console.log('🔄 재시도 버튼 클릭');
+//     loadWorklist(currentDate);
+//   }, [currentDate, loadWorklist]);
 
 //   // 로딩 상태
 //   if (loading) {
@@ -163,7 +201,7 @@
 //           height: '200px',
 //           color: '#6b7280'
 //         }}>
-//           {selectedDate} 데이터를 불러오는 중...
+//           📅 {currentDate} 데이터를 불러오는 중...
 //         </div>
 //       </div>
 //     );
@@ -181,7 +219,7 @@
 //           height: '200px',
 //           color: '#dc2626'
 //         }}>
-//           <p>{error}</p>
+//           <p>❌ {error}</p>
 //           <button 
 //             onClick={handleRetry}
 //             style={{
@@ -194,7 +232,7 @@
 //               cursor: 'pointer'
 //             }}
 //           >
-//             다시 시도
+//             🔄 다시 시도
 //           </button>
 //         </div>
 //       </div>
@@ -208,8 +246,9 @@
 //         onFilterChange={handleFilterChange}
 //         onClearFilters={clearFilters}
 //         filteredCount={filteredWorklist.length}
-//         selectedDate={selectedDate}
+//         selectedDate={currentDate}
 //         onDateChange={handleDateChange}
+//         worklist={worklist}
 //       />
       
 //       <WorkListTable
@@ -217,21 +256,31 @@
 //         onDragStart={handleDragStart}
 //       />
       
-//       {/* 디버그 정보 */}
-//       {process.env.NODE_ENV === 'development' && (
+//       {/* ✅ 개발용 디버그 정보 */}
+//       {/* {process.env.NODE_ENV === 'development' && (
 //         <div style={{
 //           position: 'fixed',
 //           bottom: '10px',
 //           left: '10px',
-//           background: 'rgba(0,0,0,0.8)',
+//           background: 'rgba(0,0,0,0.9)',
 //           color: 'white',
-//           padding: '0.5rem',
-//           borderRadius: '0.25rem',
-//           fontSize: '0.75rem'
+//           padding: '0.75rem',
+//           borderRadius: '0.5rem',
+//           fontSize: '0.75rem',
+//           lineHeight: '1.4',
+//           maxWidth: '350px',
+//           zIndex: 1000
 //         }}>
-//           선택된 날짜: {selectedDate} | 워크리스트: {worklist.length}개 | 필터링: {filteredWorklist.length}개
+//           <div>📅 선택된 날짜: <strong>{currentDate}</strong></div>
+//           <div>📊 원본 데이터: <strong>{worklist.length}개</strong></div>
+//           <div>📊 필터링된 데이터: <strong>{filteredWorklist.length}개</strong></div>
+//           <div>🔄 로딩: {loading ? '중' : '완료'}</div>
+//           {error && <div style={{color: '#fca5a5'}}>❌ 에러: {error}</div>}
+//           {worklist.length > 0 && (
+//             <div>✅ 첫 번째 환자: <strong>{worklist[0]?.patientName}</strong></div>
+//           )}
 //         </div>
-//       )}
+//       )} */}
 //     </div>
 //   );
 // });
@@ -240,6 +289,7 @@
 
 // export default WorkListPanel;
 
+// src/components/dashboard/WorkListPanel/index.js
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import FilterSection from './FilterSection';
 import WorkListTable from './WorkListTable';
@@ -314,6 +364,42 @@ const WorkListPanel = forwardRef((props, ref) => {
     }
   }, [currentDate]);
 
+  // 🔥 새로 추가: 레포트 관련 이벤트 리스너
+  useEffect(() => {
+    const handleReportSaved = (event) => {
+      console.log('📡 레포트 저장 이벤트 수신:', event.detail);
+      console.log('🔄 워크리스트 새로고침 실행 (레포트 저장)');
+      loadWorklist(currentDate);
+    };
+
+    const handleReportStatusUpdated = (event) => {
+      console.log('📡 레포트 상태 업데이트 이벤트 수신:', event.detail);
+      console.log('🔄 워크리스트 새로고침 실행 (상태 업데이트)');
+      loadWorklist(currentDate);
+    };
+
+    const handleDashboardRefresh = (event) => {
+      console.log('📡 대시보드 새로고침 이벤트 수신:', event.detail);
+      console.log('🔄 워크리스트 새로고침 실행 (대시보드)');
+      loadWorklist(currentDate);
+    };
+
+    // 🔥 이벤트 리스너 등록
+    window.addEventListener('reportSaved', handleReportSaved);
+    window.addEventListener('reportStatusUpdated', handleReportStatusUpdated);
+    window.addEventListener('dashboardRefresh', handleDashboardRefresh);
+
+    console.log('📡 워크리스트 이벤트 리스너 등록 완료');
+
+    // 🔥 정리 함수
+    return () => {
+      window.removeEventListener('reportSaved', handleReportSaved);
+      window.removeEventListener('reportStatusUpdated', handleReportStatusUpdated);
+      window.removeEventListener('dashboardRefresh', handleDashboardRefresh);
+      console.log('📡 워크리스트 이벤트 리스너 해제 완료');
+    };
+  }, [currentDate, loadWorklist]);
+
   // ✅ prop으로 받은 selectedDate 변화 감지
   useEffect(() => {
     if (selectedDate && selectedDate !== currentDate) {
@@ -344,7 +430,7 @@ const WorkListPanel = forwardRef((props, ref) => {
     }
   }, [onDateChange]);
 
-  // ✅ ref 메서드 노출
+  // ✅ ref 메서드 노출 - 🔥 새로고침 함수 강화
   useImperativeHandle(ref, () => ({
     refreshWorklist: () => {
       console.log('🔄 외부에서 워크리스트 새로고침 요청');
@@ -497,7 +583,7 @@ const WorkListPanel = forwardRef((props, ref) => {
       />
       
       {/* ✅ 개발용 디버그 정보 */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <div style={{
           position: 'fixed',
           bottom: '10px',
@@ -519,8 +605,11 @@ const WorkListPanel = forwardRef((props, ref) => {
           {worklist.length > 0 && (
             <div>✅ 첫 번째 환자: <strong>{worklist[0]?.patientName}</strong></div>
           )}
+          <div style={{color: '#94a3b8', marginTop: '0.5rem'}}>
+            📡 이벤트 리스너: reportSaved, reportStatusUpdated, dashboardRefresh
+          </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 });

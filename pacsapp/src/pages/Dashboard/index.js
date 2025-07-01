@@ -531,7 +531,7 @@ const Dashboard = () => {
       />
       
       {/* ✅ 개발용 스케줄 디버깅 정보 */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <div style={{
           position: 'fixed',
           bottom: '10px',
@@ -556,7 +556,7 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };
