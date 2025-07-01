@@ -1,265 +1,12 @@
-# from rest_framework import viewsets, status
-# from rest_framework.response import Response
-# from rest_framework.decorators import api_view, action
-# from .models import StudyRequest
-# from .serializers import StudyRequestSerializer, WorklistSerializer
-
-
-# #영상 검사 요청
-# class StudyRequestViewSet(viewsets.ModelViewSet):
-#     queryset = StudyRequest.objects.all()
-#     serializer_class = StudyRequestSerializer
-    
-#     def create(self, request, *args, **kwargs):
-#         print("받은 데이터:", request.data)  # 디버깅용
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(
-#                 {"status": "success", "data": serializer.data}, 
-#                 status=status.HTTP_201_CREATED
-#             )
-#         else:
-#             print("Serializer 에러:", serializer.errors)  # 디버깅용
-#             return Response(
-#                 {"status": "error", "errors": serializer.errors}, 
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-    
-#     # 🆕 React Dashboard용 워크리스트 API
-#     @action(detail=False, methods=['get'])
-#     def worklist(self, request):
-#         """React Dashboard에서 사용할 워크리스트 데이터"""
-#         try:
-#             # 최신순으로 정렬
-#             study_requests = StudyRequest.objects.all().order_by('-request_datetime')
-#             serializer = WorklistSerializer(study_requests, many=True)
-#             return Response(serializer.data)
-#         except Exception as e:
-#             return Response(
-#                 {'error': str(e)}, 
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-    
-#     # 🆕 검사 배정 API
-#     @action(detail=True, methods=['post'])
-#     def assign(self, request, pk=None):
-#         """드래그앤드롭으로 검사 배정"""
-#         try:
-#             study_request = self.get_object()
-            
-#             # 요청 데이터 추출
-#             room_id = request.data.get('roomId')
-#             radiologist_id = request.data.get('radiologistId')
-#             start_time = request.data.get('startTime')
-#             duration = request.data.get('duration')
-            
-#             # 검증
-#             if not all([room_id, radiologist_id, start_time, duration]):
-#                 return Response(
-#                     {'error': '필수 정보가 누락되었습니다.'}, 
-#                     status=status.HTTP_400_BAD_REQUEST
-#                 )
-            
-#             # 관련 객체 가져오기
-#             from schedules.models import ExamRoom
-#             from doctors.models import Doctor
-#             from datetime import datetime
-#             from django.utils import timezone
-            
-#             room = ExamRoom.objects.get(room_id=room_id)
-#             radiologist = Doctor.objects.get(id=radiologist_id)
-            
-#             # 시간 파싱 및 timezone 처리
-#             if isinstance(start_time, str):
-#                 # 시간만 주어진 경우 (예: "09:00")
-#                 from datetime import date, time
-#                 today = date.today()
-#                 time_obj = datetime.strptime(start_time, '%H:%M').time()
-#                 start_datetime = datetime.combine(today, time_obj)
-#                 start_datetime = timezone.make_aware(start_datetime)
-#             else:
-#                 start_datetime = start_time
-            
-#             # 배정 실행
-#             study_request.assign_schedule(room, radiologist, start_datetime, int(duration))
-            
-#             # 업데이트된 데이터 반환
-#             serializer = WorklistSerializer(study_request)
-#             return Response(serializer.data)
-            
-#         except ExamRoom.DoesNotExist:
-#             return Response(
-#                 {'error': '검사실을 찾을 수 없습니다.'}, 
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-#         except Doctor.DoesNotExist:
-#             return Response(
-#                 {'error': '영상전문의를 찾을 수 없습니다.'}, 
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-#         except Exception as e:
-#             return Response(
-#                 {'error': str(e)}, 
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-    
-#     # 🆕 검사 시작 API
-#     @action(detail=True, methods=['post'])
-#     def start_exam(self, request, pk=None):
-#         """검사 시작"""
-#         try:
-#             study_request = self.get_object()
-            
-#             if not study_request.can_start_exam():
-#                 return Response(
-#                     {'error': '검사 시작이 불가능한 상태입니다.'}, 
-#                     status=status.HTTP_400_BAD_REQUEST
-#                 )
-            
-#             study_request.start_exam()
-#             serializer = WorklistSerializer(study_request)
-#             return Response(serializer.data)
-            
-#         except Exception as e:
-#             return Response(
-#                 {'error': str(e)}, 
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-    
-#     # 🆕 검사 완료 API
-#     @action(detail=True, methods=['post'])
-#     def complete_exam(self, request, pk=None):
-#         """검사 완료"""
-#         try:
-#             study_request = self.get_object()
-            
-#             if not study_request.can_complete_exam():
-#                 return Response(
-#                     {'error': '검사 완료가 불가능한 상태입니다.'}, 
-#                     status=status.HTTP_400_BAD_REQUEST
-#                 )
-            
-#             study_request.complete_exam()
-#             serializer = WorklistSerializer(study_request)
-#             return Response(serializer.data)
-            
-#         except Exception as e:
-#             return Response(
-#                 {'error': str(e)}, 
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-    
-#     # 🆕 검사 취소 API
-#     @action(detail=True, methods=['post'])
-#     def cancel_exam(self, request, pk=None):
-#         """검사 취소 (스케줄 삭제)"""
-#         try:
-#             study_request = self.get_object()
-#             study_request.cancel_schedule()
-#             serializer = WorklistSerializer(study_request)
-#             return Response(serializer.data)
-            
-#         except Exception as e:
-#             return Response(
-#                 {'error': str(e)}, 
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-
-
-# # WorkList용 API (모든 필드 조회) - 기존 API 유지
-# @api_view(['GET'])
-# def work_list(request):
-#     """
-#     WorkList 페이지용 - 모든 StudyRequest 데이터를 모든 필드와 함께 반환
-#     """
-#     try:
-#         # created_at 대신 request_datetime으로 정렬 (실제 모델 필드 사용)
-#         study_requests = StudyRequest.objects.all().order_by('-request_datetime')
-        
-#         # 실제 모델 필드에 맞게 데이터 구성
-#         work_list_data = []
-#         for request_obj in study_requests:
-#             data = {
-#                 'id': request_obj.id,
-#                 'patient_id': request_obj.patient_id,
-#                 'patient_name': request_obj.patient_name,
-#                 'birth_date': request_obj.birth_date.strftime('%Y-%m-%d') if request_obj.birth_date else None,
-#                 'sex': request_obj.sex,
-#                 'body_part': request_obj.body_part,
-#                 'modality': request_obj.modality,
-#                 'requesting_physician': request_obj.requesting_physician,
-#                 'request_datetime': request_obj.request_datetime.strftime('%Y-%m-%d %H:%M:%S') if request_obj.request_datetime else None,
-#                 'scheduled_exam_datetime': request_obj.scheduled_exam_datetime.strftime('%Y-%m-%d %H:%M:%S') if request_obj.scheduled_exam_datetime else None,
-#                 'interpreting_physician': request_obj.interpreting_physician,
-#                 'study_uid': request_obj.study_uid,
-#                 'accession_number': request_obj.accession_number,
-#                 'study_status': request_obj.study_status,
-#                 'report_status': request_obj.report_status,
-#             }
-#             work_list_data.append(data)
-        
-#         return Response({
-#             'status': 'success',
-#             'count': len(work_list_data),
-#             'data': work_list_data
-#         })
-        
-#     except Exception as e:
-#         print(f"WorkList API 에러: {e}")
-#         return Response({
-#             'status': 'error',
-#             'message': '데이터를 불러오는데 실패했습니다.'
-#         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# # 특정 StudyRequest 상세 조회 (WorkList에서 클릭시 사용) - 기존 API 유지
-# @api_view(['GET'])
-# def work_list_detail(request, pk):
-#     """
-#     특정 StudyRequest의 모든 상세 정보 반환
-#     """
-#     try:
-#         study_request = StudyRequest.objects.get(pk=pk)
-        
-#         # 모든 필드 데이터 반환
-#         data = {
-#             'id': study_request.id,
-#             'patient_id': study_request.patient_id,
-#             'patient_name': study_request.patient_name,
-#             'birth_date': study_request.birth_date.strftime('%Y-%m-%d') if study_request.birth_date else None,
-#             'sex': study_request.sex,
-#             'body_part': study_request.body_part,
-#             'modality': study_request.modality,
-#             'requesting_physician': study_request.requesting_physician
-#             # 'created_at': study_request.created_at.strftime('%Y-%m-%d %H:%M:%S') if study_request.created_at else None,
-#             # 'updated_at': study_request.updated_at.strftime('%Y-%m-%d %H:%M:%S') if study_request.updated_at else None,
-#             # 실제 모델의 모든 필드 추가
-#         }
-        
-#         return Response({
-#             'status': 'success',
-#             'data': data
-#         })
-        
-#     except StudyRequest.DoesNotExist:
-#         return Response({
-#             'status': 'error',
-#             'message': '해당 요청을 찾을 수 없습니다.'
-#         }, status=status.HTTP_404_NOT_FOUND)
-#     except Exception as e:
-#         return Response({
-#             'status': 'error',
-#             'message': '데이터를 불러오는데 실패했습니다.'
-#         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
 from datetime import datetime, date
 from .models import StudyRequest
 from .serializers import StudyRequestSerializer, WorklistSerializer
-from django.db.models import Q
+from django.db.models import Q, Count
 from medical_integration.models import PatientMapping 
+
 #영상 검사 요청
 class StudyRequestViewSet(viewsets.ModelViewSet):
     queryset = StudyRequest.objects.all()
@@ -627,21 +374,32 @@ def worklist_by_date_specific(request, year, month, day):
     
 # backend/worklists/views.py의 completed_studies_list 함수에 디버깅 추가
 
+# backend/worklists/views.py - 진료 완료된 환자 제외 버전
+
+# backend/worklists/views.py - 진료 완료된 환자 제외 버전
+
 @api_view(['GET'])
 def completed_studies_list(request):
     """
-    RealDicomViewer용 - 진료실에 배정된 환자 중 검사상태가 완료된 검사 목록 반환
-    ✅ 진료실 배정 조건 추가
+    RealDicomViewer용 - 오늘 날짜에 진료실에 현재 배정되어 있으면서 검사상태가 완료된 검사 목록 반환
+    ✅ 오늘 날짜 조건 추가
+    ✅ 현재 진료실에 배정되어 있는 환자만 (과거 배정 이력 제외)
+    ✅ 진료 완료된 환자 제외 (status='complete' 제외)
     ✅ DICOM 업로드 여부와 관계없이 검사상태만 완료되면 목록에 표시
     ✅ 리포트상태는 확인하지 않음
     ✅ 중복 PatientMapping 처리
     """
     try:
         print("=" * 50)
-        print("🚀 completed_studies_list API 호출됨 (진료실 배정 조건 포함)")
+        print("🚀 completed_studies_list API 호출됨 (오늘 + 현재 진료실 배정 + 진료 미완료)")
         print(f"📡 요청 메서드: {request.method}")
         print(f"📡 요청 경로: {request.path}")
         print("=" * 50)
+        
+        # 🔥 오늘 날짜 계산
+        from django.utils import timezone
+        today = timezone.localdate()
+        print(f"📅 오늘 날짜: {today}")
         
         # 검사완료 상태 정의
         study_completed_statuses = [
@@ -653,29 +411,87 @@ def completed_studies_list(request):
 
         print(f"🔍 검색할 study 상태: {study_completed_statuses}")
 
-        # 🆕 1단계: 진료실에 배정된 환자들의 patient_id 목록 가져오기
-        assigned_patient_mappings = PatientMapping.objects.filter(
-            assigned_room__isnull=False,  # 진료실이 배정된 환자만
+        # 🆕 1단계: 오늘 날짜에 생성되고, 현재 진료실에 배정되어 있지만 진료가 완료되지 않은 환자들
+        today_assigned_but_not_completed_mappings = PatientMapping.objects.filter(
+            created_date__date=today,  # 🔥 오늘 날짜에 생성된 매핑만
+            assigned_room__isnull=False,  # 🔥 진료실이 배정된 환자만 (null 제외)
             is_active=True,
             mapping_type='IDENTIFIER_BASED'
+        ).exclude(
+            status='complete'  # 🔥 진료 완료된 환자 제외
         ).values_list('patient_identifier', flat=True).distinct()  # 중복 제거
 
-        assigned_patient_ids = list(assigned_patient_mappings)
-        print(f"🏥 진료실에 배정된 환자 수: {len(assigned_patient_ids)}명")
+        assigned_patient_ids = list(today_assigned_but_not_completed_mappings)
+        print(f"🏥 오늘 생성되고 진료실에 배정되었지만 진료 미완료 환자 수: {len(assigned_patient_ids)}명")
         print(f"🔍 배정된 환자 ID들: {assigned_patient_ids[:5]}{'...' if len(assigned_patient_ids) > 5 else ''}")
 
+        # 🔥 디버깅: 전체 매핑 현황 확인
+        total_today_mappings = PatientMapping.objects.filter(
+            created_date__date=today,
+            mapping_type='IDENTIFIER_BASED',
+            is_active=True
+        ).count()
+        
+        total_assigned_today = PatientMapping.objects.filter(
+            created_date__date=today,
+            assigned_room__isnull=False,
+            mapping_type='IDENTIFIER_BASED',
+            is_active=True
+        ).count()
+        
+        completed_today = PatientMapping.objects.filter(
+            created_date__date=today,
+            assigned_room__isnull=False,
+            mapping_type='IDENTIFIER_BASED',
+            is_active=True,
+            status='complete'
+        ).count()
+        
+        print(f"📊 오늘 매핑 현황:")
+        print(f"  - 전체 오늘 매핑: {total_today_mappings}개")
+        print(f"  - 오늘 진료실 배정: {total_assigned_today}개")
+        print(f"  - 오늘 진료 완료: {completed_today}개")
+        print(f"  - 오늘 진료실 배정 + 진료 미완료: {len(assigned_patient_ids)}개")
+
+        # 진료실 미배정 환자들 로그 확인 (오늘 날짜 기준)
+        unassigned_patient_mappings = PatientMapping.objects.filter(
+            created_date__date=today,  # 🔥 오늘 날짜 조건 추가
+            assigned_room__isnull=True,  # 🔥 진료실이 배정되지 않은 환자들
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED'
+        ).values_list('patient_identifier', flat=True).distinct()
+        
+        unassigned_patient_ids = list(unassigned_patient_mappings)
+        print(f"🚫 오늘 진료실 미배정 환자 수: {len(unassigned_patient_ids)}명 (제외됨)")
+        print(f"🔍 미배정 환자 ID들: {unassigned_patient_ids[:5]}{'...' if len(unassigned_patient_ids) > 5 else ''}")
+
+        # 완료된 환자들도 로그로 확인 (오늘 날짜 기준)
+        completed_patient_mappings = PatientMapping.objects.filter(
+            created_date__date=today,  # 🔥 오늘 날짜 조건 추가
+            assigned_room__isnull=False,
+            is_active=True,
+            mapping_type='IDENTIFIER_BASED',
+            status='complete'  # 진료 완료된 환자들
+        ).values_list('patient_identifier', flat=True).distinct()
+        
+        completed_patient_ids = list(completed_patient_mappings)
+        print(f"🏁 오늘 진료 완료된 환자 수: {len(completed_patient_ids)}명 (제외됨)")
+        print(f"🔍 완료된 환자 ID들: {completed_patient_ids[:5]}{'...' if len(completed_patient_ids) > 5 else ''}")
+
         if not assigned_patient_ids:
-            print("⚠️ 진료실에 배정된 환자가 없음")
+            print("⚠️ 오늘 날짜에 진료실에 배정되었지만 진료가 완료되지 않은 환자가 없음")
             return Response({
                 'status': 'success',
-                'message': '진료실에 배정된 환자가 없습니다.',
+                'message': '오늘 날짜에 진료실에 배정되었지만 진료가 완료되지 않은 환자가 없습니다.',
                 'count': 0,
                 'data': [],
                 'statistics': {
                     'total_completed': 0,
                     'with_dicom': 0,
                     'without_dicom': 0,
-                    'assigned_patients': 0
+                    'assigned_patients': 0,
+                    'excluded_completed_patients': len(completed_patient_ids),
+                    'excluded_unassigned_patients': len(unassigned_patient_ids)
                 }
             })
 
@@ -683,14 +499,14 @@ def completed_studies_list(request):
         total_studies = StudyRequest.objects.count()
         print(f"📊 전체 StudyRequest 개수: {total_studies}")
 
-        # 🆕 2단계: 진료실에 배정된 환자 중 검사상태가 완료된 항목만 조회
+        # 🆕 2단계: 오늘 날짜에 진료실에 배정되고 진료 미완료인 환자 중 검사상태가 완료된 항목만 조회
         completed_studies = StudyRequest.objects.filter(
             study_status__in=study_completed_statuses,
-            patient_id__in=assigned_patient_ids  # 🔥 진료실 배정 조건 추가
+            patient_id__in=assigned_patient_ids  # 🔥 오늘 + 진료 미완료 + 진료실 배정 조건
         ).order_by('-request_datetime')
 
         completed_count = completed_studies.count()
-        print(f"📊 진료실 배정 + 검사완료 상태인 검사 개수: {completed_count}")
+        print(f"📊 오늘 진료실 배정 + 검사완료 + 진료미완료 상태인 검사 개수: {completed_count}")
 
         # 각 상태별 개수 확인 (디버깅용)
         for status_name in study_completed_statuses:
@@ -698,7 +514,7 @@ def completed_studies_list(request):
                 study_status=status_name,
                 patient_id__in=assigned_patient_ids
             ).count()
-            print(f"  - study_status='{status_name}' + 진료실 배정: {count}개")
+            print(f"  - study_status='{status_name}' + 오늘 진료실 배정 + 진료미완료: {count}개")
 
         # study_uid 통계 (참고용)
         with_uid_count = completed_studies.exclude(
@@ -706,54 +522,63 @@ def completed_studies_list(request):
         ).count()
         without_uid_count = completed_count - with_uid_count
         
-        print(f"📊 진료실배정+검사완료 중 DICOM 있음: {with_uid_count}개")
-        print(f"📊 진료실배정+검사완료 중 DICOM 없음: {without_uid_count}개")
+        print(f"📊 진료실배정+검사완료+진료미완료 중 DICOM 있음: {with_uid_count}개")
+        print(f"📊 진료실배정+검사완료+진료미완료 중 DICOM 없음: {without_uid_count}개")
 
         if completed_count == 0:
-            print("⚠️ 진료실에 배정된 환자 중 검사완료된 항목이 없음")
+            print("⚠️ 진료실에 배정되었지만 진료 미완료 환자 중 검사완료된 항목이 없음")
             return Response({
                 'status': 'success',
-                'message': '진료실에 배정된 환자 중 검사가 완료된 환자가 없습니다.',
+                'message': '진료실에 배정되었지만 진료가 완료되지 않은 환자 중 검사가 완료된 환자가 없습니다.',
                 'count': 0,
                 'data': [],
                 'statistics': {
                     'total_completed': 0,
                     'with_dicom': 0,
                     'without_dicom': 0,
-                    'assigned_patients': len(assigned_patient_ids)
+                    'assigned_patients': len(assigned_patient_ids),
+                    'excluded_completed_patients': len(completed_patient_ids)
                 }
             })
 
         # 🆕 3단계: 진료실 정보를 포함한 데이터 구성
         completed_data = []
         for study in completed_studies:
-            # 🔥 해당 환자의 진료실 정보 가져오기 (중복 처리)
+            # 🔥 해당 환자의 오늘 날짜 진료실 정보 가져오기 (중복 처리 + 진료 완료 상태 확인)
             try:
-                # 가장 최근에 업데이트된 매핑 정보 사용
+                # 🔥 오늘 생성된 가장 최근 매핑 정보 사용 (진료 완료되지 않은 것만)
                 patient_mapping = PatientMapping.objects.filter(
                     patient_identifier=study.patient_id,
+                    created_date__date=today,  # 🔥 오늘 날짜 조건 추가
                     is_active=True,
                     mapping_type='IDENTIFIER_BASED',
-                    assigned_room__isnull=False  # 진료실이 배정된 것만
+                    assigned_room__isnull=False  # 🔥 진료실이 배정된 것만 (null 제외)
+                ).exclude(
+                    status='complete'  # 🔥 진료 완료된 것 제외
                 ).order_by('-last_sync').first()  # 가장 최근 업데이트된 것
                 
-                if patient_mapping:
+                if patient_mapping and patient_mapping.assigned_room is not None:
                     assigned_room = patient_mapping.assigned_room
                     room_status = patient_mapping.status
+                    
+                    # 진료 완료 상태 체크 (이중 확인)
+                    if room_status == 'complete':
+                        print(f"⚠️ 환자 {study.patient_id}는 진료 완료 상태이므로 제외됨")
+                        continue  # 이 환자는 건너뛰기
+                        
                 else:
-                    assigned_room = None
-                    room_status = 'unknown'
-                    print(f"⚠️ 환자 {study.patient_id}의 진료실 매핑 정보를 찾을 수 없음")
+                    # 🔥 오늘 날짜에 진료실이 배정되지 않았거나 매핑 정보가 없는 경우
+                    print(f"🚫 환자 {study.patient_id}는 오늘 진료실이 배정되지 않았거나 매핑 정보가 없음 (제외)")
+                    continue  # 이 환자는 건너뛰기
                     
             except Exception as e:
                 print(f"❌ 환자 {study.patient_id} 매핑 조회 에러: {e}")
-                assigned_room = None
-                room_status = 'error'
+                continue  # 에러 발생 시 이 환자는 건너뛰기
 
             # study_uid가 없는 경우에도 목록에 포함 (임시 UID 생성)
             study_uid_display = study.study_uid if study.study_uid else f"temp_uid_{study.id}"
             
-            print(f"  ✅ 완료된 검사: {study.patient_name} - {study.modality} - 진료실: {assigned_room}번 - UID: {study_uid_display}")
+            print(f"  ✅ 오늘 진료 미완료 검사: {study.patient_name} - {study.modality} - 진료실: {assigned_room}번 - 상태: {room_status} - UID: {study_uid_display}")
             
             data = {
                 'id': study.id,
@@ -774,7 +599,7 @@ def completed_studies_list(request):
                 'completion_date': study.request_datetime.strftime('%Y-%m-%d') if study.request_datetime else None,
                 # 🆕 진료실 정보 추가
                 'assigned_room': assigned_room,
-                'room_status': room_status,
+                'room_status': room_status,  # 'complete'가 아닌 상태만 포함됨
                 # DICOM 이미지 존재 여부 플래그
                 'has_dicom_images': bool(study.study_uid and study.study_uid.strip()),
             }
@@ -783,17 +608,19 @@ def completed_studies_list(request):
         response_data = {
             'status': 'success',
             'count': len(completed_data),
-            'message': f'진료실에 배정된 환자 중 {len(completed_data)}건의 완료된 검사를 찾았습니다. (DICOM 있음: {with_uid_count}건, 없음: {without_uid_count}건)',
+            'message': f'오늘 날짜에 진료실에 배정되었지만 진료가 완료되지 않은 환자 중 {len(completed_data)}건의 완료된 검사를 찾았습니다. (DICOM 있음: {with_uid_count}건, 없음: {without_uid_count}건)',
             'data': completed_data,
             'statistics': {
-                'total_completed': completed_count,
-                'with_dicom': with_uid_count,
-                'without_dicom': without_uid_count,
-                'assigned_patients': len(assigned_patient_ids)
+                'total_completed': len(completed_data),  # 실제 반환된 데이터 개수
+                'with_dicom': sum(1 for d in completed_data if d['has_dicom_images']),
+                'without_dicom': sum(1 for d in completed_data if not d['has_dicom_images']),
+                'assigned_patients': len(assigned_patient_ids),
+                'excluded_completed_patients': len(completed_patient_ids),
+                'excluded_unassigned_patients': len(unassigned_patient_ids)  # 🔥 제외된 진료실 미배정 환자 수
             }
         }
         
-        print(f"✅ 응답 데이터: {len(completed_data)}건")
+        print(f"✅ 최종 응답 데이터: {len(completed_data)}건 (오늘 진료 완료 {len(completed_patient_ids)}명, 오늘 진료실 미배정 {len(unassigned_patient_ids)}명 제외)")
         print("=" * 50)
         
         return Response(response_data)
@@ -1210,5 +1037,83 @@ def sync_pacs_patient_ids(request):
         return Response({
             'status': 'error',
             'message': 'PACS Patient ID 동기화 실패',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# 의사 profile 카드
+@api_view(['GET'])
+def doctor_dashboard_stats(request):
+    """
+    판독의별 대시보드 통계 API
+    ProfileCard에서 사용할 실시간 통계 데이터 반환
+    """
+    try:
+        # 요청 파라미터에서 판독의 이름 가져오기 (디폴트: 심보람)
+        doctor_name = request.GET.get('doctor_name', '심보람')
+        
+        print(f"📊 판독의별 통계 요청: {doctor_name}")
+        
+        # 오늘 날짜
+        today = date.today()
+        
+        # 해당 판독의의 오늘 검사 요청들 (interpreting_physician 기준)
+        today_studies = StudyRequest.objects.filter(
+            interpreting_physician=doctor_name,
+            request_datetime__date=today
+        )
+        
+        # 🔥 1. 금일 총 영상 검사 (오늘 요청된 모든 검사)
+        today_total = today_studies.count()
+        
+        # 🔥 2. 검사 현황 (검사완료 / 전체 검사)
+        exam_completed = today_studies.filter(
+            study_status__in=['검사완료', 'completed', 'COMPLETED', 'Completed']
+        ).count()
+        
+        exam_total = today_studies.count()  # 심보람의 오늘 전체 검사
+        
+        # 🔥 3. 레포트 현황 (레포트완료 / 전체 레포트)
+        report_completed = today_studies.filter(
+            report_status__in=['작성완료', 'completed', 'COMPLETED', 'Completed']
+        ).count()
+        
+        report_total = today_studies.count()  # 심보람의 오늘 전체 레포트
+        
+        # 📊 디버깅 로그
+        print(f"📈 {doctor_name} 통계:")
+        print(f"  금일 총 검사: {today_total}")
+        print(f"  검사완료: {exam_completed}, 검사전체: {exam_total}")
+        print(f"  레포트완료: {report_completed}, 레포트전체: {report_total}")
+        
+        # 🎯 응답 데이터 구성
+        response_data = {
+            'status': 'success',
+            'doctor_name': doctor_name,
+            'date': today.strftime('%Y-%m-%d'),
+            'stats': {
+                'today_total': today_total,          # 금일 총 영상검사
+                'exam_completed': exam_completed,    # 검사완료
+                'exam_total': exam_total,            # 검사전체
+                'report_completed': report_completed, # 레포트완료
+                'report_total': report_total          # 레포트전체
+            },
+            'display': {
+                'today_total_display': f"{today_total}",
+                'exam_status_display': f"{exam_completed}/{exam_total}",      # "1/1" 형태
+                'report_status_display': f"{report_completed}/{report_total}"  # "0/1" 형태
+            }
+        }
+        
+        return Response(response_data)
+        
+    except Exception as e:
+        print(f"❌ 판독의 통계 API 에러: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return Response({
+            'status': 'error',
+            'message': '판독의 통계 데이터를 불러오는데 실패했습니다.',
             'details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

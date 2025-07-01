@@ -14,7 +14,6 @@ const UnifiedPatientStatus = () => {
   const [assignedPatients, setAssignedPatients] = useState({});
   const [completedPatients, setCompletedPatients] = useState([]);
   const [receptionList, setReceptionList] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
@@ -246,28 +245,23 @@ const UnifiedPatientStatus = () => {
     );
   };
 
-  // 환자 배정 처리 - 기존 코드 그대로
-  const handleAssign = async (roomNumber) => {
-    if (!selectedPatient) {
-      alert('환자를 먼저 선택해주세요.');
-      return;
-    }
+  // 🔥 환자 배정 처리 - 간소화된 버전 (카드에서만 사용)
+  const handleAssign = async (patient, roomNumber) => {
     if (assignedPatients[roomNumber]) {
       alert(`진료실 ${roomNumber}번에 이미 환자가 배정되어 있습니다.`);
       return;
     }
 
-    setActionLoading(selectedPatient.mapping_id);
+    setActionLoading(patient.mapping_id);
 
     try {
       const response = await axios.post(`${API_BASE}assign-room/`, {
-        mapping_id: selectedPatient.mapping_id,
+        mapping_id: patient.mapping_id,
         room: roomNumber
       });
 
       if (response.data.success) {
-        alert(`${selectedPatient.name || selectedPatient.display}님이 진료실 ${roomNumber}번에 배정되었습니다.`);
-        setSelectedPatient(null);
+        alert(`${patient.name || patient.display}님이 진료실 ${roomNumber}번에 배정되었습니다.`);
         fetchAllData();
       } else {
         throw new Error(response.data.error || '배정에 실패했습니다.');
@@ -292,8 +286,7 @@ const UnifiedPatientStatus = () => {
         {filteredWaiting.map((patient, index) => (
           <div 
             key={patient.mapping_id || index}
-            className={`patient-status-card waiting ${selectedPatient?.mapping_id === patient.mapping_id ? 'selected' : ''}`}
-            onClick={() => setSelectedPatient(patient)}
+            className="patient-status-card waiting"
           >
             <div className="status-card-header">
               <div className="status-card-name">{patient.display || patient.name}</div>
@@ -308,22 +301,22 @@ const UnifiedPatientStatus = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleAssign(1);
+                  handleAssign(patient, 1);
                 }}
                 disabled={actionLoading === patient.mapping_id || !!assignedPatients[1]}
                 className="action-btn primary"
               >
-                1번실 배정
+                {!!assignedPatients[1] ? '1번실 사용중' : '1번실 배정'}
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleAssign(2);
+                  handleAssign(patient, 2);
                 }}
                 disabled={actionLoading === patient.mapping_id || !!assignedPatients[2]}
                 className="action-btn primary"
               >
-                2번실 배정
+                {!!assignedPatients[2] ? '2번실 사용중' : '2번실 배정'}
               </button>
               <button
                 onClick={(e) => {
@@ -379,31 +372,30 @@ const UnifiedPatientStatus = () => {
   };
 
   // 🔥 완료된 환자 목록 렌더링 - 카드 스타일로 업데이트
-  // 🔥 완료된 환자 목록 렌더링 - 카드 스타일로 업데이트
-const renderCompletedList = () => {
- const filteredCompleted = filterPatients(completedPatients);
+  const renderCompletedList = () => {
+    const filteredCompleted = filterPatients(completedPatients);
 
- return (
-   <>
-     {filteredCompleted.map((patient, index) => (
-       <div 
-         key={patient.mapping_id || index}
-         className="patient-status-card completed"
-       >
-         <div className="status-card-header">
-           <div className="status-card-name">{cleanPatientName(patient.name || patient.display)}</div>
-           <div className="status-card-meta">
-             {patient.gender === 'M' ? '남성' : '여성'} | {patient.age}세
-             <br />
-             완료시간: {patient.completion_time ? new Date(patient.completion_time).toLocaleTimeString() : 
-                       patient.completed_at ? new Date(patient.completed_at).toLocaleTimeString() : '-'}
-           </div>
-         </div>
-       </div>
-     ))}
-   </>
- );
-};
+    return (
+      <>
+        {filteredCompleted.map((patient, index) => (
+          <div 
+            key={patient.mapping_id || index}
+            className="patient-status-card completed"
+          >
+            <div className="status-card-header">
+              <div className="status-card-name">{cleanPatientName(patient.name || patient.display)}</div>
+              <div className="status-card-meta">
+                {patient.gender === 'M' ? '남성' : '여성'} | {patient.age}세
+                <br />
+                완료시간: {patient.completion_time ? new Date(patient.completion_time).toLocaleTimeString() : 
+                          patient.completed_at ? new Date(patient.completed_at).toLocaleTimeString() : '-'}
+              </div>
+            </div>
+          </div>
+        ))}
+      </>
+    );
+  };
 
   return (
     <div style={{ 
@@ -621,48 +613,6 @@ const renderCompletedList = () => {
             </div>
           </div>
         </div>
-
-        {/* 선택된 환자 정보 및 배정 버튼 */}
-        {selectedPatient && (
-          <div style={{
-            background: 'white',
-            padding: '15px',
-            borderBottom: '1px solid #e0e6ed'
-          }}>
-            <h4>선택된 환자: {selectedPatient.name || selectedPatient.display}</h4>
-            <p>ID: {selectedPatient.patient_identifier} | {selectedPatient.gender === 'M' ? '남성' : '여성'} | {selectedPatient.age}세</p>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                onClick={() => handleAssign(1)}
-                disabled={!!assignedPatients[1] || actionLoading}
-                style={{
-                  padding: '8px 16px',
-                  background: assignedPatients[1] ? '#gray' : '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: assignedPatients[1] ? 'not-allowed' : 'pointer'
-                }}
-              >
-                진료실 1번 배정 {assignedPatients[1] ? '(사용중)' : ''}
-              </button>
-              <button 
-                onClick={() => handleAssign(2)}
-                disabled={!!assignedPatients[2] || actionLoading}
-                style={{
-                  padding: '8px 16px',
-                  background: assignedPatients[2] ? '#gray' : '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: assignedPatients[2] ? 'not-allowed' : 'pointer'
-                }}
-              >
-                진료실 2번 배정 {assignedPatients[2] ? '(사용중)' : ''}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 상태별 환자 리스트 */}
         <div className="status-lists-container">

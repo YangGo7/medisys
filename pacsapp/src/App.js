@@ -1,4 +1,4 @@
-// pacsapp/src/App.js - pacsdocs 라우트 추가
+// pacsapp/src/App.js - ImagePopup 추가
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import PacsPage from './pages/PACS/PacsPage';
 import PacsDocs from './pages/PacsDocs';
 import OHIFViewer from './pages/OHIFViewer'; // 🆕 OHIF 추가
+import ImagePopup from './components/home/ImagePopup'; // 🆕 이미지 팝업 추가
 import { DoctorProvider } from './contexts/DoctorContext';
 import './App.css';
 import './utils/emergencyFix';

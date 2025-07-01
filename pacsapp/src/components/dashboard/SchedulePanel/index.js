@@ -259,7 +259,7 @@ const SchedulePanel = ({
       />
       
       {/* 🔍 디버그 정보 */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <div style={{ 
           position: 'fixed', 
           bottom: '60px', 
@@ -276,7 +276,7 @@ const SchedulePanel = ({
           ).join(', ')} | 
           원본스케줄: {hasScheduleData ? 'O' : 'X'}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

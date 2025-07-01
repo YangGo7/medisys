@@ -209,7 +209,7 @@ export const getAnnotationsForInstance = async (sopInstanceUID) => {
  */
 export const getReportForStudy = async (studyUid) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dr-reports/study/${studyUid}/`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/${studyUid}/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

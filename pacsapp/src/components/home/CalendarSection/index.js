@@ -1352,28 +1352,6 @@ const CalendarSection = () => {
           )}
         </div>
       </div>
-      
-      {/* 개발 모드에서 디버깅 정보 표시 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '10px',
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '0.5rem',
-          borderRadius: '0.25rem',
-          fontSize: '0.75rem',
-          maxWidth: '300px',
-          zIndex: 1000
-        }}>
-          <div>Month Schedules Keys: {Object.keys(monthSchedules).join(', ')}</div>
-          <div>Selected Date: {selectedDate.getFullYear()}-{(selectedDate.getMonth() + 1).toString().padStart(2, '0')}</div>
-          <div>Selected Schedules: {selectedDateSchedules ? 'Object with ' + ((selectedDateSchedules.common_schedules?.length || 0) + (selectedDateSchedules.ris_schedules?.length || 0) + (selectedDateSchedules.personal_schedules?.length || 0)) + ' total' : 'None'}</div>
-          <div>Current View: {scheduleView}</div>
-          <div>Current Schedules: {getCurrentSchedules().length}</div>
-        </div>
-      )}
     </div>
   );
 };
