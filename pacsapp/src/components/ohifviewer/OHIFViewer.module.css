@@ -239,3 +239,121 @@
 .errorRetryButton:hover {
   background: var(--color-primary-dark);
 }
+
+.panelToggleButtons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: var(--z-ai, 200);
+  pointer-events: auto;
+}
+
+.panelToggleButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 80px;
+}
+
+.panelToggleButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.panelToggleButton.active {
+  background: linear-gradient(135deg, #42a5f5 0%, #478ed1 100%);
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.panelToggleButton:disabled {
+  background: rgba(158, 158, 158, 0.3);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 기존 panelSection 스타일 개선 (있다면 기존 것과 병합) */
+.panelSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 10px;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* SimCLR 관련 z-index */
+.ohifViewerContainer {
+  --z-simclr: 350;
+}
+
+/* 패널 전환 애니메이션 */
+.panelSection > * {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .panelToggleButtons {
+    top: 10px;
+    right: 10px;
+    gap: 5px;
+  }
+  
+  .panelToggleButton {
+    padding: 6px 8px;
+    font-size: 10px;
+    min-width: 60px;
+  }
+  
+  .panelSection {
+    padding: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panelToggleButtons {
+    flex-direction: column;
+    width: 70px;
+  }
+  
+  .panelToggleButton {
+    font-size: 9px;
+    padding: 4px 6px;
+  }
+}

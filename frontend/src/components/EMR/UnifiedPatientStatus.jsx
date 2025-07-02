@@ -818,7 +818,7 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
               />
             </div>
 
-            <div className="form-group">
+            {/* <div className="form-group">
               <label className="form-label">중간 이름:</label>
               <input
                 type="text"
@@ -827,7 +827,7 @@ const PatientRegistrationForm = ({ onClose, onPatientCreated }) => {
                 placeholder="중간 이름 (선택사항)"
                 className="form-input"
               />
-            </div>
+            </div> */}
 
             <div className="form-group">
               <label className="form-label">성별 *:</label>

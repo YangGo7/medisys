@@ -3,6 +3,7 @@
 
 from django.urls import path
 from . import views
+from . import simclr_views
 from .views import (
     # 기존 imports
     get_all_openmrs_patients,
@@ -33,10 +34,14 @@ from .views import (
 app_name = 'medical_integration'
 
 urlpatterns = [
-    # 시스템 상태
+    
+    # 통합 분석 엔드포인트 (기존 + SimCLR)
     path('health/', views.health_check, name='health_check'),
     path('test-connections/', views.test_all_connections, name='test_connections'),
 
+    path('api/analysis/simclr/', simclr_views.simclr_patch_analysis, name='simclr_analysis'),
+    path('api/analysis/simclr/status/', simclr_views.simclr_model_status, name='simclr_status'),
+    path('api/analysis/simclr/reload/', simclr_views.reload_simclr_model, name='simclr_reload'),
     # OCS 매핑관련
     path('openmrs/patients/map/', views.list_openmrs_patients_map, name='list_openmrs_patients_map'),
     path('openmrs/providers/map/', views.list_openmrs_providers_map, name='list_openmrs_providers_map'),
