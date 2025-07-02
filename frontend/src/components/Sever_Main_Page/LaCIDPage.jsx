@@ -138,6 +138,64 @@ const LaCIDPage = () => {
         '시스템 다운타임 0.01% 유지',
         '모바일 반응형 웹 완성도 100%'
       ]
+    },
+    {
+      id: 5,
+      name: '이나경',
+      role: '팀원',
+      desc: 'MEMO5',
+      initial: '이',
+      email: 'nayoung.lee@lacid.ai',
+      phone: '010-4567-8901',
+      department: '소프트웨어개발팀',
+      experience: '3년차',
+      education: '고려대학교 컴퓨터학과 학사',
+      goals: [
+        '사용자 친화적 인터페이스 개발',
+        '시스템 안정성 99.9% 달성',
+        '글로벌 서비스 플랫폼 구축'
+      ],
+      responsibilities: [
+        '웹 플랫폼 프론트엔드 개발',
+        'UI/UX 디자인 및 구현',
+        '사용자 경험 분석 및 개선',
+        '시스템 통합 테스트'
+      ],
+      skills: ['React', 'JavaScript', 'Node.js', 'UI/UX Design', 'System Integration'],
+      achievements: [
+        '사용자 만족도 95% 달성',
+        '시스템 다운타임 0.01% 유지',
+        '모바일 반응형 웹 완성도 100%'
+      ]
+    },
+    {
+      id: 6,
+      name: '장소연',
+      role: '팀원',
+      desc: 'MEMO6',
+      initial: '장',
+      email: 'nayoung.lee@lacid.ai',
+      phone: '010-4567-8901',
+      department: '소프트웨어개발팀',
+      experience: '3년차',
+      education: '고려대학교 컴퓨터학과 학사',
+      goals: [
+        '사용자 친화적 인터페이스 개발',
+        '시스템 안정성 99.9% 달성',
+        '글로벌 서비스 플랫폼 구축'
+      ],
+      responsibilities: [
+        '웹 플랫폼 프론트엔드 개발',
+        'UI/UX 디자인 및 구현',
+        '사용자 경험 분석 및 개선',
+        '시스템 통합 테스트'
+      ],
+      skills: ['React', 'JavaScript', 'Node.js', 'UI/UX Design', 'System Integration'],
+      achievements: [
+        '사용자 만족도 95% 달성',
+        '시스템 다운타임 0.01% 유지',
+        '모바일 반응형 웹 완성도 100%'
+      ]
     }
   ];
 
@@ -216,6 +274,7 @@ const LaCIDPage = () => {
           <div className="container">
             <div className="hero-content">
               <h2>
+                <br/>
                 정밀 의료를 위한
                 <span className="block gradient-text">CDSS</span>
               </h2>
@@ -373,11 +432,11 @@ const LaCIDPage = () => {
               <p><strong>LaCID Co., Ltd.</strong></p>
               <div className="contact-item">
                 <MapPin className="w-4 h-4" />
-                <span>서울 강남구 테헤란로 123</span>
+                <span>대전시 서구 계롱로 491번길 86</span>
               </div>
               <div className="contact-item">
                 <Phone className="w-4 h-4" />
-                <span>02-1234-5678</span>
+                <span>042-1234-5678</span>
               </div>
               <div className="contact-item">
                 <Mail className="w-4 h-4" />
@@ -389,7 +448,7 @@ const LaCIDPage = () => {
               <h4>연구소</h4>
               <div className="contact-item">
                 <MapPin className="w-4 h-4" />
-                <span>대전 유성구 대학로 291</span>
+                <span>대전시 서구 계롱로 491번길 86 4층</span>
               </div>
               <div className="contact-item">
                 <Phone className="w-4 h-4" />
@@ -432,7 +491,7 @@ const LaCIDPage = () => {
           
           <div className="footer-bottom">
             <p>&copy; 2025 LaCID Co., Ltd. All rights reserved.</p>
-            <p>대표이사: 김영수 | 사업자등록번호: 123-45-67890</p>
+            <p>대표이사: 김채윤 | 사업자등록번호: 123-45-67890</p>
           </div>
         </div>
       </footer>

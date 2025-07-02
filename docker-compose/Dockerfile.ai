@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libxcb1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
-
+    
 # 기본 Python 패키지 설치
 RUN pip install --no-cache-dir \
     numpy \
@@ -23,7 +23,6 @@ RUN pip install --no-cache-dir \
     flask_cors \
     requests \
     ultralytics
-
 
 # PyTorch 패키지 설치 (CPU 버전)
 RUN pip install --no-cache-dir \

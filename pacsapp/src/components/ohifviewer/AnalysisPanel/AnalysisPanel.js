@@ -1,5 +1,6 @@
-// src/components/OHIFViewer/AnalysisPanel/AnalysisPanel.js
-import React from 'react';
+// src/components/OHIFViewer/AnalysisPanel/AnalysisPanel.js (SimCLR 추가 버전)
+
+import React, { useState, useCallback } from 'react'; // 🔥 useState, useCallback 추가
 import AnnotationTools from '../AnnotationTools/AnnotationTools';
 import styles from './AnalysisPanel.module.css';
 
@@ -44,6 +45,53 @@ const AnalysisPanel = ({
   onDeleteReport,
   onUpdateReportStatus
 }) => {
+  // 🔥 SimCLR 상태 추가
+  const [simclrResults, setSimclrResults] = useState(null);
+  const [isSimclrAnalyzing, setIsSimclrAnalyzing] = useState(false);
+  const [simclrError, setSimclrError] = useState(null);
+
+  // 🔥 SimCLR 분석 함수
+  const handleSimCLRAnalysis = useCallback(async () => {
+    if (!currentStudyUID) {
+      alert('스터디가 선택되지 않았습니다.');
+      return;
+    }
+
+    setIsSimclrAnalyzing(true);
+    setSimclrError(null);
+
+    try {
+      console.log('🧠 SimCLR 분석 시작:', currentStudyUID);
+
+      const response = await fetch('/api/analysis/simclr/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studyUID: currentStudyUID
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        console.log('✅ SimCLR 분석 성공:', data);
+        setSimclrResults(data);
+        alert(`SimCLR 분석 완료!\n이상도 점수: ${data.results.overall_anomaly_score.toFixed(3)}\n이상 패치: ${data.results.num_anomaly_patches}개`);
+      } else {
+        throw new Error(data.message || 'SimCLR 분석 실패');
+      }
+
+    } catch (error) {
+      console.error('❌ SimCLR 분석 실패:', error);
+      setSimclrError(error.message);
+      alert('SimCLR 분석 실패: ' + error.message);
+    } finally {
+      setIsSimclrAnalyzing(false);
+    }
+  }, [currentStudyUID]);
+
   // 🔥 현재 선택된 스터디 정보 가져오기
   const getCurrentStudy = () => {
     if (!currentStudyUID) return null;
@@ -176,7 +224,7 @@ const AnalysisPanel = ({
       )}
       
       {/* 🔥 분석 결과 없음 메시지 */}
-      {currentStudyUID && !analysisResults && !isStudyTransitioning && (
+      {currentStudyUID && !analysisResults && !simclrResults && !isStudyTransitioning && (
         <div className={styles.noAnalysisResults}>
           📊 이 스터디의 분석 결과가 없습니다.
           <div className={styles.noAnalysisResultsSubtext}>
@@ -193,7 +241,7 @@ const AnalysisPanel = ({
           <button 
             onClick={() => onAnalyzeYOLO()}
             className={`${styles.aiButtonLarge} ${styles.yoloButton}`}
-            disabled={!currentStudyUID || isStudyTransitioning}
+            disabled={!currentStudyUID || isStudyTransitioning || isSimclrAnalyzing}
           >
             🎯 YOLO 분석
           </button>
@@ -201,9 +249,22 @@ const AnalysisPanel = ({
           <button 
             onClick={() => onAnalyzeSSD()}
             className={`${styles.aiButtonLarge} ${styles.ssdButton}`}
-            disabled={!currentStudyUID || isStudyTransitioning}
+            disabled={!currentStudyUID || isStudyTransitioning || isSimclrAnalyzing}
           >
             🔍 SSD 분석
+          </button>
+
+          {/* 🔥 SimCLR 버튼 추가 */}
+          <button 
+            onClick={handleSimCLRAnalysis}
+            className={`${styles.aiButtonLarge} ${styles.simclrButton}`}
+            disabled={!currentStudyUID || isStudyTransitioning || isSimclrAnalyzing}
+          >
+            {isSimclrAnalyzing ? (
+              <>🔄 SimCLR 분석 중...</>
+            ) : (
+              <>🧠 SimCLR 분석</>
+            )}
           </button>
         </div>
         
@@ -232,6 +293,41 @@ const AnalysisPanel = ({
             ⚙️ 상태 확인
           </button>
         </div>
+
+        {/* 🔥 SimCLR 결과 표시 */}
+        {simclrResults && simclrResults.status === 'success' && (
+          <div className={styles.simclrResults}>
+            <h4 className={styles.resultsSectionHeader}>🧠 SimCLR 분석 결과:</h4>
+            <div className={styles.simclrMetrics}>
+              <div className={styles.simclrMetric}>
+                <strong>전체 이상도:</strong> {simclrResults.results.overall_anomaly_score.toFixed(3)}
+              </div>
+              <div className={styles.simclrMetric}>
+                <strong>신뢰도:</strong> {simclrResults.results.confidence.toFixed(1)}%
+              </div>
+              <div className={styles.simclrMetric}>
+                <strong>분석 패치:</strong> {simclrResults.results.num_patches}개
+              </div>
+              <div className={styles.simclrMetric}>
+                <strong>이상 패치:</strong> {simclrResults.results.num_anomaly_patches}개
+              </div>
+            </div>
+            <div className={`${styles.simclrDiagnosis} ${simclrResults.results.is_abnormal ? styles.abnormal : styles.normal}`}>
+              {simclrResults.results.is_abnormal ? (
+                <>⚠️ 이상 소견 감지됨</>
+              ) : (
+                <>✅ 정상 범위</>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 🔥 SimCLR 에러 표시 */}
+        {simclrError && (
+          <div className={styles.simclrError}>
+            ❌ SimCLR 오류: {simclrError}
+          </div>
+        )}
         
         {/* 분석 결과 표시 */}
         {analysisResults && (

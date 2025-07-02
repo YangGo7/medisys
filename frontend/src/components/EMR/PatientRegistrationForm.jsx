@@ -203,7 +203,7 @@ const PatientRegistrationForm = () => {
             />
           </div>
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label htmlFor="middleName" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               중간 이름:
             </label>
@@ -221,7 +221,7 @@ const PatientRegistrationForm = () => {
                 fontSize: '16px'
               }}
             />
-          </div>
+          </div> */}
 
           <div className="form-group">
             <label htmlFor="gender" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
