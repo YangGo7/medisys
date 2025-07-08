@@ -1,17 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import './SimulationPanel.css';
+import ShapContributionChart from "./ShapContributionChart";
 
-const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
+const SimulationPanel = ({ sampleId, testType, initialValues, statMax }) => {
   const [formValues, setFormValues] = useState(initialValues || {});
   const [prediction, setPrediction] = useState(null);
+  const [shapData, setShapData] = useState(null);
   const [loading, setLoading] = useState(false);
   const prevInitialJson = useRef("");
+
+  // ✅ 슬라이더 max값 초기 기준으로 고정
+  const computedMax = useMemo(() => {
+    const result = {};
+    for (const [key, val] of Object.entries(initialValues)) {
+      result[key] = Math.max(val * 2, 30);
+    }
+    return result;
+  }, [JSON.stringify(initialValues)]);
 
   useEffect(() => {
     const currentJson = JSON.stringify(initialValues);
     if (currentJson !== prevInitialJson.current) {
       setFormValues(initialValues);
+      setPrediction(null);
+      setShapData(null);
       prevInitialJson.current = currentJson;
     }
   }, [initialValues]);
@@ -23,12 +36,24 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
   const handleSimulate = async () => {
     setLoading(true);
     try {
+      const aliasMap = {
+        neutrophil: "Neutrophils",
+        lymphocyte: "Lymphocytes",
+        eosinophil: "Eosinophils",
+        platelet: "Platelet Count",
+        ddimer: "D-Dimer",
+        ntprobnp: "NT-proBNP",
+        pco2: "pCO2",
+        po2: "pO2",
+        ph: "pH"
+      };
+
       const components = Object.entries(formValues)
         .filter(([_, value]) => value !== null && value !== undefined && !isNaN(value))
         .map(([name, value]) => ({
-        component_name: name,
-        value: value.toString(),
-      }));
+          component_name: aliasMap[name.toLowerCase()] || name,
+          value: value.toString(),
+        }));
 
       const payload = {
         sample: sampleId,
@@ -44,12 +69,14 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
       );
 
       setPrediction(res.data.prediction_prob);
+      setShapData(res.data.shap_data);
     } catch (err) {
       console.error('❌ 시뮬레이션 요청 실패:', err);
     } finally {
       setLoading(false);
     }
   };
+
   if (!initialValues || Object.keys(initialValues).length === 0) {
     return <p>🔧 시뮬레이션 패널 준비 중입니다.</p>;
   }
@@ -62,7 +89,7 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
           <input
             type="range"
             min={0}
-            max={statMax[key] || 100}
+            max={computedMax[key] || 100}
             step={0.1}
             value={value}
             onChange={(e) => handleChange(key, parseFloat(e.target.value))}
@@ -96,6 +123,15 @@ const SimulationPanel = ({ sampleId, testType, initialValues, statMax  }) => {
           <p className="warning-text">
             ⚠️ 이 확률은 검사 수치만을 기반으로 계산되며, 실제 진단은 의료진의 종합적인 판단을 따라야 합니다.
           </p>
+        </div>
+      )}
+
+      {shapData && (
+        <div className="mt-4 bg-gray-100 p-3 rounded">
+          <h4 className="font-bold mb-2">📊 기여도 분석 결과</h4>
+          <ul className="text-sm">
+            <ShapContributionChart shapData={shapData} />
+          </ul>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-// // home/medical_system/pacsapp/src/components/dashboard/WorkListPanel/index.js
+// // src/components/dashboard/WorkListPanel/index.js
 
 // import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 // import FilterSection from './FilterSection';
@@ -74,6 +74,42 @@
 //     }
 //   }, [currentDate]);
 
+//   // 🔥 새로 추가: 레포트 관련 이벤트 리스너
+//   useEffect(() => {
+//     const handleReportSaved = (event) => {
+//       console.log('📡 레포트 저장 이벤트 수신:', event.detail);
+//       console.log('🔄 워크리스트 새로고침 실행 (레포트 저장)');
+//       loadWorklist(currentDate);
+//     };
+
+//     const handleReportStatusUpdated = (event) => {
+//       console.log('📡 레포트 상태 업데이트 이벤트 수신:', event.detail);
+//       console.log('🔄 워크리스트 새로고침 실행 (상태 업데이트)');
+//       loadWorklist(currentDate);
+//     };
+
+//     const handleDashboardRefresh = (event) => {
+//       console.log('📡 대시보드 새로고침 이벤트 수신:', event.detail);
+//       console.log('🔄 워크리스트 새로고침 실행 (대시보드)');
+//       loadWorklist(currentDate);
+//     };
+
+//     // 🔥 이벤트 리스너 등록
+//     window.addEventListener('reportSaved', handleReportSaved);
+//     window.addEventListener('reportStatusUpdated', handleReportStatusUpdated);
+//     window.addEventListener('dashboardRefresh', handleDashboardRefresh);
+
+//     console.log('📡 워크리스트 이벤트 리스너 등록 완료');
+
+//     // 🔥 정리 함수
+//     return () => {
+//       window.removeEventListener('reportSaved', handleReportSaved);
+//       window.removeEventListener('reportStatusUpdated', handleReportStatusUpdated);
+//       window.removeEventListener('dashboardRefresh', handleDashboardRefresh);
+//       console.log('📡 워크리스트 이벤트 리스너 해제 완료');
+//     };
+//   }, [currentDate, loadWorklist]);
+
 //   // ✅ prop으로 받은 selectedDate 변화 감지
 //   useEffect(() => {
 //     if (selectedDate && selectedDate !== currentDate) {
@@ -104,7 +140,7 @@
 //     }
 //   }, [onDateChange]);
 
-//   // ✅ ref 메서드 노출
+//   // ✅ ref 메서드 노출 - 🔥 새로고침 함수 강화
 //   useImperativeHandle(ref, () => ({
 //     refreshWorklist: () => {
 //       console.log('🔄 외부에서 워크리스트 새로고침 요청');
@@ -279,6 +315,9 @@
 //           {worklist.length > 0 && (
 //             <div>✅ 첫 번째 환자: <strong>{worklist[0]?.patientName}</strong></div>
 //           )}
+//           <div style={{color: '#94a3b8', marginTop: '0.5rem'}}>
+//             📡 이벤트 리스너: reportSaved, reportStatusUpdated, dashboardRefresh
+//           </div>
 //         </div>
 //       )} */}
 //     </div>
@@ -289,7 +328,11 @@
 
 // export default WorkListPanel;
 
+
+
+
 // src/components/dashboard/WorkListPanel/index.js
+
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import FilterSection from './FilterSection';
 import WorkListTable from './WorkListTable';
@@ -510,6 +553,24 @@ const WorkListPanel = forwardRef((props, ref) => {
     }
   }, [onDragStart]);
 
+  // 더블클릭 핸들러 (여기에 추가!)
+  const handleDoubleClick = useCallback((exam) => {
+    console.log('🖱️ 더블클릭된 환자:', exam);
+    
+    // 환자 ID 추출
+    const patientID = exam.patientId;
+    console.log('👤 환자 ID:', patientID);
+    
+    if (!patientID) {
+      console.error('❌ 환자 ID가 없습니다');
+      return;
+    }
+    
+    // 새창으로 뷰어 열기
+    const viewerUrl = `/viewer?patientID=${patientID}`;
+    window.open(viewerUrl, '_blank', 'width=1600,height=1000,scrollbars=yes,resizable=yes');
+  }, []);
+
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
     console.log('🔄 재시도 버튼 클릭');
@@ -580,6 +641,7 @@ const WorkListPanel = forwardRef((props, ref) => {
       <WorkListTable
         filteredWorklist={filteredWorklist}
         onDragStart={handleDragStart}
+        onDoubleClick={handleDoubleClick}
       />
       
       {/* ✅ 개발용 디버그 정보 */}

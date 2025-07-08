@@ -29,27 +29,27 @@ const LaCIDPage = () => {
       role: '팀장',
       desc: 'MEMO1',
       initial: '김',
-      email: 'chaeyun.kim@lacid.ai',
+      email: 'chaeyoon.kim@lacid.ai',
       phone: '010-1234-5678',
-      department: '연구개발본부',
-      experience: '5년차',
-      education: '서울대학교 컴퓨터공학과 석사',
+      department: '미래융합교육원',
+      experience: '0년차',
+      education: '미래융합교육원',
       goals: [
-        '폐 질환 진단 AI 모델의 정확도 98% 이상 달성',
-        '국내외 의료기관과의 파트너십 확대',
+        '정승처럼 벌어 수전노 처럼 살겠습니다',
+        'money more money',
         '차세대 의료 AI 플랫폼 구축 선도'
       ],
       responsibilities: [
         '전체 프로젝트 기획 및 관리',
         'AI 모델 개발 총괄',
-        '임상 파트너십 구축',
+        '클라우드 환경 구축',
         '팀원 멘토링 및 기술 지도'
       ],
-      skills: ['Python', 'TensorFlow', 'PyTorch', 'Medical Imaging', 'Project Management'],
+      skills: ['Python', 'TensorFlow', 'PyTorch', 'Project Management'],
       achievements: [
-        '2024년 우수 AI 연구상 수상',
-        '국제 의료 AI 학회 논문 3편 게재',
-        'SCI급 저널 논문 5편 발표'
+        '2024년 우수 AI 연구상 수상 하고 싶습니다',
+        '국제 의료 AI 학회 논문 3편 게재 하고 싶습니다',
+        'SCI급 저널 논문 5편 발표 하고 싶습니다'
       ]
     },
     {
@@ -60,7 +60,7 @@ const LaCIDPage = () => {
       initial: '김',
       email: 'sangmook.kim@lacid.ai',
       phone: '010-2345-6789',
-      department: 'AI 개발팀',
+      department: '미래융합교육원',
       experience: '4년차',
       education: '카이스트 전산학부 학사',
       goals: [
@@ -89,7 +89,7 @@ const LaCIDPage = () => {
       initial: '심',
       email: 'boram.sim@lacid.ai',
       phone: '010-3456-7890',
-      department: '임상연구팀',
+      department: '미래융합교육원',
       experience: '3년차',
       education: '연세대학교 의공학과 석사',
       goals: [
@@ -118,65 +118,7 @@ const LaCIDPage = () => {
       initial: '이',
       email: 'nayoung.lee@lacid.ai',
       phone: '010-4567-8901',
-      department: '소프트웨어개발팀',
-      experience: '3년차',
-      education: '고려대학교 컴퓨터학과 학사',
-      goals: [
-        '사용자 친화적 인터페이스 개발',
-        '시스템 안정성 99.9% 달성',
-        '글로벌 서비스 플랫폼 구축'
-      ],
-      responsibilities: [
-        '웹 플랫폼 프론트엔드 개발',
-        'UI/UX 디자인 및 구현',
-        '사용자 경험 분석 및 개선',
-        '시스템 통합 테스트'
-      ],
-      skills: ['React', 'JavaScript', 'Node.js', 'UI/UX Design', 'System Integration'],
-      achievements: [
-        '사용자 만족도 95% 달성',
-        '시스템 다운타임 0.01% 유지',
-        '모바일 반응형 웹 완성도 100%'
-      ]
-    },
-    {
-      id: 5,
-      name: '이나경',
-      role: '팀원',
-      desc: 'MEMO5',
-      initial: '이',
-      email: 'nayoung.lee@lacid.ai',
-      phone: '010-4567-8901',
-      department: '소프트웨어개발팀',
-      experience: '3년차',
-      education: '고려대학교 컴퓨터학과 학사',
-      goals: [
-        '사용자 친화적 인터페이스 개발',
-        '시스템 안정성 99.9% 달성',
-        '글로벌 서비스 플랫폼 구축'
-      ],
-      responsibilities: [
-        '웹 플랫폼 프론트엔드 개발',
-        'UI/UX 디자인 및 구현',
-        '사용자 경험 분석 및 개선',
-        '시스템 통합 테스트'
-      ],
-      skills: ['React', 'JavaScript', 'Node.js', 'UI/UX Design', 'System Integration'],
-      achievements: [
-        '사용자 만족도 95% 달성',
-        '시스템 다운타임 0.01% 유지',
-        '모바일 반응형 웹 완성도 100%'
-      ]
-    },
-    {
-      id: 6,
-      name: '장소연',
-      role: '팀원',
-      desc: 'MEMO6',
-      initial: '장',
-      email: 'nayoung.lee@lacid.ai',
-      phone: '010-4567-8901',
-      department: '소프트웨어개발팀',
+      department: '미래융합교육원',
       experience: '3년차',
       education: '고려대학교 컴퓨터학과 학사',
       goals: [

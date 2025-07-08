@@ -1,9 +1,182 @@
-// pacsapp/src/components/ohifviewer/index.js (SimCLR 통합 완료 버전)
+// import React, { useState } from 'react';
+// // import './OHIFViewerPage.css';
 
+// const OHIFViewerPage = () => {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [viewerUrl, setViewerUrl] = useState('http://35.225.63.41:8042/ohif/'); // OHIF 뷰어 주소
+//   const [showSettings, setShowSettings] = useState(false);
+//   const [connectionError, setConnectionError] = useState(false);
+
+//   const handleIframeLoad = () => {
+//     setIsLoading(false);
+//     setConnectionError(false);
+//   };
+
+//   const handleIframeError = () => {
+//     setIsLoading(false);
+//     setConnectionError(true);
+//   };
+
+//   const handleUrlChange = (newUrl) => {
+//     setViewerUrl(newUrl);
+//     setIsLoading(true);
+//     setConnectionError(false);
+//     setShowSettings(false);
+//   };
+
+//   return (
+//     <div className="ohif-page-content">
+//       {/* 상단 헤더 */}
+//       <div className="ohif-header">
+//         <div className="ohif-title-section">
+//           <h2>🖥️ OHIF Viewer</h2>
+//           <span className="ohif-status">
+//             {connectionError ? '연결 실패' : isLoading ? '로드 중...' : 'OHIF DICOM Viewer'}
+//           </span>
+//         </div>
+
+//         <div className="ohif-controls">
+//           <button
+//             className="ohif-control-btn settings"
+//             onClick={() => setShowSettings(!showSettings)}
+//             title="서버 설정"
+//           >
+//             ⚙️
+//           </button>
+
+//           <button
+//             className="ohif-control-btn refresh"
+//             onClick={() => {
+//               setIsLoading(true);
+//               setConnectionError(false);
+//               const iframe = document.getElementById('ohif-iframe');
+//               iframe.src = iframe.src;
+//             }}
+//             title="새로고침"
+//           >
+//             🔄
+//           </button>
+
+//           <button
+//             className="ohif-control-btn fullscreen"
+//             onClick={() => {
+//               const iframe = document.getElementById('ohif-iframe');
+//               if (iframe.requestFullscreen) {
+//                 iframe.requestFullscreen();
+//               }
+//             }}
+//             title="전체화면"
+//           >
+//             ⛶
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* 설정 패널 */}
+//       {showSettings && (
+//         <div className="ohif-settings">
+//           <div className="setting-row">
+//             <label>뷰어 URL:</label>
+//             <input
+//               type="text"
+//               value={viewerUrl}
+//               onChange={(e) => setViewerUrl(e.target.value)}
+//               placeholder="http://35.225.63.41:8042/ohif/"
+//             />
+//             <button
+//               onClick={() => handleUrlChange(viewerUrl)}
+//               className="apply-btn"
+//             >
+//               적용
+//             </button>
+//           </div>
+
+//           <div className="preset-buttons">
+//             <button onClick={() => handleUrlChange('http://35.225.63.41:8042/ohif/')}>
+//               기본 OHIF 뷰어
+//             </button>
+//             <button onClick={() => handleUrlChange('http://35.225.63.41:8042/ohif/')}>
+//               배포된 서버 주소
+//             </button>
+//           </div>
+
+//           <div className="viewer-info">
+//             <h4>💡 OHIF Viewer 접속 팁:</h4>
+//             <ul>
+//               <li>OHIF는 Docker 또는 정적 배포로 실행 가능</li>
+//               <li>viewer 주소에 `/viewer` 또는 `/ohif` 포함 가능</li>
+//               <li>iframe 로딩이 오래 걸릴 수 있음 (서버 준비 필요)</li>
+//             </ul>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* iframe 영역 */}
+//       <div className="ohif-viewer">
+//         {isLoading && !connectionError && (
+//           <div className="ohif-loading-overlay">
+//             <div className="loading-circle"></div>
+//             <p>OHIF 뷰어 로딩 중...</p>
+//             <small>{viewerUrl}</small>
+//           </div>
+//         )}
+
+//         {connectionError && (
+//           <div className="ohif-error-overlay">
+//             <div className="error-icon">❌</div>
+//             <h3>OHIF 뷰어에 연결할 수 없습니다</h3>
+//             <p>다음 사항을 확인하세요:</p>
+//             <ul>
+//               <li>OHIF 서버가 실행 중인지</li>
+//               <li>URL이 정확한지: <code>{viewerUrl}</code></li>
+//               <li>CORS 설정이 iframe 허용하는지</li>
+//             </ul>
+//             <div className="error-actions">
+//               <button onClick={() => handleUrlChange(viewerUrl)} className="retry-btn">
+//                 다시 시도
+//               </button>
+//               <button onClick={() => setShowSettings(true)} className="settings-btn">
+//                 설정 열기
+//               </button>
+//             </div>
+//           </div>
+//         )}
+
+//         <iframe
+//           id="ohif-iframe"
+//           src={viewerUrl}
+//           className="ohif-iframe"
+//           title="OHIF DICOM Viewer"
+//           onLoad={handleIframeLoad}
+//           onError={handleIframeError}
+//           sandbox="allow-same-origin allow-scripts allow-forms allow-downloads allow-popups"
+//           style={{ display: connectionError ? 'none' : 'block' }}
+//         />
+//       </div>
+
+//       {/* 하단 상태바 */}
+//       <div className="ohif-footer">
+//         <div className="connection-status">
+//           <div className={`status-dot ${connectionError ? 'error' : isLoading ? 'connecting' : 'connected'}`}></div>
+//           <span>
+//             {connectionError ? '연결 실패' : isLoading ? '로드 중...' : '연결됨'}
+//           </span>
+//         </div>
+//         <div className="server-info">뷰어: {viewerUrl}</div>
+//         <div className="last-update">{new Date().toLocaleTimeString('ko-KR')}</div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default OHIFViewerPage;
+
+
+// src/components/OHIFViewer/index.js
 import React, { useState, useCallback, useEffect } from 'react';
 import ViewerIframe from './ViewerIframe/ViewerIframe.js';
+
 import AnalysisPanel from './AnalysisPanel/AnalysisPanel.js';
-import SimCLRAnalysisPanel from './AnalysisPanel/SimCLRAnalysisPanel.js'; // 🔥 추가
 import LabelModal from './AnnotationTools/LabelModal.js';
 import ReportModal from './ReportModal/ReportModal.js';
 
@@ -12,7 +185,6 @@ import useAIAnalysis from '../../hooks/useAIAnalysis.js';
 import useAnnotations from '../../hooks/useAnnotations.js';
 import useReports from '../../hooks/useReports.js';
 import usePACS from '../../hooks/usePACS.js';
-import useSimCLRAnalysis from '../../hooks/useSimCLRAnalysis.js'; // 🔥 추가
 
 import styles from './OHIFViewer.module.css';
 
@@ -28,7 +200,6 @@ const OHIFViewer = ({
       iframe: 100,
       ai: 200,
       annotation: 300,
-      simclr: 350, // 🔥 추가
       modal: 400
     };
     return activeLayer === layer ? baseZIndex[layer] + 1000 : baseZIndex[layer];
@@ -37,10 +208,6 @@ const OHIFViewer = ({
   // 스터디 연동 관련 상태
   const [studySyncStatus, setStudySyncStatus] = useState('');
   const [isStudyTransitioning, setIsStudyTransitioning] = useState(false);
-
-  // 🔥 패널 표시 상태 추가
-  const [showAnalysisPanel, setShowAnalysisPanel] = useState(true);
-  const [showSimCLRPanel, setShowSimCLRPanel] = useState(false);
 
   // PACS 훅 초기화
   const pacsHook = usePACS();
@@ -77,7 +244,7 @@ const OHIFViewer = ({
     }
   }, [currentStudyUID, ohifBaseUrl, ohifUrl]);
 
-  // AI 분석 훅 (기존)
+  // AI 분석 훅
   const aiHook = useAIAnalysis(currentStudyUID);
   const {
     analysisStatus,
@@ -94,18 +261,6 @@ const OHIFViewer = ({
     recalculateOverlays,
     setAnalysisStatus
   } = aiHook;
-
-  // 🔥 SimCLR 분석 훅 추가
-  const simclrHook = useSimCLRAnalysis(currentStudyUID);
-  const {
-    simclrResults,
-    showSimCLROverlays,
-    isSimCLRAnalyzing,
-    analyzeSimCLR,
-    toggleSimCLROverlays,
-    clearSimCLRResults,
-    checkSimCLRModelStatus
-  } = simclrHook;
 
   // 어노테이션 훅
   const annotationHook = useAnnotations(currentStudyUID, setAnalysisStatus, setActiveLayer);
@@ -139,10 +294,10 @@ const OHIFViewer = ({
     reportContent,
     reportSummaries,
     showReportDropdown,
-    saveReportToServer: originalSaveReportToServer,
+    saveReportToServer,
     loadReportFromServer,
     deleteReportFromServer,
-    updateReportStatusOnServer: originalUpdateReportStatusOnServer,
+    updateReportStatusOnServer,
     openReportModal,
     closeReportModal,
     toggleReportDropdown,
@@ -150,105 +305,7 @@ const OHIFViewer = ({
     printReport
   } = reportHook;
 
-  // 🔥 수정된 레포트 저장 함수 - 성공 후 워크스테이션 새로고침
-  const saveReportToServer = useCallback(async (reportContent) => {
-    try {
-      console.log('💾 레포트 저장 시작...');
-      const result = await originalSaveReportToServer(reportContent);
-      
-      if (result && result.status === 'success') {
-        console.log('✅ 레포트 저장 성공!');
-        
-        // 🚀 워크스테이션 새로고침 신호 전송
-        console.log('🔄 워크스테이션 새로고침 신호 전송');
-        window.dispatchEvent(new CustomEvent('reportSaved', {
-          detail: {
-            studyUID: currentStudyUID,
-            reportContent: reportContent,
-            timestamp: new Date().toISOString()
-          }
-        }));
-        
-        // 🚀 현황판 새로고침 신호도 전송
-        window.dispatchEvent(new CustomEvent('dashboardRefresh', {
-          detail: {
-            source: 'reportSaved',
-            studyUID: currentStudyUID
-          }
-        }));
-        
-        console.log('📡 새로고침 신호 전송 완료');
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('❌ 레포트 저장 실패:', error);
-      throw error;
-    }
-  }, [originalSaveReportToServer, currentStudyUID]);
-
-  // 🔥 수정된 레포트 상태 업데이트 함수 - 성공 후 워크스테이션 새로고침  
-  const updateReportStatusOnServer = useCallback(async (studyUID, status) => {
-    try {
-      console.log('🔄 레포트 상태 업데이트 시작:', status);
-      const result = await originalUpdateReportStatusOnServer(studyUID, status);
-      
-      if (result && result.status === 'success') {
-        console.log('✅ 레포트 상태 업데이트 성공!');
-        
-        // 🚀 워크스테이션 새로고침 신호 전송
-        console.log('🔄 워크스테이션 새로고침 신호 전송');
-        window.dispatchEvent(new CustomEvent('reportStatusUpdated', {
-          detail: {
-            studyUID: studyUID,
-            newStatus: status,
-            timestamp: new Date().toISOString()
-          }
-        }));
-        
-        // 🚀 현황판 새로고침 신호도 전송  
-        window.dispatchEvent(new CustomEvent('dashboardRefresh', {
-          detail: {
-            source: 'reportStatusUpdated',
-            studyUID: studyUID,
-            newStatus: status
-          }
-        }));
-        
-        console.log('📡 상태 업데이트 신호 전송 완료');
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('❌ 레포트 상태 업데이트 실패:', error);
-      throw error;
-    }
-  }, [originalUpdateReportStatusOnServer]);
-
-  // 🔥 SimCLR 오버레이 업데이트 핸들러
-  const handleSimCLROverlayUpdate = useCallback((overlayData) => {
-    console.log('🧠 SimCLR 오버레이 업데이트:', overlayData);
-    
-    switch (overlayData.type) {
-      case 'simclr_heatmap':
-        setActiveLayer('simclr');
-        // 필요시 OHIF 뷰어에 히트맵 적용
-        break;
-        
-      case 'toggle_simclr_heatmap':
-        // 히트맵 토글 처리
-        break;
-        
-      case 'clear_simclr':
-        // SimCLR 결과 지우기
-        break;
-        
-      default:
-        console.log('Unknown SimCLR overlay type:', overlayData.type);
-    }
-  }, []);
-
-  // 스터디 변경 처리 함수 (SimCLR 상태 초기화 추가)
+  // 스터디 변경 처리 함수
   const handleStudyChangeFromOHIF = useCallback(async (newStudyUID) => {
     console.log('🔄 OHIF에서 스터디 변경 감지:', {
       from: currentStudyUID,
@@ -266,7 +323,6 @@ const OHIFViewer = ({
     try {
       console.log('🧹 기존 오버레이 숨김...');
       
-      // 기존 AI 오버레이 숨김
       if (aiHook.showYOLOOverlays) {
         console.log('🤖 YOLO 오버레이 숨김');
         aiHook.toggleYOLOOverlays();
@@ -274,12 +330,6 @@ const OHIFViewer = ({
       if (aiHook.showSSDOverlays) {
         console.log('🤖 SSD 오버레이 숨김');
         aiHook.toggleSSDOverlays();
-      }
-      
-      // 🔥 SimCLR 오버레이 숨김
-      if (showSimCLROverlays) {
-        console.log('🧠 SimCLR 오버레이 숨김');
-        toggleSimCLROverlays();
       }
       
       console.log('📂 PACS 상태 동기화 중...');
@@ -334,7 +384,7 @@ const OHIFViewer = ({
     } finally {
       setIsStudyTransitioning(false);
     }
-  }, [currentStudyUID, availableStudies, aiHook, setCurrentStudyUID, loadSavedResults, fetchAvailableStudies, showSimCLROverlays, toggleSimCLROverlays]);
+  }, [currentStudyUID, availableStudies, aiHook, setCurrentStudyUID, loadSavedResults, fetchAvailableStudies]);
 
   const handleManualStudySelect = useCallback(async (studyUID) => {
     console.log('👆 수동 스터디 선택:', {
@@ -391,21 +441,6 @@ const OHIFViewer = ({
     openReportModal(...args);
   };
 
-  // 🔥 패널 토글 핸들러들
-  const handleToggleAnalysisPanel = () => {
-    setShowAnalysisPanel(prev => !prev);
-    if (!showAnalysisPanel) {
-      setActiveLayer('ai');
-    }
-  };
-
-  const handleToggleSimCLRPanel = () => {
-    setShowSimCLRPanel(prev => !prev);
-    if (!showSimCLRPanel) {
-      setActiveLayer('simclr');
-    }
-  };
-
   // Props 구성
   const viewerIframeProps = {
     analysisResults,
@@ -414,7 +449,7 @@ const OHIFViewer = ({
     onRecalculateOverlays: recalculateOverlays,
     ohifUrl,
     showDebugInfo,
-    isLoading: isAnalyzing || isStudyTransitioning || isSimCLRAnalyzing, // 🔥 SimCLR 로딩 추가
+    isLoading: isAnalyzing || isStudyTransitioning,
     error: globalError,
     currentStudyUID,
     onStudyChange: handleStudyChangeFromOHIF,
@@ -484,15 +519,6 @@ const OHIFViewer = ({
     onUpdateReportStatus: updateReportStatusOnServer
   };
 
-  // 🔥 SimCLR 패널 Props
-  const simclrPanelProps = {
-    currentStudyUID,
-    currentSeriesUID: null,
-    currentInstanceUID: null,
-    onOverlayUpdate: handleSimCLROverlayUpdate,
-    isVisible: showSimCLRPanel
-  };
-
   const labelModalProps = {
     isOpen: showLabelModal,
     onSave: saveBoundingBox,
@@ -505,17 +531,17 @@ const OHIFViewer = ({
   const reportModalProps = {
     isOpen: showReportModal,
     onClose: closeReportModal,
-    onSave: saveReportToServer,  // 🔥 수정된 함수 사용
+    onSave: saveReportToServer,
     onPrint: printReport,
-    patientInfo: reportHook.getPatientInfo(),
+    patientInfo: getCurrentStudyInfo(),
     currentStudyUID,
     analysisResults,
     annotationBoxes,
     initialContent: reportContent,
     title: '📋 진단 레포트',
     onModalOpen: () => setActiveLayer('modal')
-  };  
-  
+  };
+
   // 렌더링
   if (pacsLoading && availableStudies.length === 0) {
     return (
@@ -552,7 +578,6 @@ const OHIFViewer = ({
         '--z-iframe': getZIndex('iframe'),
         '--z-ai': getZIndex('ai'),
         '--z-annotation': getZIndex('annotation'),
-        '--z-simclr': getZIndex('simclr'), // 🔥 SimCLR z-index 추가
         '--z-modal': getZIndex('modal')
       }}
     >
@@ -564,40 +589,11 @@ const OHIFViewer = ({
 
       <div className={styles.viewerSection}>
         <ViewerIframe {...viewerIframeProps} />
-        
-        {/* 🔥 패널 토글 버튼들 추가 */}
-        {!isFullscreen && (
-          <div className={styles.panelToggleButtons}>
-            <button
-              onClick={handleToggleAnalysisPanel}
-              className={`${styles.panelToggleButton} ${showAnalysisPanel ? styles.active : ''}`}
-              title="기본 AI 분석 패널"
-            >
-              🤖 AI 분석
-            </button>
-            
-            <button
-              onClick={handleToggleSimCLRPanel}
-              className={`${styles.panelToggleButton} ${showSimCLRPanel ? styles.active : ''}`}
-              title="SimCLR 이상탐지 패널"
-            >
-              🧠 SimCLR
-            </button>
-          </div>
-        )}
       </div>
       
       {!isFullscreen && (
         <div className={styles.panelSection}>
-          {/* 🔥 기존 분석 패널 조건부 렌더링 */}
-          {showAnalysisPanel && (
-            <AnalysisPanel {...analysisPanelProps} />
-          )}
-          
-          {/* 🔥 SimCLR 분석 패널 추가 */}
-          {showSimCLRPanel && (
-            <SimCLRAnalysisPanel {...simclrPanelProps} />
-          )}
+          <AnalysisPanel {...analysisPanelProps} />
         </div>
       )}
       
@@ -623,6 +619,88 @@ const OHIFViewer = ({
           >
             {isFullscreen ? '🔲 창 모드' : '📺 전체화면'}
           </button>
+          
+          <div
+            style={{
+              position: 'fixed',
+              top: '80px',
+              left: '20px',
+              zIndex: 10000,
+              background: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontFamily: 'monospace'
+            }}
+          >
+            🎯 활성 레이어: <strong>{activeLayer}</strong><br/>
+            📂 현재 스터디: <strong>{currentStudyUID || 'none'}</strong><br/>
+            🌐 OHIF URL: <strong>{ohifUrl}</strong><br/>
+            🔄 전환 중: <strong>{isStudyTransitioning ? '✅' : '❌'}</strong><br/>
+            📊 z-index: iframe({getZIndex('iframe')}), ai({getZIndex('ai')}), annotation({getZIndex('annotation')}), modal({getZIndex('modal')})
+          </div>
+          
+          <div
+            style={{
+              position: 'fixed',
+              top: '250px',
+              left: '20px',
+              zIndex: 10000,
+              background: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontFamily: 'monospace'
+            }}
+          >
+            <div><strong>🧪 디버깅 테스트</strong></div>
+            <button
+              onClick={() => {
+                console.log('🧪 강제 스터디 변경 테스트');
+                const testStudyUID = '1.3.6.1.4.1.14519.5.2.1.9999.103.2445110399502685110179049624124';
+                handleStudyChangeFromOHIF(testStudyUID);
+              }}
+              style={{
+                background: '#28a745',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                marginTop: '5px',
+                display: 'block',
+                width: '100%'
+              }}
+            >
+              🧪 강제 스터디 변경
+            </button>
+            
+            <button
+              onClick={() => {
+                console.log('📊 현재 상태 출력');
+                console.log('currentStudyUID:', currentStudyUID);
+                console.log('availableStudies:', availableStudies);
+                console.log('ohifUrl:', ohifUrl);
+              }}
+              style={{
+                background: '#007bff',
+                color: 'white',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                marginTop: '5px',
+                display: 'block',
+                width: '100%'
+              }}
+            >
+              📊 현재 상태 출력
+            </button>
+          </div>
         </div>
       )}
     </div>

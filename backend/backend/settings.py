@@ -46,7 +46,7 @@ LOCAL_APPS = [
     'orders_emr',
     'samples',
     'tests',
-    'lis_cdss',
+    'lis_cdss.apps.LisCdssConfig',
     'webhook_handler',
     'ai_analysis',
     'common',
@@ -60,7 +60,8 @@ LOCAL_APPS = [
     'schedules',
     'notifications',
     'pacsdocs',
-    'soap'
+    'soap',
+    'viewer_v2',
 
     
 ]

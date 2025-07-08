@@ -45,11 +45,11 @@ const LisRequestPanel = ({ patient, onRequestComplete }) => {
       tests: ['NT-proBNP']
     },
     {
-      id: 'D-dimer',
+      id: 'D-Dimer',
       name: '폐색전증 검사',
       icon: Stethoscope,
       color: '#8b5cf6',
-      tests: ['D-dimer']
+      tests: ['D-Dimer']
     },
     {
       id: 'ABGA',

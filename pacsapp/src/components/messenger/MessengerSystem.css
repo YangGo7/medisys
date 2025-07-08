@@ -128,8 +128,9 @@
   border: 1px solid #e2e8f0;
   font-size: 13px;
   /* 중요: 기존 레이아웃에 영향을 주지 않도록 */
-  top: 0;
-  left: 0;
+  transform: translate(300px, 300px);
+  top: 300px;
+  left: 300px;
   width: auto;
   height: auto;
   margin: 0;

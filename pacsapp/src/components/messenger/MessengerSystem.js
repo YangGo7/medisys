@@ -12,7 +12,7 @@ const MessengerSystem = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [popupPosition, setPopupPosition] = useState({ x: 100, y: 100 });
+  const [popupPosition, setPopupPosition] = useState({ x: 1100, y: 350 });
   const [popupSize, setPopupSize] = useState({ width: 700, height: 500 });
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -23,9 +23,9 @@ const MessengerSystem = () => {
 
   // 사용자 이름 리스트
   const userNames = [
-    '김의사', '박간호사', '이기사', '최원장', '정약사', '홍관리자',
+    '김의사', '박간호사', '이기사', '최원장', '김상묵', '홍관리자',
     '심보람', '양진모', '윤수진', '임철수', '조영희', '송민우',
-    '강태현', '오수연', '권혜진', '남도훈', '배상진', '허민정'
+    '강태현', '김채윤', '권혜진', '남도훈', '이나영', '허민정'
   ];
 
   // 3개 채팅방
@@ -75,20 +75,20 @@ const MessengerSystem = () => {
       setOnlineUsers(users);
     });
 
-    // 사용자 입장/퇴장 알림
-    socket.on('user joined', (data) => {
-      addNotification(`${data.name}님이 입장했습니다`);
-    });
+    // // 사용자 입장/퇴장 알림
+    // socket.on('user joined', (data) => {
+    //   addNotification(`${data.name}님이 입장했습니다`);
+    // });
 
-    socket.on('user left', (data) => {
-      addNotification(`${data.name}님이 퇴장했습니다`);
-    });
+    // socket.on('user left', (data) => {
+    //   addNotification(`${data.name}님이 퇴장했습니다`);
+    // });
 
     return () => {
       socket.off('message');
       socket.off('users update');
-      socket.off('user joined');
-      socket.off('user left');
+      // socket.off('user joined');
+      // socket.off('user left');
     };
   }, [currentUser, selectedRoom]);
 

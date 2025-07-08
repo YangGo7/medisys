@@ -8,16 +8,23 @@ const aliasToPanelName = {
   asthma: 'CBC',
   pneumonia: 'CRP',
   chf: 'NT-proBNP',
-  pe: 'D-dimer',
+  pe: 'D-Dimer',
   copd: 'ABGA',
 };
 
 const panelComponents = {
   CRP: ['CRP'],
-  CBC: ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet'],
-  ABGA: ['pCO2', 'pO2', 'pH', 'HCO3', 'O2_sat'],
+  CBC: [
+    'WBC',
+    'Neutrophils',
+    'Lymphocytes',
+    'Eosinophils',
+    'Hemoglobin',
+    'Platelet Count'
+  ],
+  ABGA: ['pCO2', 'pO2', 'pH'],
   'NT-proBNP': ['NT-proBNP'],
-  'D-dimer': ['D-dimer'],
+  'D-Dimer': ['D-Dimer'],
 };
 
 const componentUnits = {
@@ -26,20 +33,18 @@ const componentUnits = {
   // NT-proBNP 기반 (심부전)
   'NT-proBNP': 'pg/mL',
   // D-dimer 기반 (폐색전증)
-  'D-dimer': 'ng/mL FEU', // 또는 'μg/mL FEU'도 있음 → 단위 통일 필요
+  'D-Dimer': 'ng/mL FEU', // 또는 'μg/mL FEU'도 있음 → 단위 통일 필요
   // ABGA 기반 (COPD 등)
   pCO2: 'mmHg',
   pO2: 'mmHg',
   pH: '-',             // 단위 없음 (수소 이온 농도 지수)
-  HCO3: 'mmol/L',
-  O2_sat: '%',
   // CBC 기반 (천식)
   WBC: '10^3/uL',
-  'Neutrophil%': '%',
-  'Lymphocyte%': '%',
-  'Eosinophil%': '%',
+  Neutrophils: '%',
+  Lymphocytes: '%',
+  Eosinophils: '%',
   Hemoglobin: 'g/dL',
-  Platelet: '10^3/uL',
+  'Platelet Count': '10^3/uL',
 };
 const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
   const navigate = useNavigate();
@@ -120,37 +125,32 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
         return;
       }
 
-      await Promise.all(
-        entries.map(([component_name, result_value]) =>
-          axios.post(`${process.env.REACT_APP_API_BASE_URL}tests/run`, {
+
+      // 🆕 CDSS 예측 통합 전송
+          const cdssPayload = {
             sample: sampleId,
             test_type: selectedPanel,
-            component_name,
-            result_value,
-            result_unit: componentUnits[component_name] || '',
+            values: results,
             verified_by: 1,
             verified_date: new Date().toISOString(),
-          })
-        )
-      );
-
-      await Promise.all(
-        entries.map(([component_name, result_value]) => {
-          const payload = {
-            sample: sampleId,
-            test_type: selectedPanel,
-            component_name,
-            value: result_value,
-            unit: componentUnits[component_name] || '',
-            verified_by: 1,
-           verified_date: new Date().toISOString()
+            patient_id: sample?.patient_id
           }; 
-          console.log("CDSS 전송 payload 확인:", payload);
-          return axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/predict/`, payload)
+
+          console.log("🚀 CDSS 전송 시작 ===");
+          console.log("📦 sampleId:", sampleId);
+          console.log("📦 selectedPanel (test_type):", selectedPanel);
+          console.log("📦 payload:", cdssPayload);
+
+          await axios.post(`${process.env.REACT_APP_API_BASE_URL}cdss/predict/`, cdssPayload)
             .then(res => {
               console.log("✅ CDSS 응답:", res.data);
-              if (res.data.lfs_saved) {
-                console.log("🧬 LiverFunctionSample 저장됨 (기여도 분석 가능)");
+              if (res.data.debug) {
+                console.log("🐛 [CDSS DEBUG INFO]");
+                console.log("📄 test_type 요청:", res.data.debug.requested_test_type);
+                console.log("🔁 매핑된 모델명:", res.data.debug.mapped_test_type);
+                console.log("📦 등록된 모델 키:", res.data.debug.model_keys);
+                console.log("🔬 입력된 피처 목록:", res.data.debug.input_features);
+                console.log("🚨 에러 메시지:", res.data.debug.error);
               }
               if (res.data.prediction !== undefined) {
                 console.log("🔍 예측 결과:", res.data.prediction);
@@ -163,8 +163,7 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
               console.error('❌ CDSS POST error:', err?.response?.data || err);
               throw err;
             });
-        })
-      );
+          
 
       // 로그 저장
       try {
@@ -289,5 +288,6 @@ const ResultInputForm = ({ sampleId: propSampleId, onClose }) => {
     </div>
   );
 };
+
 
 export default ResultInputForm;

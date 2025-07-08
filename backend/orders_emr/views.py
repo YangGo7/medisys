@@ -26,7 +26,7 @@ PANEL_COMPONENTS = {
     'CBC': ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet'],
     'ABGA': ['pCO2', 'pO2', 'pH', 'HCO3', 'O2_sat'],
     'NT-proBNP': ['NT-proBNP'],
-    'D-dimer': ['D-dimer'],
+    'D-Dimer': ['D-Dimer'],
 }
 
 @api_view(['GET', 'POST'])

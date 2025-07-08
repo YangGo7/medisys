@@ -43,11 +43,7 @@ export default function LisLayout() {
             }/>
           </div>
 
-          <div className="chat-widget">
-            <h4>💬 채팅</h4>
-            <p>2개의 메시지</p>
-            <button className="chat-btn">채팅 열기</button>
-          </div>
+        
 
           <div className="system-status">
             <h4>🔧 시스템 상태</h4>

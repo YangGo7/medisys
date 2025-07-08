@@ -9,6 +9,7 @@ import {
 // 백엔드 API 서비스 클래스
 class DashboardAPI {
   static BASE_URL = process.env.REACT_APP_API_URL || 'http://35.225.63.41:8000/api/';
+  
   // HTTP 요청 헬퍼 함수
   static async request(endpoint, options = {}) {
     try {
@@ -173,8 +174,7 @@ const StatisticsBoard = ({
         { name: '3진료실', value: 45 },
         { name: '4진료실', value: 52 },
         { name: '5진료실', value: 38 },
-        { name: '6진료실', value: 29 },
-        { name: '특진실', value: 34 }
+        { name: '6진료실', value: 29 }
       ],
       examStats: [
         { name: 'CT', value: 23 },
@@ -353,6 +353,27 @@ const StatisticsBoard = ({
       </div>
     </div>
   );
+
+  // 커스텀 툴팁 컴포넌트
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          backgroundColor: '#fff',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+          padding: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>{label}</p>
+          <p style={{ margin: 0, color: '#3498db' }}>
+            진료 건수: <span style={{ fontWeight: 'bold' }}>{payload[0].value}건</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   // 로딩 상태 렌더링
   if (isLoading && !dashboardData.mainStats) {
@@ -546,25 +567,89 @@ const StatisticsBoard = ({
             <div className="bottom-charts">
               {/* 진료실별 + 검사 현황 */}
               <div>
-                {/* 진료실별 진료 건수 */}
+                {/* 진료실별 진료 건수 - 세로형 바 차트로 변경 */}
                 <div className="chart-container" style={{ marginBottom: '1.5rem' }}>
                   <div className="chart-title">
                     <span className="icon">🏥</span>
                     진료실별 진료 건수
                   </div>
-                  {dashboardData.roomStats ? (
-                    <ResponsiveContainer width="100%" height={280}>
-                      <BarChart data={dashboardData.roomStats} layout="horizontal">
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                        <XAxis type="number" tick={{ fontSize: 12 }} />
-                        <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} />
-                        <Tooltip />
-                        <Bar dataKey="value" fill="#3498db" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="loading">데이터 없음</div>
-                  )}
+                  
+                  <div style={{ width: '100%', height: '280px', padding: '10px' }}>
+                    <BarChart
+                      width={750}
+                      height={260}
+                      data={[
+                        { name: '1진료실', value: 89 },
+                        { name: '2진료실', value: 67 },
+                        { name: '3진료실', value: 45 },
+                        { name: '4진료실', value: 52 },
+                        { name: '5진료실', value: 38 },
+                        { name: '6진료실', value: 29 }
+                      ]}
+                      margin={{ top: 20, right: 50, left: 20, bottom: 80 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                      <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 12 }}
+                        interval={0}
+                        axisLine={true}
+                        tickLine={true}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }} 
+                        domain={[0, 100]}
+                        tickCount={6}
+                        tickFormatter={(value) => `${value}건`}
+                        axisLine={true}
+                        tickLine={true}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value}건`, '진료 건수']}
+                        labelStyle={{ color: '#333', fontWeight: 'bold' }}
+                        contentStyle={{ 
+                          backgroundColor: '#fff', 
+                          border: '1px solid #ccc',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="value" 
+                        fill="#3498db" 
+                        radius={[6, 6, 0, 0]}
+                        stroke="#2980b9"
+                        strokeWidth={1}
+                        minPointSize={2}
+                        maxBarSize={5}
+                      />
+                    </BarChart>
+                  </div>
+                  
+                  {/* 통계 요약 */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '10px',
+                    marginTop: '15px',
+                    fontSize: '12px'
+                  }}>
+                    <div style={{ textAlign: 'center', padding: '8px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#3498db' }}>총 진료</div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold' }}>320건</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '8px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#27ae60' }}>평균</div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold' }}>53건</div>
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '8px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#e74c3c' }}>최고</div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold' }}>1진료실</div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 검사/처방 현황 */}

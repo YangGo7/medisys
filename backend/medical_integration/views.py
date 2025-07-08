@@ -3244,14 +3244,15 @@ def get_completed_patients_today(request):
             'success': False,
             'error': f'서버 오류: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+##### lis 용 나영 추가       ################################ 
 @api_view(['POST'])
 def receive_cdss_result(request):
     try:
         data = request.data
         patient_id = data.get('patient_id')
         prediction = data.get('prediction')
-        panel = data.get('panel')
+        panel = data.get('panel') or data.get('test_type')
         results = data.get('results', {})
 
         logger.info(f"📥 CDSS 결과 수신: patient_id={patient_id}, panel={panel}, prediction={prediction}")
@@ -3270,7 +3271,8 @@ def receive_cdss_result(request):
             panel=panel,
             prediction=prediction,
             explanation=data.get('explanation', 'AI 예측 설명 없음'),
-            results=results
+            results=results,
+            shap_values=data.get("shap_values")  
         )
 
         return Response({'message': 'CDSS 결과가 성공적으로 반영되었습니다.'}, status=200)
@@ -3292,9 +3294,8 @@ def get_cdss_result_by_patient(request):
     serializer = CDSSResultSerializer(results, many=True)
     return Response(serializer.data)
 
-# backend/medical_integration/views.py에 추가할 함수
+#######################################################################
 
-# backend/medical_integration/views.py에 추가할 함수
 
 @api_view(['POST'])
 def search_orthanc_studies_by_patient_id(request):

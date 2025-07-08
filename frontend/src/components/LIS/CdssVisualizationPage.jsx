@@ -1,6 +1,3 @@
-// ✅ CdssVisualizationPage.jsx 전체 리팩토링: 색상 테마 통일 + 텍스트 명확화
-// ✅ echarts 스타일 통일 (보라-푸른톤 테마) + renderer svg로 선명도 향상
-
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import * as echarts from 'echarts';
@@ -8,7 +5,9 @@ import './CdssVisualizationPage.css';
 import ShapContributionChart from './ShapContributionChart';
 import VariableImportanceChart from './VariableImportanceChart';
 import SimulationPanel from './SimulationPanel';
-import SampleImportanceChart from './SampleImportanceChart';
+import TestCountChart from './TestCountChart';
+import TestResultRatioChart from './TestResultRatioChart';
+import WeeklyAbnormalTrendChart from './WeeklyAbnormalTrendChart';
 
 const CdssVisualizationPage = () => {
   const [sampleList, setSampleList] = useState([]);
@@ -44,15 +43,15 @@ const CdssVisualizationPage = () => {
         setSampleList(ids);
       });
 
-    axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/stats/`)
-      .then(res => {
-        setStats(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('📉 통계 데이터 로딩 실패:', err);
-        setLoading(false);
-      });
+    // axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/stats/`)
+    //   .then(res => {
+    //     setStats(res.data);
+    //     setLoading(false);
+    //   })
+    //   .catch(err => {
+    //     console.error('📉 통계 데이터 로딩 실패:', err);
+    //     setLoading(false);
+    //   });
   }, []);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ const CdssVisualizationPage = () => {
     const cleanup = [];
     if (!stats) return;
 
-    // 도넛
+    // 도넛: 정상/이상 비율
     cleanup.push(renderChart(donutRef, {
       title: { text: '정상/이상 비율', left: 'center' },
       legend: { bottom: 10 },
@@ -108,7 +107,7 @@ const CdssVisualizationPage = () => {
       }]
     }));
 
-    // 막대
+    // 평균값 막대
     if (stats.mean_values) {
       const labels = Object.keys(stats.mean_values);
       cleanup.push(renderChart(barRef, {
@@ -133,7 +132,7 @@ const CdssVisualizationPage = () => {
       }));
     }
 
-    // 라인
+    // 주간 이상 건수
     if (stats.weekly_abnormal_trend) {
       cleanup.push(renderChart(lineRef, {
         title: { text: '주간 이상 건수 추세', left: 'center' },
@@ -187,15 +186,14 @@ const CdssVisualizationPage = () => {
           <h2>🧬 샘플 결과 ({selectedSample || '선택 안 됨'})</h2>
           {sampleDetail ? (
             <>
-              <span>{sampleDetail?.prediction === 1 ? "🟢 정상 소견" : "🔴 이상 소견"}</span>
-              {/* <ShapContributionChart shapData={sampleDetail.shap_data} /> */}
+              <span>{sampleDetail?.prediction === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
               <SimulationPanel
                 sampleId={selectedSample}
                 testType={sampleDetail?.test_type}
                 initialValues={sampleDetail?.results ? Object.fromEntries(sampleDetail.results.map(r => [r.component_name, parseFloat(r.value)])) : {}}
                 statMax={stats?.mean_values ? Object.fromEntries(Object.entries(stats.mean_values).map(([k, v]) => [k, v.abnormal * 2 || 100])) : {}}
               />
-              {/* <SampleImportanceChart sampleId={selectedSample} /> */}
+              <ShapContributionChart shapData={sampleDetail?.shap_data} />
             </>
           ) : (
             <p className="cdss-loading">예측 결과, 시뮬레이션 등 다양한 시각화 예정</p>
@@ -204,12 +202,15 @@ const CdssVisualizationPage = () => {
 
         <div className="cdss-card">
           <h2>📊 전체 시각화</h2>
-          <div className="cdss-chart-row">
+          {/* <div className="cdss-chart-row">
             <div className="cdss-doughnut-wrapper" ref={donutRef}></div>
             <div className="cdss-line-chart" ref={lineRef} style={{ height: '360px' }}></div>
           </div>
-          <div className="cdss-chart-full" ref={barRef} style={{ height: '400px' }}></div>
-          <VariableImportanceChart />
+          <div className="cdss-chart-full" ref={barRef} style={{ height: '400px' }}></div> */}
+          <TestCountChart />
+          <TestResultRatioChart />
+          <WeeklyAbnormalTrendChart />
+          {/* <VariableImportanceChart /> */}
         </div>
       </div>
     </div>

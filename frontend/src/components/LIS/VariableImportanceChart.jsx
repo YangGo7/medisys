@@ -50,7 +50,7 @@ const VariableImportanceChart = () => {
       xAxis: {
         type: 'category',
         data: labels,
-        axisLabel: { rotate: 30 }
+        axisLabel: { rotate: 0 }
       },
       yAxis: {
         type: 'value',

@@ -4,7 +4,9 @@ import React from 'react';
 
 const WorkListTable = ({
   filteredWorklist,
-  onDragStart
+  onDragStart,
+  onDoubleClick
+
 }) => {
   // 🔧 안전한 날짜 포맷팅 함수
   const formatDateTime = (dateTime) => {
@@ -49,6 +51,7 @@ const WorkListTable = ({
                 className={`worklist-row ${isDraggable ? 'draggable' : ''}`}
                 draggable={isDraggable}
                 onDragStart={() => onDragStart(exam)}
+                onDoubleClick={() => onDoubleClick(exam)}
               >
                 <td className="row-number">{index + 1}</td>
                 <td className="patient-id">{exam.patientId || '-'}</td>

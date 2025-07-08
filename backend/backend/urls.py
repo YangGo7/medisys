@@ -24,7 +24,7 @@ urlpatterns = [
     
     # 헬스체크
     path('api/health/', health_check_view, name='health_check'),
-    
+    path('api/analysis/', include('medical_integration.simclr_urls')),
     # 각 앱별 prefix로 충돌 방지
     path('api/integration/', include('medical_integration.urls')),
     
@@ -43,9 +43,11 @@ urlpatterns = [
     # RIS 기능
     path('webhook/', include('webhook_handler.urls')),
     path('api/ai/', include('ai_analysis.urls')),
-    path('api/annotations/', include('dr_annotations.urls')),
+    path('api/dr-annotations/', include('dr_annotations.urls')), #뷰어 만들어서 수정함
     path('api/reports/', include('dr_reports.urls')),
     path('api/pacsdocs/', include('pacsdocs.urls')),
+    path('api/viewer-v2/', include('viewer_v2.urls')),   # 새로 추가
+    
     # stt
     path('api/stt/', include('stt_service.urls')),
     path('api/statisticsboard/', include('statisticsboard.urls')),

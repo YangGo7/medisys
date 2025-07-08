@@ -3,15 +3,25 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CDSSResult, LiverFunctionSample
+from .models import CDSSResult
 from .serializers import CDSSResultSerializer
-from lis_cdss.inference.manual_contributions import get_manual_contributions
-from lis_cdss.inference.blood_inference import run_blood_model, MODELS
-# from lis_cdss.inference.shap_lis import generate_shap_values  
-from django.db.models import Avg, Count
+from openmrs_models.models import Person
+from samples.models import Sample
+from lis_cdss.inference.blood_inference import run_blood_model, get_alias_map, align_input_to_model_features
+from lis_cdss.inference.model_registry import get_model
+from lis_cdss.inference.shap_manual import get_manual_contributions
+from lis_cdss.inference.explanation import generate_explanation
+from lis_cdss.inference.background_registry import get_background_df
+from openmrs_models.models import Patient, PatientIdentifier
+from django.db.models import Avg, Count, Q
+from django.db.models.functions import TruncWeek
+from django.utils import timezone
 from django.utils.timezone import localtime
 from collections import defaultdict
+from datetime import timedelta
+import traceback
 import numpy as np
+from uuid import UUID
 import pandas as pd
 import shap
 import requests
@@ -32,6 +42,10 @@ def get_cdss_result_by_sample(request, sample_id):
         results = CDSSResult.objects.filter(sample__id=sample_id)
         if not results.exists():
             return Response({'error': '샘플 결과 없음'}, status=404)
+        
+        first = results.first()
+        if first is None:
+            return Response({'error': '결과가 유효하지 않음'}, status=500)
 
         serializer = CDSSResultSerializer(results, many=True)
         first = results.first()
@@ -105,9 +119,9 @@ def generate_explanation(results: dict, panel: str) -> str:
             return f"NT-proBNP 수치({bnp})가 125를 초과하여 심부전 가능성이 있습니다."
 
     elif panel == 'PE':
-        d_dimer = results.get('D-dimer')
+        d_dimer = results.get('D-Dimer')
         if d_dimer is not None and d_dimer > 0.5:
-            return f"D-dimer 수치({d_dimer})가 0.5를 초과하여 폐색전증 가능성이 있습니다."
+            return f"D-Dimer 수치({d_dimer})가 0.5를 초과하여 폐색전증 가능성이 있습니다."
 
     elif panel == 'COPD':
         pco2 = results.get('pCO2')
@@ -121,126 +135,146 @@ def generate_explanation(results: dict, panel: str) -> str:
 
     return "검사 수치에 기반한 이상 소견이 탐지되었습니다."
 
-
-@api_view(['POST'])
-def send_cdss_result_to_emr(request):
-    try:
-        # CDSS 내부에서 예측 결과 확보
-        patient_id = request.data.get('patient_id')
-        prediction = request.data.get('prediction')  # 'normal' or 'abnormal'
-        panel = request.data.get('panel')            # 예: 'LFT'
-        results = request.data.get('results')        # Dict of lab values
-        
-        explanation = generate_explanation(results, panel)
-        
-        payload = {
-            "patient_id": patient_id,
-            "prediction": prediction,
-            "test_type": panel,
-            "results": results,
-            "explanation": "Eosinophil 수치가 비정상적으로 높습니다"
-        }
-
-        # 🔗 EMR API URL 설정
-        EMR_URL = "http://35.225.63.41:8000/api/integration/receive_cdss_result/" 
-
-        response = requests.post(EMR_URL, json=payload)
-        response.raise_for_status()
-
-        return Response({'message': 'EMR 전송 성공', 'response': response.json()}, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 def receive_model_result(request):
-    data = request.data
-    sample = data.get("sample")
-    test_type = data.get("test_type")
-    component_name = normalize_component_name(data.get("component_name"))
+    try:
+        sample_id = request.data.get("sample")
+        test_type = request.data.get("test_type")
+        values = request.data.get("values")
+        verified_by = request.data.get("verified_by", 1)
+        verified_date = request.data.get("verified_date") or timezone.now()
+        patient_uuid = request.data.get("patient_id")
 
-    print("📥 [CDSS 수신] sample:", sample, "| test_type:", test_type, "| component:", component_name)
+        print("\n📥 CDSS 요청 수신 완료")
+        print("📌 Sample ID:", sample_id)
+        print("📌 Test type:", test_type)
+        print("📌 입력값 keys:", list(values.keys()) if values else "❌ 없음")
 
-    existing = CDSSResult.objects.filter(
-        sample=sample,
-        test_type=test_type,
-        component_name=component_name
-    ).first()
+        # ✅ 예측 수행
+        prediction, probability = run_blood_model(test_type, values)
+        print(f"✅ 예측 완료 → prediction={prediction}, prob={probability:.4f}")
 
-    request_data = request.data.copy()
-    request_data["component_name"] = component_name
-
-    if existing:
-        serializer = CDSSResultSerializer(existing, data=request_data)
-    else:
-        serializer = CDSSResultSerializer(data=request_data)
-        
-    prediction = None
-
-    if serializer.is_valid():
-        instance = serializer.save()
-        
-        print("✅ 응답에 포함될 prediction:", prediction)
-        print("✅ 저장된 instance.prediction:", instance.prediction)
-
+        # ✅ SHAP-like 기여도 계산
+        shap_data = {}
         try:
-            related = CDSSResult.objects.filter(
-                sample=sample,
-                test_type=test_type
-            ).order_by('component_name')
+            mapped_type = get_alias_map().get(test_type, test_type)
+            background_path = f"lis_cdss/inference/{test_type.lower()}_background.csv"
+            background_df = pd.read_csv(background_path)
+            print("📊 background_df 로드 성공:", background_df.shape)
+            
+            model = get_model(mapped_type)
+            if model is None:
+                raise ValueError(f"❌ SHAP 계산용 모델이 존재하지 않습니다: {mapped_type}")
 
-            values = {
-                normalize_component_name(r.component_name): r.value
-                for r in related
+            shap_data = get_manual_contributions(
+                model=model,
+                input_dict=values,
+                background_df=background_df
+            )
+            print("✅ SHAP 기여도 계산 완료")
+        except Exception as e:
+            print("❌ SHAP 기여도 생성 실패:", e)
+            shap_data = {}
+
+        # ✅ unit 매핑
+        unit_mapping = {
+            "WBC": "10^3/uL", "Neutrophils": "%", "Lymphocytes": "%",
+            "Eosinophils": "%", "Hemoglobin": "g/dL", "Platelet Count": "10^3/uL",
+            "CRP": "mg/L", "NT-proBNP": "pg/mL", "D-dimer": "ng/mL FEU",
+            "pCO2": "mmHg", "pO2": "mmHg", "pH": "-", "HCO3": "mmol/L", "O2_sat": "%"
+        }
+
+        # ✅ 결과 저장
+        result_instances = []
+        for component, value in values.items():
+            data = {
+                "sample": sample_id,
+                "test_type": test_type,
+                "component_name": component,
+                "value": value,
+                "unit": unit_mapping.get(component, "unknown"),
+                "prediction": prediction,
+                "prediction_prob": probability,
+                "verified_by": verified_by,
+                "verified_date": verified_date,
+                "shap_values": shap_data if shap_data else None
             }
 
-            model = MODELS.get(test_type.upper())
-            prediction, probability = run_blood_model(test_type, values) if model else (None, None)
-            related.update(prediction=prediction)
-            
-            print(f"📌 계산된 prediction: {prediction}")
-            
-            instance.prediction = prediction
-            instance.prediction_prob = probability
-            instance.save()
+            existing = CDSSResult.objects.filter(
+                sample=sample_id, test_type=test_type, component_name=component
+            ).first()
 
-            # ✅ EMR 전송 시도
-            try:
-                sample_obj = instance.sample
-                patient_id = getattr(sample_obj, 'patient_id', None)
-                created_at = getattr(sample_obj, 'created_at', datetime.now())
+            serializer = CDSSResultSerializer(instance=existing, data=data)
+            if serializer.is_valid():
+                result = serializer.save(shap_values=shap_data)
+                result_instances.append(result)
+            else:
+                print(f"❌ 저장 실패 for {component}: {serializer.errors}")
 
-                send_result_to_emr(
-                    patient_id=patient_id,
-                    sample_id=sample,
-                    test_type=test_type,
-                    prediction=prediction,
-                    result_dict=values,
-                    created_at=created_at
-                )
-            except Exception as e:
-                print(f"❌ EMR 전송 오류: {e}")
+        # ✅ EMR 전송 시도
+        try:
+            sample = Sample.objects.get(id=sample_id)
 
-            # ✅ 기여도 계산 대체 방식
-            background_df = pd.read_csv("lis_cdss/inference/lft_background.csv")
-            contribution_result = get_manual_contributions(model, values, background_df)
+            # 수정: patient UUID로부터 Patient 객체 조회
+            patient_uuid = sample.patient_id
+            print("🔗 EMR 전송용 patient_uuid:", patient_uuid)
             
-            response_data = CDSSResultSerializer(instance).data
-            response_data['shap_data'] = contribution_result  # ← SHAP 대체
-            response_data['results'] = [
+            # Step 1: person 테이블에서 uuid로 person_id 찾기
+            person_obj = Person.objects.using('openmrs').filter(uuid=patient_uuid).first()
+            if not person_obj:
+                raise ValueError(f"❌ person 테이블에서 uuid={patient_uuid}를 찾을 수 없음")
+            
+            person_id = person_obj.person_id
+
+            patient_obj = Patient.objects.using('openmrs').filter(patient_id=person_id).first()
+            if not patient_obj:
+                raise ValueError(f"❌ patient 테이블에서 person_id={person_id}를 찾을 수 없음")
+
+            # Step 2: 해당 PK로 PatientIdentifier 찾기
+            identifier_obj = PatientIdentifier.objects.using('openmrs').filter(
+                patient_id=person_id, voided=0
+            ).first()
+            if  not identifier_obj:
+                raise ValueError(f"❌ 식별자가 없습니다: patient_id={person_id}")
+
+            identifier_value = identifier_obj.identifier
+            print(f"✅ EMR 전송용 식별자: {identifier_value}")
+
+            explanation = generate_explanation(values, test_type)
+            payload = {
+                "patient_id": identifier_value,
+                "prediction": "abnormal" if prediction == 1 else "normal",
+                "test_type": test_type,
+                "results": values,
+                "explanation": explanation
+            }
+
+            EMR_URL = "http://35.225.63.41:8000/api/integration/receive_cdss_result/"
+            print("📤 EMR 전송 payload:", payload)
+
+            emr_response = requests.post(EMR_URL, json=payload)
+            emr_response.raise_for_status()
+            print("✅ EMR 전송 성공")
+
+        except Exception as emr_error:
+            print("❌ EMR 전송 실패:", emr_error)
+
+        return Response({
+            "sample": sample_id,
+            "test_type": test_type,
+            "prediction": prediction,
+            "probability": probability,
+            "shap_data": shap_data,
+            "results": [
                 {"component_name": r.component_name, "value": r.value, "unit": r.unit}
-                for r in related
-            ]  # ← 프론트에서 data.results로 사용할 수 있게 추가
-            response_data['prediction'] = prediction
-            response_data['lfs_saved'] = True
+                for r in result_instances
+            ]
+        }, status=201)
 
-            return Response(response_data, status=201)
-
-        except Exception as e:
-            print("❌ 예측/저장 중 오류:", e)
-            return Response({'error': str(e)}, status=500)
-
-    print("❌ CDSSResult 저장 실패:", serializer.errors)
-    return Response(serializer.errors, status=400)
+    except Exception as e:
+        print("❌ receive_model_result 전체 예외:", e)
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)
 
 # ✅ 슬라이더 기반 전체 시뮬레이션 입력 처리 (시각화용)
 @api_view(['POST'])
@@ -250,29 +284,52 @@ def receive_full_sample(request):
         test_type = request.data.get("test_type")
         components = request.data.get("components", [])
 
-        # 입력값 구성
+        # 🔧 1. 입력값 정제
         input_dict = {
             comp["component_name"]: float(comp["value"])
             for comp in components
             if comp["value"] not in [None, "", "NaN"]
         }
 
-        feature_names = joblib.load("lis_cdss/inference/lft_feature_names.joblib")
-        model = joblib.load("lis_cdss/inference/lft_logistic_model.pkl")
-        background_df = pd.read_csv("lis_cdss/inference/lft_background.csv")
+        # 🔧 2. 모델 불러오기 (alias 포함)
+        alias_map = get_alias_map()
+        model_key = alias_map.get(test_type, test_type)
+        model = get_model(model_key)
+        if not model:
+            raise ValueError(f"❌ {model_key} 모델이 등록되어 있지 않습니다.")
 
-        # 예측
-        df = pd.DataFrame([input_dict], columns=feature_names)
+        # 🔧 3. 입력값 align
+        aligned_input = align_input_to_model_features(input_dict, model)
+        df = pd.DataFrame([aligned_input])
+
+        # 🔧 4. 파생 변수 생성 (CBC 관련)
+        try:
+            if all(k in df.columns for k in ["Eosinophils", "WBC"]):
+                df["Eosinophil_Ratio"] = df["Eosinophils"] / df["WBC"]
+            if all(k in df.columns for k in ["Neutrophils", "Lymphocytes"]):
+                df["Neutrophil_to_Lymphocyte"] = df["Neutrophils"] / df["Lymphocytes"]
+            if all(k in df.columns for k in ["Platelet Count", "WBC"]):
+                df["Platelet_to_WBC"] = df["Platelet Count"] / df["WBC"]
+        except Exception as e:
+            print(f"⚠️ 파생변수 생성 오류: {e}")
+
+        df = df.reindex(columns=model.feature_names_in_)
+        df = df.drop(columns=["SUBJECT_ID"], errors="ignore")
+
+        if df.isnull().any().any():
+            raise ValueError(f"❌ 누락된 feature 존재: {df.columns[df.isnull().any()].tolist()}")
+
+        # 🔧 5. 예측
         prob = model.predict_proba(df)[0][1]
         pred = int(prob >= 0.5)
 
-        # 기여도 계산
-        contrib_result = get_manual_contributions(model, input_dict, background_df)
-        if not contrib_result:
-            contrib_result = {
-                "features": feature_names,
-                "contributions": [0.0] * len(feature_names)
-            }
+        # 🔧 6. SHAP 계산
+        background_df = get_background_df(model_key)
+        shap_contrib = get_manual_contributions(model, input_dict, background_df)
+        contrib_result = {
+            "features": list(shap_contrib.keys()),
+            "contributions": list(shap_contrib.values())
+        }
 
         return Response({
             "sample": sample_id,
@@ -283,54 +340,68 @@ def receive_full_sample(request):
         }, status=200)
 
     except Exception as e:
-        print("❌ 시뮬레이션 오류:", e)
-        return Response({"error": str(e)}, status=500)
-    
-        # try:
-        #     explainer = shap.Explainer(model.predict_proba, df)
-        #     shap_values = explainer(df)
-        #     shap_output = shap_values.values[0][1].tolist()
-        # except Exception as e:
-        #     print(f"⚠️ SHAP 계산 실패: {e}")
-        #     shap_output = [0.0] * len(features)  # 또는 None
+        print("❌ receive_full_sample 예외:", e)
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=500)   
         
-        
-
+@api_view(['GET'])
+def test_type_counts(request):
+    # test_type별로 몇 건씩 검사했는지 집계
+    counts = (
+        CDSSResult.objects
+        .values('test_type')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    return Response(counts)
 
 @api_view(['GET'])
-def lft_statistics_summary(request):
-    samples = LiverFunctionSample.objects.all()
-    total = samples.count()
-    abnormal = samples.filter(prediction=1).count()
-    normal = total - abnormal
+def test_result_ratios(request):
+    try:
+        results = (
+            CDSSResult.objects
+            .values('test_type')
+            .annotate(
+                normal=Count('id', filter=Q(prediction=0)),
+                abnormal=Count('id', filter=Q(prediction=1))
+            )
+        )
 
-    # 평균값 계산
-    fields = ['ALT', 'AST', 'ALP', 'Albumin', 'Total_Bilirubin', 'Direct_Bilirubin']
-    mean_values = {}
-
-    for field in fields:
-        mean_values[field] = {
-            'normal': round(samples.filter(prediction=0).aggregate(avg=Avg(field))['avg'] or 0, 2),
-            'abnormal': round(samples.filter(prediction=1).aggregate(avg=Avg(field))['avg'] or 0, 2)
+        data = {
+            item['test_type']: {
+                'normal': item['normal'],
+                'abnormal': item['abnormal']
+            }
+            for item in results
         }
 
-    # 확률 히스토그램 (10개 구간)
-    probs = list(samples.exclude(probability__isnull=True).values_list('probability', flat=True))
-    hist, _ = np.histogram(probs, bins=10, range=(0, 1))
-    probability_histogram = hist.tolist()
+        return Response(data)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)
 
-    # 주간 이상 발생 추이
-    trend = defaultdict(int)
-    for s in samples.filter(prediction=1):
-        week = localtime(s.created_at).strftime("%Y-W%U")
-        trend[week] += 1
-    weekly_abnormal_trend = [{'week': k, 'abnormal_count': v} for k, v in sorted(trend.items())]
+@api_view(['GET'])
+def weekly_abnormal_trend(request):
+    """
+    주차별 이상 판정 건수 반환
+    (예: {'week': '2025-06-30 ~ 2025-07-06', 'abnormal_count': 5})
+    """
+    results = (
+        CDSSResult.objects
+        .filter(prediction=1)
+        .annotate(week=TruncWeek("verified_date"))
+        .values("week")
+        .annotate(abnormal_count=Count("id"))
+        .order_by("week")
+    )
 
-    return Response({
-        'total': total,
-        'normal': normal,
-        'abnormal': abnormal,
-        'mean_values': mean_values,
-        'probability_histogram': probability_histogram,
-        'weekly_abnormal_trend': weekly_abnormal_trend
-    })
+    data = [
+        {
+            "week": f"{localtime(r['week']).date()} ~ {(localtime(r['week']) + timedelta(days=6)).date()}",
+            "abnormal_count": r["abnormal_count"]
+        }
+        for r in results
+    ]
+
+    return Response(data)

@@ -1117,3 +1117,24 @@ def doctor_dashboard_stats(request):
             'message': '판독의 통계 데이터를 불러오는데 실패했습니다.',
             'details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# viewer2
+@api_view(['GET'])
+def patient_worklist(request, patient_id):
+    """특정 환자의 WorkList 정보 반환"""
+    try:
+        study_request = StudyRequest.objects.filter(patient_id=patient_id).first()
+        if study_request:
+            # 환자 정보 + 검사 정보 반환
+            return Response({
+                'patient_id': study_request.patient_id,
+                'patient_name': study_request.patient_name,
+                'birth_date': study_request.birth_date,
+                'sex': study_request.sex,
+                'exam_datetime': study_request.request_datetime,
+                'modality': study_request.modality,
+                'body_part': study_request.body_part
+            })
+    except:
+        return Response({'error': 'Patient not found'})

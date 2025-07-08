@@ -6,9 +6,11 @@ from .views import (
     get_cdss_result_by_sample,
     delete_cdss_result,
     receive_full_sample,
-    lft_statistics_summary
+    test_type_counts,
+    test_result_ratios,
+    weekly_abnormal_trend,
 )
-from lis_cdss.inference.importance_view import get_logistic_importance, get_sample_contributions
+
 
 urlpatterns = [
     path('receive/', receive_test_result),  # 단순 저장 (모델 X)
@@ -17,7 +19,7 @@ urlpatterns = [
     path('results/<int:sample_id>/', get_cdss_result_by_sample),  # 샘플 단일 조회 (GET)
     path('delete/<int:sample_id>/', delete_cdss_result),  # 삭제 (DELETE)
     path('receive_full_sample/', receive_full_sample),
-    path('lft/stats/', lft_statistics_summary),
-    path('lft/importance/', get_logistic_importance),
-    path('lft/importance/sample/<int:sample_id>/', get_sample_contributions),
+    path('stats/test_counts/', test_type_counts),
+    path('stats/test_result_ratios/', test_result_ratios),
+    path('stats/weekly_abnormal_trend/', weekly_abnormal_trend),
 ]

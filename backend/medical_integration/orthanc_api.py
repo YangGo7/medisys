@@ -1,438 +1,310 @@
-# backend/medical_integration/orthanc_api.py (업데이트)
+# backend/medical_integration/orthanc_api.py
+# OrthancAPI 클래스에 누락된 메서드들 추가
 
 import requests
-from requests.auth import HTTPBasicAuth
-from django.conf import settings
+import json
 import logging
-import tempfile
+from typing import Dict, List, Optional, Any
+from django.conf import settings
 import os
 
 logger = logging.getLogger('medical_integration')
 
 class OrthancAPI:
-    """Orthanc API 통합 클래스 (DICOM 업로드 기능 추가)"""
+    """Orthanc PACS 서버 API 클라이언트 (SimCLR 호환 버전)"""
     
     def __init__(self):
-        self.base_url = f"http://{settings.EXTERNAL_SERVICES['orthanc']['host']}:{settings.EXTERNAL_SERVICES['orthanc']['port']}"
-        self.username = settings.EXTERNAL_SERVICES['orthanc']['username']
-        self.password = settings.EXTERNAL_SERVICES['orthanc']['password']
-        self.auth = HTTPBasicAuth(self.username, self.password)
+        """Orthanc API 초기화"""
+        # 환경변수에서 설정 로드
+        self.base_url = os.getenv('ORTHANC_URL', 'http://localhost:8042')
+        self.username = os.getenv('ORTHANC_USERNAME', 'orthanc')
+        self.password = os.getenv('ORTHANC_PASSWORD', 'orthanc')
+        self.timeout = int(os.getenv('ORTHANC_TIMEOUT', '60'))
+        
+        # URL 정리 (마지막 슬래시 제거)
+        self.base_url = self.base_url.rstrip('/')
+        
+        # 인증 설정
+        self.auth = (self.username, self.password)
+        
+        # 기본 헤더
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        
+        logger.info(f"OrthancAPI 초기화: {self.base_url}")
+        
+        # 연결 테스트
+        self._test_connection()
     
-    def get(self, endpoint):
-        """일반 GET 요청"""
+    def _test_connection(self):
+        """Orthanc 서버 연결 테스트"""
         try:
-            if endpoint.startswith('/'):
-                endpoint = endpoint[1:]
-                
-            response = requests.get(
-                f"{self.base_url}/{endpoint}",
-                auth=self.auth,
-                timeout=60
-            )
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Orthanc GET 요청 실패 (endpoint: {endpoint}): {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Orthanc GET 요청 처리 중 오류 (endpoint: {endpoint}): {e}")
-            return None
-    
-    def post(self, endpoint, data=None, files=None, content_type=None):
-        """일반 POST 요청 (DICOM 업로드 지원)"""
-        try:
-            if endpoint.startswith('/'):
-                endpoint = endpoint[1:]
-            
-            headers = {}
-            if content_type:
-                headers['Content-Type'] = content_type
-            
-            response = requests.post(
-                f"{self.base_url}/{endpoint}",
-                data=data,
-                files=files,
-                json=data if not files and not content_type else None,
-                auth=self.auth,
-                headers=headers,
-                timeout=60  # DICOM 업로드는 시간이 오래 걸릴 수 있음
-            )
-            response.raise_for_status()
-            
-            # 응답이 JSON인 경우만 파싱
-            content_type = response.headers.get('Content-Type', '')
-            if 'application/json' in content_type:
-                return response.json()
+            response = self.get('system')
+            if response:
+                logger.info(f"✅ Orthanc 연결 성공: {response.get('Name', 'Unknown')}")
+                return True
             else:
-                return response.content
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Orthanc POST 요청 실패 (endpoint: {endpoint}): {e}")
-            return None
+                logger.warning("⚠️ Orthanc 연결 실패")
+                return False
         except Exception as e:
-            logger.error(f"Orthanc POST 요청 처리 중 오류 (endpoint: {endpoint}): {e}")
-            return None
+            logger.error(f"❌ Orthanc 연결 오류: {e}")
+            return False
     
-    def upload_dicom(self, dicom_data):
-        """DICOM 파일을 Orthanc에 업로드"""
+    def get(self, endpoint: str) -> Optional[Dict]:
+        """GET 요청"""
         try:
-            logger.info("Orthanc에 DICOM 업로드 시작")
-            
-            # DICOM 데이터가 바이트가 아닌 경우 변환
-            if not isinstance(dicom_data, bytes):
-                if hasattr(dicom_data, 'read'):
-                    dicom_data = dicom_data.read()
-                else:
-                    logger.error("올바르지 않은 DICOM 데이터 형식")
-                    return None
-            
-            # Orthanc instances API로 업로드
-            response = requests.post(
-                f"{self.base_url}/instances",
-                data=dicom_data,
-                auth=self.auth,
-                headers={'Content-Type': 'application/dicom'},
-                timeout=120
+            url = f"{self.base_url}/{endpoint}"
+            response = requests.get(
+                url, 
+                auth=self.auth, 
+                headers=self.headers,
+                timeout=self.timeout
             )
-            
-            logger.info(f"Orthanc 업로드 응답 상태: {response.status_code}")
             
             if response.status_code == 200:
-                result = response.json()
-                logger.info(f"DICOM 업로드 성공: {result}")
-                return result
+                return response.json()
             else:
-                logger.error(f"DICOM 업로드 실패: {response.status_code} - {response.text}")
+                logger.warning(f"GET {endpoint} 실패: {response.status_code}")
                 return None
                 
         except Exception as e:
-            logger.error(f"DICOM 업로드 중 오류: {e}")
+            logger.error(f"GET {endpoint} 오류: {e}")
             return None
     
-    def upload_dicom_file(self, file_path):
-        """파일 경로로 DICOM 업로드"""
+    def post(self, endpoint: str, data: Dict) -> Optional[Any]:
+        """POST 요청"""
         try:
-            with open(file_path, 'rb') as f:
-                dicom_data = f.read()
-            return self.upload_dicom(dicom_data)
-        except Exception as e:
-            logger.error(f"DICOM 파일 업로드 실패: {e}")
-            return None
-    
-    def get_patients(self):
-        """모든 환자 ID 목록 조회"""
-        return self.get("patients")
-    
-    def get_patient(self, patient_id):
-        """환자 ID로 환자 정보 조회"""
-        return self.get(f"patients/{patient_id}")
-    
-    def get_patient_studies(self, patient_id):
-        """환자 ID로 모든 Study 조회"""
-        return self.get(f"patients/{patient_id}/studies")
-    
-    def get_study(self, study_id):
-        """Study ID로 Study 정보 조회"""
-        return self.get(f"studies/{study_id}")
-    
-    def get_study_series(self, study_id):
-        """Study ID로 모든 Series 조회"""
-        return self.get(f"studies/{study_id}/series")
-    
-    def get_series(self, series_id):
-        """Series ID로 Series 정보 조회"""
-        return self.get(f"series/{series_id}")
-    
-    def get_series_instances(self, series_id):
-        """Series ID로 모든 Instance 조회"""
-        return self.get(f"series/{series_id}/instances")
-    
-    def get_instance(self, instance_id):
-        """Instance ID로 Instance 정보 조회"""
-        return self.get(f"instances/{instance_id}")
-    
-    def get_instance_tags(self, instance_id):
-        """Instance ID로 DICOM 태그 조회"""
-        return self.get(f"instances/{instance_id}/tags")
-    
-    def get_instance_preview(self, instance_id):
-        """Instance ID로 미리보기 이미지 가져오기"""
-        try:
-            response = requests.get(
-                f"{self.base_url}/instances/{instance_id}/preview",
+            url = f"{self.base_url}/{endpoint}"
+            response = requests.post(
+                url,
                 auth=self.auth,
-                timeout=60
+                headers=self.headers,
+                json=data,
+                timeout=self.timeout
             )
-            response.raise_for_status()
-            return response.content
-        except requests.exceptions.RequestException as e:
-            logger.error(f"인스턴스 미리보기 가져오기 실패 (instance_id: {instance_id}): {e}")
-            return None
+            
+            if response.status_code in [200, 201]:
+                return response.json()
+            else:
+                logger.warning(f"POST {endpoint} 실패: {response.status_code}")
+                return None
+                
         except Exception as e:
-            logger.error(f"인스턴스 미리보기 처리 중 오류 (instance_id: {instance_id}): {e}")
+            logger.error(f"POST {endpoint} 오류: {e}")
             return None
     
-    def get_instance_file(self, instance_id):
-        """Instance ID로 DICOM 파일 다운로드"""
+    def get_binary(self, endpoint: str) -> Optional[bytes]:
+        """바이너리 데이터 GET 요청 (DICOM 파일용)"""
         try:
+            url = f"{self.base_url}/{endpoint}"
             response = requests.get(
-                f"{self.base_url}/instances/{instance_id}/file",
+                url,
                 auth=self.auth,
-                timeout=60
+                timeout=self.timeout
             )
-            response.raise_for_status()
-            return response.content
+            
+            if response.status_code == 200:
+                return response.content
+            else:
+                logger.warning(f"GET Binary {endpoint} 실패: {response.status_code}")
+                return None
+                
         except Exception as e:
-            logger.error(f"DICOM 파일 다운로드 실패 (instance_id: {instance_id}): {e}")
+            logger.error(f"GET Binary {endpoint} 오류: {e}")
             return None
     
-    def search_patients_by_name(self, patient_name):
-        """환자 이름으로 검색"""
-        try:
-            all_patients = self.get_patients()
-            if not all_patients:
-                return []
-            
-            matching_patients = []
-            for patient_id in all_patients:
-                patient_info = self.get_patient(patient_id)
-                if patient_info and 'MainDicomTags' in patient_info:
-                    patient_name_in_dicom = patient_info['MainDicomTags'].get('PatientName', '')
-                    if patient_name.lower() in patient_name_in_dicom.lower():
-                        matching_patients.append({
-                            'patient_id': patient_id,
-                            'patient_info': patient_info
-                        })
-            
-            return matching_patients
-        except Exception as e:
-            logger.error(f"환자 이름 검색 실패 (name: {patient_name}): {e}")
-            return []
+    # 🔥 SimCLR에서 필요한 메서드들 추가
     
-    def search_studies_by_patient_id(self, patient_id):
-        """환자 ID로 Study 검색 (상세 정보 포함)"""
+    def get_study_by_uid(self, study_uid: str) -> Optional[Dict]:
+        """Study Instance UID로 Study 정보 조회"""
         try:
-            studies = self.get_patient_studies(patient_id)
-            if not studies:
-                return []
+            logger.info(f"📋 Study UID로 검색: {study_uid}")
             
-            study_details = []
-            for study_id in studies:
-                study_info = self.get_study(study_id)
-                if study_info:
-                    study_details.append({
-                        'study_id': study_id,
-                        'study_instance_uid': study_info.get('MainDicomTags', {}).get('StudyInstanceUID'),
-                        'study_date': study_info.get('MainDicomTags', {}).get('StudyDate'),
-                        'study_time': study_info.get('MainDicomTags', {}).get('StudyTime'),
-                        'study_description': study_info.get('MainDicomTags', {}).get('StudyDescription'),
-                        'modality': study_info.get('MainDicomTags', {}).get('Modality'),
-                        'accession_number': study_info.get('MainDicomTags', {}).get('AccessionNumber'),
-                        'patient_name': study_info.get('PatientMainDicomTags', {}).get('PatientName'),
-                        'patient_id_dicom': study_info.get('PatientMainDicomTags', {}).get('PatientID'),
-                        'series_count': len(study_info.get('Series', [])),
-                        'last_update': study_info.get('LastUpdate')
-                    })
+            # Orthanc의 find API 사용
+            find_result = self.post("tools/find", {
+                "Level": "Study",
+                "Query": {
+                    "StudyInstanceUID": study_uid
+                }
+            })
             
-            return study_details
+            if not find_result or len(find_result) == 0:
+                logger.warning(f"Study UID {study_uid}를 찾을 수 없음")
+                return None
+            
+            study_id = find_result[0]
+            logger.info(f"✅ Study ID 발견: {study_id}")
+            
+            # Study 상세 정보 조회
+            study_info = self.get(f"studies/{study_id}")
+            if study_info:
+                study_info['ID'] = study_id  # ID 추가
+                logger.info(f"📊 Study 정보 로드: {study_info.get('MainDicomTags', {}).get('StudyDescription', 'No Description')}")
+            
+            return study_info
+            
         except Exception as e:
-            logger.error(f"환자 Study 검색 실패 (patient_id: {patient_id}): {e}")
-            return []
+            logger.error(f"Study UID 검색 오류: {e}")
+            return None
     
-    def get_study_with_series_and_instances(self, study_id):
-        """Study의 모든 Series와 Instance 정보 조회"""
+    def get_instance_id_by_uid(self, instance_uid: str) -> Optional[str]:
+        """Instance UID로 Instance ID 조회"""
         try:
-            study_info = self.get_study(study_id)
+            find_result = self.post("tools/find", {
+                "Level": "Instance",
+                "Query": {
+                    "SOPInstanceUID": instance_uid
+                }
+            })
+            
+            if find_result and len(find_result) > 0:
+                return find_result[0]
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Instance UID 검색 오류: {e}")
+            return None
+    
+    def get_study_with_series_and_instances(self, study_id: str) -> Optional[Dict]:
+        """Study ID로 Series와 Instance 포함한 상세 정보 조회"""
+        try:
+            study_info = self.get(f"studies/{study_id}")
             if not study_info:
                 return None
             
             # Series 정보 추가
             series_list = []
             for series_id in study_info.get('Series', []):
-                series_info = self.get_series(series_id)
+                series_info = self.get(f"series/{series_id}")
                 if series_info:
                     # Instance 정보 추가
-                    instances = []
+                    instances_list = []
                     for instance_id in series_info.get('Instances', []):
-                        instance_info = self.get_instance(instance_id)
+                        instance_info = self.get(f"instances/{instance_id}")
                         if instance_info:
-                            instances.append({
-                                'instance_id': instance_id,
-                                'instance_info': instance_info
-                            })
+                            instance_info['ID'] = instance_id
+                            instances_list.append(instance_info)
                     
-                    series_list.append({
-                        'series_id': series_id,
-                        'series_info': series_info,
-                        'instances': instances
-                    })
+                    series_info['ID'] = series_id
+                    series_info['Instances'] = instances_list
+                    series_list.append(series_info)
             
-            study_info['series_details'] = series_list
+            study_info['Series'] = series_list
             return study_info
             
         except Exception as e:
-            logger.error(f"Study 상세 정보 조회 실패 (study_id: {study_id}): {e}")
+            logger.error(f"Study 상세 정보 조회 오류: {e}")
             return None
     
-    def delete_patient(self, patient_id):
-        """환자 데이터 삭제"""
+    def get_instance_dicom(self, instance_id: str) -> Optional[bytes]:
+        """Instance ID로 DICOM 파일 데이터 조회"""
         try:
-            response = requests.delete(
-                f"{self.base_url}/patients/{patient_id}",
-                auth=self.auth,
-                timeout=60
-            )
-            response.raise_for_status()
-            logger.info(f"환자 삭제 성공: {patient_id}")
-            return True
+            logger.info(f"📥 DICOM 파일 다운로드: {instance_id}")
+            return self.get_binary(f"instances/{instance_id}/file")
         except Exception as e:
-            logger.error(f"환자 삭제 실패 (patient_id: {patient_id}): {e}")
-            return False
-    
-    def delete_study(self, study_id):
-        """Study 데이터 삭제"""
-        try:
-            response = requests.delete(
-                f"{self.base_url}/studies/{study_id}",
-                auth=self.auth,
-                timeout=60
-            )
-            response.raise_for_status()
-            logger.info(f"Study 삭제 성공: {study_id}")
-            return True
-        except Exception as e:
-            logger.error(f"Study 삭제 실패 (study_id: {study_id}): {e}")
-            return False
-    
-    def test_connection(self):
-        """Orthanc 서버 연결 테스트"""
-        try:
-            response = requests.get(
-                f"{self.base_url}/system",
-                auth=self.auth,
-                timeout=40
-            )
-            response.raise_for_status()
-            system_info = response.json()
-            logger.info(f"Orthanc 연결 성공: {system_info.get('Name', 'Unknown')} "
-                       f"버전 {system_info.get('Version', 'Unknown')}")
-            return True
-        except Exception as e:
-            logger.error(f"Orthanc 연결 실패: {e}")
-            return False\
-    
-    def upload_dicom(self, dicom_data):
-     try:
-        import logging
-        logger = logging.getLogger('medical_integration')
-        
-        logger.info("Orthanc에 DICOM 업로드 시작")
-        
-        # dicom_data가 bytes인지 확인
-        if not isinstance(dicom_data, bytes):
-            logger.error(f"DICOM 데이터가 bytes 타입이 아닙니다: {type(dicom_data)}")
+            logger.error(f"DICOM 파일 다운로드 오류: {e}")
             return None
-        
-        response = requests.post(
-            f"{self.base_url}/instances",
-            data=dicom_data,  # JSON이 아닌 raw binary data
-            auth=self.auth,
-            headers={'Content-Type': 'application/dicom'},  # DICOM 전용 content-type
-            timeout=60
-        )
-        
-        logger.info(f"Orthanc 업로드 응답 상태: {response.status_code}")
-        
-        if response.status_code == 200:
-            result = response.json()
-            logger.info(f"DICOM 업로드 성공: {result}")
-            return result
-        else:
-            logger.error(f"DICOM 업로드 실패: HTTP {response.status_code}")
-            logger.error(f"응답 내용: {response.text}")
-            return None
-            
-     except Exception as e:
-        logger.error(f"DICOM 업로드 중 오류: {e}")
-        return None
-
-    def process_dicom_with_mapping(self, dicom_bytes, patient_uuid):
-        """DICOM 업로드 후 자동 매핑 처리 (수정된 버전)"""
+    
+    def get_instance_file(self, instance_id: str) -> Optional[bytes]:
+        """Instance 파일 데이터 조회 (get_instance_dicom과 동일)"""
+        return self.get_instance_dicom(instance_id)
+    
+    def get_system_info(self) -> Optional[Dict]:
+        """Orthanc 시스템 정보 조회"""
+        return self.get('system')
+    
+    def get_instance_preview(self, instance_id: str) -> Optional[bytes]:
+        """Instance 미리보기 이미지 조회"""
         try:
-            import tempfile
-            import pydicom
-            from .models import PatientMapping
-            import logging
-            
-            logger = logging.getLogger('medical_integration')
-            logger.info("DICOM 업로드 후 자동 매핑 처리 시작")
-            
-            # 🔥 수정: 임시 파일을 통해 pydicom으로 읽기
-            with tempfile.NamedTemporaryFile(suffix='.dcm', delete=False) as temp_file:
-                temp_file.write(dicom_bytes)
-                temp_file_path = temp_file.name
-            
-            try:
-                # 임시 파일에서 DICOM 읽기
-                dicom_ds = pydicom.dcmread(temp_file_path)
-                
-                # DICOM에서 환자 정보 추출
-                patient_info = {
-                    'patient_name': str(dicom_ds.get('PatientName', '')),
-                    'patient_id': str(dicom_ds.get('PatientID', '')),
-                    'patient_birth_date': str(dicom_ds.get('PatientBirthDate', '')),
-                    'patient_sex': str(dicom_ds.get('PatientSex', '')),
-                    'study_instance_uid': str(dicom_ds.get('StudyInstanceUID', ''))
+            return self.get_binary(f"instances/{instance_id}/preview")
+        except Exception as e:
+            logger.error(f"Instance 미리보기 오류: {e}")
+            return None
+    
+    # 🔥 기존 프로젝트와의 호환성을 위한 메서드들
+    
+    def get_studies(self) -> List[str]:
+        """모든 Study ID 목록 조회"""
+        try:
+            studies = self.get('studies')
+            return studies if studies else []
+        except Exception as e:
+            logger.error(f"Studies 목록 조회 오류: {e}")
+            return []
+    
+    def get_study(self, study_id: str) -> Optional[Dict]:
+        """Study ID로 Study 정보 조회"""
+        return self.get(f"studies/{study_id}")
+    
+    def get_series(self, series_id: str) -> Optional[Dict]:
+        """Series ID로 Series 정보 조회"""
+        return self.get(f"series/{series_id}")
+    
+    def get_instance(self, instance_id: str) -> Optional[Dict]:
+        """Instance ID로 Instance 정보 조회"""
+        return self.get(f"instances/{instance_id}")
+    
+    def get_patients(self) -> List[str]:
+        """모든 Patient ID 목록 조회"""
+        try:
+            patients = self.get('patients')
+            return patients if patients else []
+        except Exception as e:
+            logger.error(f"Patients 목록 조회 오류: {e}")
+            return []
+    
+    def get_patient(self, patient_id: str) -> Optional[Dict]:
+        """Patient ID로 Patient 정보 조회"""
+        return self.get(f"patients/{patient_id}")
+    
+    def find_studies_by_patient_id(self, patient_id: str) -> List[Dict]:
+        """Patient ID로 Study 검색"""
+        try:
+            find_result = self.post("tools/find", {
+                "Level": "Study",
+                "Query": {
+                    "PatientID": patient_id
                 }
-                
-                logger.info(f"DICOM 환자 정보 추출 성공: {patient_info}")
-                
-            except Exception as e:
-                logger.error(f"DICOM 환자 정보 추출 실패: {e}")
-                patient_info = None
-            finally:
-                # 임시 파일 삭제
-                try:
-                    os.unlink(temp_file_path)
-                except:
-                    pass
+            })
             
-            if not patient_info:
-                logger.error("DICOM 환자 정보 추출 실패")
-                return None
+            studies = []
+            if find_result:
+                for study_id in find_result:
+                    study_info = self.get_study(study_id)
+                    if study_info:
+                        study_info['ID'] = study_id
+                        studies.append(study_info)
             
-            # Orthanc에 업로드
-            upload_result = self.upload_dicom(dicom_bytes)
-            
-            if not upload_result:
-                logger.error("Orthanc 업로드 실패")
-                return None
-            
-            # 자동 매핑 생성
-            orthanc_patient_id = upload_result.get('ParentPatient')
-            
-            if orthanc_patient_id and patient_uuid:
-                try:
-                    mapping, created = PatientMapping.objects.get_or_create(
-                        orthanc_patient_id=orthanc_patient_id,
-                        openmrs_patient_uuid=patient_uuid,
-                        defaults={'sync_status': 'SYNCED'}
-                    )
-                    
-                    if created:
-                        logger.info(f"새 환자 매핑 생성: {mapping}")
-                    else:
-                        logger.info(f"기존 매핑 사용: {mapping}")
-                        
-                except Exception as e:
-                    logger.error(f"환자 매핑 생성 실패: {e}")
-            
-            return {
-                'upload_result': upload_result,
-                'patient_info': patient_info,
-                'mapping_created': created if 'created' in locals() else False
-            }
+            return studies
             
         except Exception as e:
-            logger.error(f"DICOM 처리 및 매핑 실패: {e}")
+            logger.error(f"Patient ID로 Study 검색 오류: {e}")
+            return []
+    
+    def get_study_statistics(self) -> Optional[Dict]:
+        """Orthanc 통계 정보 조회"""
+        return self.get('statistics')
+    
+    # 🔥 DICOM Web 관련 메서드 (OHIF 호환성)
+    
+    def get_dicom_web_studies(self) -> Optional[List]:
+        """DICOMweb 형식으로 Studies 조회"""
+        try:
+            return self.get('dicom-web/studies')
+        except Exception as e:
+            logger.error(f"DICOMweb Studies 조회 오류: {e}")
             return None
+    
+    def get_dicom_web_study(self, study_uid: str) -> Optional[Dict]:
+        """DICOMweb 형식으로 특정 Study 조회"""
+        try:
+            return self.get(f'dicom-web/studies/{study_uid}')
+        except Exception as e:
+            logger.error(f"DICOMweb Study 조회 오류: {e}")
+            return None
+
+# 전역 인스턴스
+orthanc_api = OrthancAPI()
