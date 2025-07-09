@@ -1,9 +1,10 @@
-// // hooks/viewer_v2/useAnnotations.js
+// // hooks/viewer_v2/useAnnotations.js - 수정 완료
 // import { useState, useRef, useCallback } from 'react';
 // import { 
 //   saveAnnotations, 
 //   loadAnnotations, 
-//   deleteAllAnnotations 
+//   deleteAllAnnotations,
+//   updateAnnotation
 // } from '../../utils/viewer_v2/api';
 
 // // 🔥 API_BASE_URL 추가
@@ -58,9 +59,20 @@
 //  * @param {Function} setAnalysisStatus - 상태 메시지 설정 함수
 //  * @param {Function} setActiveLayer - 활성 레이어 설정 함수
 //  * @param {Object} doctorInfo - 판독의 정보 (WorkList에서)
+//  * @param {Function} getImageDisplayInfo - 🔥 새로 추가: 이미지 표시 정보 가져오는 함수
+//  * @param {Function} getOriginalImageSize - 🔥 새로 추가: 원본 이미지 크기 가져오는 함수
 //  * @returns {Object} 어노테이션 관련 상태와 함수들
 //  */
-// const useAnnotations = (currentStudyUID, currentInstanceUID, currentInstanceNumber, setAnalysisStatus, setActiveLayer, doctorInfo) => {
+// const useAnnotations = (
+//     currentStudyUID, 
+//     currentInstanceUID, 
+//     currentInstanceNumber, 
+//     setAnalysisStatus, 
+//     setActiveLayer, 
+//     doctorInfo,
+//     getImageDisplayInfo, // 🔥 새로 추가
+//     getOriginalImageSize // 🔥 새로 추가
+// ) => {
 //     // =============================================================================
 //     // 상태 관리
 //     // =============================================================================
@@ -145,8 +157,11 @@
 //         const convertedAnnotation = {
 //             id: Date.now() + Math.random(),
 //             measurementId: measurement.id,
+//             type: measurement.type, // 🔥 추가: 변환용
+//             startPoint: measurement.startPoint, // 🔥 추가: 변환용
+//             endPoint: measurement.endPoint, // 🔥 추가: 변환용
 //             shape_type: shape_type,  // 🔥 수정: 올바른 shape_type 설정
-//             coordinates: coordinates,  // 🔥 수정: 타입에 맞는 coordinates 설정
+//             coordinates: coordinates,  // 🔥 수정: 타입에 맞는 coordinates 설정 (아직 화면 좌표)
 //             label: annotationData.label || '',
 //             dr_text: annotationData.memo || '',
 //             slice: annotationData.slice || currentInstanceNumber || 1,
@@ -162,7 +177,7 @@
 //             memo: annotationData.memo || ''
 //         };
         
-//         console.log('✅ 변환된 어노테이션:', convertedAnnotation);
+//         console.log('✅ 변환된 어노테이션 (화면 좌표):', convertedAnnotation);
 //         console.log('✅ shape_type:', convertedAnnotation.shape_type);
 //         console.log('✅ coordinates:', convertedAnnotation.coordinates);
 //         console.log('✅ doctor_name:', convertedAnnotation.doctor_name);
@@ -170,7 +185,7 @@
 //     }, [currentInstanceNumber, doctorInfo]);
     
 //     /**
-//      * 🔥 핵심 함수: 측정값에 라벨을 추가하고 Django 어노테이션으로 변환 - 성공시 결과 반환
+//      * 🔥 핵심 함수: 측정값에 라벨을 추가하고 Django 어노테이션으로 변환 - 좌표 변환 적용
 //      */
 //     const addMeasurementToAnnotations = useCallback(async (measurement, annotationData) => {
 //         console.log('🏷️ useAnnotations - addMeasurementToAnnotations 호출:', { measurement, annotationData });
@@ -183,10 +198,19 @@
 //         console.log('✅ 측정값을 Django 어노테이션으로 변환 시작:', measurement.id);
         
 //         try {
-//             // 1. 측정값을 Django 어노테이션 형태로 변환
+//             // 1. 측정값을 Django 어노테이션 형태로 변환 (아직 화면 좌표)
 //             const djangoAnnotation = convertMeasurementToAnnotation(measurement, annotationData);
             
-//             // 2. 즉시 서버에 저장
+//             // 🔥 2. 좌표 변환 정보 가져오기
+//             const imageDisplayInfo = getImageDisplayInfo ? getImageDisplayInfo() : null;
+//             const originalImageSize = getOriginalImageSize ? getOriginalImageSize() : null;
+            
+//             console.log('🔄 좌표 변환 정보:', {
+//                 imageDisplayInfo: !!imageDisplayInfo,
+//                 originalImageSize
+//             });
+            
+//             // 3. 즉시 서버에 저장 (좌표 변환 적용)
 //             console.log('💾 Django 어노테이션 서버 저장 시작');
             
 //             if (!currentStudyUID) {
@@ -194,6 +218,7 @@
 //                 return null;
 //             }
             
+//             // 🔥 수정: 불필요한 매개변수 제거
 //             const saveData = await saveAnnotations(
 //                 currentStudyUID, 
 //                 currentInstanceUID || 'temp-instance-uid',
@@ -270,7 +295,7 @@
 //             showToast('❌ 라벨 저장 중 오류가 발생했습니다');
 //             return null;
 //         }
-//     }, [convertMeasurementToAnnotation, currentStudyUID, currentInstanceUID, currentInstanceNumber]);
+//     }, [convertMeasurementToAnnotation, currentStudyUID, currentInstanceUID, currentInstanceNumber, getImageDisplayInfo, getOriginalImageSize]);
     
 //     /**
 //      * 🔥 모든 어노테이션 가져오기 - 완전한 중복 제거 + 타입 체크 추가
@@ -444,13 +469,15 @@
 //             setShowAnnotationDropdown(false);
 //         }
 //     }, [getAllAnnotations, deleteBoundingBox]);
+
+
     
 //     // =============================================================================
-//     // 🔥 서버 통신 함수들
+//     // 🔥 서버 통신 함수들 - 좌표 변환 적용
 //     // =============================================================================
     
 //     /**
-//      * 🔥 모든 어노테이션을 서버에 저장
+//      * 🔥 모든 어노테이션을 서버에 저장 - 좌표 변환 적용
 //      */
 //     const saveAnnotationsToServer = useCallback(async () => {
 //         console.log('💾 saveAnnotationsToServer 호출됨');
@@ -537,6 +564,16 @@
 //                 return;
 //             }
             
+//             // 🔥 좌표 변환 정보 가져오기
+//             const imageDisplayInfo = getImageDisplayInfo ? getImageDisplayInfo() : null;
+//             const originalImageSize = getOriginalImageSize ? getOriginalImageSize() : null;
+            
+//             console.log('🔄 저장용 좌표 변환 정보:', {
+//                 imageDisplayInfo: !!imageDisplayInfo,
+//                 originalImageSize
+//             });
+            
+//             // 🔥 수정: 불필요한 매개변수 제거
 //             const data = await saveAnnotations(
 //                 currentStudyUID, 
 //                 currentInstanceUID || 'temp-instance-uid',
@@ -584,10 +621,10 @@
 //             }
 //             console.error('❌ 네트워크 에러:', error);
 //         }
-//     }, [currentStudyUID, currentInstanceUID, currentInstanceNumber, getAllAnnotations, setAnalysisStatus, setActiveLayer]);
+//     }, [currentStudyUID, currentInstanceUID, currentInstanceNumber, getAllAnnotations, setAnalysisStatus, setActiveLayer, getImageDisplayInfo, getOriginalImageSize]);
     
 //     /**
-//      * 🔥 서버에서 어노테이션을 불러오는 함수
+//      * 🔥 서버에서 어노테이션을 불러오는 함수 - 좌표 변환 적용
 //      */
 //     const loadAnnotationsFromServer = useCallback(async () => {
 //         if (!currentStudyUID) {
@@ -607,7 +644,20 @@
 //             console.log('📥 Study UID:', currentStudyUID);
 //             console.log('📥 Instance UID:', currentInstanceUID);
             
-//             const data = await loadAnnotations(currentStudyUID, currentInstanceUID);
+//             // 🔥 좌표 변환 정보 가져오기
+//             const imageDisplayInfo = getImageDisplayInfo ? getImageDisplayInfo() : null;
+//             const originalImageSize = getOriginalImageSize ? getOriginalImageSize() : null;
+            
+//             console.log('🔄 불러오기용 좌표 변환 정보:', {
+//                 imageDisplayInfo: !!imageDisplayInfo,
+//                 originalImageSize
+//             });
+            
+//             // 🔥 수정: 잘못된 매개변수 제거
+//             const data = await loadAnnotations(
+//                 currentStudyUID, 
+//                 currentInstanceUID
+//             );
 //             console.log('📥 서버 응답 전체:', data);
 //             console.log('📥 응답 상태:', data.status);
 //             console.log('📥 응답 어노테이션 개수:', data.annotations?.length);
@@ -718,7 +768,7 @@
 //                 console.error('❌ 불러오기 에러:', error);
 //             }
 //         }
-//     }, [currentStudyUID, currentInstanceUID, setAnalysisStatus, setActiveLayer, doctorInfo]);
+//     }, [currentStudyUID, currentInstanceUID, setAnalysisStatus, setActiveLayer, doctorInfo, getImageDisplayInfo, getOriginalImageSize]);
     
 //     /**
 //      * 🔥 모든 어노테이션을 클리어하는 함수 (서버에서도 삭제) - 에러 처리 강화
@@ -796,7 +846,7 @@
 //     }, [currentStudyUID, currentInstanceUID, getAllAnnotations, setAnalysisStatus, setActiveLayer]);
 
 //     /**
-//      * 🔥 수정된 Django 어노테이션 개별 편집 함수 - 올바른 API 엔드포인트 사용
+//      * 🔥 수정된 Django 어노테이션 개별 편집 함수 - 좌표 변환 적용
 //      */
 //     const updateDjangoAnnotation = useCallback(async (annotationId, updateData) => {
 //         console.log('✏️ updateDjangoAnnotation 호출:', { annotationId, updateData });
@@ -807,26 +857,24 @@
 //         }
         
 //         try {
-//             // 🔥 수정: 올바른 Django API 엔드포인트와 메서드 사용
-//             console.log('🔗 API 호출:', `${API_BASE_URL}/api/dr-annotations/detail/${annotationId}/`);
+//             // 🔥 좌표 변환 정보 가져오기
+//             const imageDisplayInfo = getImageDisplayInfo ? getImageDisplayInfo() : null;
+//             const originalImageSize = getOriginalImageSize ? getOriginalImageSize() : null;
             
-//             const response = await fetch(`${API_BASE_URL}/api/dr-annotations/detail/${annotationId}/`, {
-//                 method: 'PUT', // 🔥 수정: PATCH → PUT
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify(updateData)
+//             console.log('🔄 개별 수정용 좌표 변환 정보:', {
+//                 imageDisplayInfo: !!imageDisplayInfo,
+//                 originalImageSize,
+//                 hasCoordinates: !!(updateData.startPoint && updateData.endPoint)
 //             });
             
-//             console.log('📡 API 응답 상태:', response.status);
+//             // 🔥 수정: 불필요한 매개변수 제거
+//             console.log('🔗 API 호출:', `${API_BASE_URL}/api/dr-annotations/detail/${annotationId}/`);
             
-//             if (!response.ok) {
-//                 const errorText = await response.text();
-//                 console.error('❌ API 에러 응답:', errorText);
-//                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-//             }
+//             const result = await updateAnnotation(
+//                 annotationId, 
+//                 updateData
+//             );
             
-//             const result = await response.json();
 //             console.log('✅ Django 어노테이션 개별 수정 API 응답:', result);
             
 //             // 🔥 Django 응답 구조에 맞게 수정
@@ -851,7 +899,7 @@
 //             showToast('❌ 라벨 수정에 실패했습니다');
 //             return { success: false, error: error.message };
 //         }
-//     }, []);
+//     }, [getImageDisplayInfo, getOriginalImageSize]);
     
 //     // =============================================================================
 //     // 토글 및 UI 함수들
@@ -946,7 +994,7 @@
 //         addMeasurementToAnnotations,
 //         convertMeasurementToAnnotation,
 //         getAllAnnotations,
-//         updateDjangoAnnotation, // 🔥 새로 추가!
+//         updateDjangoAnnotation, // 🔥 수정 완료!
         
 //         // 서버 통신
 //         saveAnnotationsToServer,
@@ -972,8 +1020,6 @@
 
 // export default useAnnotations;
 
-
-// hooks/viewer_v2/useAnnotations.js
 // hooks/viewer_v2/useAnnotations.js - 수정 완료
 import { useState, useRef, useCallback } from 'react';
 import { 
@@ -1445,6 +1491,23 @@ const useAnnotations = (
             setShowAnnotationDropdown(false);
         }
     }, [getAllAnnotations, deleteBoundingBox]);
+
+    const toggleDjangoAnnotationVisibility = useCallback((annotationId) => {
+        console.log('👁️ Django 어노테이션 표시/숨김 토글:', annotationId);
+        
+        setAnnotationBoxes(prev => {
+            const updated = prev.map(annotation => 
+                annotation.id === annotationId || `django-${annotation.id}` === annotationId
+                    ? { ...annotation, visible: annotation.visible !== false ? false : true }
+                    : annotation
+            );
+            
+            const toggledAnnotation = updated.find(a => a.id === annotationId || `django-${a.id}` === annotationId);
+            console.log('👁️ 토글 결과:', toggledAnnotation?.visible);
+            
+            return updated;
+        });
+    }, []);
     
     // =============================================================================
     // 🔥 서버 통신 함수들 - 좌표 변환 적용

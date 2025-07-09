@@ -1,4 +1,4 @@
-// // /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 완전한 통합 버전
+// // /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 수동 주석 좌표변환 제거
 
 // import React, { useState, useRef, useCallback, useEffect } from 'react';
 // import { Stethoscope, Calendar, EyeOff } from 'lucide-react';
@@ -14,79 +14,51 @@
 //   aiResults = {}, 
 //   patientInfo = {}, 
 //   viewport = {},
-  
-//   // 실제 이미지 관련 props
 //   currentImageUrl,
 //   imageIds,
 //   viewportSettings,
-  
-//   // 🔥 CSS 기반 이미지 변환
 //   imageTransform,
 //   getImageStyle,
-  
-//   // 🔥 마우스 이벤트 핸들러
 //   onMouseDown,
 //   onMouseMove,
 //   onMouseUp,
 //   onWheel,
-  
-//   // 🔥 측정 도구 관련
 //   measurements = [],
 //   currentMeasurement,
-  
-//   // 🔥 편집 관련 props
 //   editingMeasurement,
 //   isEditMode,
 //   startEditMode,
 //   stopEditMode,
-  
-//   // 🔥 컨텍스트 메뉴 관련 props
 //   onDeleteMeasurement,
-  
-//   // 🔥 라벨링 관련 props 추가
 //   onAddManualAnnotation,
 //   onEditManualAnnotation,
 //   setActiveRightPanel,
-  
-//   // 🔥 하이라이트 관련 props 추가
 //   highlightedMeasurementId,
 //   onHighlightMeasurement,
-  
-//   // 🔥 수동 주석 데이터 추가 (라벨 표시용)
 //   manualAnnotations = [],
-  
-//   // 🔥 Django 어노테이션 시스템 연동
 //   addMeasurementToAnnotations,
-  
-//   // 🔥 Django 어노테이션 데이터 추가 (뷰어 렌더링용)
 //   annotationBoxes = [],
-  
-//   // 🔥 새로 추가: 전체 숨기기 관련 props
-//   allMeasurementsHidden = false
+//   allMeasurementsHidden = false,
+//   onImageDisplayInfoChange,
+//   // 🔥 새로 추가: 패널 상태 감지를 위한 props
+//   leftPanelWidth,
+//   rightPanelWidth,
+//   isPanelResizing
 // }) => {
 //   const modelColors = {
 //     yolov8: '#3b82f6',
 //     ssd: '#ef4444', 
 //     simclr: '#22c55e'
 //   };
-
-//   // 🔥 이미지 크기 측정 관련 state 추가
 //   const imageRef = useRef(null);
-//   const [imageDisplayInfo, setImageDisplayInfo] = useState(null);
-
-//   // 🔥 컨텍스트 메뉴 상태
 //   const [contextMenu, setContextMenu] = useState(null);
 //   const [selectedMeasurementForMenu, setSelectedMeasurementForMenu] = useState(null);
-  
-//   // 🔥 라벨링 모달 상태
 //   const [isLabelingModalOpen, setIsLabelingModalOpen] = useState(false);
 //   const [measurementToLabel, setMeasurementToLabel] = useState(null);
-
-//   // 🔥 라벨 편집 모달 상태
 //   const [isLabelEditModalOpen, setIsLabelEditModalOpen] = useState(false);
 //   const [annotationToEdit, setAnnotationToEdit] = useState(null);
+//   const [imageDisplayInfo, setImageDisplayInfo] = useState(null);
 
-//   // 기본값 설정
 //   const safePatientInfo = {
 //     name: '샘플 환자',
 //     id: 'SAMPLE-001',
@@ -104,68 +76,80 @@
 
 //   const safeAiResults = aiResults || {};
 
-//   // 🔥 디버깅 로그 추가
 //   console.log('🖼️ DicomViewer - manualAnnotations:', manualAnnotations?.length || 0);
 //   console.log('🖼️ DicomViewer - annotationBoxes:', annotationBoxes?.length || 0);
 //   console.log('🎯 DicomViewer - highlightedMeasurementId:', highlightedMeasurementId);
 //   console.log('👁️ DicomViewer - allMeasurementsHidden:', allMeasurementsHidden);
 //   console.log('🤖 DicomViewer - safeAiResults:', safeAiResults);
+//   console.log('📐 DicomViewer - imageDisplayInfo:', imageDisplayInfo);
 
-//   // 🔥 새로 추가: 이미지 크기 측정 함수
+//   // 🔥 이미지 크기 측정 함수 개선
 //   const measureImageDisplay = useCallback(() => {
-//     if (!imageRef.current) return;
-    
-//     const img = imageRef.current;
-//     const container = img.parentElement; // .mv-image-content
-    
-//     console.log('📐 이미지 크기 측정 시작');
-//     console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
-//     console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
-    
-//     // object-fit: contain 계산
-//     const containerAspect = container.clientWidth / container.clientHeight;
-//     const imageAspect = img.naturalWidth / img.naturalHeight;
-    
-//     let displayWidth, displayHeight, offsetX, offsetY;
-    
-//     if (imageAspect > containerAspect) {
-//       // 이미지가 더 넓음 - 가로에 맞춤
-//       displayWidth = container.clientWidth;
-//       displayHeight = container.clientWidth / imageAspect;
-//       offsetX = 0;
-//       offsetY = (container.clientHeight - displayHeight) / 2;
-//     } else {
-//       // 이미지가 더 높음 - 세로에 맞춤
-//       displayHeight = container.clientHeight;
-//       displayWidth = container.clientHeight * imageAspect;
-//       offsetX = (container.clientWidth - displayWidth) / 2;
-//       offsetY = 0;
-//     }
-    
-//     const scaleX = displayWidth / img.naturalWidth;
-//     const scaleY = displayHeight / img.naturalHeight;
-    
-//     const displayInfo = {
-//       naturalWidth: img.naturalWidth,
-//       naturalHeight: img.naturalHeight,
-//       containerWidth: container.clientWidth,
-//       containerHeight: container.clientHeight,
-//       displayWidth,
-//       displayHeight,
-//       offsetX,
-//       offsetY,
-//       scaleX,
-//       scaleY
-//     };
-    
-//     console.log('📐 측정 결과:', displayInfo);
-//     setImageDisplayInfo(displayInfo);
-//   }, []);
+//   if (!imageRef.current) return;
+  
+//   const img = imageRef.current;
+//   const container = img.parentElement;
+  
+//   console.log('📐 이미지 크기 측정 시작');
+//   console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
+//   console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
+  
+//   const containerAspect = container.clientWidth / container.clientHeight;
+//   const imageAspect = img.naturalWidth / img.naturalHeight;
+  
+//   let displayWidth, displayHeight, offsetX, offsetY;
+  
+//   if (imageAspect > containerAspect) {
+//     displayWidth = container.clientWidth;
+//     displayHeight = container.clientWidth / imageAspect;
+//     offsetX = 0;
+//     offsetY = (container.clientHeight - displayHeight) / 2;
+//   } else {
+//     displayHeight = container.clientHeight;
+//     displayWidth = container.clientHeight * imageAspect;
+//     offsetX = (container.clientWidth - displayWidth) / 2;
+//     offsetY = 0;
+//   }
+  
+//   const scaleX = displayWidth / img.naturalWidth;
+//   const scaleY = displayHeight / img.naturalHeight;
+  
+//   const displayInfo = {
+//     naturalWidth: img.naturalWidth,
+//     naturalHeight: img.naturalHeight,
+//     containerWidth: container.clientWidth,
+//     containerHeight: container.clientHeight,
+//     displayWidth,
+//     displayHeight,
+//     offsetX,
+//     offsetY,
+//     scaleX,
+//     scaleY
+//   };
+  
+//   console.log('📐 측정 결과:', displayInfo);
+//   setImageDisplayInfo(displayInfo);
+  
+//   // 🔥 이 부분이 있으면 Layout으로 정보 전달
+//   if (onImageDisplayInfoChange) {
+//     console.log('🔄 Layout으로 이미지 표시 정보 전달:', displayInfo);
+//     onImageDisplayInfoChange(displayInfo);
+//   }
+// }, [onImageDisplayInfoChange]);
 
-//   // 🔥 창 크기 변경시 재측정
+//   // 🔥 이미지 로드 핸들러
+//   const handleImageLoad = useCallback(() => {
+//     console.log('🖼️ 이미지 로드 완료 - 크기 측정 시작');
+//     setTimeout(() => {
+//       measureImageDisplay();
+//     }, 50);
+//   }, [measureImageDisplay]);
+
+//   // 🔥 창 크기 변경 감지
 //   useEffect(() => {
 //     const handleResize = () => {
 //       if (imageDisplayInfo) {
+//         console.log('🔄 창 크기 변경 감지 - 재측정');
 //         measureImageDisplay();
 //       }
 //     };
@@ -174,11 +158,39 @@
 //     return () => window.removeEventListener('resize', handleResize);
 //   }, [imageDisplayInfo, measureImageDisplay]);
 
-//   // 🔥 새로 추가: imageTransform 변경시 재측정 (zoom, pan, rotation 등)
+//   // 🔥 패널 크기 변경 감지 (핵심 수정사항)
+//   useEffect(() => {
+//     console.log('🔄 패널 크기 변경 감지:', { leftPanelWidth, rightPanelWidth });
+    
+//     if (imageDisplayInfo) {
+//       // 패널 크기 변경 후 약간의 지연을 두고 재측정
+//       const timer = setTimeout(() => {
+//         console.log('📐 패널 크기 변경으로 인한 재측정 시작');
+//         measureImageDisplay();
+//       }, 100);
+      
+//       return () => clearTimeout(timer);
+//     }
+//   }, [leftPanelWidth, rightPanelWidth, imageDisplayInfo, measureImageDisplay]);
+
+//   // 🔥 패널 리사이징 중 감지
+//   useEffect(() => {
+//     if (isPanelResizing) {
+//       console.log('🔄 패널 리사이징 중...');
+//     } else if (imageDisplayInfo) {
+//       console.log('✅ 패널 리사이징 완료 - 재측정');
+//       const timer = setTimeout(() => {
+//         measureImageDisplay();
+//       }, 50);
+      
+//       return () => clearTimeout(timer);
+//     }
+//   }, [isPanelResizing, imageDisplayInfo, measureImageDisplay]);
+
+//   // 🔥 이미지 변환 감지 (zoom, pan 등)
 //   useEffect(() => {
 //     if (imageDisplayInfo && imageTransform) {
 //       console.log('🔄 이미지 변환 감지 - 재측정 시작:', imageTransform);
-//       // 약간의 지연을 두고 재측정 (transform 애니메이션 완료 후)
 //       const timer = setTimeout(() => {
 //         measureImageDisplay();
 //       }, 50);
@@ -187,22 +199,56 @@
 //     }
 //   }, [imageTransform?.zoom, imageTransform?.panX, imageTransform?.panY, imageTransform?.rotation, imageTransform?.flipH, imageTransform?.flipV, measureImageDisplay, imageDisplayInfo]);
 
-//   // 🔥 새로 추가: bbox 좌표 변환 함수 (zoom, pan, rotation 적용)
+//   // 🔥 이미지 URL 변경 감지
+//   useEffect(() => {
+//     if (currentImageUrl && imageRef.current) {
+//       console.log('🔄 이미지 URL 변경 감지 - 재측정 준비');
+//     }
+//   }, [currentImageUrl]);
+
+//   // 🔥 ResizeObserver를 사용한 컨테이너 크기 변경 감지 (추가 보완)
+//   useEffect(() => {
+//   if (!imageRef.current?.parentElement) return;
+
+//   const container = imageRef.current.parentElement;
+  
+//   // 🔥 패널 열고 닫을 때 이미지 크기 변경 감지
+//   const resizeObserver = new ResizeObserver((entries) => {
+//     for (const entry of entries) {
+//       console.log('📐 패널 크기 변경으로 인한 이미지 컨테이너 크기 변경:', {
+//         width: entry.contentRect.width,
+//         height: entry.contentRect.height
+//       });
+      
+//       // 패널 열고 닫을 때 annotation 좌표 재계산
+//       if (imageDisplayInfo) {
+//         const timer = setTimeout(() => {
+//           measureImageDisplay();
+//         }, 100); // 패널 애니메이션 완료 후
+        
+//         return () => clearTimeout(timer);
+//       }
+//     }
+//   });
+
+//   resizeObserver.observe(container);
+//   return () => resizeObserver.disconnect();
+// }, [imageDisplayInfo, measureImageDisplay]);
+
+//   // 🔥 AI 전용 bbox 변환 함수 (기존 방식 그대로)
 //   const transformBboxCoordinates = useCallback((bbox, originalWidth, originalHeight) => {
 //     if (!imageDisplayInfo) {
-//       console.warn('⚠️ 이미지 표시 정보가 없어서 bbox 변환 불가');
+//       console.warn('⚠️ AI bbox 변환: 이미지 표시 정보가 없음');
 //       return bbox;
 //     }
 
-//     console.log('🔄 bbox 변환 시작:', { bbox, originalWidth, originalHeight });
-//     console.log('📐 변환 정보:', imageDisplayInfo);
+//     console.log('🤖 AI bbox 변환 시작:', { bbox, originalWidth, originalHeight });
+//     console.log('📐 AI 변환 정보:', imageDisplayInfo);
 //     console.log('🎛️ 이미지 변환:', imageTransform);
 
-//     // 원본 이미지 크기 vs 현재 표시 크기 비율 계산
 //     const scaleX = imageDisplayInfo.displayWidth / originalWidth;
 //     const scaleY = imageDisplayInfo.displayHeight / originalHeight;
 
-//     // 🔥 추가: 사용자 변환 적용 (zoom, pan, rotation)
 //     const zoomFactor = imageTransform?.zoom || 1;
 //     const panX = imageTransform?.panX || 0;
 //     const panY = imageTransform?.panY || 0;
@@ -213,7 +259,6 @@
 //     let transformedBbox;
 
 //     if (Array.isArray(bbox)) {
-//       // [x1, y1, x2, y2] 형태
 //       transformedBbox = [
 //         bbox[0] * scaleX * zoomFactor + imageDisplayInfo.offsetX + panX,
 //         bbox[1] * scaleY * zoomFactor + imageDisplayInfo.offsetY + panY,
@@ -221,7 +266,6 @@
 //         bbox[3] * scaleY * zoomFactor + imageDisplayInfo.offsetY + panY
 //       ];
 
-//       // 🔥 플립 적용
 //       if (flipH || flipV) {
 //         const centerX = imageDisplayInfo.containerWidth / 2;
 //         const centerY = imageDisplayInfo.containerHeight / 2;
@@ -229,19 +273,16 @@
 //         if (flipH) {
 //           transformedBbox[0] = 2 * centerX - transformedBbox[0];
 //           transformedBbox[2] = 2 * centerX - transformedBbox[2];
-//           // x1과 x2 순서 바꾸기
 //           [transformedBbox[0], transformedBbox[2]] = [transformedBbox[2], transformedBbox[0]];
 //         }
         
 //         if (flipV) {
 //           transformedBbox[1] = 2 * centerY - transformedBbox[1];
 //           transformedBbox[3] = 2 * centerY - transformedBbox[3];
-//           // y1과 y2 순서 바꾸기
 //           [transformedBbox[1], transformedBbox[3]] = [transformedBbox[3], transformedBbox[1]];
 //         }
 //       }
 
-//       // 🔥 회전 적용 (간단한 90도 단위만)
 //       if (rotation !== 0 && rotation % 90 === 0) {
 //         const centerX = imageDisplayInfo.containerWidth / 2;
 //         const centerY = imageDisplayInfo.containerHeight / 2;
@@ -254,7 +295,6 @@
 //           const y2 = transformedBbox[3] - centerY;
           
 //           if (rotation > 0) {
-//             // 시계방향 90도 회전
 //             transformedBbox = [
 //               centerX - y1,
 //               centerY + x1,
@@ -262,7 +302,6 @@
 //               centerY + x2
 //             ];
 //           } else {
-//             // 반시계방향 90도 회전
 //             transformedBbox = [
 //               centerX + y1,
 //               centerY - x1,
@@ -274,7 +313,6 @@
 //       }
 
 //     } else if (bbox && typeof bbox === 'object') {
-//       // {x, y, width, height} 형태
 //       transformedBbox = {
 //         x: bbox.x * scaleX * zoomFactor + imageDisplayInfo.offsetX + panX,
 //         y: bbox.y * scaleY * zoomFactor + imageDisplayInfo.offsetY + panY,
@@ -282,11 +320,10 @@
 //         height: bbox.height * scaleY * zoomFactor
 //       };
 
-//       // 플립과 회전은 배열 형태로 변환 후 적용
 //       const arrayBbox = [transformedBbox.x, transformedBbox.y, 
 //                         transformedBbox.x + transformedBbox.width, 
 //                         transformedBbox.y + transformedBbox.height];
-//       const processedArray = transformBboxCoordinates(arrayBbox, 1, 1); // 재귀 호출로 변환 적용
+//       const processedArray = transformBboxCoordinates(arrayBbox, 1, 1);
       
 //       transformedBbox = {
 //         x: Math.min(processedArray[0], processedArray[2]),
@@ -295,35 +332,46 @@
 //         height: Math.abs(processedArray[3] - processedArray[1])
 //       };
 //     } else {
-//       console.warn('❌ 알 수 없는 bbox 형태:', bbox);
+//       console.warn('❌ 알 수 없는 AI bbox 형태:', bbox);
 //       return bbox;
 //     }
 
-//     console.log('✅ 변환된 bbox (zoom, pan, rotation 적용):', transformedBbox);
+//     console.log('✅ AI bbox 변환 완료:', transformedBbox);
 //     return transformedBbox;
 //   }, [imageDisplayInfo, imageTransform]);
 
-//   // 🔥 수정: Django 어노테이션을 측정값 형태로 변환하여 렌더링 - visible 상태 고려
+  
+//   // 🎯 수정: 수동 주석은 좌표 변환 없이 그대로 사용
 //   const convertDjangoAnnotationsToMeasurements = () => {
 //     if (!annotationBoxes || !Array.isArray(annotationBoxes)) {
 //       return [];
 //     }
+    
+//     console.log('🔄 Django 어노테이션 → 측정값 변환 시작:', annotationBoxes.length);
     
 //     return annotationBoxes
 //       .filter(annotation => annotation.coordinates && annotation.shape_type)
 //       .map(annotation => {
 //         let startPoint, endPoint, centerPoint, radius;
         
-//         // 🔥 Django 어노테이션의 visible 상태 확인 (measurements 배열에서)
+//         console.log(`🔄 어노테이션 ${annotation.id} 변환:`, annotation.shape_type, annotation.coordinates);
+        
 //         const correspondingMeasurement = measurements.find(m => 
 //           m.id === `django-${annotation.id}` || m.measurementId === `django-${annotation.id}`
 //         );
 //         const isVisible = correspondingMeasurement ? (correspondingMeasurement.visible !== false) : true;
         
+//         console.log(`👁️ 어노테이션 ${annotation.id} visible 상태:`, isVisible);
+        
+//         // 🔥 핵심 수정: Django 어노테이션은 이미 화면 좌표계이므로 변환 없이 사용
+//         const transformedCoords = annotation.coordinates;
+        
+//         console.log('🏷️ Django 어노테이션 - 좌표 변환 없이 사용:', transformedCoords);
+        
 //         switch (annotation.shape_type) {
 //           case 'line':
-//             startPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
-//             endPoint = { x: annotation.coordinates[2], y: annotation.coordinates[3] };
+//             startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
+//             endPoint = { x: transformedCoords[2], y: transformedCoords[3] };
 //             const length = Math.sqrt(
 //               Math.pow(endPoint.x - startPoint.x, 2) + 
 //               Math.pow(endPoint.y - startPoint.y, 2)
@@ -341,12 +389,12 @@
 //             };
             
 //           case 'rectangle':
-//             startPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
+//             startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
 //             endPoint = { 
-//               x: annotation.coordinates[0] + annotation.coordinates[2], 
-//               y: annotation.coordinates[1] + annotation.coordinates[3] 
+//               x: transformedCoords[0] + transformedCoords[2], 
+//               y: transformedCoords[1] + transformedCoords[3] 
 //             };
-//             const area = annotation.coordinates[2] * annotation.coordinates[3];
+//             const area = transformedCoords[2] * transformedCoords[3];
 //             return {
 //               id: `django-${annotation.id}`,
 //               type: 'rectangle',
@@ -360,16 +408,14 @@
 //             };
             
 //           case 'circle':
-//             centerPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
-//             radius = annotation.coordinates[2];
+//             centerPoint = { x: transformedCoords[0], y: transformedCoords[1] };
+//             radius = transformedCoords[2];
 //             const circleArea = Math.PI * radius * radius;
 //             return {
 //               id: `django-${annotation.id}`,
 //               type: 'circle',
 //               startPoint: centerPoint,
 //               endPoint: { x: centerPoint.x + radius, y: centerPoint.y },
-//               centerPoint,
-//               radius,
 //               value: `면적: ${circleArea.toFixed(1)} mm²`,
 //               isComplete: true,
 //               visible: isVisible,
@@ -378,15 +424,14 @@
 //             };
             
 //           default:
+//             console.warn('❌ 알 수 없는 어노테이션 타입:', annotation.shape_type);
 //             return null;
 //         }
 //       })
 //       .filter(Boolean);
 //   };
 
-//   // 🔥 마우스 다운 핸들러 래퍼 (우클릭 차단)
 //   const handleMouseDownWrapper = (event) => {
-//     // 우클릭이면 무시
 //     if (event.button === 2) {
 //       console.log('🖱️ DicomViewer - 우클릭 감지 - 측정 시작 차단');
 //       event.preventDefault();
@@ -394,52 +439,96 @@
 //       return;
 //     }
     
-//     // 좌클릭만 onMouseDown 전달
 //     if (onMouseDown) {
 //       onMouseDown(event);
 //     }
 //   };
 
-//   // 🔥 컨텍스트 메뉴 핸들러
-//   const handleContextMenu = (event, measurement) => {
-//     event.preventDefault();
-//     event.stopPropagation();
+  
+
+//   const handleContextMenu = (e) => {
+//     e.preventDefault();
     
-//     // 🔥 확실하게 측정 중단
-//     if (onMouseUp) {
-//       onMouseUp(event);
+//     const rect = e.currentTarget.getBoundingClientRect();
+//     const x = e.clientX - rect.left;
+//     const y = e.clientY - rect.top;
+    
+//     const clickedMeasurement = [...measurements, ...convertDjangoAnnotationsToMeasurements()].find(measurement => {
+//       if (!measurement.isComplete || !measurement.visible) return false;
+      
+//       const buffer = 10;
+      
+//       switch (measurement.type) {
+//         case 'length':
+//           const lineDistance = distancePointToLine(
+//             { x, y },
+//             measurement.startPoint,
+//             measurement.endPoint
+//           );
+//           return lineDistance <= buffer;
+          
+//         case 'rectangle':
+//           const minX = Math.min(measurement.startPoint.x, measurement.endPoint.x);
+//           const maxX = Math.max(measurement.startPoint.x, measurement.endPoint.x);
+//           const minY = Math.min(measurement.startPoint.y, measurement.endPoint.y);
+//           const maxY = Math.max(measurement.startPoint.y, measurement.endPoint.y);
+          
+//           return x >= minX - buffer && x <= maxX + buffer && 
+//                  y >= minY - buffer && y <= maxY + buffer;
+          
+//         case 'circle':
+//           const centerDistance = Math.sqrt(
+//             Math.pow(x - measurement.startPoint.x, 2) + 
+//             Math.pow(y - measurement.startPoint.y, 2)
+//           );
+//           const radius = Math.sqrt(
+//             Math.pow(measurement.endPoint.x - measurement.startPoint.x, 2) + 
+//             Math.pow(measurement.endPoint.y - measurement.startPoint.y, 2)
+//           );
+          
+//           return Math.abs(centerDistance - radius) <= buffer;
+          
+//         default:
+//           return false;
+//       }
+//     });
+    
+//     if (clickedMeasurement) {
+//       setSelectedMeasurementForMenu(clickedMeasurement);
+//       setContextMenu({ x: e.clientX, y: e.clientY });
 //     }
+//   };
+
+//     const distancePointToLine = (point, lineStart, lineEnd) => {
+//     const A = point.x - lineStart.x;
+//     const B = point.y - lineStart.y;
+//     const C = lineEnd.x - lineStart.x;
+//     const D = lineEnd.y - lineStart.y;
+
+//     const dot = A * C + B * D;
+//     const lenSq = C * C + D * D;
+//     let param = -1;
     
-//     // 🔥 브라우저 뷰포트 기준 좌표 사용 (더 정확함)
-//     const viewportX = event.clientX;
-//     const viewportY = event.clientY;
-    
-//     // 🔥 메뉴가 화면 밖으로 나가지 않도록 조정
-//     const menuWidth = 180;
-//     const menuHeight = 160;
-//     const windowWidth = window.innerWidth;
-//     const windowHeight = window.innerHeight;
-    
-//     let x = viewportX;
-//     let y = viewportY;
-    
-//     // 오른쪽 경계 체크
-//     if (x + menuWidth > windowWidth) {
-//       x = windowWidth - menuWidth - 10;
+//     if (lenSq !== 0) {
+//       param = dot / lenSq;
 //     }
-    
-//     // 하단 경계 체크
-//     if (y + menuHeight > windowHeight) {
-//       y = windowHeight - menuHeight - 10;
+
+//     let xx, yy;
+
+//     if (param < 0) {
+//       xx = lineStart.x;
+//       yy = lineStart.y;
+//     } else if (param > 1) {
+//       xx = lineEnd.x;
+//       yy = lineEnd.y;
+//     } else {
+//       xx = lineStart.x + param * C;
+//       yy = lineStart.y + param * D;
 //     }
-    
-//     // 최소값 보장
-//     x = Math.max(10, x);
-//     y = Math.max(10, y);
-    
-//     setContextMenu({ x, y });
-//     setSelectedMeasurementForMenu(measurement);
-//     console.log('🖱️ 우클릭 컨텍스트 메뉴:', measurement.id, `위치: (${x}, ${y})`);
+
+//     const dx = point.x - xx;
+//     const dy = point.y - yy;
+//     return Math.sqrt(dx * dx + dy * dy);
 //   };
 
 //   const handleCloseContextMenu = () => {
@@ -447,7 +536,6 @@
 //     setSelectedMeasurementForMenu(null);
 //   };
 
-//   // 🔥 좌표 편집 모드 진입
 //   const handleEditCoordinates = () => {
 //     if (selectedMeasurementForMenu && startEditMode) {
 //       console.log('📍 좌표 편집 모드 시작:', selectedMeasurementForMenu.id);
@@ -456,12 +544,9 @@
 //     }
 //   };
 
-//   // 🔥 측정값에 연결된 라벨 찾기 - Django 어노테이션 지원 개선
 //   const findLabelForMeasurement = (measurementId) => {
-//     // Django 어노테이션인지 확인
 //     const measurement = measurements.find(m => m.id === measurementId);
 //     if (measurement && measurement.source === 'django' && measurement.djangoData) {
-//       // Django 어노테이션은 자체적으로 라벨을 가지고 있음
 //       return {
 //         id: measurement.djangoData.id,
 //         label: measurement.djangoData.label,
@@ -476,7 +561,6 @@
 //       };
 //     }
     
-//     // 일반 측정값의 경우 manualAnnotations에서 찾기
 //     const found = manualAnnotations.find(annotation => 
 //       annotation.measurementId === measurementId
 //     );
@@ -484,15 +568,12 @@
 //     return found;
 //   };
 
-//   // 🔥 라벨 편집 모달 열기
 //   const handleEditLabel = () => {
 //     if (selectedMeasurementForMenu) {
 //       console.log('🔍 선택된 측정값:', selectedMeasurementForMenu);
 //       console.log('🔍 전체 manualAnnotations:', manualAnnotations);
       
-//       // 🔥 Django 어노테이션인지 확인
 //       if (selectedMeasurementForMenu.source === 'django' && selectedMeasurementForMenu.djangoData) {
-//         // Django 어노테이션의 경우 djangoData를 사용
 //         const djangoAnnotation = {
 //           id: selectedMeasurementForMenu.djangoData.id,
 //           label: selectedMeasurementForMenu.djangoData.label,
@@ -511,7 +592,6 @@
 //         setAnnotationToEdit(djangoAnnotation);
 //         setIsLabelEditModalOpen(true);
 //       } else {
-//         // 일반 측정값의 경우 기존 로직 사용
 //         const linkedAnnotation = findLabelForMeasurement(selectedMeasurementForMenu.id);
 //         console.log('🔍 찾은 annotation:', linkedAnnotation);
         
@@ -529,7 +609,6 @@
 //           setIsLabelEditModalOpen(true);
 //         } else {
 //           console.error('❌ linkedAnnotation이 null입니다!');
-//           // 임시로 새 라벨 추가 모달로 대체
 //           setMeasurementToLabel(selectedMeasurementForMenu);
 //           setIsLabelingModalOpen(true);
 //         }
@@ -546,7 +625,6 @@
 //     }
 //   };
 
-//   // 🔥 라벨링 모달 열기
 //   const handleLabelMeasurement = () => {
 //     if (selectedMeasurementForMenu) {
 //       console.log('🏷️ 라벨링 시작:', selectedMeasurementForMenu.id);
@@ -556,20 +634,18 @@
 //     }
 //   };
 
-//   // 🔥 라벨링 저장 핸들러 - 실시간 반영 추가
 //   const handleSaveLabeling = async (annotationData) => {
 //     console.log('💾 DicomViewer - 라벨링 저장 시작:', annotationData);
 //     console.log('📏 DicomViewer - 측정값 정보:', measurementToLabel);
+//     console.log('📐 DicomViewer - 현재 이미지 표시 정보:', imageDisplayInfo);
     
-//     // 1. 기존 manualAnnotations에 추가 (UI 표시용)
 //     if (onAddManualAnnotation) {
-//       console.log('✅ DicomViewer - onAddManualAnnotation 호출');
+//       console.log('✅ DicomViewer - onAddManualAnnotation 호출 (좌표변환없음)');
 //       await onAddManualAnnotation(annotationData);
 //     } else {
 //       console.error('❌ DicomViewer - onAddManualAnnotation prop이 없음!');
 //     }
     
-//     // 오른쪽 패널을 수동 주석 탭으로 전환
 //     if (setActiveRightPanel) {
 //       console.log('🔄 DicomViewer - 오른쪽 패널을 manual-annotations로 전환');
 //       setActiveRightPanel('manual-annotations');
@@ -581,7 +657,6 @@
 //     setMeasurementToLabel(null);
 //   };
 
-//   // 🔥 라벨 편집 저장 핸들러 - 실시간 반영 추가
 //   const handleSaveLabelEdit = async (updatedAnnotation) => {
 //     console.log('✏️ DicomViewer - 라벨 편집 저장:', updatedAnnotation);
     
@@ -595,26 +670,22 @@
 //     setAnnotationToEdit(null);
 //   };
 
-//   // 🔥 라벨링 모달 닫기
 //   const handleCloseLabeling = () => {
 //     setIsLabelingModalOpen(false);
 //     setMeasurementToLabel(null);
 //   };
 
-//   // 🔥 라벨 편집 모달 닫기
 //   const handleCloseLabelEdit = () => {
 //     setIsLabelEditModalOpen(false);
 //     setAnnotationToEdit(null);
 //   };
 
-//   // 클릭 시 컨텍스트 메뉴 닫기
 //   const handleClick = () => {
 //     if (contextMenu) {
 //       handleCloseContextMenu();
 //     }
 //   };
 
-//   // 타입별 기본 색상 반환
 //   const getOriginalColor = (type) => {
 //     switch (type) {
 //       case 'length': return '#fbbf24';
@@ -624,7 +695,6 @@
 //     }
 //   };
 
-//   // 🔥 편집 핸들 렌더링
 //   const renderEditHandles = (measurement) => {
 //     if (!isEditMode || editingMeasurement?.id !== measurement.id) return null;
 
@@ -738,7 +808,7 @@
 //     return handles;
 //   };
 
-//   // 🔥 AI 결과 렌더링 함수 (bbox 변환 적용)
+//   // 🔥 AI 결과 렌더링 - 기존 방식 그대로 유지
 //   const renderAIResults = () => {
 //     if (allMeasurementsHidden) {
 //       console.log('👁️ 전체 숨기기 활성화 - AI 결과도 숨김');
@@ -757,41 +827,33 @@
 //       annotations
 //         .filter(result => result && result.visible !== false)
 //         .forEach((result, idx) => {
-//           // AI 결과에서 bbox 좌표 및 원본 이미지 크기 추출
 //           let bbox = result.bbox || result.coordinates;
-//           const originalWidth = result.image_width || 2985; // 기본값
-//           const originalHeight = result.image_height || 2985; // 기본값
+//           const originalWidth = result.image_width || 2985;
+//           const originalHeight = result.image_height || 2985;
           
 //           console.log('🔍 AI 결과 원본:', { bbox, originalWidth, originalHeight });
           
 //           let x1, y1, x2, y2;
           
-//           // bbox가 객체인 경우 처리
 //           if (bbox && typeof bbox === 'object' && !Array.isArray(bbox)) {
-//             // 객체 형태: {x: 323, y: 1020, width: 1068, height: 1695} 또는 {x1, y1, x2, y2}
 //             if (bbox.x !== undefined && bbox.y !== undefined && bbox.width !== undefined && bbox.height !== undefined) {
-//               // {x, y, width, height} 형태를 [x1, y1, x2, y2]로 변환
 //               bbox = [bbox.x, bbox.y, bbox.x + bbox.width, bbox.y + bbox.height];
 //             } else if (bbox.x1 !== undefined && bbox.y1 !== undefined && bbox.x2 !== undefined && bbox.y2 !== undefined) {
-//               // {x1, y1, x2, y2} 형태를 배열로 변환
 //               bbox = [bbox.x1, bbox.y1, bbox.x2, bbox.y2];
 //             } else {
 //               console.warn('❌ AI 결과 bbox 객체 형태를 인식할 수 없음:', bbox);
 //               return;
 //             }
 //           } else if (Array.isArray(bbox) && bbox.length >= 4) {
-//             // 배열 형태: [x1, y1, x2, y2] 또는 [x, y, width, height]
 //             if (result.bbox_format === 'xywh' || (bbox.length === 4 && bbox[2] < bbox[0])) {
-//               // [x, y, width, height] 형태를 [x1, y1, x2, y2]로 변환
 //               bbox = [bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]];
 //             }
-//             // 이미 [x1, y1, x2, y2] 형태인 경우는 그대로 사용
 //           } else {
 //             console.warn('❌ AI 결과에 유효한 bbox가 없음:', result);
 //             return;
 //           }
           
-//           // 🔥 bbox 좌표 변환 적용
+//           // 🔥 AI 결과는 transformBboxCoordinates 사용 (기존 방식)
 //           const transformedBbox = transformBboxCoordinates(bbox, originalWidth, originalHeight);
           
 //           if (Array.isArray(transformedBbox)) {
@@ -800,7 +862,7 @@
 //             x2 = transformedBbox[2];
 //             y2 = transformedBbox[3];
 //           } else {
-//             console.warn('❌ bbox 변환 실패:', transformedBbox);
+//             console.warn('❌ AI bbox 변환 실패:', transformedBbox);
 //             return;
 //           }
           
@@ -815,14 +877,12 @@
 //           const confidence = result.confidence || result.score || 0;
 //           const label = result.label || result.class_name || 'Unknown';
           
-//           // confidence를 퍼센트로 변환
 //           const confidencePercent = confidence > 1 ? confidence : Math.round(confidence * 100);
 
 //           const key = `ai-${modelName}-${result.id || idx}`;
 
 //           aiElements.push(
 //             <g key={key}>
-//               {/* AI bbox 사각형 */}
 //               <rect
 //                 x={Math.min(x1, x2)}
 //                 y={Math.min(y1, y2)}
@@ -837,7 +897,6 @@
 //                 }}
 //               />
               
-//               {/* AI 라벨 배경 */}
 //               <rect
 //                 x={Math.min(x1, x2)}
 //                 y={Math.min(y1, y2) - 25}
@@ -848,7 +907,6 @@
 //                 rx="3"
 //               />
               
-//               {/* AI 라벨 텍스트 */}
 //               <text
 //                 x={Math.min(x1, x2) + 5}
 //                 y={Math.min(y1, y2) - 10}
@@ -863,7 +921,6 @@
 //                 🤖 {label} ({confidencePercent}%)
 //               </text>
 
-//               {/* 모델명 표시 */}
 //               <text
 //                 x={centerX}
 //                 y={Math.max(y1, y2) + 15}
@@ -879,7 +936,6 @@
 //                 [{modelName.toUpperCase()}]
 //               </text>
               
-//               {/* bbox 모서리 점들 */}
 //               <circle cx={x1} cy={y1} r="3" fill={color} />
 //               <circle cx={x2} cy={y1} r="3" fill={color} />
 //               <circle cx={x1} cy={y2} r="3" fill={color} />
@@ -892,15 +948,12 @@
 //     return aiElements;
 //   };
 
-//   // 🔥 수정된 측정값 렌더링 - Django 어노테이션 포함 + visible 상태 엄격 체크 + 전체 숨기기 우선 확인
 //   const renderMeasurements = () => {
-//     // 🔥 새로 추가: 전체 숨기기 상태가 활성화되어 있으면 아무것도 렌더링하지 않음
 //     if (allMeasurementsHidden) {
 //       console.log('👁️ 전체 숨기기 활성화 - 모든 측정값과 어노테이션 숨김');
 //       return [];
 //     }
 
-//     // 🔥 로컬 측정값과 Django 어노테이션 통합
 //     const localMeasurements = [...(measurements || [])];
 //     const djangoMeasurements = convertDjangoAnnotationsToMeasurements();
     
@@ -922,7 +975,6 @@
 
 //     return allMeasurements
 //       .filter(measurement => {
-//         // 🔥 수정: visible 상태 엄격 체크 - false인 경우 완전히 숨김
 //         const isVisible = measurement.visible !== false;
 //         console.log(`📊 측정값 ${measurement.id} visible:`, measurement.visible, '→ 표시:', isVisible);
 //         return isVisible;
@@ -931,22 +983,16 @@
 //         const { id, type, startPoint, endPoint, value, isComplete } = measurement;
 //         const key = id || `temp-${index}`;
         
-//         // 편집 중인 측정값인지 확인
 //         const isEditing = isEditMode && editingMeasurement?.id === measurement.id;
-        
-//         // 🔥 하이라이트된 측정값인지 확인 (깜빡이 효과)
 //         const isHighlighted = highlightedMeasurementId === measurement.id;
         
-//         // 🔥 연결된 라벨 찾기 - Django 어노테이션 지원
 //         let linkedLabel = null;
 //         if (measurement.source === 'django' && measurement.djangoData?.label) {
-//           // Django 어노테이션은 자체적으로 라벨을 가짐
 //           linkedLabel = {
 //             label: measurement.djangoData.label,
 //             memo: measurement.djangoData.dr_text || ''
 //           };
 //         } else {
-//           // 일반 측정값은 manualAnnotations에서 찾기
 //           linkedLabel = findLabelForMeasurement(measurement.id);
 //         }
         
@@ -980,7 +1026,6 @@
 //                 <circle cx={startPoint.x} cy={startPoint.y} r="4" fill={strokeColor} />
 //                 <circle cx={endPoint.x} cy={endPoint.y} r="4" fill={strokeColor} />
                 
-//                 {/* 측정값 표시 */}
 //                 {isComplete && value && (
 //                   <text
 //                     x={(startPoint.x + endPoint.x) / 2}
@@ -1001,7 +1046,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 🔥 연결된 라벨 표시 */}
 //                 {isComplete && linkedLabel && (
 //                   <text
 //                     x={(startPoint.x + endPoint.x) / 2}
@@ -1022,7 +1066,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 편집 핸들 */}
 //                 {renderEditHandles(measurement)}
 //               </g>
 //             );
@@ -1052,7 +1095,6 @@
 //                   onContextMenu={(e) => isComplete && handleContextMenu(e, measurement)}
 //                 />
                 
-//                 {/* 측정값 표시 */}
 //                 {isComplete && value && (
 //                   <text
 //                     x={rectX + rectWidth / 2}
@@ -1073,7 +1115,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 🔥 연결된 라벨 표시 */}
 //                 {isComplete && linkedLabel && (
 //                   <text
 //                     x={rectX + rectWidth / 2}
@@ -1094,7 +1135,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 편집 핸들 */}
 //                 {renderEditHandles(measurement)}
 //               </g>
 //             );
@@ -1124,7 +1164,6 @@
 //                 />
 //                 <circle cx={startPoint.x} cy={startPoint.y} r="4" fill={strokeColor} />
                 
-//                 {/* 측정값 표시 */}
 //                 {isComplete && value && (
 //                   <text
 //                     x={startPoint.x}
@@ -1145,7 +1184,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 🔥 연결된 라벨 표시 */}
 //                 {isComplete && linkedLabel && (
 //                   <text
 //                     x={startPoint.x}
@@ -1166,7 +1204,6 @@
 //                   </text>
 //                 )}
                 
-//                 {/* 편집 핸들 */}
 //                 {renderEditHandles(measurement)}
 //               </g>
 //             );
@@ -1182,7 +1219,6 @@
 
 //   return (
 //     <div className="mv-dicom-viewer">
-//       {/* 실제 DICOM 이미지 표시 */}
 //       <div className="mv-medical-image">
 //         <div 
 //           className="mv-image-content"
@@ -1214,7 +1250,7 @@
 //                   ...getImageStyle(),
 //                   pointerEvents: 'none'
 //                 }}
-//                 onLoad={measureImageDisplay}
+//                 onLoad={handleImageLoad}
 //                 onError={(e) => {
 //                   console.error('❌ DICOM 이미지 로드 실패:', e.target.src);
 //                 }}
@@ -1246,7 +1282,6 @@
 //         </div>
 //       </div>
 
-//       {/* 뷰포트 정보 오버레이 */}
 //       <div className="mv-viewport-info mv-info-left">
 //         <div className="mv-info-row">
 //           <Stethoscope size={12} />
@@ -1268,7 +1303,6 @@
 //             <span>모든 측정값 숨김</span>
 //           </div>
 //         )}
-//         {/* 🔥 이미지 크기 정보 표시 (디버깅용) */}
 //         {imageDisplayInfo && (
 //           <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
 //             📐 {Math.round(imageDisplayInfo.displayWidth)}x{Math.round(imageDisplayInfo.displayHeight)}
@@ -1308,7 +1342,6 @@
 //         )}
 //       </div>
 
-//       {/* 도구 도움말 */}
 //       {selectedTool && !isEditMode && (
 //         <div className="mv-tool-help">
 //           {selectedTool === 'wwwc' && '마우스 드래그: Window/Level 조절'}
@@ -1338,7 +1371,6 @@
 //         </div>
 //       )}
 
-//       {/* 컨텍스트 메뉴 */}
 //       {contextMenu && (
 //         <div 
 //           className="mv-context-menu"
@@ -1372,7 +1404,6 @@
 //         </div>
 //       )}
 
-//       {/* 라벨링 모달들 */}
 //       <Modal
 //         isOpen={isLabelingModalOpen}
 //         onClose={handleCloseLabeling}
@@ -1408,7 +1439,6 @@
 
 // export default DicomViewer;
 
-// /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 완전한 전체 코드
 // /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 수동 주석 좌표변환 제거
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -1770,8 +1800,9 @@ const DicomViewer = ({
         const correspondingMeasurement = measurements.find(m => 
           m.id === `django-${annotation.id}` || m.measurementId === `django-${annotation.id}`
         );
-        const isVisible = correspondingMeasurement ? (correspondingMeasurement.visible !== false) : true;
-        
+        // const isVisible = correspondingMeasurement ? (correspondingMeasurement.visible !== false) : true;
+        const isVisible = annotation.visible !== false;
+
         console.log(`👁️ 어노테이션 ${annotation.id} visible 상태:`, isVisible);
         
         // 🔥 핵심 수정: Django 어노테이션은 이미 화면 좌표계이므로 변환 없이 사용

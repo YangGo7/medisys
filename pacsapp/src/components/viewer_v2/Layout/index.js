@@ -558,21 +558,38 @@
 //   const handleToggleMeasurementVisibility = useCallback((measurementId) => {
 //     console.log('🔧 개별 토글 시작:', measurementId);
     
-//     // 토글 전 상태 확인
-//     const beforeState = measurementsList.find(m => m.id === measurementId);
-//     console.log('🔧 토글 전 상태:', beforeState?.visible);
+//   // 토글 전 상태 확인
+//   const beforeMeasurement = measurementsList.find(m => m.id === measurementId);
+//   console.log('🔧 토글 전 상태:', {
+//     id: measurementId,
+//     visible: beforeMeasurement?.visible,
+//     exists: !!beforeMeasurement
+//   });
+  
+//   // Django 어노테이션인지 확인
+//   const isDjangoMeasurement = measurementId && typeof measurementId === 'string' && measurementId.startsWith('django-');
+  
+//   if (isDjangoMeasurement) {
+//     console.log('👁️ Django 어노테이션 표시/숨김 토글:', measurementId);
     
-//     // Django 어노테이션인지 확인 + 타입 체크 강화
-//     const isDjangoMeasurement = measurementId && typeof measurementId === 'string' && measurementId.startsWith('django-');
-    
-//     if (isDjangoMeasurement) {
-//       console.log('👁️ Django 어노테이션 표시/숨김 토글:', measurementId);
+//     // 🔥 핵심 수정: useMeasurements의 toggleMeasurementVisibility 호출
+//     if (toggleMeasurementVisibility) {
+//       toggleMeasurementVisibility(measurementId);
       
-//       // 1. useMeasurements의 측정값 토글 (Django 어노테이션용)
-//       if (toggleMeasurementVisibility) {
-//         toggleMeasurementVisibility(measurementId);
-//         console.log('✅ useMeasurements에서 Django 어노테이션 토글 완료');
-//       }
+//       // 🔥 추가: 토글 후 상태 확인 (디버깅용)
+//       setTimeout(() => {
+//         const afterMeasurement = measurementsList.find(m => m.id === measurementId);
+//         console.log('🔧 토글 후 상태:', {
+//           id: measurementId,
+//           visible: afterMeasurement?.visible,
+//           changed: beforeMeasurement?.visible !== afterMeasurement?.visible
+//         });
+//       }, 100);
+      
+//       console.log('✅ useMeasurements에서 Django 어노테이션 토글 호출 완료');
+//     } else {
+//       console.error('❌ toggleMeasurementVisibility 함수가 없음!');
+//     }
       
 //       return;
 //     }
@@ -830,6 +847,25 @@
 //       }
 //     }
 //   }, [annotationBoxes, currentImageIndex]); // 🔥 measurementsList 의존성 제거로 무한 루프 방지
+
+
+//   useEffect(() => {
+//   // 패널 상태 변화시 이미지 표시 정보 재계산
+//   const timer = setTimeout(() => {
+//     console.log('🔄 패널 상태 변화 감지 - 이미지 표시 정보 재계산');
+//     if (handleImageDisplayInfoChange) {
+//       // DicomViewer에서 이미지 표시 정보 재측정 요청
+//       const imageDisplayInfo = getImageDisplayInfo();
+//       if (imageDisplayInfo) {
+//         handleImageDisplayInfoChange(imageDisplayInfo);
+//         console.log('📐 업데이트된 이미지 표시 정보:', imageDisplayInfo);
+//       }
+//     }
+//   }, 300); // 패널 애니메이션 완료 후 재계산
+
+//   return () => clearTimeout(timer);
+//   }, [showLeftPanel, activeRightPanel]); // 패널 상태 변화 감지
+
 
 //   // 🔥 측정값 동기화를 위한 useEffect - 자동 Django 어노테이션 변환 제거
 //   useEffect(() => {
@@ -1189,6 +1225,8 @@
 
 //   export default Layout;
 
+
+
 // /home/medical_system/pacsapp/src/components/viewer_v2/Layout/index.js 
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -1449,6 +1487,7 @@ const Layout = () => {
     getAllAnnotations,
     convertMeasurementToAnnotation,
     updateDjangoAnnotation, // 🔥 새로 추가: 개별 수정 함수
+    // toggleDjangoAnnotationVisibility,
     isLoading: annotationsLoading
   } = useAnnotations(
     currentStudyUID,        // 첫 번째: Study UID
@@ -1460,6 +1499,7 @@ const Layout = () => {
     getImageDisplayInfo,   // 🔥 일곱 번째: 실제 이미지 표시 정보 함수
     getOriginalImageSize   // 🔥 여덟 번째: 실제 원본 이미지 크기 함수
   );
+
 
   // 🔥 인스턴스 변경 감지 → AI 결과 업데이트
   useEffect(() => {
@@ -2356,6 +2396,9 @@ const Layout = () => {
           updateDjangoAnnotation={updateDjangoAnnotation} // 🔥 새로 추가!
           annotationBoxes={annotationBoxes} // 🔥 핵심: 생성된 어노테이션 데이터
           
+          // 새로 추가,,
+          onToggleDjangoAnnotationVisibility={toggleDjangoAnnotationVisibility}
+
           // 🔥 레포트 관련 props 추가
           reports={reports}
           showReportModal={showReportModal}

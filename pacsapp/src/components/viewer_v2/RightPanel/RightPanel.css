@@ -85,7 +85,7 @@
 .mv-panel-content {
   flex: 1;
   padding: 20px; /* 16px → 20px */
-  overflow-y: auto;
+  overflow-y: auto !important;
   overflow-x: hidden; /* 🔥 추가: 가로 스크롤 방지 */
   background-color: #1e293b !important;
   min-height: 0; /* 🔥 추가: flexbox 스크롤 문제 해결 */

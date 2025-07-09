@@ -188,7 +188,7 @@ function LoginPage() {
           )}
 
           {/* 더미 로그인 버튼 추가 */}
-          <div className="medisys-dummy-login">
+          {/* <div className="medisys-dummy-login">
             <button
               onClick={handleDummyLogin}
               className="medisys-dummy-login-button"
@@ -198,7 +198,7 @@ function LoginPage() {
             <p className="medisys-dummy-info">
               ID: aa | PW: qq11ww22 | Code: a114e97d
             </p>
-          </div>
+          </div> */}
 
           {/* 메인 로그인 폼 */}
           <LoginForm onLoginSuccess={setUserId} />
