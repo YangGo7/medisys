@@ -1,40 +1,4 @@
-/* /home/medical_system/pacsapp/src/components/viewer_v2/RightPanel/ReportsPanel.css */
-
-/* /home/medical_system/pacsapp/src/components/viewer_v2/RightPanel/ReportsPanel.css */
-
-/* 🚀 기본 레포트 패널 컨테이너 - 스크롤 제거 및 레이아웃 개선 */
-.mv-panel-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #ffffff;
-  overflow: hidden; /* 🚀 전체 스크롤 제거 */
-}
-
-/* 🚀 헤더를 상단 고정으로 변경 */
-.reports-header {
-  padding: 16px;
-  border-bottom: 2px solid #e5e7eb;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  flex-shrink: 0; /* 🚀 고정 영역 */
-}
-
-.reports-title {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e40af;
-  line-height: 1.3;
-}
-
-.reports-subtitle {
-  margin: 0 0 12px 0;
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-/* 🚀 새 레포트 버튼 개선 - 깜빡거림 완전 제거 */
+/* 🚀 새 리포트 버튼 개선 - 차분한 테마 적용 */
 .mv-new-report-btn {
   display: flex;
   align-items: center;
@@ -42,7 +6,7 @@
   gap: 8px;
   width: 100%;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #475569 0%, #64748b 100%); /* 차분한 슬레이트 그라디언트 */
   color: white;
   border: none;
   border-radius: 8px;
@@ -50,18 +14,79 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.3); /* 슬레이트 섀도우 */
   animation: none !important; /* 🚀 깜빡거림 완전 제거 */
 }
 
 .mv-new-report-btn:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #64748b 0%, #6b7280 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 8px rgba(71, 85, 105, 0.4);
+}/* ========================================
+   Reports Panel Dark Theme CSS - Complete
+   ======================================== */
+
+/* 🚀 기본 레포트 패널 컨테이너 - 다크테마 적용 */
+.mv-panel-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e293b; /* 다크 배경 */
+  color: #e5e7eb; /* 밝은 텍스트 */
+  overflow: hidden; /* 🚀 전체 스크롤 제거 */
+}
+
+/* 🚀 헤더를 상단 고정으로 변경 - 다크테마 */
+.reports-header {
+  padding: 16px;
+  border-bottom: 2px solid #475569; /* 다크 보더 */
+  background: linear-gradient(135deg, #334155 0%, #475569 100%); /* 다크 그라디언트 */
+  flex-shrink: 0; /* 🚀 고정 영역 */
+}
+
+.reports-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3b82f6; /* 블루 강조 */
+  line-height: 1.3;
+}
+
+.reports-subtitle {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #94a3b8; /* 회색 텍스트 */
+  font-weight: 500;
+}
+
+/* 🚀 새 레포트 버튼 개선 - 다크 블루 테마 적용 */
+.mv-new-report-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 다크 블루 그라디언트 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3); /* 블루 섀도우 */
+  animation: none !important; /* 🚀 깜빡거림 완전 제거 */
+}
+
+.mv-new-report-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 
 .mv-new-report-btn:disabled {
-  background: #9ca3af;
+  background: #4b5563; /* 다크 비활성 */
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -69,21 +94,21 @@
 
 .mv-new-report-btn.primary {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .mv-new-report-btn.primary:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 
-/* 🚀 필터도 고정 영역 */
+/* 🚀 필터도 고정 영역 - 다크테마 */
 .report-filters {
   display: flex;
   gap: 6px;
   padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  background: #fafafa;
+  border-bottom: 1px solid #334155; /* 다크 보더 */
+  background: #1e293b; /* 다크 배경 */
   flex-wrap: wrap;
   flex-shrink: 0; /* 🚀 고정 영역 */
 }
@@ -95,18 +120,18 @@
   padding: 6px 10px;
   font-size: 11px;
   font-weight: 500;
-  border: 1px solid #d1d5db;
+  border: 1px solid #4b5563; /* 다크 보더 */
   border-radius: 16px;
-  background: white;
-  color: #6b7280;
+  background: #374151; /* 다크 배경 */
+  color: #94a3b8; /* 밝은 텍스트 */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .filter-btn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #4b5563;
+  border-color: #6b7280;
 }
 
 .filter-btn.active {
@@ -115,10 +140,10 @@
   border-color: #3b82f6;
 }
 
-/* 🚀 현재 Study 섹션을 고정 */
+/* 🚀 현재 Study 섹션을 고정 - 다크테마 */
 .current-study-section {
   padding: 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #334155; /* 다크 보더 */
   flex-shrink: 0; /* 🚀 고정 영역 */
 }
 
@@ -126,14 +151,14 @@
   margin: 0 0 12px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: #e5e7eb; /* 밝은 텍스트 */
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0; /* 🚀 고정 */
 }
 
-/* 현재 Study 정보 */
+/* 현재 Study 정보 - 다크테마 */
 .current-study-info {
   display: flex;
   flex-direction: column;
@@ -146,18 +171,18 @@
   gap: 6px;
   font-size: 11px;
   padding: 8px;
-  background: #f8fafc;
+  background: #334155; /* 다크 배경 */
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #475569; /* 다크 보더 */
 }
 
 .study-label {
   font-weight: 600;
-  color: #374151;
+  color: #e5e7eb; /* 밝은 텍스트 */
 }
 
 .study-uid {
-  color: #6b7280;
+  color: #94a3b8; /* 회색 텍스트 */
   font-family: 'Courier New', monospace;
 }
 
@@ -170,20 +195,20 @@
 .no-current-study-report {
   padding: 16px;
   text-align: center;
-  color: #666;
-  border: 2px dashed #ddd;
+  color: #94a3b8; /* 다크 텍스트 */
+  border: 2px dashed #4b5563; /* 다크 보더 */
   border-radius: 8px;
-  background: #f9fafb;
+  background: #334155; /* 다크 배경 */
 }
 
 .no-study-info {
   text-align: center;
   padding: 20px;
-  color: #6b7280;
+  color: #94a3b8; /* 다크 텍스트 */
   font-style: italic;
 }
 
-/* 🚀 레포트 목록만 스크롤 가능하게 */
+/* 🚀 레포트 목록만 스크롤 가능하게 - 다크테마 */
 .reports-list {
   padding: 16px;
   flex: 1; /* 🚀 남은 공간 모두 차지 */
@@ -192,7 +217,7 @@
   flex-direction: column;
 }
 
-/* 🚀 레포트 그리드에 스크롤 */
+/* 🚀 레포트 그리드에 스크롤 - 다크테마 */
 .reports-grid {
   display: flex;
   flex-direction: column;
@@ -202,11 +227,11 @@
   padding-right: 4px;
 }
 
-/* 레포트 아이템 */
+/* 레포트 아이템 - 다크테마 */
 .mv-report-item {
   display: flex;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: #374151; /* 다크 배경 */
+  border: 1px solid #4b5563; /* 다크 보더 */
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s ease;
@@ -216,21 +241,21 @@
 
 .mv-report-item:hover {
   border-color: #3b82f6;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
   transform: translateY(-1px);
 }
 
 .mv-report-item.current-study {
-  border-color: #10b981;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #64748b; /* 차분한 슬레이트 */
+  background: linear-gradient(135deg, #334155 0%, #475569 100%); /* 차분한 다크 그라디언트 */
 }
 
 .mv-report-item.current-study:hover {
-  border-color: #059669;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  border-color: #6b7280; /* 조금 더 밝은 슬레이트 */
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.25);
 }
 
-/* 레포트 정보 */
+/* 레포트 정보 - 다크테마 */
 .mv-report-info {
   flex: 1;
   padding: 12px;
@@ -249,7 +274,7 @@
 .mv-report-title {
   font-size: 13px;
   font-weight: 600;
-  color: #1f2937;
+  color: #e5e7eb; /* 밝은 텍스트 */
   line-height: 1.3;
   display: flex;
   align-items: center;
@@ -258,7 +283,7 @@
 }
 
 .current-badge {
-  background: #10b981;
+  background: #64748b; /* 차분한 슬레이트 */
   color: white;
   font-size: 10px;
   padding: 2px 6px;
@@ -277,7 +302,22 @@
   white-space: nowrap;
 }
 
-/* 메타 정보 */
+.mv-report-status.completed {
+  background-color: #16a34a;
+  color: white;
+}
+
+.mv-report-status.draft {
+  background-color: #d97706;
+  color: white;
+}
+
+.mv-report-status.pending {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* 메타 정보 - 다크테마 */
 .mv-report-meta {
   display: flex;
   flex-direction: column;
@@ -289,46 +329,46 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #6b7280;
+  color: #94a3b8; /* 다크 텍스트 */
 }
 
 .mv-report-updated {
   font-size: 10px;
-  color: #9ca3af;
+  color: #64748b; /* 더 어두운 텍스트 */
 }
 
-/* 레포트 미리보기 */
+/* 레포트 미리보기 - 다크테마 */
 .mv-report-preview {
   font-size: 11px;
-  color: #4b5563;
+  color: #d1d5db; /* 밝은 텍스트 */
   line-height: 1.4;
-  background: #f8fafc;
+  background: #334155; /* 다크 배경 */
   padding: 8px;
   border-radius: 4px;
-  border-left: 3px solid #e5e7eb;
+  border-left: 3px solid #4b5563; /* 다크 보더 */
   margin-top: 4px;
   transition: all 0.2s ease;
 }
 
-/* Study UID */
+/* Study UID - 다크테마 */
 .mv-report-study-uid {
   font-size: 10px;
-  color: #9ca3af;
+  color: #64748b; /* 다크 텍스트 */
   font-family: 'Courier New', monospace;
-  background: #f9fafb;
+  background: #1e293b; /* 다크 배경 */
   padding: 4px 6px;
   border-radius: 3px;
   margin-top: 4px;
 }
 
-/* 컨트롤 버튼들 */
+/* 컨트롤 버튼들 - 다크테마 */
 .mv-report-controls {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 8px;
-  background: #f8fafc;
-  border-left: 1px solid #e5e7eb;
+  background: #334155; /* 다크 배경 */
+  border-left: 1px solid #4b5563; /* 다크 보더 */
 }
 
 .mv-action-btn {
@@ -341,8 +381,8 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
-  border: 1px solid #d1d5db;
+  background: #374151; /* 다크 배경 */
+  border: 1px solid #4b5563; /* 다크 보더 */
   animation: none !important; /* 🚀 애니메이션 제거 */
 }
 
@@ -355,17 +395,17 @@
 }
 
 .mv-action-btn.mv-edit:hover {
-  background: #dbeafe;
+  background: rgba(59, 130, 246, 0.1); /* 블루 호버 */
   border-color: #3b82f6;
 }
 
 .mv-action-btn.mv-view {
-  color: #10b981;
+  color: #64748b; /* 차분한 슬레이트 */
 }
 
 .mv-action-btn.mv-view:hover {
-  background: #dcfce7;
-  border-color: #10b981;
+  background: rgba(100, 116, 139, 0.1); /* 슬레이트 호버 */
+  border-color: #64748b;
 }
 
 .mv-action-btn.mv-delete {
@@ -373,11 +413,11 @@
 }
 
 .mv-action-btn.mv-delete:hover {
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.1); /* 레드 호버 */
   border-color: #ef4444;
 }
 
-/* 🚀 빈 상태 개선 */
+/* 🚀 빈 상태 개선 - 다크테마 */
 .no-reports {
   display: flex;
   flex-direction: column;
@@ -385,7 +425,7 @@
   gap: 16px;
   padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
+  color: #94a3b8; /* 다크 텍스트 */
   flex: 1;
   justify-content: center;
 }
@@ -393,29 +433,31 @@
 .no-reports-icon {
   font-size: 48px;
   opacity: 0.5;
+  color: #4b5563; /* 다크 아이콘 */
 }
 
 .no-reports p {
   margin: 0;
   font-size: 14px;
   font-style: italic;
+  color: #94a3b8; /* 다크 텍스트 */
 }
 
-/* 🚀 로딩 상태 개선 */
+/* 🚀 로딩 상태 개선 - 다크테마 */
 .loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   padding: 40px 20px;
-  color: #6b7280;
+  color: #94a3b8; /* 다크 텍스트 */
   flex: 1;
 }
 
 .loading-spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #4b5563; /* 다크 보더 */
   border-top: 2px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -431,61 +473,53 @@
   display: none; /* 🚀 하단 버튼 숨김 */
 }
 
-/* 기존 푸터 스타일 (숨김 처리) */
-.reports-footer {
-  padding: 16px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8fafc;
-  margin-top: auto;
-  display: none; /* 🚀 완전히 숨김 */
-}
-
-/* 🚀 스크롤바 스타일 개선 */
+/* 🚀 스크롤바 스타일 개선 - 다크테마 */
 .reports-grid::-webkit-scrollbar {
   width: 6px;
 }
 
 .reports-grid::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #334155; /* 다크 트랙 */
   border-radius: 3px;
 }
 
 .reports-grid::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #64748b; /* 다크 썸 */
   border-radius: 3px;
 }
 
 .reports-grid::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #94a3b8; /* 호버 시 더 밝게 */
 }
 
-/* 기존 전체 패널 스크롤바 스타일 (참고용 - 이제 사용 안함) */
+/* 기존 전체 패널 스크롤바 스타일 - 다크테마 */
 .mv-panel-content::-webkit-scrollbar {
   width: 6px;
 }
 
 .mv-panel-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #334155;
+  border-radius: 3px;
 }
 
 .mv-panel-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #64748b;
   border-radius: 3px;
 }
 
 .mv-panel-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #94a3b8;
 }
 
-/* 호버 효과 */
+/* 호버 효과 - 차분한 테마 */
 .mv-report-item:hover .mv-report-preview {
-  background: #f0f9ff;
-  border-left-color: #3b82f6;
+  background: rgba(100, 116, 139, 0.1); /* 차분한 슬레이트 호버 */
+  border-left-color: #64748b;
 }
 
 .mv-report-item.current-study:hover .mv-report-preview {
-  background: #f0fdf4;
-  border-left-color: #10b981;
+  background: rgba(100, 116, 139, 0.15); /* 조금 더 진한 슬레이트 */
+  border-left-color: #64748b;
 }
 
 /* 🚀 모든 깜빡거리는 애니메이션 제거 */
@@ -510,7 +544,7 @@
   animation: none !important;
 }
 
-/* 🚀 반응형 개선 */
+/* 🚀 반응형 개선 - 다크테마 */
 @media (max-width: 768px) {
   .reports-header {
     padding: 12px;
@@ -532,7 +566,7 @@
     flex-direction: row;
     justify-content: center;
     border-left: none;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid #4b5563; /* 다크 보더 */
     padding: 8px 12px;
   }
   
@@ -560,11 +594,11 @@
   }
 }
 
-/* 🚀 접근성 개선 */
+/* 🚀 접근성 개선 - 다크테마 */
 .mv-new-report-btn:focus,
 .filter-btn:focus,
 .mv-action-btn:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #60a5fa; /* 밝은 블루 포커스 */
   outline-offset: 2px;
 }
 
@@ -574,54 +608,7 @@
   outline: none;
 }
 
-/* 🚀 다크모드 지원 (선택사항) */
-@media (prefers-color-scheme: dark) {
-  .mv-panel-content {
-    background: #1f2937;
-    color: #f9fafb;
-  }
-  
-  .reports-header {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-    border-bottom-color: #4b5563;
-  }
-  
-  .reports-title {
-    color: #60a5fa;
-  }
-  
-  .reports-subtitle {
-    color: #9ca3af;
-  }
-  
-  .mv-report-item {
-    background: #374151;
-    border-color: #4b5563;
-  }
-  
-  .mv-report-item:hover {
-    border-color: #60a5fa;
-  }
-  
-  .mv-report-preview {
-    background: #374151;
-    color: #d1d5db;
-  }
-  
-  .filter-btn {
-    background: #374151;
-    border-color: #4b5563;
-    color: #9ca3af;
-  }
-  
-  .filter-btn.active {
-    background: #60a5fa;
-    color: white;
-    border-color: #60a5fa;
-  }
-}
-
-/* 🚀 고대비 모드 지원 */
+/* 🚀 고대비 모드 지원 - 다크테마 */
 @media (prefers-contrast: high) {
   .mv-report-item {
     border-width: 2px;
@@ -636,7 +623,7 @@
   }
   
   .mv-new-report-btn {
-    border: 2px solid #047857;
+    border: 2px solid #475569; /* 차분한 슬레이트 보더 */
   }
 }
 
@@ -654,4 +641,145 @@
   .mv-new-report-btn:hover {
     transform: none;
   }
+}
+
+/* ========================================
+   추가 다크테마 스타일
+   ======================================== */
+
+/* 상태별 추가 스타일 */
+.mv-report-status.reviewing {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.mv-report-status.approved {
+  background-color: #10b981;
+  color: white;
+}
+
+.mv-report-status.rejected {
+  background-color: #ef4444;
+  color: white;
+}
+
+/* 우선순위 표시 */
+.mv-report-priority {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.mv-report-priority.high {
+  background: #ef4444;
+  color: white;
+}
+
+.mv-report-priority.medium {
+  background: #f59e0b;
+  color: white;
+}
+
+.mv-report-priority.low {
+  background: #6b7280;
+  color: white;
+}
+
+/* 레포트 타입 아이콘 */
+.mv-report-type-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  opacity: 0.7;
+}
+
+/* 검색/필터 결과 하이라이트 */
+.mv-report-item.highlighted {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+/* 임시 저장 표시 */
+.mv-report-item.auto-saved {
+  position: relative;
+}
+
+.mv-report-item.auto-saved::after {
+  content: "자동저장됨";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* 협업 표시 */
+.mv-report-collaborators {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.mv-collaborator-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4b5563;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+/* 보안 레벨 표시 */
+.mv-report-security {
+  font-size: 9px;
+  color: #f59e0b;
+  margin-top: 2px;
+}
+
+/* 첨부파일 표시 */
+.mv-report-attachments {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* 댓글 수 표시 */
+.mv-report-comments {
+  font-size: 10px;
+  color: #8b5cf6;
+  margin-top: 2px;
+}
+
+/* 즐겨찾기 표시 */
+.mv-report-favorite {
+  color: #f59e0b;
+  margin-left: 4px;
+}
+
+/* 읽음/안읽음 표시 */
+.mv-report-item.unread {
+  border-left: 3px solid #3b82f6;
+}
+
+.mv-report-item.unread .mv-report-title {
+  font-weight: 700;
+}
+
+/* 만료 예정 경고 */
+.mv-report-expiring {
+  border: 1px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.mv-report-expiring .mv-report-preview {
+  border-left-color: #f59e0b;
 }

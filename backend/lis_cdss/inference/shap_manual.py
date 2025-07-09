@@ -60,6 +60,7 @@ def get_manual_contributions(model, input_dict, background_df):
         elif norm_feat in background_df.columns:
             aligned_df[raw_feat] = background_df[norm_feat]
         else:
+            print(f"❌ 누락된 feature: {norm_feat} → {raw_feat}")
             aligned_df[raw_feat] = np.nan
     aligned_df = aligned_df.fillna(background_df.mean(numeric_only=True))
 

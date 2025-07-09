@@ -31,13 +31,6 @@ const LisRequestPanel = ({ patient, onRequestComplete }) => {
       tests: ['WBC','Neutrophil%', 'Lymphocyte%', 'Eosinophil%', 'Hemoglobin', 'Platelet']
     },
     {
-      id: 'CRP',
-      name: '폐렴 검사',
-      icon: Activity,
-      color: '#10b981',
-      tests: ['CRP']
-    },
-    {
       id: 'NT-proBNP',
       name: '심부전 검사',
       icon: Microscope,

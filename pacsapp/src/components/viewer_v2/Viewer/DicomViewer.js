@@ -1450,22 +1450,25 @@ const DicomViewer = ({
   addMeasurementToAnnotations,
   annotationBoxes = [],
   allMeasurementsHidden = false,
-  onImageDisplayInfoChange
+  onImageDisplayInfoChange,
+  // 🔥 새로 추가: 패널 상태 감지를 위한 props
+  leftPanelWidth,
+  rightPanelWidth,
+  isPanelResizing
 }) => {
   const modelColors = {
     yolov8: '#3b82f6',
     ssd: '#ef4444', 
     simclr: '#22c55e'
   };
-
   const imageRef = useRef(null);
-  const [imageDisplayInfo, setImageDisplayInfo] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedMeasurementForMenu, setSelectedMeasurementForMenu] = useState(null);
   const [isLabelingModalOpen, setIsLabelingModalOpen] = useState(false);
   const [measurementToLabel, setMeasurementToLabel] = useState(null);
   const [isLabelEditModalOpen, setIsLabelEditModalOpen] = useState(false);
   const [annotationToEdit, setAnnotationToEdit] = useState(null);
+  const [imageDisplayInfo, setImageDisplayInfo] = useState(null);
 
   const safePatientInfo = {
     name: '샘플 환자',
@@ -1491,68 +1494,61 @@ const DicomViewer = ({
   console.log('🤖 DicomViewer - safeAiResults:', safeAiResults);
   console.log('📐 DicomViewer - imageDisplayInfo:', imageDisplayInfo);
 
+  // 🔥 이미지 크기 측정 함수 개선
   const measureImageDisplay = useCallback(() => {
-    if (!imageRef.current) {
-      console.warn('⚠️ imageRef.current가 없어서 이미지 크기 측정 불가');
-      return;
-    }
-    
-    const img = imageRef.current;
-    const container = img.parentElement;
-    
-    if (!container) {
-      console.warn('⚠️ container가 없어서 이미지 크기 측정 불가');
-      return;
-    }
-    
-    console.log('📐 이미지 크기 측정 시작');
-    console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
-    console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
-    
-    const containerAspect = container.clientWidth / container.clientHeight;
-    const imageAspect = img.naturalWidth / img.naturalHeight;
-    
-    let displayWidth, displayHeight, offsetX, offsetY;
-    
-    if (imageAspect > containerAspect) {
-      displayWidth = container.clientWidth;
-      displayHeight = container.clientWidth / imageAspect;
-      offsetX = 0;
-      offsetY = (container.clientHeight - displayHeight) / 2;
-    } else {
-      displayHeight = container.clientHeight;
-      displayWidth = container.clientHeight * imageAspect;
-      offsetX = (container.clientWidth - displayWidth) / 2;
-      offsetY = 0;
-    }
-    
-    const scaleX = displayWidth / img.naturalWidth;
-    const scaleY = displayHeight / img.naturalHeight;
-    
-    const displayInfo = {
-      naturalWidth: img.naturalWidth,
-      naturalHeight: img.naturalHeight,
-      containerWidth: container.clientWidth,
-      containerHeight: container.clientHeight,
-      displayWidth,
-      displayHeight,
-      offsetX,
-      offsetY,
-      scaleX,
-      scaleY
-    };
-    
-    console.log('📐 측정 결과:', displayInfo);
-    setImageDisplayInfo(displayInfo);
-    
-    if (onImageDisplayInfoChange) {
-      console.log('🔄 Layout으로 이미지 표시 정보 전달:', displayInfo);
-      onImageDisplayInfoChange(displayInfo);
-    } else {
-      console.warn('⚠️ onImageDisplayInfoChange 콜백이 없음!');
-    }
-  }, [onImageDisplayInfoChange]);
+  if (!imageRef.current) return;
+  
+  const img = imageRef.current;
+  const container = img.parentElement;
+  
+  console.log('📐 이미지 크기 측정 시작');
+  console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
+  console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
+  
+  const containerAspect = container.clientWidth / container.clientHeight;
+  const imageAspect = img.naturalWidth / img.naturalHeight;
+  
+  let displayWidth, displayHeight, offsetX, offsetY;
+  
+  if (imageAspect > containerAspect) {
+    displayWidth = container.clientWidth;
+    displayHeight = container.clientWidth / imageAspect;
+    offsetX = 0;
+    offsetY = (container.clientHeight - displayHeight) / 2;
+  } else {
+    displayHeight = container.clientHeight;
+    displayWidth = container.clientHeight * imageAspect;
+    offsetX = (container.clientWidth - displayWidth) / 2;
+    offsetY = 0;
+  }
+  
+  const scaleX = displayWidth / img.naturalWidth;
+  const scaleY = displayHeight / img.naturalHeight;
+  
+  const displayInfo = {
+    naturalWidth: img.naturalWidth,
+    naturalHeight: img.naturalHeight,
+    containerWidth: container.clientWidth,
+    containerHeight: container.clientHeight,
+    displayWidth,
+    displayHeight,
+    offsetX,
+    offsetY,
+    scaleX,
+    scaleY
+  };
+  
+  console.log('📐 측정 결과:', displayInfo);
+  setImageDisplayInfo(displayInfo);
+  
+  // 🔥 이 부분이 있으면 Layout으로 정보 전달
+  if (onImageDisplayInfoChange) {
+    console.log('🔄 Layout으로 이미지 표시 정보 전달:', displayInfo);
+    onImageDisplayInfoChange(displayInfo);
+  }
+}, [onImageDisplayInfoChange]);
 
+  // 🔥 이미지 로드 핸들러
   const handleImageLoad = useCallback(() => {
     console.log('🖼️ 이미지 로드 완료 - 크기 측정 시작');
     setTimeout(() => {
@@ -1560,6 +1556,7 @@ const DicomViewer = ({
     }, 50);
   }, [measureImageDisplay]);
 
+  // 🔥 창 크기 변경 감지
   useEffect(() => {
     const handleResize = () => {
       if (imageDisplayInfo) {
@@ -1572,6 +1569,36 @@ const DicomViewer = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [imageDisplayInfo, measureImageDisplay]);
 
+  // 🔥 패널 크기 변경 감지 (핵심 수정사항)
+  useEffect(() => {
+    console.log('🔄 패널 크기 변경 감지:', { leftPanelWidth, rightPanelWidth });
+    
+    if (imageDisplayInfo) {
+      // 패널 크기 변경 후 약간의 지연을 두고 재측정
+      const timer = setTimeout(() => {
+        console.log('📐 패널 크기 변경으로 인한 재측정 시작');
+        measureImageDisplay();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [leftPanelWidth, rightPanelWidth, imageDisplayInfo, measureImageDisplay]);
+
+  // 🔥 패널 리사이징 중 감지
+  useEffect(() => {
+    if (isPanelResizing) {
+      console.log('🔄 패널 리사이징 중...');
+    } else if (imageDisplayInfo) {
+      console.log('✅ 패널 리사이징 완료 - 재측정');
+      const timer = setTimeout(() => {
+        measureImageDisplay();
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isPanelResizing, imageDisplayInfo, measureImageDisplay]);
+
+  // 🔥 이미지 변환 감지 (zoom, pan 등)
   useEffect(() => {
     if (imageDisplayInfo && imageTransform) {
       console.log('🔄 이미지 변환 감지 - 재측정 시작:', imageTransform);
@@ -1583,11 +1610,41 @@ const DicomViewer = ({
     }
   }, [imageTransform?.zoom, imageTransform?.panX, imageTransform?.panY, imageTransform?.rotation, imageTransform?.flipH, imageTransform?.flipV, measureImageDisplay, imageDisplayInfo]);
 
+  // 🔥 이미지 URL 변경 감지
   useEffect(() => {
     if (currentImageUrl && imageRef.current) {
       console.log('🔄 이미지 URL 변경 감지 - 재측정 준비');
     }
   }, [currentImageUrl]);
+
+  // 🔥 ResizeObserver를 사용한 컨테이너 크기 변경 감지 (추가 보완)
+  useEffect(() => {
+  if (!imageRef.current?.parentElement) return;
+
+  const container = imageRef.current.parentElement;
+  
+  // 🔥 패널 열고 닫을 때 이미지 크기 변경 감지
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      console.log('📐 패널 크기 변경으로 인한 이미지 컨테이너 크기 변경:', {
+        width: entry.contentRect.width,
+        height: entry.contentRect.height
+      });
+      
+      // 패널 열고 닫을 때 annotation 좌표 재계산
+      if (imageDisplayInfo) {
+        const timer = setTimeout(() => {
+          measureImageDisplay();
+        }, 100); // 패널 애니메이션 완료 후
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  });
+
+  resizeObserver.observe(container);
+  return () => resizeObserver.disconnect();
+}, [imageDisplayInfo, measureImageDisplay]);
 
   // 🔥 AI 전용 bbox 변환 함수 (기존 방식 그대로)
   const transformBboxCoordinates = useCallback((bbox, originalWidth, originalHeight) => {
@@ -1694,6 +1751,7 @@ const DicomViewer = ({
     return transformedBbox;
   }, [imageDisplayInfo, imageTransform]);
 
+  
   // 🎯 수정: 수동 주석은 좌표 변환 없이 그대로 사용
   const convertDjangoAnnotationsToMeasurements = () => {
     if (!annotationBoxes || !Array.isArray(annotationBoxes)) {
@@ -1716,50 +1774,19 @@ const DicomViewer = ({
         
         console.log(`👁️ 어노테이션 ${annotation.id} visible 상태:`, isVisible);
         
-        const originalWidth = annotation.image_width || 2985;
-        const originalHeight = annotation.image_height || 2985;
+        // 🔥 핵심 수정: Django 어노테이션은 이미 화면 좌표계이므로 변환 없이 사용
+        const transformedCoords = annotation.coordinates;
         
-        console.log(`📐 원본 이미지 크기: ${originalWidth} x ${originalHeight}`);
-        
-        // 🎯 핵심 수정: 수동 주석과 Django 어노테이션 구분 처리
-        let transformedCoords;
-        
-        if (annotation.source === 'manual') {
-          console.log('🎯 수동 주석 - 좌표 변환 없이 그대로 사용');
-          transformedCoords = annotation.coordinates;
-        } else if (annotation.source === 'ai') {
-          console.log('🤖 AI 결과 - 좌표 변환 시작');
-          transformedCoords = transformBboxCoordinates(
-            annotation.coordinates,
-            originalWidth,
-            originalHeight
-          );
-        } else {
-          // Django 어노테이션은 이미 화면 좌표계
-          console.log('🏷️ Django 어노테이션 - 좌표 변환 없이 사용');
-          transformedCoords = annotation.coordinates; // ✅ 변환 안 함!
-        }
-        
-        console.log(`✅ 좌표 처리: ${annotation.coordinates} → ${transformedCoords}`);
+        console.log('🏷️ Django 어노테이션 - 좌표 변환 없이 사용:', transformedCoords);
         
         switch (annotation.shape_type) {
           case 'line':
-            if (Array.isArray(transformedCoords) && transformedCoords.length >= 4) {
-              startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
-              endPoint = { x: transformedCoords[2], y: transformedCoords[3] };
-            } else {
-              console.warn('❌ line 좌표 변환 실패:', transformedCoords);
-              startPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
-              endPoint = { x: annotation.coordinates[2], y: annotation.coordinates[3] };
-            }
-            
+            startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
+            endPoint = { x: transformedCoords[2], y: transformedCoords[3] };
             const length = Math.sqrt(
               Math.pow(endPoint.x - startPoint.x, 2) + 
               Math.pow(endPoint.y - startPoint.y, 2)
             );
-            
-            console.log(`📏 line 측정값: 길이=${length.toFixed(1)}mm`);
-            
             return {
               id: `django-${annotation.id}`,
               type: 'length',
@@ -1773,25 +1800,12 @@ const DicomViewer = ({
             };
             
           case 'rectangle':
-            if (Array.isArray(transformedCoords) && transformedCoords.length >= 4) {
-              startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
-              endPoint = { 
-                x: transformedCoords[0] + transformedCoords[2], 
-                y: transformedCoords[1] + transformedCoords[3] 
-              };
-            } else {
-              console.warn('❌ rectangle 좌표 변환 실패:', transformedCoords);
-              startPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
-              endPoint = { 
-                x: annotation.coordinates[0] + annotation.coordinates[2], 
-                y: annotation.coordinates[1] + annotation.coordinates[3] 
-              };
-            }
-            
-            const area = Math.abs(endPoint.x - startPoint.x) * Math.abs(endPoint.y - startPoint.y);
-            
-            console.log(`📐 rectangle 측정값: 면적=${area.toFixed(1)}mm²`);
-            
+            startPoint = { x: transformedCoords[0], y: transformedCoords[1] };
+            endPoint = { 
+              x: transformedCoords[0] + transformedCoords[2], 
+              y: transformedCoords[1] + transformedCoords[3] 
+            };
+            const area = transformedCoords[2] * transformedCoords[3];
             return {
               id: `django-${annotation.id}`,
               type: 'rectangle',
@@ -1805,28 +1819,14 @@ const DicomViewer = ({
             };
             
           case 'circle':
-            if (Array.isArray(transformedCoords) && transformedCoords.length >= 3) {
-              centerPoint = { x: transformedCoords[0], y: transformedCoords[1] };
-              radius = transformedCoords[2];
-              endPoint = { x: centerPoint.x + radius, y: centerPoint.y };
-            } else {
-              console.warn('❌ circle 좌표 변환 실패:', transformedCoords);
-              centerPoint = { x: annotation.coordinates[0], y: annotation.coordinates[1] };
-              radius = annotation.coordinates[2];
-              endPoint = { x: centerPoint.x + radius, y: centerPoint.y };
-            }
-            
+            centerPoint = { x: transformedCoords[0], y: transformedCoords[1] };
+            radius = transformedCoords[2];
             const circleArea = Math.PI * radius * radius;
-            
-            console.log(`🔵 circle 측정값: 반지름=${radius.toFixed(1)}mm, 면적=${circleArea.toFixed(1)}mm²`);
-            
             return {
               id: `django-${annotation.id}`,
               type: 'circle',
               startPoint: centerPoint,
-              endPoint: endPoint,
-              centerPoint,
-              radius,
+              endPoint: { x: centerPoint.x + radius, y: centerPoint.y },
               value: `면적: ${circleArea.toFixed(1)} mm²`,
               isComplete: true,
               visible: isVisible,
@@ -1835,7 +1835,7 @@ const DicomViewer = ({
             };
             
           default:
-            console.warn('❌ 알 수 없는 shape_type:', annotation.shape_type);
+            console.warn('❌ 알 수 없는 어노테이션 타입:', annotation.shape_type);
             return null;
         }
       })
@@ -1855,39 +1855,91 @@ const DicomViewer = ({
     }
   };
 
-  const handleContextMenu = (event, measurement) => {
-    event.preventDefault();
-    event.stopPropagation();
+  
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
     
-    if (onMouseUp) {
-      onMouseUp(event);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const clickedMeasurement = [...measurements, ...convertDjangoAnnotationsToMeasurements()].find(measurement => {
+      if (!measurement.isComplete || !measurement.visible) return false;
+      
+      const buffer = 10;
+      
+      switch (measurement.type) {
+        case 'length':
+          const lineDistance = distancePointToLine(
+            { x, y },
+            measurement.startPoint,
+            measurement.endPoint
+          );
+          return lineDistance <= buffer;
+          
+        case 'rectangle':
+          const minX = Math.min(measurement.startPoint.x, measurement.endPoint.x);
+          const maxX = Math.max(measurement.startPoint.x, measurement.endPoint.x);
+          const minY = Math.min(measurement.startPoint.y, measurement.endPoint.y);
+          const maxY = Math.max(measurement.startPoint.y, measurement.endPoint.y);
+          
+          return x >= minX - buffer && x <= maxX + buffer && 
+                 y >= minY - buffer && y <= maxY + buffer;
+          
+        case 'circle':
+          const centerDistance = Math.sqrt(
+            Math.pow(x - measurement.startPoint.x, 2) + 
+            Math.pow(y - measurement.startPoint.y, 2)
+          );
+          const radius = Math.sqrt(
+            Math.pow(measurement.endPoint.x - measurement.startPoint.x, 2) + 
+            Math.pow(measurement.endPoint.y - measurement.startPoint.y, 2)
+          );
+          
+          return Math.abs(centerDistance - radius) <= buffer;
+          
+        default:
+          return false;
+      }
+    });
+    
+    if (clickedMeasurement) {
+      setSelectedMeasurementForMenu(clickedMeasurement);
+      setContextMenu({ x: e.clientX, y: e.clientY });
     }
+  };
+
+    const distancePointToLine = (point, lineStart, lineEnd) => {
+    const A = point.x - lineStart.x;
+    const B = point.y - lineStart.y;
+    const C = lineEnd.x - lineStart.x;
+    const D = lineEnd.y - lineStart.y;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
     
-    const viewportX = event.clientX;
-    const viewportY = event.clientY;
-    
-    const menuWidth = 180;
-    const menuHeight = 160;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    
-    let x = viewportX;
-    let y = viewportY;
-    
-    if (x + menuWidth > windowWidth) {
-      x = windowWidth - menuWidth - 10;
+    if (lenSq !== 0) {
+      param = dot / lenSq;
     }
-    
-    if (y + menuHeight > windowHeight) {
-      y = windowHeight - menuHeight - 10;
+
+    let xx, yy;
+
+    if (param < 0) {
+      xx = lineStart.x;
+      yy = lineStart.y;
+    } else if (param > 1) {
+      xx = lineEnd.x;
+      yy = lineEnd.y;
+    } else {
+      xx = lineStart.x + param * C;
+      yy = lineStart.y + param * D;
     }
-    
-    x = Math.max(10, x);
-    y = Math.max(10, y);
-    
-    setContextMenu({ x, y });
-    setSelectedMeasurementForMenu(measurement);
-    console.log('🖱️ 우클릭 컨텍스트 메뉴:', measurement.id, `위치: (${x}, ${y})`);
+
+    const dx = point.x - xx;
+    const dy = point.y - yy;
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
   const handleCloseContextMenu = () => {

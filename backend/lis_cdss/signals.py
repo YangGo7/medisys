@@ -11,11 +11,7 @@ logger = logging.getLogger(__name__)
 
 def generate_explanation(results: dict, panel: str) -> str:
     panel = panel.upper()
-    if panel == 'PNEUMONIA':
-        crp = results.get('CRP')
-        if crp is not None and crp > 5.0:
-            return f"CRP 수치({crp})가 5.0을 초과하여 폐렴 가능성이 있습니다."
-    elif panel == 'CHF':
+    if panel == 'CHF':
         bnp = results.get('NT-proBNP')
         if bnp is not None and bnp > 125:
             return f"NT-proBNP 수치({bnp})가 125를 초과하여 심부전 가능성이 있습니다."

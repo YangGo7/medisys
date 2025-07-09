@@ -6,14 +6,12 @@ import './ResultInputForm.css';
 
 const aliasToPanelName = {
   asthma: 'CBC',
-  pneumonia: 'CRP',
   chf: 'NT-proBNP',
   pe: 'D-Dimer',
   copd: 'ABGA',
 };
 
 const panelComponents = {
-  CRP: ['CRP'],
   CBC: [
     'WBC',
     'Neutrophils',
@@ -28,8 +26,6 @@ const panelComponents = {
 };
 
 const componentUnits = {
-  // CRP 기반 (폐렴)
-  CRP: 'mg/L',
   // NT-proBNP 기반 (심부전)
   'NT-proBNP': 'pg/mL',
   // D-dimer 기반 (폐색전증)

@@ -8,7 +8,7 @@ from .serializers import CDSSResultSerializer
 from openmrs_models.models import Person
 from samples.models import Sample
 from lis_cdss.inference.blood_inference import run_blood_model, get_alias_map, align_input_to_model_features
-from lis_cdss.inference.model_registry import get_model
+import lis_cdss.inference.model_registry as model_registry
 from lis_cdss.inference.shap_manual import get_manual_contributions
 from lis_cdss.inference.explanation import generate_explanation
 from lis_cdss.inference.background_registry import get_background_df
@@ -24,6 +24,9 @@ import numpy as np
 from uuid import UUID
 import pandas as pd
 import shap
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
 import requests
 import joblib
 from datetime import datetime
@@ -108,12 +111,7 @@ def generate_explanation(results: dict, panel: str) -> str:
     """
     panel = panel.upper()
 
-    if panel == 'PNEUMONIA':
-        crp = results.get('CRP')
-        if crp is not None and crp > 5.0:
-            return f"CRP 수치({crp})가 5.0을 초과하여 폐렴 가능성이 있습니다."
-
-    elif panel == 'CHF':
+    if panel == 'CHF':
         bnp = results.get('NT-proBNP')
         if bnp is not None and bnp > 125:
             return f"NT-proBNP 수치({bnp})가 125를 초과하여 심부전 가능성이 있습니다."
@@ -162,7 +160,7 @@ def receive_model_result(request):
             background_df = pd.read_csv(background_path)
             print("📊 background_df 로드 성공:", background_df.shape)
             
-            model = get_model(mapped_type)
+            model = model_registry.get_model(mapped_type)
             if model is None:
                 raise ValueError(f"❌ SHAP 계산용 모델이 존재하지 않습니다: {mapped_type}")
 
@@ -294,9 +292,13 @@ def receive_full_sample(request):
         # 🔧 2. 모델 불러오기 (alias 포함)
         alias_map = get_alias_map()
         model_key = alias_map.get(test_type, test_type)
-        model = get_model(model_key)
+        model = model_registry.get_model(model_key)
+        print("📌 API 내부 모델 목록:", list(model_registry.get_all_models().keys()))
         if not model:
-            raise ValueError(f"❌ {model_key} 모델이 등록되어 있지 않습니다.")
+            current_models = list(model_registry.get_all_models().keys())
+            raise ValueError(f"❌ {model_key} 모델이 등록되어 있지 않습니다.\n"
+                             f"현재 등록된 모델: {current_models}\n"
+                             f"alias_map: {alias_map}")
 
         # 🔧 3. 입력값 align
         aligned_input = align_input_to_model_features(input_dict, model)
@@ -330,19 +332,43 @@ def receive_full_sample(request):
             "features": list(shap_contrib.keys()),
             "contributions": list(shap_contrib.values())
         }
+        
+        # ✅ force plot HTML 생성
+        force_plot_html = get_force_plot_html(model, df, background_df, model.feature_names_in_)
 
         return Response({
             "sample": sample_id,
             "test_type": test_type,
             "prediction": pred,
             "prediction_prob": prob,
-            "shap_data": contrib_result
+            "shap_data": contrib_result,
+            "shap_html": force_plot_html
         }, status=200)
 
     except Exception as e:
         print("❌ receive_full_sample 예외:", e)
         traceback.print_exc()
         return Response({"error": str(e)}, status=500)   
+    
+def get_force_plot_html(model, input_df, background_df, feature_names):
+    try:
+        explainer = shap.Explainer(model.predict, background_df)
+        shap_values = explainer(input_df)
+
+        # force plot 그리기 (matplotlib=True는 PNG 저장용)
+        shap.plots.force(shap_values[0], matplotlib=True, feature_names=feature_names)
+
+        buf = BytesIO()
+        plt.savefig(buf, format="png", bbox_inches='tight')
+        plt.close()
+        buf.seek(0)
+
+        img_base64 = base64.b64encode(buf.read()).decode("utf-8")
+        return f'<img src="data:image/png;base64,{img_base64}" style="width:100%; height:auto;"/>'
+
+    except Exception as e:
+        print(f"❌ force plot 생성 실패: {e}")
+        return "<p>SHAP 시각화 실패</p>"
         
 @api_view(['GET'])
 def test_type_counts(request):

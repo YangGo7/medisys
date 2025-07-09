@@ -1,4 +1,4 @@
-// import React, { useState, useEffect, useMemo, useRef } from 'react';
+// import React, { useState, useEffect, useRef, useMemo } from 'react';
 // import { X, Mic, Save, FileText, StopCircle, Play } from 'lucide-react';
 // import './ReportModal.css';
 
@@ -6,17 +6,18 @@
 //   isOpen,
 //   onClose,
 //   onSave,
+//   onPrint,
   
 //   // 환자 및 Study 정보
-//   patientInfo,
-//   currentStudyUID,
+//   patientInfo = {},
+//   currentStudyUID = '',
 //   currentInstanceUID,
 //   currentInstanceNumber,
   
 //   // AI 결과 및 어노테이션 데이터
 //   allAIResults,
 //   currentInstanceResults,
-//   annotationBoxes,
+//   annotationBoxes = [],
 //   instances,
   
 //   // 슬라이스 이동 함수
@@ -24,7 +25,10 @@
   
 //   // 초기 레포트 내용 (편집 시)
 //   initialContent = '',
-//   initialStatus = 'draft'
+//   initialStatus = 'draft',
+  
+//   // 설정
+//   title = '📋 진단 레포트'
 // }) => {
 //   // 🔥 상태 관리
 //   const [selectedFindings, setSelectedFindings] = useState([]);
@@ -33,24 +37,34 @@
 //   const [isRecording, setIsRecording] = useState(false);
 //   const [recordingTime, setRecordingTime] = useState(0);
 //   const [sttLoading, setSttLoading] = useState(false);
+//   const [hasPermission, setHasPermission] = useState(false);
   
 //   // STT 관련 상태
 //   const [mediaRecorder, setMediaRecorder] = useState(null);
 //   const [audioBlob, setAudioBlob] = useState(null);
+//   const [audioUrl, setAudioUrl] = useState(null);
 //   const audioChunks = useRef([]);
 //   const timerRef = useRef(null);
 
-//   // 🔥 Study 전체 데이터 준비
+//   // API 기반 환자 정보 상태
+//   const [apiPatientInfo, setApiPatientInfo] = useState({});
+//   const [isLoadingPatientInfo, setIsLoadingPatientInfo] = useState(false);
+
+//   // 🔥 Study 전체 데이터 준비 (데이터 없어도 작동하도록 수정)
 //   const studyReportData = useMemo(() => {
-//     if (!allAIResults || !annotationBoxes || !instances) {
-//       return null;
-//     }
-
 //     console.log('📊 Study 레포트 데이터 준비 시작');
+//     console.log('📊 받은 데이터:', { 
+//       allAIResults: !!allAIResults, 
+//       annotationBoxes: annotationBoxes?.length || 0, 
+//       instances: instances?.length || 0 
+//     });
 
-//     // 1. AI 결과 수집 (인스턴스별)
-//     const aiFindings = [];
-//     if (allAIResults.groupedByInstance) {
+//     // 기본 구조 생성 (데이터가 없어도)
+//     let aiFindings = [];
+//     let manualFindings = [];
+
+//     // 1. AI 결과 수집 (안전하게)
+//     if (allAIResults && allAIResults.groupedByInstance) {
 //       Object.entries(allAIResults.groupedByInstance).forEach(([instanceUID, results]) => {
 //         const instanceNumber = results.instance_number;
         
@@ -74,9 +88,8 @@
 //       });
 //     }
 
-//     // 2. 어노테이션 수집 (인스턴스별)
-//     const manualFindings = [];
-//     if (Array.isArray(annotationBoxes)) {
+//     // 2. 어노테이션 수집 (안전하게)
+//     if (Array.isArray(annotationBoxes) && annotationBoxes.length > 0) {
 //       annotationBoxes.forEach(annotation => {
 //         manualFindings.push({
 //           id: `manual-${annotation.id || Math.random().toString(36).substr(2, 9)}`,
@@ -104,15 +117,23 @@
 //       findingsByInstance[instanceUID].push(finding);
 //     });
 
-//     // 4. 주요 소견이 있는 인스턴스 식별
+//     // 4. 주요 소견이 있는 인스턴스 식별 (instances가 없어도 작동)
 //     const significantInstances = Object.entries(findingsByInstance)
 //       .map(([instanceUID, findings]) => {
-//         const instance = instances.find(inst => inst.sopInstanceUID === instanceUID);
-//         const instanceIndex = instance ? instances.indexOf(instance) : -1;
+//         let instanceNumber = findings[0]?.instanceNumber || 0;
+        
+//         // instances 배열이 있다면 정확한 번호 찾기
+//         if (Array.isArray(instances) && instances.length > 0) {
+//           const instance = instances.find(inst => inst.sopInstanceUID === instanceUID);
+//           const instanceIndex = instance ? instances.indexOf(instance) : -1;
+//           if (instanceIndex >= 0) {
+//             instanceNumber = instanceIndex + 1;
+//           }
+//         }
         
 //         return {
 //           instanceUID,
-//           instanceNumber: instanceIndex >= 0 ? instanceIndex + 1 : findings[0]?.instanceNumber || 0,
+//           instanceNumber,
 //           count: findings.length,
 //           summary: findings.map(f => f.label).join(', '),
 //           findings: findings
@@ -122,7 +143,7 @@
 //       .sort((a, b) => b.count - a.count);
 
 //     const result = {
-//       total_instances: instances.length,
+//       total_instances: (Array.isArray(instances) ? instances.length : 1),
 //       total_findings: allFindings.length,
 //       ai_findings: aiFindings.length,
 //       manual_findings: manualFindings.length,
@@ -140,6 +161,103 @@
 //     if (!studyReportData || !currentInstanceUID) return [];
 //     return studyReportData.findings_by_instance[currentInstanceUID] || [];
 //   }, [studyReportData, currentInstanceUID]);
+
+//   // 🔥 API에서 환자 정보 로드 (loadReport 함수가 있다면 사용)
+//   useEffect(() => {
+//     const loadPatientInfoFromAPI = async () => {
+//       if (isOpen && currentStudyUID) {
+//         setIsLoadingPatientInfo(true);
+//         try {
+//           // loadReport 함수가 있는 경우에만 사용
+//           if (typeof window !== 'undefined' && window.loadReport) {
+//             console.log('🔍 ReportModal에서 환자 정보 직접 로드 시도...');
+//             const result = await window.loadReport(currentStudyUID);
+            
+//             if (result && result.status === 'success' && result.report) {
+//               const report = result.report;
+//               const apiInfo = {
+//                 patient_name: report.patient_name || 'Unknown',
+//                 patient_id: report.patient_id || 'Unknown',
+//                 study_date: report.study_date || 
+//                            report.study_datetime?.split(' ')[0] || 
+//                            report.scheduled_exam_datetime?.split(' ')[0] ||
+//                            report.created_at?.split('T')[0] ||
+//                            'Unknown',
+//                 doctor_name: report.doctor_name || '미배정',
+//                 doctor_id: report.doctor_id || 'UNASSIGNED'
+//               };
+              
+//               setApiPatientInfo(apiInfo);
+//               console.log('✅ API에서 환자 정보 로드 성공:', apiInfo);
+//             }
+//           }
+//         } catch (error) {
+//           console.error('❌ API 환자 정보 로드 실패:', error);
+//         } finally {
+//           setIsLoadingPatientInfo(false);
+//         }
+//       }
+//     };
+
+//     loadPatientInfoFromAPI();
+//   }, [isOpen, currentStudyUID]);
+
+//   // 🔥 초기 데이터 설정
+//   useEffect(() => {
+//     if (isOpen) {
+//       setReportText(initialContent);
+//       setReportStatus(initialStatus);
+//       setSelectedFindings([]);
+//       setAudioBlob(null);
+//       setAudioUrl(null);
+//       setSttLoading(false);
+//       checkMicrophonePermission();
+      
+//       // 녹음 중이라면 정리
+//       if (isRecording) {
+//         stopRecording();
+//       }
+//     }
+//   }, [isOpen, initialContent, initialStatus]);
+
+//   // ESC 키로 모달 닫기
+//   useEffect(() => {
+//     const handleEscape = (e) => {
+//       if (e.key === 'Escape' && isOpen) {
+//         handleClose();
+//       }
+//     };
+
+//     if (isOpen) {
+//       document.addEventListener('keydown', handleEscape);
+//       return () => document.removeEventListener('keydown', handleEscape);
+//     }
+//   }, [isOpen]);
+
+//   // 컴포넌트 언마운트 시 정리
+//   useEffect(() => {
+//     return () => {
+//       if (timerRef.current) {
+//         clearInterval(timerRef.current);
+//       }
+//       if (mediaRecorder && mediaRecorder.state === 'recording') {
+//         mediaRecorder.stop();
+//       }
+//       if (audioUrl) {
+//         URL.revokeObjectURL(audioUrl);
+//       }
+//     };
+//   }, []);
+
+//   // 환자 정보 우선순위: API > prop > fallback
+//   const patient = {
+//     ...patientInfo,
+//     patient_name: apiPatientInfo.patient_name || patientInfo.patient_name || 'Unknown',
+//     patient_id: apiPatientInfo.patient_id || patientInfo.patient_id || 'Unknown',
+//     study_date: apiPatientInfo.study_date || (patientInfo.study_date && patientInfo.study_date !== '' ? patientInfo.study_date : 'Unknown'),
+//     doctor_name: apiPatientInfo.doctor_name || (patientInfo.doctor_name && patientInfo.doctor_name !== '' ? patientInfo.doctor_name : '미배정'),
+//     doctor_id: apiPatientInfo.doctor_id || patientInfo.doctor_id || 'UNASSIGNED'
+//   };
 
 //   // 🔥 소견 추가 핸들러
 //   const handleAddFinding = (finding) => {
@@ -168,19 +286,45 @@
 //   // 🔥 인스턴스 이동 핸들러
 //   const handleGoToInstance = (instanceNumber) => {
 //     if (onGoToInstance && typeof onGoToInstance === 'function') {
-//       // instanceNumber는 1-based, 배열 인덱스는 0-based
 //       onGoToInstance(instanceNumber - 1);
 //       console.log('🔄 인스턴스 이동:', instanceNumber);
 //     }
 //   };
 
-//   // 🔥 녹음 시작
-//   const startRecording = async () => {
+// // 🔥 마이크 권한 확인
+//   const checkMicrophonePermission = async () => {
 //     try {
 //       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//       const recorder = new MediaRecorder(stream);
-      
+//       setHasPermission(true);
+//       stream.getTracks().forEach(track => track.stop());
+//       console.log('✅ 마이크 권한 승인됨');
+//     } catch (error) {
+//       console.error('❌ 마이크 권한 거부됨:', error);
+//       setHasPermission(false);
+//     }
+//   };
+
+//   // 🔥 녹음 시작
+//   const startRecording = async () => {
+//     if (!hasPermission) {
+//       await checkMicrophonePermission();
+//       return;
+//     }
+
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({ 
+//         audio: {
+//           echoCancellation: true,
+//           noiseSuppression: true,
+//           autoGainControl: true,
+//           sampleRate: 44100
+//         }
+//       });
+
 //       audioChunks.current = [];
+//       const recorder = new MediaRecorder(stream, {
+//         mimeType: 'audio/webm;codecs=opus'
+//       });
       
 //       recorder.ondataavailable = (event) => {
 //         if (event.data.size > 0) {
@@ -192,7 +336,9 @@
 //         const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
 //         setAudioBlob(blob);
         
-//         // 스트림 정리
+//         const url = URL.createObjectURL(blob);
+//         setAudioUrl(url);
+        
 //         stream.getTracks().forEach(track => track.stop());
 //       };
       
@@ -207,7 +353,7 @@
 //       setIsRecording(true);
 //       setRecordingTime(0);
       
-//       console.log('🎤 녹음 시작');
+//       console.log('🎤 녹음 시작됨');
 //     } catch (error) {
 //       console.error('❌ 녹음 시작 실패:', error);
 //       alert('마이크 접근 권한이 필요합니다.');
@@ -236,7 +382,7 @@
 //     try {
 //       const formData = new FormData();
 //       formData.append('audio', audioBlob, 'recording.webm');
-//       formData.append('patient_id', patientInfo?.patient_id || 'UNKNOWN');
+//       formData.append('patient_id', patient.patient_id || 'UNKNOWN');
 //       formData.append('study_uid', currentStudyUID || 'UNKNOWN');
       
 //       // 🔥 선택된 소견 정보도 함께 전달
@@ -286,6 +432,10 @@
         
 //         // 오디오 블롭 정리
 //         setAudioBlob(null);
+//         if (audioUrl) {
+//           URL.revokeObjectURL(audioUrl);
+//           setAudioUrl(null);
+//         }
         
 //       } else {
 //         throw new Error(result.message || 'STT 처리 실패');
@@ -296,43 +446,6 @@
 //       alert(`음성 인식 실패: ${error.message}`);
 //     } finally {
 //       setSttLoading(false);
-//     }
-//   };
-
-//   // 🔥 레포트 저장 핸들러
-//   const handleSave = async () => {
-//     if (!reportText.trim()) {
-//       alert('종합 소견을 입력해주세요.');
-//       return;
-//     }
-
-//     try {
-//       const reportData = {
-//         content: reportText,
-//         status: reportStatus,
-//         selected_findings: selectedFindings,
-//         patient_info: patientInfo,
-//         study_uid: currentStudyUID,
-//         instance_uid: currentInstanceUID,
-//         created_at: new Date().toISOString()
-//       };
-
-//       if (typeof onSave === 'function') {
-//         const result = await onSave(reportData);
-        
-//         if (result && result.success) {
-//           alert(`레포트가 저장되었습니다! (상태: ${reportStatus})`);
-//           onClose();
-//         } else {
-//           alert(`저장 실패: ${result?.error || '알 수 없는 오류'}`);
-//         }
-//       } else {
-//         console.error('onSave 함수가 정의되지 않았습니다.');
-//         alert('저장 함수가 정의되지 않았습니다.');
-//       }
-//     } catch (error) {
-//       console.error('❌ 레포트 저장 실패:', error);
-//       alert('레포트 저장 중 오류가 발생했습니다.');
 //     }
 //   };
 
@@ -358,33 +471,71 @@
 //     };
 //   }, [isRecording]);
 
-//   // 🔥 초기 데이터 설정
-//   useEffect(() => {
-//     if (isOpen) {
-//       setReportText(initialContent);
-//       setReportStatus(initialStatus);
-//       setSelectedFindings([]);
-//       setAudioBlob(null);
-//       setSttLoading(false);
-      
-//       // 녹음 중이라면 정리
-//       if (isRecording) {
-//         stopRecording();
-//       }
+//   // 🔥 레포트 저장/수정 핸들러
+//   const handleSave = async () => {
+//     if (!reportText.trim()) {
+//       alert('종합 소견을 입력해주세요.');
+//       return;
 //     }
-//   }, [isOpen, initialContent, initialStatus]);
 
-//   // 컴포넌트 언마운트 시 정리
-//   useEffect(() => {
-//     return () => {
-//       if (timerRef.current) {
-//         clearInterval(timerRef.current);
+//     try {
+//       const reportData = {
+//         content: reportText,
+//         status: reportStatus,
+//         selected_findings: selectedFindings,
+//         patient_info: patient,
+//         study_uid: currentStudyUID,
+//         instance_uid: currentInstanceUID,
+//         created_at: new Date().toISOString()
+//       };
+
+//       if (typeof onSave === 'function') {
+//         const result = await onSave(reportData);
+        
+//         if (result && result.success) {
+//           const action = result.isEdit ? '수정' : '저장';
+//           alert(`레포트가 ${action}되었습니다! (상태: ${reportStatus})`);
+//           handleClose();
+//         } else {
+//           const action = result?.isEdit ? '수정' : '저장';
+//           alert(`${action} 실패: ${result?.error || '알 수 없는 오류'}`);
+//         }
+//       } else {
+//         console.error('onSave 함수가 정의되지 않았습니다.');
+//         alert('저장 함수가 정의되지 않았습니다.');
 //       }
-//       if (mediaRecorder && mediaRecorder.state === 'recording') {
-//         mediaRecorder.stop();
-//       }
-//     };
-//   }, []);
+//     } catch (error) {
+//       console.error('❌ 레포트 처리 실패:', error);
+//       alert('레포트 처리 중 오류가 발생했습니다.');
+//     }
+//   };
+
+//   const handleClose = () => {
+//     // 녹음 중이면 중지
+//     if (isRecording) {
+//       stopRecording();
+//     }
+//     // 오디오 URL 정리
+//     if (audioUrl) {
+//       URL.revokeObjectURL(audioUrl);
+//       setAudioUrl(null);
+//     }
+//     onClose();
+//   };
+
+//   const handlePrint = () => {
+//     if (onPrint) {
+//       onPrint();
+//     } else {
+//       window.print();
+//     }
+//   };
+
+//   const handleOverlayClick = (e) => {
+//     if (e.target === e.currentTarget) {
+//       handleClose();
+//     }
+//   };
 
 //   // 시간 포맷팅
 //   const formatTime = (seconds) => {
@@ -393,40 +544,50 @@
 //     return `${mins}:${secs.toString().padStart(2, '0')}`;
 //   };
 
+//   // Study UID 표시용
+//   const displayStudyUID = currentStudyUID ? 
+//     currentStudyUID.substring(0, 30) + '...' : 'N/A';
+
 //   if (!isOpen) return null;
 
 //   return (
-//     <div className="report-modal-overlay">
+//     <div className="report-modal-overlay" onClick={handleOverlayClick}>
 //       <div className="report-modal-content">
 //         {/* 헤더 */}
 //         <div className="report-modal-header">
-//           <h2>📋 진단 레포트 작성</h2>
-//           <button className="report-modal-close" onClick={onClose}>
+//           <h2>{title}</h2>
+//           <button className="report-modal-close" onClick={handleClose}>
 //             <X size={24} />
 //           </button>
 //         </div>
-
-//         {/* 환자 정보 */}
-//         <div className="report-section">
-//           <h3>👤 환자 정보</h3>
-//           <div className="patient-info-grid">
-//             <div>
-//               <strong>환자명:</strong> {patientInfo?.patient_name || 'Unknown'}
+        
+//         {/* 환자 정보 섹션 */}
+//         <div className="patient-info">
+//           <h3 className="patient-info-header">👤 환자 정보</h3>
+//           <div className="patient-grid">
+//             <div className="patient-grid-item">
+//               <strong>환자명:</strong> {patient.patient_name}
 //             </div>
-//             <div>
-//               <strong>환자 ID:</strong> {patientInfo?.patient_id || 'Unknown'}
+//             <div className="patient-grid-item">
+//               <strong>환자 ID:</strong> {patient.patient_id}
 //             </div>
-//             <div>
-//               <strong>검사일:</strong> {patientInfo?.study_date || 'Unknown'}
+//             <div className="patient-grid-item">
+//               <strong>검사일:</strong> {patient.study_date}
+//             </div>
+//             <div className="patient-grid-item">
+//               <strong>판독의:</strong> {patient.doctor_name} {isLoadingPatientInfo && '(로딩중...)'}
+//             </div>
+//             <div className="patient-grid-item">
+//               <strong>Study UID:</strong> {displayStudyUID}
 //             </div>
 //           </div>
 //         </div>
 
 //         {/* Study 전체 요약 */}
 //         {studyReportData && (
-//           <div className="report-section">
-//             <h3>📊 Study 전체 요약</h3>
-//             <div className="study-summary">
+//           <div className="study-summary">
+//             <h3 className="study-summary-header">📊 Study 전체 요약</h3>
+//             <div className="study-summary-content">
 //               <p>
 //                 총 {studyReportData.total_instances}개 인스턴스 중 {studyReportData.significant_instances.length}개에서 소견 발견
 //               </p>
@@ -438,8 +599,10 @@
 //         )}
 
 //         {/* 현재 인스턴스 소견 */}
-//         <div className="report-section">
-//           <h3>🔍 현재 인스턴스 #{currentInstanceNumber} 소견</h3>
+//         <div className="current-instance-section">
+//           <h3 className="current-instance-header">
+//             🔍 현재 인스턴스 #{currentInstanceNumber} 소견
+//           </h3>
 //           {currentInstanceFindings.length > 0 ? (
 //             <div className="findings-grid">
 //               {currentInstanceFindings.map(finding => (
@@ -474,8 +637,8 @@
 
 //         {/* 다른 인스턴스 네비게이션 */}
 //         {studyReportData && studyReportData.significant_instances.length > 1 && (
-//           <div className="report-section">
-//             <h3>🔄 다른 인스턴스 주요 소견</h3>
+//           <div className="instance-navigation">
+//             <h3 className="instance-navigation-header">🔄 다른 인스턴스 주요 소견</h3>
 //             <select 
 //               className="instance-selector"
 //               onChange={(e) => {
@@ -500,10 +663,10 @@
 //         )}
 
 //         {/* 선택된 소견 목록 */}
-//         <div className="report-section">
-//           <h3>📝 선택된 소견 ({selectedFindings.length}개)</h3>
+//         <div className="selected-findings">
+//           <h3 className="selected-findings-header">📝 선택된 소견 ({selectedFindings.length}개)</h3>
 //           {selectedFindings.length > 0 ? (
-//             <div className="selected-findings">
+//             <div className="selected-findings-list">
 //               {selectedFindings.map(finding => (
 //                 <div key={finding.id} className="selected-finding-item">
 //                   <span className="selected-finding-text">
@@ -533,8 +696,10 @@
 //         </div>
 
 //         {/* STT 섹션 */}
-//         <div className="report-section">
-//           <h3>🎤 음성 인식 (SOAP 형식 자동 변환)</h3>
+//         <div className="stt-section">
+//           <h3 className="stt-header">
+//             🎤 음성 인식 (SOAP 형식 자동 변환)
+//           </h3>
           
 //           {selectedFindings.length > 0 && (
 //             <div className="stt-context">
@@ -552,50 +717,188 @@
 //           <div className="stt-controls">
 //             {!isRecording ? (
 //               <button 
-//                 className="stt-btn record-btn"
+//                 className="button record-btn"
 //                 onClick={startRecording}
-//                 disabled={sttLoading}
+//                 disabled={sttLoading || !hasPermission}
 //               >
 //                 <Mic size={20} />
 //                 🎤 녹음 시작
 //               </button>
 //             ) : (
-//               <button 
-//                 className="stt-btn stop-btn"
-//                 onClick={stopRecording}
-//               >
-//                 <StopCircle size={20} />
-//                 🔴 녹음 중지 ({formatTime(recordingTime)})
-//               </button>
+//               <div className="recording-controls">
+//                 <button 
+//                   className="button stop-btn"
+//                   onClick={stopRecording}
+//                 >
+//                   <StopCircle size={20} />
+//                   🔴 녹음 중지 ({formatTime(recordingTime)})
+//                 </button>
+//                 <div className="recording-indicator">
+//                   <span className="recording-dot"></span>
+//                   녹음 중...
+//                 </div>
+//               </div>
 //             )}
             
 //             {audioBlob && !isRecording && (
 //               <button 
-//                 className="stt-btn process-btn"
+//                 className="button process-btn"
 //                 onClick={processSTT}
 //                 disabled={sttLoading}
 //               >
-//                 {sttLoading ? '🤖 변환 중...' : '🤖 SOAP 변환'}
+//                 {sttLoading ? (
+//                   <>
+//                     <span className="spinner"></span>
+//                     🤖 변환 중...
+//                   </>
+//                 ) : (
+//                   '🤖 SOAP 변환'
+//                 )}
 //               </button>
 //             )}
 //           </div>
-//         </div>
 
-//         {/* 종합 소견 */}
+//           {/* 오디오 재생 */}
+//           {audioUrl && (
+//             <div className="audio-playback">
+//               <audio
+//                 src={audioUrl}
+//                 controls
+//                 className="audio-controls"
+//               />
+//               <p className="audio-hint">
+//                 💡 녹음된 음성을 확인한 후 SOAP 변환 버튼을 눌러주세요.
+//               </p>
+//             </div>
+//           )}
+
+//           {/* 권한 없음 안내 */}
+//           {!hasPermission && (
+//             <div className="permission-warning">
+//               <strong>⚠️ 마이크 권한이 필요합니다</strong>
+//               <p>음성 인식을 사용하려면 브라우저에서 마이크 접근을 허용해야 합니다.</p>
+//               <button
+//                 onClick={checkMicrophonePermission}
+//                 className="button permission-button"
+//               >
+//                 권한 다시 요청
+//               </button>
+//             </div>
+//           )}
+//         </div>
+        
+//         {/* AI 분석 결과 섹션 (기존 호환성 유지) */}
+//         {allAIResults && allAIResults.results && allAIResults.results.length > 0 && (
+//           <div className="ai-results">
+//             <h3 className="ai-results-header">
+//               🤖 AI 분석 결과 (상세)
+//             </h3>
+            
+//             <div className="ai-results-summary">
+//               <strong>사용 모델:</strong> {
+//                 allAIResults.model_used || 
+//                 allAIResults.model_type || 
+//                 allAIResults.model ||
+//                 allAIResults.models?.[0] ||
+//                 allAIResults.results?.[0]?.model ||
+//                 'Unknown'
+//               } | 
+//               <strong> 총 검출:</strong> {allAIResults.detections || allAIResults.results.length}개
+//             </div>
+            
+//             {allAIResults.results.map((result, index) => (
+//               <div 
+//                 key={index} 
+//                 className={`detection-item ${
+//                   result.confidence > 0.8 ? 'detection-item-high' : 'detection-item-low'
+//                 }`}
+//               >
+//                 <div>
+//                   <div className={`detection-label ${
+//                     result.confidence > 0.8 ? 'detection-label-high' : 'detection-label-low'
+//                   }`}>
+//                     {result.label}
+//                   </div>
+//                   <div className="detection-location">
+//                     위치: [{result.bbox.join(', ')}]
+//                   </div>
+//                 </div>
+//                 <span className={`confidence-badge ${
+//                   result.confidence > 0.8 ? 'confidence-badge-high' : 'confidence-badge-low'
+//                 }`}>
+//                   {Math.round(result.confidence * 100)}%
+//                 </span>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+        
+//         {/* 수동 어노테이션 섹션 (기존 호환성 유지) */}
+//         {annotationBoxes.length > 0 && (
+//           <div className="annotations">
+//             <h3 className="annotations-header">
+//               ✏️ 수동 어노테이션 (상세)
+//             </h3>
+            
+//             {annotationBoxes.map((box, index) => (
+//               <div key={box.id} className="annotation-item">
+//                 <div>
+//                   <div className="annotation-label">
+//                     수동 마킹 {index + 1}: {box.label}
+//                   </div>
+//                   <div className="annotation-location">
+//                     화면 위치: [{box.left}, {box.top}, {box.left + box.width}, {box.top + box.height}]
+//                   </div>
+//                   {box.doctor_name && (
+//                     <div className="annotation-doctor">
+//                       판독의: {box.doctor_name}
+//                     </div>
+//                   )}
+//                 </div>
+//                 <span className="annotation-badge">
+//                   수동
+//                 </span>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+        
+//         {/* 종합 소견 섹션 */}
 //         <div className="report-section">
-//           <h3>📝 종합 소견</h3>
-//           <textarea 
-//             className="report-textarea"
+//           <h3 className="report-section-header">📝 종합 소견</h3>
+//           <textarea
 //             value={reportText}
 //             onChange={(e) => setReportText(e.target.value)}
-//             placeholder="종합 소견을 입력하거나 음성 인식을 사용하세요..."
+//             placeholder="의료진의 종합 소견을 입력하세요...
+
+// SOAP 형식 예시:
+
+// S (Subjective - 주관적 소견):
+// 환자가 호소하는 증상이나 병력
+
+// O (Objective - 객관적 소견):
+// 영상에서 관찰되는 구체적인 소견들
+// - 심장 크기 및 형태
+// - 폐 실질 소견
+// - 흉막 소견
+
+// A (Assessment - 평가/진단):
+// 영상 소견을 바탕으로 한 진단적 평가
+
+// P (Plan - 계획):
+// 추가 검사나 추적 관찰 권고사항"
+//             className="report-textarea"
 //             rows={15}
 //           />
+//           <div className="textarea-footer">
+//             <span>글자 수: {reportText.length}</span>
+//             <span>💡 음성인식 결과가 SOAP 형식으로 자동 추가됩니다</span>
+//           </div>
 //         </div>
 
 //         {/* 레포트 상태 */}
-//         <div className="report-section">
-//           <h3>📋 레포트 상태</h3>
+//         <div className="report-status-section">
+//           <h3 className="report-status-header">📋 레포트 상태</h3>
 //           <select 
 //             value={reportStatus} 
 //             onChange={(e) => setReportStatus(e.target.value)}
@@ -606,18 +909,26 @@
 //             <option value="approved">승인</option>
 //           </select>
 //         </div>
-
-//         {/* 버튼들 */}
-//         <div className="report-modal-footer">
-//           <button 
-//             className="modal-btn cancel-btn"
-//             onClick={onClose}
+        
+//         {/* 버튼 섹션 */}
+//         <div className="button-container">
+//           <button
+//             onClick={handleClose}
+//             className="button cancel-button"
 //           >
 //             ❌ 취소
 //           </button>
-//           <button 
-//             className="modal-btn save-btn"
+          
+//           <button
+//             onClick={handlePrint}
+//             className="button print-button"
+//           >
+//             🖨️ 인쇄
+//           </button>
+          
+//           <button
 //             onClick={handleSave}
+//             className="button save-button"
 //             disabled={sttLoading}
 //           >
 //             <Save size={20} />
@@ -630,7 +941,6 @@
 // };
 
 // export default ReportModal;
-
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Mic, Save, FileText, StopCircle, Play } from 'lucide-react';
@@ -1185,33 +1495,33 @@ const ReportModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="report-modal-overlay" onClick={handleOverlayClick}>
-      <div className="report-modal-content">
+    <div className="rpt-modal-overlay" onClick={handleOverlayClick}>
+      <div className="rpt-modal-content">
         {/* 헤더 */}
-        <div className="report-modal-header">
+        <div className="rpt-modal-header">
           <h2>{title}</h2>
-          <button className="report-modal-close" onClick={handleClose}>
+          <button className="rpt-modal-close" onClick={handleClose}>
             <X size={24} />
           </button>
         </div>
         
         {/* 환자 정보 섹션 */}
-        <div className="patient-info">
-          <h3 className="patient-info-header">👤 환자 정보</h3>
-          <div className="patient-grid">
-            <div className="patient-grid-item">
+        <div className="rpt-patient-info">
+          <h3 className="rpt-patient-info-header">👤 환자 정보</h3>
+          <div className="rpt-patient-grid">
+            <div className="rpt-patient-grid-item">
               <strong>환자명:</strong> {patient.patient_name}
             </div>
-            <div className="patient-grid-item">
+            <div className="rpt-patient-grid-item">
               <strong>환자 ID:</strong> {patient.patient_id}
             </div>
-            <div className="patient-grid-item">
+            <div className="rpt-patient-grid-item">
               <strong>검사일:</strong> {patient.study_date}
             </div>
-            <div className="patient-grid-item">
+            <div className="rpt-patient-grid-item">
               <strong>판독의:</strong> {patient.doctor_name} {isLoadingPatientInfo && '(로딩중...)'}
             </div>
-            <div className="patient-grid-item">
+            <div className="rpt-patient-grid-item">
               <strong>Study UID:</strong> {displayStudyUID}
             </div>
           </div>
@@ -1219,9 +1529,9 @@ const ReportModal = ({
 
         {/* Study 전체 요약 */}
         {studyReportData && (
-          <div className="study-summary">
-            <h3 className="study-summary-header">📊 Study 전체 요약</h3>
-            <div className="study-summary-content">
+          <div className="rpt-study-summary">
+            <h3 className="rpt-study-summary-header">📊 Study 전체 요약</h3>
+            <div className="rpt-study-summary-content">
               <p>
                 총 {studyReportData.total_instances}개 인스턴스 중 {studyReportData.significant_instances.length}개에서 소견 발견
               </p>
@@ -1233,26 +1543,26 @@ const ReportModal = ({
         )}
 
         {/* 현재 인스턴스 소견 */}
-        <div className="current-instance-section">
-          <h3 className="current-instance-header">
+        <div className="rpt-current-instance-section">
+          <h3 className="rpt-current-instance-header">
             🔍 현재 인스턴스 #{currentInstanceNumber} 소견
           </h3>
           {currentInstanceFindings.length > 0 ? (
-            <div className="findings-grid">
+            <div className="rpt-findings-grid">
               {currentInstanceFindings.map(finding => (
-                <div key={finding.id} className="finding-item">
-                  <div className="finding-info">
-                    <span className={`finding-badge ${finding.type}`}>
+                <div key={finding.id} className="rpt-finding-item">
+                  <div className="rpt-finding-info">
+                    <span className={`rpt-finding-badge ${finding.type}`}>
                       {finding.type === 'ai' ? '🤖' : '✏️'}
                     </span>
-                    <span className="finding-label">{finding.label}</span>
+                    <span className="rpt-finding-label">{finding.label}</span>
                     {finding.confidence && finding.confidence > 0 && (
-                      <span className="finding-confidence">({finding.confidence}%)</span>
+                      <span className="rpt-finding-confidence">({finding.confidence}%)</span>
                     )}
-                    <span className="finding-source">{finding.source}</span>
+                    <span className="rpt-finding-source">{finding.source}</span>
                   </div>
                   <button
-                    className={`add-finding-btn ${
+                    className={`rpt-add-finding-btn ${
                       selectedFindings.some(f => f.id === finding.id) 
                         ? 'added' : 'available'
                     }`}
@@ -1265,16 +1575,16 @@ const ReportModal = ({
               ))}
             </div>
           ) : (
-            <p className="no-findings">현재 인스턴스에는 소견이 없습니다.</p>
+            <p className="rpt-no-findings">현재 인스턴스에는 소견이 없습니다.</p>
           )}
         </div>
 
         {/* 다른 인스턴스 네비게이션 */}
         {studyReportData && studyReportData.significant_instances.length > 1 && (
-          <div className="instance-navigation">
-            <h3 className="instance-navigation-header">🔄 다른 인스턴스 주요 소견</h3>
+          <div className="rpt-instance-navigation">
+            <h3 className="rpt-instance-navigation-header">🔄 다른 인스턴스 주요 소견</h3>
             <select 
-              className="instance-selector"
+              className="rpt-instance-selector"
               onChange={(e) => {
                 const instanceNumber = parseInt(e.target.value);
                 if (instanceNumber && !isNaN(instanceNumber)) {
@@ -1297,17 +1607,17 @@ const ReportModal = ({
         )}
 
         {/* 선택된 소견 목록 */}
-        <div className="selected-findings">
-          <h3 className="selected-findings-header">📝 선택된 소견 ({selectedFindings.length}개)</h3>
+        <div className="rpt-selected-findings">
+          <h3 className="rpt-selected-findings-header">📝 선택된 소견 ({selectedFindings.length}개)</h3>
           {selectedFindings.length > 0 ? (
-            <div className="selected-findings-list">
+            <div className="rpt-selected-findings-list">
               {selectedFindings.map(finding => (
-                <div key={finding.id} className="selected-finding-item">
-                  <span className="selected-finding-text">
+                <div key={finding.id} className="rpt-selected-finding-item">
+                  <span className="rpt-selected-finding-text">
                     {finding.display_text}
                   </span>
                   <button
-                    className="remove-finding-btn"
+                    className="rpt-remove-finding-btn"
                     onClick={() => handleRemoveFinding(finding.id)}
                   >
                     ✕
@@ -1316,31 +1626,31 @@ const ReportModal = ({
               ))}
               
               <button 
-                className="clear-all-findings-btn"
+                className="rpt-clear-all-findings-btn"
                 onClick={() => setSelectedFindings([])}
               >
                 🗑️ 모두 제거
               </button>
             </div>
           ) : (
-            <p className="no-selected-findings">
+            <p className="rpt-no-selected-findings">
               선택된 소견이 없습니다. 위에서 소견을 선택해주세요.
             </p>
           )}
         </div>
 
         {/* STT 섹션 */}
-        <div className="stt-section">
-          <h3 className="stt-header">
+        <div className="rpt-stt-section">
+          <h3 className="rpt-stt-header">
             🎤 음성 인식 (SOAP 형식 자동 변환)
           </h3>
           
           {selectedFindings.length > 0 && (
-            <div className="stt-context">
-              <p className="stt-context-label">
+            <div className="rpt-stt-context">
+              <p className="rpt-stt-context-label">
                 💡 다음 소견들을 참고하여 종합 의견을 말씀해주세요:
               </p>
-              <ul className="stt-context-list">
+              <ul className="rpt-stt-context-list">
                 {selectedFindings.map(finding => (
                   <li key={finding.id}>{finding.display_text}</li>
                 ))}
@@ -1348,10 +1658,10 @@ const ReportModal = ({
             </div>
           )}
           
-          <div className="stt-controls">
+          <div className="rpt-stt-controls">
             {!isRecording ? (
               <button 
-                className="button record-btn"
+                className="rpt-button rpt-record-btn"
                 onClick={startRecording}
                 disabled={sttLoading || !hasPermission}
               >
@@ -1359,16 +1669,16 @@ const ReportModal = ({
                 🎤 녹음 시작
               </button>
             ) : (
-              <div className="recording-controls">
+              <div className="rpt-recording-controls">
                 <button 
-                  className="button stop-btn"
+                  className="rpt-button rpt-stop-btn"
                   onClick={stopRecording}
                 >
                   <StopCircle size={20} />
                   🔴 녹음 중지 ({formatTime(recordingTime)})
                 </button>
-                <div className="recording-indicator">
-                  <span className="recording-dot"></span>
+                <div className="rpt-recording-indicator">
+                  <span className="rpt-recording-dot"></span>
                   녹음 중...
                 </div>
               </div>
@@ -1376,13 +1686,13 @@ const ReportModal = ({
             
             {audioBlob && !isRecording && (
               <button 
-                className="button process-btn"
+                className="rpt-button rpt-process-btn"
                 onClick={processSTT}
                 disabled={sttLoading}
               >
                 {sttLoading ? (
                   <>
-                    <span className="spinner"></span>
+                    <span className="rpt-spinner"></span>
                     🤖 변환 중...
                   </>
                 ) : (
@@ -1394,13 +1704,13 @@ const ReportModal = ({
 
           {/* 오디오 재생 */}
           {audioUrl && (
-            <div className="audio-playback">
+            <div className="rpt-audio-playback">
               <audio
                 src={audioUrl}
                 controls
-                className="audio-controls"
+                className="rpt-audio-controls"
               />
-              <p className="audio-hint">
+              <p className="rpt-audio-hint">
                 💡 녹음된 음성을 확인한 후 SOAP 변환 버튼을 눌러주세요.
               </p>
             </div>
@@ -1408,12 +1718,12 @@ const ReportModal = ({
 
           {/* 권한 없음 안내 */}
           {!hasPermission && (
-            <div className="permission-warning">
+            <div className="rpt-permission-warning">
               <strong>⚠️ 마이크 권한이 필요합니다</strong>
               <p>음성 인식을 사용하려면 브라우저에서 마이크 접근을 허용해야 합니다.</p>
               <button
                 onClick={checkMicrophonePermission}
-                className="button permission-button"
+                className="rpt-button rpt-permission-button"
               >
                 권한 다시 요청
               </button>
@@ -1423,12 +1733,12 @@ const ReportModal = ({
         
         {/* AI 분석 결과 섹션 (기존 호환성 유지) */}
         {allAIResults && allAIResults.results && allAIResults.results.length > 0 && (
-          <div className="ai-results">
-            <h3 className="ai-results-header">
+          <div className="rpt-ai-results">
+            <h3 className="rpt-ai-results-header">
               🤖 AI 분석 결과 (상세)
             </h3>
             
-            <div className="ai-results-summary">
+            <div className="rpt-ai-results-summary">
               <strong>사용 모델:</strong> {
                 allAIResults.model_used || 
                 allAIResults.model_type || 
@@ -1443,22 +1753,22 @@ const ReportModal = ({
             {allAIResults.results.map((result, index) => (
               <div 
                 key={index} 
-                className={`detection-item ${
-                  result.confidence > 0.8 ? 'detection-item-high' : 'detection-item-low'
+                className={`rpt-detection-item ${
+                  result.confidence > 0.8 ? 'rpt-detection-item-high' : 'rpt-detection-item-low'
                 }`}
               >
                 <div>
-                  <div className={`detection-label ${
-                    result.confidence > 0.8 ? 'detection-label-high' : 'detection-label-low'
+                  <div className={`rpt-detection-label ${
+                    result.confidence > 0.8 ? 'rpt-detection-label-high' : 'rpt-detection-label-low'
                   }`}>
                     {result.label}
                   </div>
-                  <div className="detection-location">
+                  <div className="rpt-detection-location">
                     위치: [{result.bbox.join(', ')}]
                   </div>
                 </div>
-                <span className={`confidence-badge ${
-                  result.confidence > 0.8 ? 'confidence-badge-high' : 'confidence-badge-low'
+                <span className={`rpt-confidence-badge ${
+                  result.confidence > 0.8 ? 'rpt-confidence-badge-high' : 'rpt-confidence-badge-low'
                 }`}>
                   {Math.round(result.confidence * 100)}%
                 </span>
@@ -1469,27 +1779,27 @@ const ReportModal = ({
         
         {/* 수동 어노테이션 섹션 (기존 호환성 유지) */}
         {annotationBoxes.length > 0 && (
-          <div className="annotations">
-            <h3 className="annotations-header">
+          <div className="rpt-annotations">
+            <h3 className="rpt-annotations-header">
               ✏️ 수동 어노테이션 (상세)
             </h3>
             
             {annotationBoxes.map((box, index) => (
-              <div key={box.id} className="annotation-item">
+              <div key={box.id} className="rpt-annotation-item">
                 <div>
-                  <div className="annotation-label">
+                  <div className="rpt-annotation-label">
                     수동 마킹 {index + 1}: {box.label}
                   </div>
-                  <div className="annotation-location">
+                  <div className="rpt-annotation-location">
                     화면 위치: [{box.left}, {box.top}, {box.left + box.width}, {box.top + box.height}]
                   </div>
                   {box.doctor_name && (
-                    <div className="annotation-doctor">
+                    <div className="rpt-annotation-doctor">
                       판독의: {box.doctor_name}
                     </div>
                   )}
                 </div>
-                <span className="annotation-badge">
+                <span className="rpt-annotation-badge">
                   수동
                 </span>
               </div>
@@ -1498,8 +1808,8 @@ const ReportModal = ({
         )}
         
         {/* 종합 소견 섹션 */}
-        <div className="report-section">
-          <h3 className="report-section-header">📝 종합 소견</h3>
+        <div className="rpt-report-section">
+          <h3 className="rpt-report-section-header">📝 종합 소견</h3>
           <textarea
             value={reportText}
             onChange={(e) => setReportText(e.target.value)}
@@ -1521,22 +1831,22 @@ A (Assessment - 평가/진단):
 
 P (Plan - 계획):
 추가 검사나 추적 관찰 권고사항"
-            className="report-textarea"
+            className="rpt-report-textarea"
             rows={15}
           />
-          <div className="textarea-footer">
+          <div className="rpt-textarea-footer">
             <span>글자 수: {reportText.length}</span>
             <span>💡 음성인식 결과가 SOAP 형식으로 자동 추가됩니다</span>
           </div>
         </div>
 
         {/* 레포트 상태 */}
-        <div className="report-status-section">
-          <h3 className="report-status-header">📋 레포트 상태</h3>
+        <div className="rpt-report-status-section">
+          <h3 className="rpt-report-status-header">📋 레포트 상태</h3>
           <select 
             value={reportStatus} 
             onChange={(e) => setReportStatus(e.target.value)}
-            className="status-selector"
+            className="rpt-status-selector"
           >
             <option value="draft">초안</option>
             <option value="completed">완료</option>
@@ -1545,24 +1855,24 @@ P (Plan - 계획):
         </div>
         
         {/* 버튼 섹션 */}
-        <div className="button-container">
+        <div className="rpt-button-container">
           <button
             onClick={handleClose}
-            className="button cancel-button"
+            className="rpt-button rpt-cancel-button"
           >
             ❌ 취소
           </button>
           
           <button
             onClick={handlePrint}
-            className="button print-button"
+            className="rpt-button rpt-print-button"
           >
             🖨️ 인쇄
           </button>
           
           <button
             onClick={handleSave}
-            className="button save-button"
+            className="rpt-button rpt-save-button"
             disabled={sttLoading}
           >
             <Save size={20} />

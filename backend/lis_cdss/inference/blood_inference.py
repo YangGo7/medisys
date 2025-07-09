@@ -2,12 +2,11 @@ import joblib
 import os
 import pandas as pd
 import traceback
-from lis_cdss.inference.model_registry import load_model, get_model
+from lis_cdss.inference.model_registry import load_model, get_model, get_all_models
 
 # test_type → 실제 모델명 매핑
 ALIAS_TO_MODEL = {
     "CBC": "ASTHMA",
-    "CRP": "PNEUMONIA",
     "NT-proBNP": "CHF",
     "D-Dimer": "PE",
     "ABGA": "COPD"
@@ -137,6 +136,7 @@ def load_cdss_model_and_background():
 
             results[key] = (model, background_df)
             print(f"✅ {key} 모델 + 배경값 로딩 완료")
+            print("🔍 등록된 모델 목록:", list(get_all_models().keys()))
         except Exception as e:
             print(f"❌ {key} 모델 로딩 실패:", e)
 

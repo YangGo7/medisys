@@ -30,9 +30,32 @@
 }
 
 .cdss-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: row;
   gap: 2rem;
+  align-items: flex-start;
+}
+
+.cdss-left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cdss-right-panel {
+  width: 50%;
+  min-width: 400px;
+}
+
+@media (max-width: 1024px) {
+  .cdss-grid {
+    flex-direction: column;
+  }
+  .cdss-right-panel {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 .cdss-card {

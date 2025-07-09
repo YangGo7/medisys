@@ -3,8 +3,8 @@ import axios from 'axios';
 import * as echarts from 'echarts';
 import './CdssVisualizationPage.css';
 import ShapContributionChart from './ShapContributionChart';
-import VariableImportanceChart from './VariableImportanceChart';
 import SimulationPanel from './SimulationPanel';
+import ShapForcePlot from './ShapForcePlot';
 import TestCountChart from './TestCountChart';
 import TestResultRatioChart from './TestResultRatioChart';
 import WeeklyAbnormalTrendChart from './WeeklyAbnormalTrendChart';
@@ -42,16 +42,6 @@ const CdssVisualizationPage = () => {
         const ids = [...new Set(res.data.map(r => r.sample))];
         setSampleList(ids);
       });
-
-    // axios.get(`${process.env.REACT_APP_API_BASE_URL}cdss/lft/stats/`)
-    //   .then(res => {
-    //     setStats(res.data);
-    //     setLoading(false);
-    //   })
-    //   .catch(err => {
-    //     console.error('📉 통계 데이터 로딩 실패:', err);
-    //     setLoading(false);
-    //   });
   }, []);
 
   useEffect(() => {
@@ -83,7 +73,6 @@ const CdssVisualizationPage = () => {
     const cleanup = [];
     if (!stats) return;
 
-    // 도넛: 정상/이상 비율
     cleanup.push(renderChart(donutRef, {
       title: { text: '정상/이상 비율', left: 'center' },
       legend: { bottom: 10 },
@@ -107,7 +96,6 @@ const CdssVisualizationPage = () => {
       }]
     }));
 
-    // 평균값 막대
     if (stats.mean_values) {
       const labels = Object.keys(stats.mean_values);
       cleanup.push(renderChart(barRef, {
@@ -132,7 +120,6 @@ const CdssVisualizationPage = () => {
       }));
     }
 
-    // 주간 이상 건수
     if (stats.weekly_abnormal_trend) {
       cleanup.push(renderChart(lineRef, {
         title: { text: '주간 이상 건수 추세', left: 'center' },
@@ -181,12 +168,12 @@ const CdssVisualizationPage = () => {
         </select>
       </div>
 
-      <div className="cdss-grid">
-        <div className="cdss-card">
+      <div className="cdss-flex-row">
+        <div className="cdss-left-panel">
           <h2>🧬 샘플 결과 ({selectedSample || '선택 안 됨'})</h2>
           {sampleDetail ? (
             <>
-              <span>{sampleDetail?.prediction === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
+              <span>{Number(sampleDetail?.prediction) === 1 ? "🔴 이상 소견" : "🟢 정상 소견"}</span>
               <SimulationPanel
                 sampleId={selectedSample}
                 testType={sampleDetail?.test_type}
@@ -200,18 +187,16 @@ const CdssVisualizationPage = () => {
           )}
         </div>
 
-        <div className="cdss-card">
-          <h2>📊 전체 시각화</h2>
-          {/* <div className="cdss-chart-row">
-            <div className="cdss-doughnut-wrapper" ref={donutRef}></div>
-            <div className="cdss-line-chart" ref={lineRef} style={{ height: '360px' }}></div>
-          </div>
-          <div className="cdss-chart-full" ref={barRef} style={{ height: '400px' }}></div> */}
-          <TestCountChart />
-          <TestResultRatioChart />
-          <WeeklyAbnormalTrendChart />
-          {/* <VariableImportanceChart /> */}
+        <div className="cdss-right-panel">
+          <ShapForcePlot html={sampleDetail?.shap_html} />
         </div>
+      </div>
+
+      <div className="cdss-card">
+        <h2>📊 전체 시각화</h2>
+        <TestCountChart />
+        <TestResultRatioChart />
+        <WeeklyAbnormalTrendChart />
       </div>
     </div>
   );

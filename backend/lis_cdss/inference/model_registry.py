@@ -1,12 +1,12 @@
 # lis_cdss/inference/model_registry.py
 
-MODELS = {}
+_model_map = {}
 
 def load_model(key, model):
-    MODELS[key] = model
+    _model_map[key] = model
 
 def get_model(key):
-    return MODELS.get(key)
+    return _model_map.get(key)
 
 def get_all_models():
-    return MODELS
+    return _model_map

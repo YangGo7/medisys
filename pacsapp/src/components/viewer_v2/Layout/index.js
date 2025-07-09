@@ -2039,6 +2039,25 @@ const Layout = () => {
     }
   }, [annotationBoxes, currentImageIndex]); // 🔥 measurementsList 의존성 제거로 무한 루프 방지
 
+
+  useEffect(() => {
+  // 패널 상태 변화시 이미지 표시 정보 재계산
+  const timer = setTimeout(() => {
+    console.log('🔄 패널 상태 변화 감지 - 이미지 표시 정보 재계산');
+    if (handleImageDisplayInfoChange) {
+      // DicomViewer에서 이미지 표시 정보 재측정 요청
+      const imageDisplayInfo = getImageDisplayInfo();
+      if (imageDisplayInfo) {
+        handleImageDisplayInfoChange(imageDisplayInfo);
+        console.log('📐 업데이트된 이미지 표시 정보:', imageDisplayInfo);
+      }
+    }
+  }, 300); // 패널 애니메이션 완료 후 재계산
+
+  return () => clearTimeout(timer);
+  }, [showLeftPanel, activeRightPanel]); // 패널 상태 변화 감지
+
+
   // 🔥 측정값 동기화를 위한 useEffect - 자동 Django 어노테이션 변환 제거
   useEffect(() => {
     if (viewerMeasurements && viewerMeasurements.length > 0) {
