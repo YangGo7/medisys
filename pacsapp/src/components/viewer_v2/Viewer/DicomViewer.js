@@ -1439,7 +1439,7 @@
 
 // export default DicomViewer;
 
-// /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 수동 주석 좌표변환 제거
+// /home/medical_system/pacsapp/src/components/viewer_v2/Viewer/DicomViewer.js - 우클릭 컨텍스트 메뉴 수정 완료
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Stethoscope, Calendar, EyeOff } from 'lucide-react';
@@ -1526,57 +1526,57 @@ const DicomViewer = ({
 
   // 🔥 이미지 크기 측정 함수 개선
   const measureImageDisplay = useCallback(() => {
-  if (!imageRef.current) return;
-  
-  const img = imageRef.current;
-  const container = img.parentElement;
-  
-  console.log('📐 이미지 크기 측정 시작');
-  console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
-  console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
-  
-  const containerAspect = container.clientWidth / container.clientHeight;
-  const imageAspect = img.naturalWidth / img.naturalHeight;
-  
-  let displayWidth, displayHeight, offsetX, offsetY;
-  
-  if (imageAspect > containerAspect) {
-    displayWidth = container.clientWidth;
-    displayHeight = container.clientWidth / imageAspect;
-    offsetX = 0;
-    offsetY = (container.clientHeight - displayHeight) / 2;
-  } else {
-    displayHeight = container.clientHeight;
-    displayWidth = container.clientHeight * imageAspect;
-    offsetX = (container.clientWidth - displayWidth) / 2;
-    offsetY = 0;
-  }
-  
-  const scaleX = displayWidth / img.naturalWidth;
-  const scaleY = displayHeight / img.naturalHeight;
-  
-  const displayInfo = {
-    naturalWidth: img.naturalWidth,
-    naturalHeight: img.naturalHeight,
-    containerWidth: container.clientWidth,
-    containerHeight: container.clientHeight,
-    displayWidth,
-    displayHeight,
-    offsetX,
-    offsetY,
-    scaleX,
-    scaleY
-  };
-  
-  console.log('📐 측정 결과:', displayInfo);
-  setImageDisplayInfo(displayInfo);
-  
-  // 🔥 이 부분이 있으면 Layout으로 정보 전달
-  if (onImageDisplayInfoChange) {
-    console.log('🔄 Layout으로 이미지 표시 정보 전달:', displayInfo);
-    onImageDisplayInfoChange(displayInfo);
-  }
-}, [onImageDisplayInfoChange]);
+    if (!imageRef.current) return;
+    
+    const img = imageRef.current;
+    const container = img.parentElement;
+    
+    console.log('📐 이미지 크기 측정 시작');
+    console.log('원본 크기:', img.naturalWidth, 'x', img.naturalHeight);
+    console.log('컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
+    
+    const containerAspect = container.clientWidth / container.clientHeight;
+    const imageAspect = img.naturalWidth / img.naturalHeight;
+    
+    let displayWidth, displayHeight, offsetX, offsetY;
+    
+    if (imageAspect > containerAspect) {
+      displayWidth = container.clientWidth;
+      displayHeight = container.clientWidth / imageAspect;
+      offsetX = 0;
+      offsetY = (container.clientHeight - displayHeight) / 2;
+    } else {
+      displayHeight = container.clientHeight;
+      displayWidth = container.clientHeight * imageAspect;
+      offsetX = (container.clientWidth - displayWidth) / 2;
+      offsetY = 0;
+    }
+    
+    const scaleX = displayWidth / img.naturalWidth;
+    const scaleY = displayHeight / img.naturalHeight;
+    
+    const displayInfo = {
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight,
+      containerWidth: container.clientWidth,
+      containerHeight: container.clientHeight,
+      displayWidth,
+      displayHeight,
+      offsetX,
+      offsetY,
+      scaleX,
+      scaleY
+    };
+    
+    console.log('📐 측정 결과:', displayInfo);
+    setImageDisplayInfo(displayInfo);
+    
+    // 🔥 이 부분이 있으면 Layout으로 정보 전달
+    if (onImageDisplayInfoChange) {
+      console.log('🔄 Layout으로 이미지 표시 정보 전달:', displayInfo);
+      onImageDisplayInfoChange(displayInfo);
+    }
+  }, [onImageDisplayInfoChange]);
 
   // 🔥 이미지 로드 핸들러
   const handleImageLoad = useCallback(() => {
@@ -1649,32 +1649,32 @@ const DicomViewer = ({
 
   // 🔥 ResizeObserver를 사용한 컨테이너 크기 변경 감지 (추가 보완)
   useEffect(() => {
-  if (!imageRef.current?.parentElement) return;
+    if (!imageRef.current?.parentElement) return;
 
-  const container = imageRef.current.parentElement;
-  
-  // 🔥 패널 열고 닫을 때 이미지 크기 변경 감지
-  const resizeObserver = new ResizeObserver((entries) => {
-    for (const entry of entries) {
-      console.log('📐 패널 크기 변경으로 인한 이미지 컨테이너 크기 변경:', {
-        width: entry.contentRect.width,
-        height: entry.contentRect.height
-      });
-      
-      // 패널 열고 닫을 때 annotation 좌표 재계산
-      if (imageDisplayInfo) {
-        const timer = setTimeout(() => {
-          measureImageDisplay();
-        }, 100); // 패널 애니메이션 완료 후
+    const container = imageRef.current.parentElement;
+    
+    // 🔥 패널 열고 닫을 때 이미지 크기 변경 감지
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        console.log('📐 패널 크기 변경으로 인한 이미지 컨테이너 크기 변경:', {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        });
         
-        return () => clearTimeout(timer);
+        // 패널 열고 닫을 때 annotation 좌표 재계산
+        if (imageDisplayInfo) {
+          const timer = setTimeout(() => {
+            measureImageDisplay();
+          }, 100); // 패널 애니메이션 완료 후
+          
+          return () => clearTimeout(timer);
+        }
       }
-    }
-  });
+    });
 
-  resizeObserver.observe(container);
-  return () => resizeObserver.disconnect();
-}, [imageDisplayInfo, measureImageDisplay]);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [imageDisplayInfo, measureImageDisplay]);
 
   // 🔥 AI 전용 bbox 변환 함수 (기존 방식 그대로)
   const transformBboxCoordinates = useCallback((bbox, originalWidth, originalHeight) => {
@@ -1873,11 +1873,12 @@ const DicomViewer = ({
       .filter(Boolean);
   };
 
+  // 🔥 수정 1: 우클릭 처리 개선
   const handleMouseDownWrapper = (event) => {
+    // 🔥 우클릭인 경우 측정 시작만 차단하고 컨텍스트 메뉴는 허용
     if (event.button === 2) {
-      console.log('🖱️ DicomViewer - 우클릭 감지 - 측정 시작 차단');
-      event.preventDefault();
-      event.stopPropagation();
+      console.log('🖱️ DicomViewer - 우클릭 감지 - 측정 시작은 차단하지만 컨텍스트 메뉴는 허용');
+      // 🔥 새 측정 시작만 차단하고 onMouseDown은 호출하지 않음
       return;
     }
     
@@ -1886,62 +1887,34 @@ const DicomViewer = ({
     }
   };
 
-  
-
-  const handleContextMenu = (e) => {
+  // 🔥 수정 2: 컨텍스트 메뉴 핸들러 개선
+  const handleContextMenu = (e, measurement) => {
+    console.log('🖱️ 컨텍스트 메뉴 호출:', measurement);
     e.preventDefault();
+    e.stopPropagation(); // 이벤트 전파 차단
     
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = e.clientX;
+    const y = e.clientY;
     
-    const clickedMeasurement = [...measurements, ...convertDjangoAnnotationsToMeasurements()].find(measurement => {
-      if (!measurement.isComplete || !measurement.visible) return false;
-      
-      const buffer = 10;
-      
-      switch (measurement.type) {
-        case 'length':
-          const lineDistance = distancePointToLine(
-            { x, y },
-            measurement.startPoint,
-            measurement.endPoint
-          );
-          return lineDistance <= buffer;
-          
-        case 'rectangle':
-          const minX = Math.min(measurement.startPoint.x, measurement.endPoint.x);
-          const maxX = Math.max(measurement.startPoint.x, measurement.endPoint.x);
-          const minY = Math.min(measurement.startPoint.y, measurement.endPoint.y);
-          const maxY = Math.max(measurement.startPoint.y, measurement.endPoint.y);
-          
-          return x >= minX - buffer && x <= maxX + buffer && 
-                 y >= minY - buffer && y <= maxY + buffer;
-          
-        case 'circle':
-          const centerDistance = Math.sqrt(
-            Math.pow(x - measurement.startPoint.x, 2) + 
-            Math.pow(y - measurement.startPoint.y, 2)
-          );
-          const radius = Math.sqrt(
-            Math.pow(measurement.endPoint.x - measurement.startPoint.x, 2) + 
-            Math.pow(measurement.endPoint.y - measurement.startPoint.y, 2)
-          );
-          
-          return Math.abs(centerDistance - radius) <= buffer;
-          
-        default:
-          return false;
-      }
-    });
-    
-    if (clickedMeasurement) {
-      setSelectedMeasurementForMenu(clickedMeasurement);
-      setContextMenu({ x: e.clientX, y: e.clientY });
+    // 🔥 전달받은 measurement 사용
+    if (measurement) {
+      setSelectedMeasurementForMenu(measurement);
+      setContextMenu({ x, y });
+      console.log('✅ 컨텍스트 메뉴 표시:', { x, y, measurement: measurement.id });
+    } else {
+      console.error('❌ measurement가 없어서 컨텍스트 메뉴를 표시할 수 없음');
     }
   };
 
-    const distancePointToLine = (point, lineStart, lineEnd) => {
+  // 🔥 수정 3: 측정값별 컨텍스트 메뉴 핸들러 생성
+  const createContextMenuHandler = (measurement) => {
+    return (e) => {
+      console.log('🎯 측정값별 컨텍스트 메뉴 핸들러:', measurement.id);
+      handleContextMenu(e, measurement);
+    };
+  };
+
+  const distancePointToLine = (point, lineStart, lineEnd) => {
     const A = point.x - lineStart.x;
     const B = point.y - lineStart.y;
     const C = lineEnd.x - lineStart.x;
@@ -2390,6 +2363,7 @@ const DicomViewer = ({
     return aiElements;
   };
 
+  // 🔥 수정 4: 측정값 렌더링에서 컨텍스트 메뉴 이벤트 올바르게 연결
   const renderMeasurements = () => {
     if (allMeasurementsHidden) {
       console.log('👁️ 전체 숨기기 활성화 - 모든 측정값과 어노테이션 숨김');
@@ -2445,6 +2419,9 @@ const DicomViewer = ({
                            getOriginalColor(type);
         const strokeWidth = isEditing ? 3 : isHighlighted ? 3 : 2;
         
+        // 🔥 컨텍스트 메뉴 핸들러 생성
+        const contextMenuHandler = createContextMenuHandler(measurement);
+        
         let measurementElement = null;
         
         switch (type) {
@@ -2463,10 +2440,30 @@ const DicomViewer = ({
                     cursor: isComplete ? 'context-menu' : 'default',
                     pointerEvents: isComplete ? 'auto' : 'none'
                   }}
-                  onContextMenu={(e) => isComplete && handleContextMenu(e, measurement)}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 수정됨
                 />
-                <circle cx={startPoint.x} cy={startPoint.y} r="4" fill={strokeColor} />
-                <circle cx={endPoint.x} cy={endPoint.y} r="4" fill={strokeColor} />
+                <circle 
+                  cx={startPoint.x} 
+                  cy={startPoint.y} 
+                  r="4" 
+                  fill={strokeColor}
+                  style={{ 
+                    cursor: isComplete ? 'context-menu' : 'default',
+                    pointerEvents: isComplete ? 'auto' : 'none'
+                  }}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 추가
+                />
+                <circle 
+                  cx={endPoint.x} 
+                  cy={endPoint.y} 
+                  r="4" 
+                  fill={strokeColor}
+                  style={{ 
+                    cursor: isComplete ? 'context-menu' : 'default',
+                    pointerEvents: isComplete ? 'auto' : 'none'
+                  }}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 추가
+                />
                 
                 {isComplete && value && (
                   <text
@@ -2481,7 +2478,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-measurement-highlight' : ''}
                   >
                     {value}
@@ -2501,7 +2498,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-label-highlight' : ''}
                   >
                     🏷️ "{linkedLabel.label}"
@@ -2534,7 +2531,7 @@ const DicomViewer = ({
                     cursor: isComplete ? 'context-menu' : 'default',
                     pointerEvents: isComplete ? 'auto' : 'none'
                   }}
-                  onContextMenu={(e) => isComplete && handleContextMenu(e, measurement)}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 수정됨
                 />
                 
                 {isComplete && value && (
@@ -2550,7 +2547,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-measurement-highlight' : ''}
                   >
                     {value}
@@ -2570,7 +2567,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-label-highlight' : ''}
                   >
                     🏷️ "{linkedLabel.label}"
@@ -2602,9 +2599,19 @@ const DicomViewer = ({
                     cursor: isComplete ? 'context-menu' : 'default',
                     pointerEvents: isComplete ? 'auto' : 'none'
                   }}
-                  onContextMenu={(e) => isComplete && handleContextMenu(e, measurement)}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 수정됨
                 />
-                <circle cx={startPoint.x} cy={startPoint.y} r="4" fill={strokeColor} />
+                <circle 
+                  cx={startPoint.x} 
+                  cy={startPoint.y} 
+                  r="4" 
+                  fill={strokeColor}
+                  style={{ 
+                    cursor: isComplete ? 'context-menu' : 'default',
+                    pointerEvents: isComplete ? 'auto' : 'none'
+                  }}
+                  onContextMenu={isComplete ? contextMenuHandler : undefined} // 🔥 추가
+                />
                 
                 {isComplete && value && (
                   <text
@@ -2619,7 +2626,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-measurement-highlight' : ''}
                   >
                     {value}
@@ -2639,7 +2646,7 @@ const DicomViewer = ({
                       cursor: 'context-menu',
                       pointerEvents: 'auto'
                     }}
-                    onContextMenu={(e) => handleContextMenu(e, measurement)}
+                    onContextMenu={contextMenuHandler} // 🔥 수정됨
                     className={isHighlighted ? 'mv-label-highlight' : ''}
                   >
                     🏷️ "{linkedLabel.label}"
@@ -2669,7 +2676,13 @@ const DicomViewer = ({
           onMouseUp={onMouseUp}
           onWheel={onWheel}
           onClick={handleClick}
-          onContextMenu={(e) => e.preventDefault()}
+          // 🔥 수정 5: 상위에서 우클릭 차단하지 않도록 수정
+          onContextMenu={(e) => {
+            // 측정값이 아닌 빈 공간에서의 우클릭만 차단
+            if (e.target === e.currentTarget || e.target.tagName === 'IMG') {
+              e.preventDefault();
+            }
+          }}
           style={{ 
             cursor: isEditMode ? 'default' :
                     selectedTool === 'wwwc' ? 'ew-resize' : 
@@ -2813,39 +2826,102 @@ const DicomViewer = ({
         </div>
       )}
 
-      {contextMenu && (
+      {/* 🔥 컨텍스트 메뉴 렌더링 - 스타일 개선 */}
+      {contextMenu && selectedMeasurementForMenu && (
         <div 
           className="mv-context-menu"
           style={{
             position: 'fixed',
             left: contextMenu.x,
             top: contextMenu.y,
-            zIndex: 1000
+            zIndex: 1000,
+            backgroundColor: 'white',
+            border: '1px solid #ccc',
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            padding: '4px 0',
+            minWidth: '140px',
+            fontSize: '13px'
           }}
         >
+          {/* 라벨이 있으면 편집, 없으면 추가 */}
           {(selectedMeasurementForMenu?.source === 'django' && selectedMeasurementForMenu?.djangoData?.label) || 
            findLabelForMeasurement(selectedMeasurementForMenu?.id) ? (
-            <div className="mv-context-menu-item" onClick={handleEditLabel}>
+            <div 
+              className="mv-context-menu-item" 
+              onClick={handleEditLabel}
+              style={{
+                padding: '8px 16px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #eee',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
               ✏️ 라벨 편집
             </div>
           ) : (
-            <div className="mv-context-menu-item" onClick={handleLabelMeasurement}>
+            <div 
+              className="mv-context-menu-item" 
+              onClick={handleLabelMeasurement}
+              style={{
+                padding: '8px 16px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #eee',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
               🏷️ 라벨 추가
             </div>
           )}
           
+          {/* Django 어노테이션이 아닌 경우에만 좌표 편집 가능 */}
           {selectedMeasurementForMenu?.source !== 'django' && (
-            <div className="mv-context-menu-item" onClick={handleEditCoordinates}>
+            <div 
+              className="mv-context-menu-item" 
+              onClick={handleEditCoordinates}
+              style={{
+                padding: '8px 16px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #eee',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
               📍 좌표 편집
             </div>
           )}
           
-          <div className="mv-context-menu-item" onClick={handleDeleteMeasurement}>
+          <div 
+            className="mv-context-menu-item" 
+            onClick={handleDeleteMeasurement}
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#fef2f2'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+          >
             ❌ 삭제하기
           </div>
         </div>
       )}
 
+      {/* 라벨링 모달 */}
       <Modal
         isOpen={isLabelingModalOpen}
         onClose={handleCloseLabeling}
@@ -2860,6 +2936,7 @@ const DicomViewer = ({
         />
       </Modal>
 
+      {/* 라벨 편집 모달 */}
       <LabelingEditModal
         isOpen={isLabelEditModalOpen}
         onClose={handleCloseLabelEdit}
@@ -2867,6 +2944,7 @@ const DicomViewer = ({
         annotation={annotationToEdit}
       />
 
+      {/* 로딩 오버레이 */}
       {!currentImageUrl && (
         <div className="mv-loading-overlay">
           <div className="mv-loading-message">

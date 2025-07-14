@@ -754,6 +754,12 @@ class AnnotationListView(APIView):
             if study_uid:
                 queryset = queryset.filter(study_uid=study_uid)
             
+            # 🔥 새로 추가: instance_uid 필터
+            instance_uid = request.GET.get('instance_uid')
+            if instance_uid:
+                queryset = queryset.filter(instance_uid=instance_uid)
+                print(f"🏷️ instance_uid 필터 적용: {instance_uid}")
+            
             # patient_id 필터
             patient_id = request.GET.get('patient_id')
             if patient_id:
@@ -771,6 +777,8 @@ class AnnotationListView(APIView):
             
             # 정렬
             queryset = queryset.order_by('-created_at')
+            
+            print(f"🔍 최종 쿼리셋 개수: {queryset.count()}개")
             
             # 페이지네이션 (간단한 형태)
             page_size = int(request.GET.get('page_size', 20))

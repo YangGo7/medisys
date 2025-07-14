@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import NoticeBoard from './Notics_page';
 import './titlepage.css';
+import StatisticsBoard from './StatisticsBoard'; 
 
 // API 서비스 클래스
 class MainPageFunctionAPI {
@@ -30,6 +31,7 @@ class MainPageFunctionAPI {
       throw error;
     }
   }
+
 
   // 헬스 체크
   static async healthCheck() {
@@ -67,6 +69,11 @@ class MainPageFunctionAPI {
   }
 }
 
+
+
+
+
+
 const MainPageFunction = ({ setCurrentTab }) => {
   const [currentView, setCurrentView] = useState('dashboard'); // dashboard, notices
   const [systemStatus, setSystemStatus] = useState({
@@ -76,6 +83,41 @@ const MainPageFunction = ({ setCurrentTab }) => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  const renderStatisticsBoard = () => (
+    <div>
+      {/* 뒤로 가기 버튼 */}
+      <div style={{
+        padding: '1rem 2rem',
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
+      }}>
+        <button
+          onClick={() => setCurrentView('dashboard')}
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#f39c12',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            fontWeight: '600'
+          }}
+        >
+          ← 메인으로 돌아가기
+        </button>
+        <h2 style={{ margin: 0, color: '#2c3e50', fontSize: '1.3rem' }}>
+          통계 대시보드
+        </h2>
+      </div>
+
+      {/* 실제 통계 컴포넌트 */}
+      <StatisticsBoard />
+    </div>
+  );
   // 시스템 상태 확인
   const checkSystemHealth = async () => {
     try {
@@ -94,6 +136,12 @@ const MainPageFunction = ({ setCurrentTab }) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleQuickAction = (key) => {
+    if (key === 'Statistics') {
+      setCurrentView('statistics');
     }
   };
 
@@ -307,7 +355,7 @@ const MainPageFunction = ({ setCurrentTab }) => {
 
           {/* 통계 대시보드 카드 */}
           <div
-            onClick={() => setCurrentTab && setCurrentTab('statistics')}
+            onClick={() => handleQuickAction('Statistics')}
             style={{
               background: 'rgba(243, 156, 18, 0.05)',
               border: '1px solid rgba(243, 156, 18, 0.2)',
@@ -482,6 +530,7 @@ const MainPageFunction = ({ setCurrentTab }) => {
     <div>
       {currentView === 'dashboard' && renderDashboard()}
       {currentView === 'notices' && renderNoticeBoard()}
+      {currentView === 'statistics' && renderStatisticsBoard()}
     </div>
   );
 };

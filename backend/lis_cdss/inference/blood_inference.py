@@ -67,6 +67,7 @@ def load_models():
 def run_blood_model(test_type, values):
     alias_map = get_alias_map()
     mapped = alias_map.get(test_type, test_type) 
+    print("📌 run_blood_model(): test_type=", test_type, "→ mapped =", mapped)
     model = get_model(mapped)
 
     if not model:

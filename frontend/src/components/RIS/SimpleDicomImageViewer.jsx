@@ -62,6 +62,9 @@ const SimpleDicomImageViewer = ({ studyId, studyUid, patientInfo }) => {
           }
         });
       }
+      
+      const instanceIds = allInstances.map(img => img.id);
+      loadAnnotations(instanceIds);
 
       if (allInstances.length === 0) {
         throw new Error('Instance가 없습니다');
@@ -109,6 +112,55 @@ const SimpleDicomImageViewer = ({ studyId, studyUid, patientInfo }) => {
     }
   };
 
+  const renderAnnotations = () => {
+  const anns = annotations[currentImage?.id] || [];
+  return anns.map((ann, idx) => {
+    const { coordinates, label } = ann;
+    const { x, y, width, height } = coordinates;
+
+    // 이미지 실제 크기와 표시된 크기의 비율을 고려해 위치 계산
+    if (!imageRef.current) return null;
+
+    const img = imageRef.current;
+    const scaleX = img.clientWidth / img.naturalWidth;
+    const scaleY = img.clientHeight / img.naturalHeight;
+
+    const left = x * scaleX;
+    const top = y * scaleY;
+    const boxWidth = width * scaleX;
+    const boxHeight = height * scaleY;
+
+    return (
+      <div
+        key={idx}
+        style={{
+          position: 'absolute',
+          left,
+          top,
+          width: boxWidth,
+          height: boxHeight,
+          border: '2px solid #f87171',
+          backgroundColor: 'rgba(248,113,113,0.15)',
+          color: '#f87171',
+          fontSize: '12px',
+          pointerEvents: 'none'
+        }}
+      >
+        <span style={{
+          position: 'absolute',
+          top: '-16px',
+          left: 0,
+          background: 'rgba(0,0,0,0.7)',
+          color: 'white',
+          padding: '1px 4px',
+          borderRadius: '4px'
+        }}>{label}</span>
+      </div>
+    );
+  });
+};
+
+  const imageRef = useRef(null);
   // 키보드 이벤트 처리
   const handleKeyDown = (event) => {
     switch (event.key) {
@@ -210,6 +262,7 @@ const SimpleDicomImageViewer = ({ studyId, studyUid, patientInfo }) => {
       {/* 메인 이미지 */}
       <div className="w-full h-full flex items-center justify-center">
         <img 
+          ref={imageRef}
           src={currentImage.imageUrl}
           alt={`DICOM Image ${currentImageIndex + 1}`}
           className="max-w-full max-h-full object-contain"
@@ -220,7 +273,12 @@ const SimpleDicomImageViewer = ({ studyId, studyUid, patientInfo }) => {
           }}
         />
       </div>
-
+      
+      {/* 어노테이션 박스 */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+        {renderAnnotations()}
+      </div>
+      
       {/* 하단 네비게이션 */}
       {images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">

@@ -6,6 +6,8 @@ import ShapSummaryText from './ShapSummaryText';
 const CdssResultModal = ({ data, onClose, isModal = true }) => {
   if (!data) return null;
 
+  console.log("💡 data.test_type =", data.test_type);
+
   const interpretPrediction = (value) => {
     const finalValue = value === null || value === undefined || value === '' ? 0 : value;
     if (finalValue === 1 || finalValue === true || finalValue === "1") return '🔴 이상 소견';
@@ -15,10 +17,28 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
 
   const testTypeLabelMap = {
     CBC: 'CBC',
+    ASTHMA: 'CBC',
     CRP: 'CRP',
     ABGA: 'ABGA',
+    COPD: 'ABGA',
     'NT-proBNP': 'NT-proBNP',
+    CHF: 'NT-proBNP',
     'D-Dimer': 'D-Dimer',
+    PE: 'D-Dimer',
+  };
+
+  const componentUnits = {
+    'WBC': '10^3/uL',
+    'Neutrophils': '%',
+    'Lymphocytes': '%',
+    'Eosinophils': '%',
+    'Hemoglobin': 'g/dL',
+    'Platelet Count': '10^3/uL',
+    'pCO2': 'mmHg',
+    'pO2': 'mmHg',
+    'pH': '-',
+    'NT-proBNP': 'pg/mL',
+    'D-Dimer': 'ng/mL FEU',
   };
 
   return (
@@ -44,12 +64,19 @@ const CdssResultModal = ({ data, onClose, isModal = true }) => {
             <tr><th>항목</th><th>값</th></tr>
           </thead>
           <tbody>
-            {Object.entries(data.results || {}).map(([key, value], idx) => (
-              <tr key={idx}>
-                <td>{value.component_name || `항목 ${key}`}</td>
-                <td>{value.value !== undefined && value.value !== null ? value.value : '-'} {value.unit ?? ''}</td>
-              </tr>
-            ))}
+            {Array.isArray(data.results)
+              ? data.results.map((item, idx) => (
+                <tr key={idx}>
+                  <td>{item.component_name || `항목 ${idx + 1}`}</td>
+                  <td>{item.value ?? '-'} {item.unit ?? ''}</td>
+                </tr>
+              ))
+            : Object.entries(data.results || {}).map(([key, value], idx) => (
+                <tr key={idx}>
+                  <td>{`${key}`}</td>
+                  <td>{value ?? '-'} {componentUnits[key] ?? ''}</td>
+                </tr>
+              ))}
           </tbody>
 
         </table>

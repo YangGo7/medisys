@@ -2,11 +2,9 @@
 from django.urls import path
 from . import views 
 from .views import AIAnalysisResultSaveAPIView # AIAnalysisResultSaveAPIView는 POST 처리
-
 urlpatterns = [
     path('analyze/', views.analyze_study_now, name='analyze_now'),
     path('analyze-ssd/', views.analyze_with_ssd, name='analyze_ssd'),
-    
     # POST 요청 (AI 분석 결과 저장)
     path('results/save/', AIAnalysisResultSaveAPIView.as_view(), name='AIAnalysisResultSaveAPIView'),
     
@@ -20,4 +18,6 @@ urlpatterns = [
     path('status/', views.model_status, name='model_status'),
     path('check/<str:study_uid>/<str:model_type>/', views.check_existing_analysis, name='check_existing_analysis'),
     path('pacs-studies/', views.get_pacs_studies, name='get_pacs_studies'), 
+    
+    
 ]

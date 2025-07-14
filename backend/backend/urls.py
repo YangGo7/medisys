@@ -24,7 +24,6 @@ urlpatterns = [
     
     # 헬스체크
     path('api/health/', health_check_view, name='health_check'),
-    path('api/analysis/', include('medical_integration.simclr_urls')),
     # 각 앱별 prefix로 충돌 방지
     path('api/integration/', include('medical_integration.urls')),
     

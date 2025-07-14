@@ -811,6 +811,8 @@
 
 // export default ManualAnnotationsPanel;
 
+
+
 // /home/medical_system/pacsapp/src/components/viewer_v2/RightPanel/ManualAnnotationsPanel.js
 
 import React, { useEffect, useState } from 'react';
@@ -856,6 +858,9 @@ const ManualAnnotationsPanel = ({
   loadAnnotationsFromServer,
   clearAllAnnotations,
   annotationBoxes = [],
+  
+  // 🔥 추가: Django 토글 함수 받기 (선택적)
+  onToggleDjangoAnnotationVisibility,
   
   // 측정값 삭제 함수
   onDeleteMeasurement
@@ -970,25 +975,37 @@ const ManualAnnotationsPanel = ({
     return djangoAnnotations; // 🔥 Django 어노테이션만 반환
   }, [convertedAnnotations]);
 
-  // 🔥 수정: Django 어노테이션만 숨기는 토글 함수 (AI 결과는 그대로)
+  // 🔥 수정: Django 어노테이션만 숨기는 토글 함수 - 실제 함수 사용
   const handleToggleAllDjangoAnnotations = () => {
     console.log('👁️‍🗨️ Django 어노테이션만 표시/숨김 토글 - 현재상태:', allDjangoAnnotationsHidden);
     
     const newHiddenState = !allDjangoAnnotationsHidden;
     setAllDjangoAnnotationsHidden(newHiddenState);
     
-    // Django 어노테이션들만 개별적으로 토글
-    allAnnotations.forEach(annotation => {
-      if (annotation.source === 'django' && annotation.measurementId) {
-        // 각 Django 어노테이션의 measurementId로 개별 토글
-        const measurementId = annotation.measurementId || `django-${annotation.id.replace('django-', '')}`;
-        console.log(`🔄 Django 어노테이션 개별 토글: ${measurementId}`);
-        
-        if (onToggleMeasurementVisibility) {
-          onToggleMeasurementVisibility(measurementId);
+    // 🔥 수정: 실제 Django 토글 함수 사용 (있으면)
+    if (onToggleDjangoAnnotationVisibility) {
+      console.log('🔄 Django 전용 토글 함수 사용');
+      allAnnotations.forEach(annotation => {
+        if (annotation.source === 'django' && annotation.measurementId) {
+          const measurementId = annotation.measurementId || `django-${annotation.id.replace('django-', '')}`;
+          console.log(`🔄 Django 어노테이션 개별 토글 (전용함수): ${measurementId}`);
+          onToggleDjangoAnnotationVisibility(measurementId);
         }
-      }
-    });
+      });
+    } else {
+      // 🔥 fallback: 기존 방식 사용
+      console.log('🔄 기존 토글 함수 사용 (fallback)');
+      allAnnotations.forEach(annotation => {
+        if (annotation.source === 'django' && annotation.measurementId) {
+          const measurementId = annotation.measurementId || `django-${annotation.id.replace('django-', '')}`;
+          console.log(`🔄 Django 어노테이션 개별 토글 (fallback): ${measurementId}`);
+          
+          if (onToggleMeasurementVisibility) {
+            onToggleMeasurementVisibility(measurementId);
+          }
+        }
+      });
+    }
     
     console.log(`✅ Django 어노테이션만 ${newHiddenState ? '숨김' : '표시'} 완료 (AI 결과는 그대로)`);
   };
@@ -1141,7 +1158,7 @@ const ManualAnnotationsPanel = ({
     setSelectedAnnotationForEdit(null);
   };
 
-  // 🔥 수정: 개별 표시/숨김 토글 - Django 어노테이션 지원 + 디버깅
+  // 🔥 수정: 개별 표시/숨김 토글 - Django 전용 함수 우선 사용
   const handleToggleVisibility = (annotationId, event) => {
     event.stopPropagation();
     
@@ -1158,18 +1175,19 @@ const ManualAnnotationsPanel = ({
       currentVisible: isVisibleInViewer(annotation)
     });
     
-    // 🔥 Django 어노테이션인 경우
+    // 🔥 Django 어노테이션인 경우 - Django 전용 함수 우선 사용
     if (annotation.source === 'django') {
-      // measurementId 형태로 변환하여 토글
       const measurementId = annotation.measurementId || `django-${annotation.id.replace('django-', '')}`;
       console.log('🔄 Django 어노테이션 측정값 ID로 토글:', measurementId);
       
-      // 🔥 토글 전 measurements에서 현재 상태 확인
-      const currentMeasurement = measurements.find(m => m.id === measurementId);
-      console.log('📊 토글 전 측정값 상태:', currentMeasurement);
-      
-      if (onToggleMeasurementVisibility) {
-        console.log('🔄 onToggleMeasurementVisibility 호출:', measurementId);
+      // 🔥 1순위: Django 전용 토글 함수 사용
+      if (onToggleDjangoAnnotationVisibility) {
+        console.log('🔄 onToggleDjangoAnnotationVisibility 호출:', measurementId);
+        onToggleDjangoAnnotationVisibility(measurementId);
+      } 
+      // 🔥 2순위: 일반 측정값 토글 함수 사용 (fallback)
+      else if (onToggleMeasurementVisibility) {
+        console.log('🔄 onToggleMeasurementVisibility 호출 (fallback):', measurementId);
         onToggleMeasurementVisibility(measurementId);
         
         // 🔥 토글 후 상태 확인 (디버깅용)
@@ -1178,7 +1196,7 @@ const ManualAnnotationsPanel = ({
           console.log('📊 토글 후 측정값 상태:', afterMeasurement);
         }, 100);
       } else {
-        console.error('❌ onToggleMeasurementVisibility 함수가 없음!');
+        console.error('❌ Django 토글 함수들이 모두 없음!');
       }
     } else {
       // 일반 측정값의 경우

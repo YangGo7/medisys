@@ -1,6 +1,5 @@
 // pages/OHIFViewer/index.js
 import React from 'react';
-import OHIFViewerComponent from '../../components/ohifviewer'; // 실제 OHIF 컴포넌트 import
 
 const OHIFViewer = () => {
   return (

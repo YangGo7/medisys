@@ -1,6 +1,3 @@
-// RealDicomViewer.jsx - Part 1/4
-// 헤더 제거 및 오버레이 방식 적용
-
 import React, { useState, useEffect, useRef } from 'react';
 
 const RealDicomViewer = () => {
@@ -11,25 +8,22 @@ const RealDicomViewer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // 뷰어 상태
   const [selectedStudyId, setSelectedStudyId] = useState(null);
   const [selectedStudyUid, setSelectedStudyUid] = useState(null);
   const [viewerLayout, setViewerLayout] = useState('split');
 
   const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
-  // 🔥 어노테이션이 포함된 DICOM 뷰어 컴포넌트
+  // 🔥 개쌤 DICOM 뷰어 - 그냥 간단하게!
   const SimpleDicomImageViewer = ({ studyId, studyUid, patientInfo }) => {
     const [images, setImages] = useState([]);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [viewerLoading, setViewerLoading] = useState(false);
     const [viewerError, setViewerError] = useState('');
-    const [annotations, setAnnotations] = useState({}); // instance_uid를 키로 하는 어노테이션 객체
+    const [annotations, setAnnotations] = useState([]);
     const [showAnnotations, setShowAnnotations] = useState(true);
     
-    // 이미지 컨테이너와 오버레이 참조
     const imageContainerRef = useRef(null);
-    const overlayRef = useRef(null);
     
     useEffect(() => {
       if (studyUid) {
@@ -37,41 +31,34 @@ const RealDicomViewer = () => {
       }
     }, [studyUid]);
 
-    // 🔥 어노테이션 데이터 로드 (두 번째 파일의 방식 적용)
-    const loadAnnotations = async (instanceIds) => {
+    // 🔥 간단하게 어노테이션 로드!
+    const loadAnnotationsForInstance = async (instanceUid) => {
       try {
-        console.log('🏷️ 어노테이션 로드 중...', instanceIds);
+        console.log('🏷️ 어노테이션 로드:', instanceUid);
         
-        const response = await fetch(`${API_BASE}annotations/by-instances/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            instance_uids: instanceIds
-          })
+        // 그냥 list API에 instance_uid 파라미터 추가해서 호출
+        const response = await fetch(`${API_BASE}dr-annotations/list/?instance_uid=${instanceUid}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
         });
 
         if (response.ok) {
-          const annotationData = await response.json();
-          console.log('✅ 어노테이션 로드 완료:', annotationData);
+          const data = await response.json();
+          console.log('✅ 어노테이션 응답:', data);
           
-          // instance_uid를 키로 하는 객체로 변환
-          const annotationsByInstance = {};
-          annotationData.forEach(annotation => {
-            const instanceUid = annotation.instance_uid;
-            if (!annotationsByInstance[instanceUid]) {
-              annotationsByInstance[instanceUid] = [];
-            }
-            annotationsByInstance[instanceUid].push(annotation);
-          });
-          
-          setAnnotations(annotationsByInstance);
+          if (data.status === 'success' && data.annotations) {
+            setAnnotations(data.annotations);
+            console.log('✅ 어노테이션 설정 완료:', data.annotations);
+          } else {
+            setAnnotations([]);
+          }
         } else {
           console.warn('어노테이션 로드 실패:', response.status);
+          setAnnotations([]);
         }
       } catch (err) {
         console.error('어노테이션 로드 에러:', err);
+        setAnnotations([]);
       }
     };
 
@@ -83,44 +70,32 @@ const RealDicomViewer = () => {
         // Django 백엔드를 통해 Orthanc 검색
         const response = await fetch(`${API_BASE}ohif/orthanc/tools/find`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             Level: 'Study',
             Query: { StudyInstanceUID: studyUID }
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`Study 검색 실패: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Study 검색 실패: ${response.status}`);
 
         const studyIds = await response.json();
-        if (studyIds.length === 0) {
-          throw new Error('Study를 찾을 수 없습니다');
-        }
+        if (studyIds.length === 0) throw new Error('Study를 찾을 수 없습니다');
 
         // Study 정보 조회
         const studyInfoResponse = await fetch(`${API_BASE}ohif/orthanc/studies/${studyIds[0]}`);
-
-        if (!studyInfoResponse.ok) {
-          throw new Error('Study 정보 조회 실패');
-        }
+        if (!studyInfoResponse.ok) throw new Error('Study 정보 조회 실패');
 
         const studyInfo = await studyInfoResponse.json();
         const allImages = [];
-        const allInstanceUids = [];
 
         // 모든 Series의 Instance 가져오기
         for (const seriesId of studyInfo.Series || []) {
           try {
             const seriesResponse = await fetch(`${API_BASE}ohif/orthanc/series/${seriesId}`);
-
             if (seriesResponse.ok) {
               const seriesInfo = await seriesResponse.json();
               for (const instanceId of seriesInfo.Instances || []) {
-                // Instance 상세 정보 가져오기 (UID 확인용)
                 const instanceResponse = await fetch(`${API_BASE}ohif/orthanc/instances/${instanceId}`);
                 if (instanceResponse.ok) {
                   const instanceInfo = await instanceResponse.json();
@@ -131,10 +106,6 @@ const RealDicomViewer = () => {
                     instanceUid: instanceUid,
                     imageUrl: `${API_BASE}ohif/orthanc/instances/${instanceId}/preview`
                   });
-                  
-                  if (instanceUid) {
-                    allInstanceUids.push(instanceUid);
-                  }
                 }
               }
             }
@@ -143,16 +114,14 @@ const RealDicomViewer = () => {
           }
         }
 
-        if (allImages.length === 0) {
-          throw new Error('이미지가 없습니다');
-        }
+        if (allImages.length === 0) throw new Error('이미지가 없습니다');
 
         setImages(allImages);
         setCurrentImageIndex(0);
         
-        // 🔥 어노테이션 로드
-        if (allInstanceUids.length > 0) {
-          await loadAnnotations(allInstanceUids);
+        // 🔥 첫 번째 이미지의 어노테이션 로드
+        if (allImages[0]?.instanceUid) {
+          await loadAnnotationsForInstance(allImages[0].instanceUid);
         }
 
       } catch (err) {
@@ -163,60 +132,29 @@ const RealDicomViewer = () => {
       }
     };
 
+    // 이미지 변경 시 어노테이션도 다시 로드
+    const changeImage = async (newIndex) => {
+      setCurrentImageIndex(newIndex);
+      const newImage = images[newIndex];
+      if (newImage?.instanceUid) {
+        await loadAnnotationsForInstance(newImage.instanceUid);
+      }
+    };
+
     const nextImage = () => {
       if (currentImageIndex < images.length - 1) {
-        setCurrentImageIndex(currentImageIndex + 1);
+        changeImage(currentImageIndex + 1);
       }
     };
 
     const previousImage = () => {
       if (currentImageIndex > 0) {
-        setCurrentImageIndex(currentImageIndex - 1);
+        changeImage(currentImageIndex - 1);
       }
     };
 
-    // 🔥 오버레이 위치 업데이트 (두 번째 파일의 방식 적용)
-    const updateOverlayPosition = () => {
-      if (imageContainerRef.current && overlayRef.current) {
-        const containerRect = imageContainerRef.current.getBoundingClientRect();
-        const imageElement = imageContainerRef.current.querySelector('img');
-        
-        if (imageElement) {
-          const imageRect = imageElement.getBoundingClientRect();
-          
-          // 오버레이를 이미지 위치에 맞춤
-          overlayRef.current.style.left = `${imageRect.left - containerRect.left}px`;
-          overlayRef.current.style.top = `${imageRect.top - containerRect.top}px`;
-          overlayRef.current.style.width = `${imageRect.width}px`;
-          overlayRef.current.style.height = `${imageRect.height}px`;
-        }
-      }
-    };
-
-    // 이미지 로드 시 오버레이 위치 업데이트
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        updateOverlayPosition();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }, [currentImageIndex, images]);
-
-    // 윈도우 리사이즈 시 오버레이 위치 업데이트
-    useEffect(() => {
-      const handleResize = () => {
-        updateOverlayPosition();
-      };
-
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // RealDicomViewer.jsx - Part 2/4
-// 어노테이션 오버레이 컴포넌트
-
-    // 🔥 어노테이션 오버레이 컴포넌트 (두 번째 파일의 방식 적용)
-    const AnnotationOverlay = ({ annotations }) => {
+    // 🔥 정확한 어노테이션 오버레이 - viewer_v2 방식과 동일하게!
+    const renderAnnotations = () => {
       if (!showAnnotations || !annotations || annotations.length === 0) {
         return null;
       }
@@ -224,148 +162,137 @@ const RealDicomViewer = () => {
       const imageElement = imageContainerRef.current?.querySelector('img');
       if (!imageElement) return null;
 
-      return (
-        <div 
-          ref={overlayRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            pointerEvents: 'none',
-            zIndex: 200
-          }}
-        >
-          {annotations.map((annotation, index) => {
-            try {
-              // bbox 파싱 (JSON 문자열 또는 객체)
-              const bbox = typeof annotation.bbox === 'string' 
-                ? JSON.parse(annotation.bbox) 
-                : annotation.bbox;
-              
-              if (!bbox || (!bbox.x && !bbox[0])) {
-                console.warn('bbox 정보 없음:', annotation);
-                return null;
-              }
+      // 🔥 viewer_v2와 동일한 이미지 크기 계산 방식
+      const container = imageElement.parentElement;
+      const naturalWidth = imageElement.naturalWidth || 512;
+      const naturalHeight = imageElement.naturalHeight || 512;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      
+      // object-fit: contain 방식으로 실제 표시 크기 계산
+      const containerAspect = containerWidth / containerHeight;
+      const imageAspect = naturalWidth / naturalHeight;
+      
+      let displayWidth, displayHeight, offsetX, offsetY;
+      
+      if (imageAspect > containerAspect) {
+        // 이미지가 더 넓음 - 가로에 맞춤
+        displayWidth = containerWidth;
+        displayHeight = containerWidth / imageAspect;
+        offsetX = 0;
+        offsetY = (containerHeight - displayHeight) / 2;
+      } else {
+        // 이미지가 더 높음 - 세로에 맞춤
+        displayHeight = containerHeight;
+        displayWidth = containerHeight * imageAspect;
+        offsetX = (containerWidth - displayWidth) / 2;
+        offsetY = 0;
+      }
+      
+      const scaleX = displayWidth / naturalWidth;
+      const scaleY = displayHeight / naturalHeight;
 
-              // bbox 형식 정규화 - [x1, y1, x2, y2] 또는 {x, y, width, height}
-              let normalizedBbox;
-              if (Array.isArray(bbox) && bbox.length === 4) {
-                // [x1, y1, x2, y2] 형식
-                normalizedBbox = {
-                  x: bbox[0],
-                  y: bbox[1], 
-                  width: bbox[2] - bbox[0],
-                  height: bbox[3] - bbox[1]
-                };
-              } else if (bbox.x !== undefined) {
-                // {x, y, width, height} 형식
-                normalizedBbox = {
-                  x: bbox.x,
-                  y: bbox.y,
-                  width: bbox.width || bbox.w,
-                  height: bbox.height || bbox.h
-                };
-              } else {
-                console.warn('지원되지 않는 bbox 형식:', bbox);
-                return null;
-              }
+      console.log('🎯 정확한 어노테이션 좌표 계산:', {
+        count: annotations.length,
+        container: { width: containerWidth, height: containerHeight },
+        natural: { width: naturalWidth, height: naturalHeight },
+        display: { width: displayWidth, height: displayHeight },
+        offset: { x: offsetX, y: offsetY },
+        scale: { x: scaleX, y: scaleY }
+      });
 
-              // 실제 이미지 크기 가져오기
-              const naturalWidth = imageElement.naturalWidth || 512;
-              const naturalHeight = imageElement.naturalHeight || 512;
-              
-              // 표시된 이미지 크기
-              const displayWidth = imageElement.offsetWidth;
-              const displayHeight = imageElement.offsetHeight;
-              
-              // 스케일 계산
-              const scaleX = displayWidth / naturalWidth;
-              const scaleY = displayHeight / naturalHeight;
+      return annotations.map((ann, index) => {
+        const coords = ann.coordinates; // [x, y, width, height]
+        if (!coords || coords.length !== 4) {
+          console.warn('좌표 오류:', coords);
+          return null;
+        }
 
-              const scaledX = normalizedBbox.x * scaleX;
-              const scaledY = normalizedBbox.y * scaleY;
-              const scaledWidth = normalizedBbox.width * scaleX;
-              const scaledHeight = normalizedBbox.height * scaleY;
+        const [x, y, width, height] = coords;
+        
+        // 🔥 viewer_v2와 동일한 방식으로 좌표 변환
+        const scaledX = x * scaleX + offsetX;
+        const scaledY = y * scaleY + offsetY;
+        const scaledWidth = width * scaleX;
+        const scaledHeight = height * scaleY;
 
-              // 유효성 검사
-              if (scaledWidth < 5 || scaledHeight < 5) {
-                console.warn('박스가 너무 작음:', { scaledWidth, scaledHeight });
-                return null;
-              }
+        console.log(`🎯 어노테이션 ${index + 1} 정확한 변환:`, {
+          original: [x, y, width, height],
+          scaled: [scaledX, scaledY, scaledWidth, scaledHeight],
+          계산과정: {
+            scaledX: `${x} * ${scaleX} + ${offsetX} = ${scaledX}`,
+            scaledY: `${y} * ${scaleY} + ${offsetY} = ${scaledY}`,
+            scaledWidth: `${width} * ${scaleX} = ${scaledWidth}`,
+            scaledHeight: `${height} * ${scaleY} = ${scaledHeight}`
+          }
+        });
 
-              return (
-                <div key={`annotation-${annotation.id}-${index}`}>
-                  {/* 어노테이션 박스 */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: scaledX,
-                      top: scaledY,
-                      width: scaledWidth,
-                      height: scaledHeight,
-                      border: '2px solid #ff6b6b',
-                      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                      borderRadius: '4px',
-                      pointerEvents: 'auto',
-                      cursor: 'pointer',
-                      boxSizing: 'border-box'
-                    }}
-                    title={`${annotation.label} - ${annotation.doctor_name}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log('어노테이션 클릭:', annotation);
-                    }}
-                  />
-                  
-                  {/* 라벨 */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: scaledX,
-                      top: scaledY - 25,
-                      backgroundColor: '#ff6b6b',
-                      color: 'white',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      whiteSpace: 'nowrap',
-                      pointerEvents: 'auto',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                      zIndex: 201
-                    }}
-                  >
-                    {annotation.label}
-                  </div>
-                  
-                  {/* 판독의 이름 */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: scaledX + scaledWidth - 80,
-                      top: scaledY + scaledHeight + 5,
-                      backgroundColor: '#4a5568',
-                      color: 'white',
-                      padding: '2px 6px',
-                      borderRadius: '3px',
-                      fontSize: '10px',
-                      pointerEvents: 'auto',
-                      maxWidth: '80px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    👨‍⚕️ {annotation.doctor_name}
-                  </div>
-                </div>
-              );
-            } catch (err) {
-              console.warn('어노테이션 렌더링 오류:', err, annotation);
-              return null;
-            }
-          })}
-        </div>
-      );
+        // 유효성 검사
+        if (scaledWidth < 2 || scaledHeight < 2) {
+          console.warn(`어노테이션 ${index + 1} 너무 작음:`, { scaledWidth, scaledHeight });
+          return null;
+        }
+
+        return (
+          <div key={ann.id}>
+            {/* 어노테이션 박스 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: scaledX,
+                top: scaledY,
+                width: scaledWidth,
+                height: scaledHeight,
+                border: '3px solid #ff6b6b',
+                backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                borderRadius: '4px',
+                pointerEvents: 'none',
+                zIndex: 100,
+                boxSizing: 'border-box'
+              }}
+            />
+            
+            {/* 라벨 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: scaledX,
+                top: Math.max(0, scaledY - 25), // 화면 위로 벗어나지 않게
+                backgroundColor: '#ff6b6b',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                zIndex: 101,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {ann.label}
+            </div>
+            
+            {/* 의사 이름 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: Math.max(0, scaledX + scaledWidth - 80),
+                top: Math.min(containerHeight - 20, scaledY + scaledHeight + 5),
+                backgroundColor: '#333',
+                color: 'white',
+                padding: '2px 6px',
+                borderRadius: '3px',
+                fontSize: '10px',
+                zIndex: 101,
+                maxWidth: '80px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              👨‍⚕️ {ann.doctor_name}
+            </div>
+          </div>
+        );
+      });
     };
 
     if (viewerLoading) {
@@ -378,10 +305,7 @@ const RealDicomViewer = () => {
           backgroundColor: '#000',
           color: '#fff'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: '16px', fontSize: '32px' }}>⏳</div>
-            <div>DICOM 로딩 중...</div>
-          </div>
+          <div>⏳ DICOM 로딩 중...</div>
         </div>
       );
     }
@@ -396,10 +320,7 @@ const RealDicomViewer = () => {
           backgroundColor: '#000',
           color: '#ff6b6b'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: '16px', fontSize: '32px' }}>❌</div>
-            <div>{viewerError}</div>
-          </div>
+          <div>❌ {viewerError}</div>
         </div>
       );
     }
@@ -414,33 +335,28 @@ const RealDicomViewer = () => {
           backgroundColor: '#000',
           color: '#888'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: '16px', fontSize: '32px' }}>📷</div>
-            <div>이미지가 없습니다</div>
-          </div>
+          <div>📷 이미지가 없습니다</div>
         </div>
       );
     }
 
     const currentImage = images[currentImageIndex];
-    const currentAnnotations = currentImage?.instanceUid ? annotations[currentImage.instanceUid] || [] : [];
 
     return (
       <div style={{ height: '100%', backgroundColor: '#000', display: 'flex', flexDirection: 'column' }}>
-        {/* 간단한 네비게이션 헤더 */}
+        {/* 헤더 */}
         <div style={{
           backgroundColor: '#2a2a2a',
           color: '#fff',
           padding: '8px 16px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid #444'
+          alignItems: 'center'
         }}>
-          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-            {patientInfo?.name || 'Unknown'} • 어노테이션: {currentAnnotations.length}개
+          <div>
+            {patientInfo?.name || 'Unknown'} • 어노테이션: {annotations.length}개
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               onClick={() => setShowAnnotations(!showAnnotations)}
               style={{
@@ -456,52 +372,13 @@ const RealDicomViewer = () => {
               🏷️ {showAnnotations ? 'ON' : 'OFF'}
             </button>
             
-            <button
-              onClick={previousImage}
-              disabled={currentImageIndex === 0}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: currentImageIndex === 0 ? 'not-allowed' : 'pointer',
-                opacity: currentImageIndex === 0 ? 0.5 : 1,
-                fontSize: '11px'
-              }}
-            >
-              ◀
-            </button>
-            <span style={{
-              fontSize: '12px',
-              padding: '4px 8px',
-              backgroundColor: '#444',
-              borderRadius: '4px',
-              minWidth: '60px',
-              textAlign: 'center'
-            }}>
-              {currentImageIndex + 1} / {images.length}
-            </span>
-            <button
-              onClick={nextImage}
-              disabled={currentImageIndex === images.length - 1}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: currentImageIndex === images.length - 1 ? 'not-allowed' : 'pointer',
-                opacity: currentImageIndex === images.length - 1 ? 0.5 : 1,
-                fontSize: '11px'
-              }}
-            >
-              ▶
-            </button>
+            <button onClick={previousImage} disabled={currentImageIndex === 0}>◀</button>
+            <span>{currentImageIndex + 1} / {images.length}</span>
+            <button onClick={nextImage} disabled={currentImageIndex === images.length - 1}>▶</button>
           </div>
         </div>
 
-        {/* 🔥 이미지 영역 - 상대적 위치 컨테이너 */}
+        {/* 이미지 영역 */}
         <div 
           ref={imageContainerRef}
           style={{
@@ -515,13 +392,9 @@ const RealDicomViewer = () => {
           }}
         >
           <div style={{
+            position: 'relative',
             maxWidth: '100%',
-            maxHeight: '100%',
-            border: '2px solid #444',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-            position: 'relative'
+            maxHeight: '100%'
           }}>
             <img
               src={currentImage?.imageUrl}
@@ -529,19 +402,24 @@ const RealDicomViewer = () => {
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
-                display: 'block',
-                backgroundColor: '#000'
+                display: 'block'
               }}
-              onLoad={updateOverlayPosition}
+              onLoad={() => {
+                console.log('🖼️ 이미지 로드 완료');
+                // 이미지 로드 후 약간의 딜레이를 주고 다시 렌더링
+                setTimeout(() => {
+                  setAnnotations([...annotations]);
+                }, 100);
+              }}
             />
+            
+            {/* 🔥 어노테이션 오버레이 */}
+            {renderAnnotations()}
           </div>
-          
-          {/* 🔥 어노테이션 오버레이 */}
-          <AnnotationOverlay annotations={currentAnnotations} />
         </div>
 
-        {/* 어노테이션 정보 패널 - 축소 버전 */}
-        {currentAnnotations.length > 0 && (
+        {/* 하단 어노테이션 리스트 */}
+        {annotations.length > 0 && (
           <div style={{
             backgroundColor: '#1a1a1a',
             color: '#fff',
@@ -551,22 +429,17 @@ const RealDicomViewer = () => {
             overflowY: 'auto'
           }}>
             <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
-              🏷️ 어노테이션 ({currentAnnotations.length}개)
+              🏷️ 어노테이션 ({annotations.length}개)
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-              {currentAnnotations.map((annotation, index) => (
-                <div key={annotation.id} style={{
+              {annotations.map((ann, index) => (
+                <div key={ann.id} style={{
                   backgroundColor: '#333',
                   padding: '4px 8px',
                   borderRadius: '4px',
-                  fontSize: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                  fontSize: '11px'
                 }}>
-                  <span style={{ color: '#ff6b6b' }}>#{index + 1}</span>
-                  <span>{annotation.label}</span>
-                  <span style={{ color: '#aaa' }}>by {annotation.doctor_name}</span>
+                  #{index + 1} {ann.label} - {ann.doctor_name}
                 </div>
               ))}
             </div>
@@ -575,7 +448,6 @@ const RealDicomViewer = () => {
       </div>
     );
   };
-
   // RealDicomViewer.jsx - Part 3/4
 // 데이터 로드 및 이벤트 핸들러
 
@@ -1195,7 +1067,7 @@ const RealDicomViewer = () => {
                 justifyContent: 'center',
                 margin: '0 auto 24px auto'
               }}>
-                <span style={{ fontSize: '64px' }}>🖼️</span>
+                <span style={{ fontSize: '64px' }}>🩻</span>
               </div>
               <div style={{
                 fontSize: '32px',
@@ -1240,7 +1112,7 @@ const RealDicomViewer = () => {
                   padding: '16px',
                   border: '1px solid rgba(75, 85, 99, 0.3)'
                 }}>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>🖼️</div>
+                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>🩻</div>
                   <div style={{ fontWeight: '500', color: '#e5e7eb', fontSize: '14px' }}>이미지 뷰어</div>
                   <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>DICOM 영상 확인</div>
                 </div>

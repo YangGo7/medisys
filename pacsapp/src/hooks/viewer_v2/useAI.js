@@ -345,6 +345,268 @@
 
 // export default useAI;
 
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useCallback } from 'react';
+
+// const useAI = () => {
+//   const [selectedAIModel, setSelectedAIModel] = useState('yolov8');
+//   const [aiResults, setAiResults] = useState({
+//     yolov8: [],
+//     ssd: [],
+//     simclr: []
+//   });
+//   const [visibleAnnotations, setVisibleAnnotations] = useState({});
+//   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+//   // 사용 가능한 AI 모델 목록
+//   const availableModels = [
+//     { id: 'yolov8', name: 'YOLOv8', color: '#3b82f6', description: '객체 탐지 모델' },
+//     { id: 'ssd', name: 'SSD', color: '#ef4444', description: '단일 샷 탐지기' },
+//     { id: 'simclr', name: 'SimCLR', color: '#22c55e', description: '자가 지도 학습 모델' }
+//   ];
+
+//   // 모델별 샘플 결과 생성
+//   const generateMockResults = useCallback((modelName, currentSlice = 1) => {
+//     const baseId = Date.now();
+    
+//     const mockResults = {
+//       yolov8: [
+//         { 
+//           id: baseId + 1, 
+//           label: "폐결절", 
+//           type: "rectangle", 
+//           coords: "x:240, y:180, w:60, h:45", 
+//           slice: currentSlice, 
+//           confidence: 92,
+//           visible: true,
+//           bbox: { x: 240, y: 180, width: 60, height: 45 }
+//         },
+//         { 
+//           id: baseId + 2, 
+//           label: "종양 의심", 
+//           type: "circle", 
+//           coords: "x:320, y:220, r:25", 
+//           slice: currentSlice, 
+//           confidence: 87,
+//           visible: true,
+//           bbox: { x: 295, y: 195, width: 50, height: 50 }
+//         }
+//       ],
+//       ssd: [
+//         { 
+//           id: baseId + 3, 
+//           label: "병변", 
+//           type: "rectangle", 
+//           coords: "x:200, y:150, w:80, h:60", 
+//           slice: currentSlice, 
+//           confidence: 85,
+//           visible: true,
+//           bbox: { x: 200, y: 150, width: 80, height: 60 }
+//         },
+//         { 
+//           id: baseId + 4, 
+//           label: "이상음영", 
+//           type: "circle", 
+//           coords: "x:350, y:250, r:30", 
+//           slice: currentSlice, 
+//           confidence: 78,
+//           visible: true,
+//           bbox: { x: 320, y: 220, width: 60, height: 60 }
+//         }
+//       ],
+//       simclr: [
+//         { 
+//           id: baseId + 5, 
+//           label: "간유리음영", 
+//           type: "rectangle", 
+//           coords: "x:150, y:300, w:40, h:35", 
+//           slice: currentSlice, 
+//           confidence: 75,
+//           visible: true,
+//           bbox: { x: 150, y: 300, width: 40, height: 35 }
+//         }
+//       ]
+//     };
+
+//     return mockResults[modelName] || [];
+//   }, []);
+
+//   // AI 모델 실행
+//   const runAIModel = useCallback(async (modelName, currentSlice = 1, imageData = null) => {
+//     setIsAnalyzing(true);
+    
+//     try {
+//       // 실제 환경에서는 여기서 API 호출
+//       // const response = await fetch('/api/ai/analyze', {
+//       //   method: 'POST',
+//       //   headers: { 'Content-Type': 'application/json' },
+//       //   body: JSON.stringify({ model: modelName, slice: currentSlice, imageData })
+//       // });
+//       // const results = await response.json();
+
+//       // 모의 분석 시간
+//       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+//       const results = generateMockResults(modelName, currentSlice);
+      
+//       setAiResults(prev => ({
+//         ...prev,
+//         [modelName]: results
+//       }));
+      
+//       // 새로운 결과들을 표시 상태로 설정
+//       const newVisible = {};
+//       results.forEach(result => {
+//         newVisible[`${modelName}-${result.id}`] = true;
+//       });
+//       setVisibleAnnotations(prev => ({ ...prev, ...newVisible }));
+      
+//       return results;
+//     } catch (error) {
+//       console.error('AI 모델 실행 중 오류:', error);
+//       throw error;
+//     } finally {
+//       setIsAnalyzing(false);
+//     }
+//   }, [generateMockResults]);
+
+//   // 여러 모델 동시 실행
+//   const runAllModels = useCallback(async (currentSlice = 1, imageData = null) => {
+//     setIsAnalyzing(true);
+    
+//     try {
+//       const promises = availableModels.map(model => 
+//         runAIModel(model.id, currentSlice, imageData)
+//       );
+      
+//       const results = await Promise.all(promises);
+//       return results;
+//     } catch (error) {
+//       console.error('모든 AI 모델 실행 중 오류:', error);
+//       throw error;
+//     } finally {
+//       setIsAnalyzing(false);
+//     }
+//   }, [runAIModel, availableModels]);
+
+//   // 주석 표시/숨김 토글
+//   const toggleAnnotationVisibility = useCallback((modelName, annotationId) => {
+//     const key = `${modelName}-${annotationId}`;
+//     setVisibleAnnotations(prev => ({
+//       ...prev,
+//       [key]: !prev[key]
+//     }));
+
+//     // AI 결과에서도 visible 속성 업데이트
+//     setAiResults(prev => ({
+//       ...prev,
+//       [modelName]: prev[modelName].map(annotation => 
+//         annotation.id === annotationId 
+//           ? { ...annotation, visible: !annotation.visible }
+//           : annotation
+//       )
+//     }));
+//   }, []);
+
+//   // 주석 삭제
+//   const deleteAnnotation = useCallback((modelName, annotationId) => {
+//     setAiResults(prev => ({
+//       ...prev,
+//       [modelName]: prev[modelName].filter(a => a.id !== annotationId)
+//     }));
+    
+//     // 표시 상태에서도 제거
+//     const key = `${modelName}-${annotationId}`;
+//     setVisibleAnnotations(prev => {
+//       const newState = { ...prev };
+//       delete newState[key];
+//       return newState;
+//     });
+//   }, []);
+
+//   // 모든 결과 지우기
+//   const clearAllResults = useCallback((modelName = null) => {
+//     if (modelName) {
+//       setAiResults(prev => ({
+//         ...prev,
+//         [modelName]: []
+//       }));
+      
+//       // 해당 모델의 표시 상태 제거
+//       setVisibleAnnotations(prev => {
+//         const newState = { ...prev };
+//         Object.keys(newState).forEach(key => {
+//           if (key.startsWith(`${modelName}-`)) {
+//             delete newState[key];
+//           }
+//         });
+//         return newState;
+//       });
+//     } else {
+//       setAiResults({
+//         yolov8: [],
+//         ssd: [],
+//         simclr: []
+//       });
+//       setVisibleAnnotations({});
+//     }
+//   }, []);
+
+//   // 모델별 결과 통계
+//   const getModelStats = useCallback((modelName) => {
+//     const results = aiResults[modelName] || [];
+//     const totalCount = results.length;
+//     const visibleCount = results.filter(r => r.visible).length;
+//     const avgConfidence = totalCount > 0 
+//       ? results.reduce((sum, r) => sum + r.confidence, 0) / totalCount 
+//       : 0;
+
+//     return {
+//       totalCount,
+//       visibleCount,
+//       avgConfidence: Math.round(avgConfidence * 10) / 10
+//     };
+//   }, [aiResults]);
+
+//   // 신뢰도 필터링
+//   const filterByConfidence = useCallback((modelName, minConfidence) => {
+//     const results = aiResults[modelName] || [];
+//     return results.filter(r => r.confidence >= minConfidence);
+//   }, [aiResults]);
+
+//   return {
+//     selectedAIModel,
+//     setSelectedAIModel,
+//     aiResults,
+//     setAiResults,
+//     visibleAnnotations,
+//     setVisibleAnnotations,
+//     isAnalyzing,
+//     availableModels,
+//     runAIModel,
+//     runAllModels,
+//     toggleAnnotationVisibility,
+//     deleteAnnotation,
+//     clearAllResults,
+//     getModelStats,
+//     filterByConfidence
+//   };
+// };
+
+// export default useAI;
+
+
+
 import { useState, useCallback } from 'react';
 import {   
   getAIAnalysisResults,   

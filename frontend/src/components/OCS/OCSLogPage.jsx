@@ -123,11 +123,6 @@ export default function OCSLogPage() {
   return (
     <div className="ocs-log-wrapper">
       {/* 🔹 상단 탭 메뉴 추가 */}
-      <div className="ocs-tab-nav">
-        <button className="tab-button active">메디시스 v3.0</button>
-        <button className="tab-button" onClick={() => navigate('/lis')}>LIS</button>
-        <button className="tab-button" onClick={() => navigate('/RISPage')}>RIS</button>
-      </div>
       <button
         className="back-button"
         onClick={() => navigate(-1)}

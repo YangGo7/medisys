@@ -199,7 +199,7 @@
 
 
 // /home/medical_system/pacsapp/src/components/viewer_v2/RightPanel/MeasurementsPanel.js
-// /home/medical_system/pacsapp/src/components/viewer_v2/RightPanel/MeasurementsPanel.js
+
 
 import React from 'react';
 import { X, Eye, EyeOff, Ruler } from 'lucide-react';

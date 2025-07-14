@@ -20,6 +20,8 @@ const ReportsPanel = ({
   const lastPatientIdRef = useRef(null);
   const loadingRef = useRef(false);
 
+
+  
   // 🔥 reports 객체에서 데이터 가져오기
   useEffect(() => {
     if (reports && reports.reportList) {

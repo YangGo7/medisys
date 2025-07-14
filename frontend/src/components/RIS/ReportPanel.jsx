@@ -1,5 +1,3 @@
-// frontend/src/components/RIS/ReportPanel.jsx
-
 import React, { useState, useEffect } from 'react';
 
 const ReportPanel = ({ 
@@ -34,7 +32,8 @@ const ReportPanel = ({
 
       console.log('📋 리포트 로드 시작:', studyUid);
 
-      const response = await fetch(`${API_BASE}reports/study/${studyUid}/`, {
+      // 수정: /api/reports/ 경로 추가
+      const response = await fetch(`${API_BASE}/api/reports/${studyUid}/`, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -74,24 +73,20 @@ const ReportPanel = ({
       setSaving(true);
       setError(null);
 
+      // 수정: 백엔드 API에 맞는 데이터 구조로 변경
       const requestData = {
         study_uid: studyUid,
         patient_id: patientInfo?.patient_id || 'UNKNOWN',
-        patient_info: patientInfo || {},
-        report_content: editedReport,
-        report_status: 'completed'
+        dr_report: editedReport,  // report_content 대신 dr_report 사용
+        report_status: 'completed',
+        doctor_name: '김영상'  // TODO: 실제 로그인한 의사 이름으로 변경 필요
       };
 
       console.log('💾 리포트 저장 시작:', requestData);
 
-      const url = reportData 
-        ? `${API_BASE}reports/${reportData.id}/`
-        : `${API_BASE}reports/create/`;
-      
-      const method = reportData ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
+      // 수정: 항상 /api/reports/save/ 엔드포인트 사용
+      const response = await fetch(`${API_BASE}/api/reports/save/`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -101,14 +96,8 @@ const ReportPanel = ({
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') {
-          setReportData(data.report || {
-            ...requestData,
-            id: Date.now(),
-            dr_report: editedReport,
-            doctor_name: '김영상',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
+          // 서버에서 반환된 리포트 데이터 사용
+          setReportData(data.report);
           setEditMode(false);
           
           // 부모 컴포넌트에 저장 알림
@@ -116,12 +105,13 @@ const ReportPanel = ({
             onReportSave(data.report);
           }
 
-          console.log('✅ 리포트 저장 완료');
+          console.log('✅ 리포트 저장 완료:', data.report);
         } else {
           throw new Error(data.message || '리포트 저장 실패');
         }
       } else {
-        throw new Error(`리포트 저장 실패: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `리포트 저장 실패: ${response.status}`);
       }
     } catch (err) {
       console.error('❌ 리포트 저장 실패:', err);

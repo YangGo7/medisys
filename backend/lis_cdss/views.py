@@ -7,7 +7,7 @@ from .models import CDSSResult
 from .serializers import CDSSResultSerializer
 from openmrs_models.models import Person
 from samples.models import Sample
-from lis_cdss.inference.blood_inference import run_blood_model, get_alias_map, align_input_to_model_features
+from lis_cdss.inference.blood_inference import run_blood_model, get_alias_map, align_input_to_model_features, load_cdss_model_and_background
 import lis_cdss.inference.model_registry as model_registry
 from lis_cdss.inference.shap_manual import get_manual_contributions
 from lis_cdss.inference.explanation import generate_explanation
@@ -136,6 +136,14 @@ def generate_explanation(results: dict, panel: str) -> str:
 @api_view(['POST'])
 def receive_model_result(request):
     try:
+        print("🚨 receive_model_result() 진입")
+        print("📦 현재 모델 목록:", list(model_registry.get_all_models().keys()))
+
+        if not model_registry.get_model("ASTHMA"):
+            print("⚠ ASTHMA 모델이 없어서 재로딩합니다.")
+            load_cdss_model_and_background()
+            print("✅ 재로딩 후 모델 목록:", list(model_registry.get_all_models().keys()))
+            
         sample_id = request.data.get("sample")
         test_type = request.data.get("test_type")
         values = request.data.get("values")

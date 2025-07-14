@@ -358,10 +358,6 @@ const LabelingForm = ({
         <div className="mv-preview-coords">
           좌표: {formatCoordinates(measurement)}
         </div>
-        {/* 🔥 Django 타입 미리보기 추가 (개발용) */}
-        <div className="mv-preview-django">
-          Django 타입: {getDjangoTypeName(measurement?.type)}
-        </div>
       </div>
 
       {/* 라벨 입력 */}
@@ -398,18 +394,6 @@ const LabelingForm = ({
         />
         <div className="mv-char-count">{memo.length}/200</div>
       </div>
-
-      {/* 🔥 Django 구조 미리보기 (개발용) */}
-      {measurement && (
-        <div className="mv-django-preview">
-          <details>
-            <summary>Django 데이터 미리보기</summary>
-            <pre className="mv-django-data">
-              {JSON.stringify(formatCoordinatesForDjango(measurement), null, 2)}
-            </pre>
-          </details>
-        </div>
-      )}
 
       {/* 버튼 */}
       <div className="mv-form-actions">
