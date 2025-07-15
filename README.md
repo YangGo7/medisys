@@ -175,7 +175,7 @@ lacid/
 └── README.md
 ```
 
-### 사용법
+### 시연 영상(임시) https://youtu.be/e_5U5SGQKi4
 
 #### 1. 영상 업로드 및 분석
 1. PACS 시스템에 DICOM 파일 업로드
